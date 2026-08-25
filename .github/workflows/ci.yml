@@ -1,0 +1,107 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Tests and fidelity
+    runs-on: ubuntu-latest
+
+    services:
+      mongo:
+        image: mongo:8
+        ports: ['27017:27017']
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.adminCommand({ ping: 1 }).ok'"
+          --health-interval 10s --health-timeout 5s --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # The guarantee this project rests on: the authored templates must arrive
+      # here byte for byte, or every later check is meaningless.
+      - name: Check the byte-exact inputs survived checkout
+        run: |
+          size=$(stat -c%s content-source/pages/index.html)
+          if [ "$size" != "144579" ]; then
+            echo "content-source/pages/index.html is $size bytes, expected 144579."
+            echo "Line-ending conversion has touched it — check .gitattributes."
+            exit 1
+          fi
+
+      - name: Unit tests
+        run: npm run test:core
+
+      - name: Fidelity — the CMS reproduces every authored page
+        run: npm run verify
+
+      - name: API integration tests
+        run: npm run test --workspace @rainbow/api
+        env:
+          MONGODB_URI: mongodb://127.0.0.1:27017/rainbow_ci
+          CACHE_ENABLED: 'false'
+
+  stack:
+    name: Full stack
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build and start the stack
+        run: |
+          cp .env.example .env
+          sed -i "s/^JWT_SECRET=.*/JWT_SECRET=$(openssl rand -hex 32)/" .env
+          sed -i "s/^PREVIEW_SECRET=.*/PREVIEW_SECRET=$(openssl rand -hex 16)/" .env
+          sed -i "s/^REVALIDATE_SECRET=.*/REVALIDATE_SECRET=$(openssl rand -hex 16)/" .env
+          sed -i "s/^ADMIN_PASSWORD=.*/ADMIN_PASSWORD=CiPassword!2026/" .env
+          docker compose up -d --build --wait
+
+      - name: Seed the content
+        run: docker compose exec -T api node apps/api/src/seed/seed.js
+
+      - name: Fidelity — the running site matches the authored source
+        run: node tools/verify-live.mjs http://localhost:8080
+
+      - name: The CMS-driven navigation renders identically
+        run: node tools/verify-megamenu.mjs http://localhost:8080
+
+      - name: Smoke — the routes that must never 404
+        run: |
+          set -e
+          for path in /fr /en/tarifs /de/faq /admin/ /robots.txt /sitemap.xml /assets/partners.json; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:8080$path")
+            echo "$code $path"
+            [ "$code" = "200" ] || exit 1
+          done
+
+      - name: Logs on failure
+        if: failure()
+        run: docker compose logs --tail 80
+
+      - name: Tear down
+        if: always()
+        run: docker compose down -v

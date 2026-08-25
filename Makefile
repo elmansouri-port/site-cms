@@ -70,7 +70,7 @@ verify-live: ## Diff the running site against the authored source
 	node tools/verify-live.mjs $(GATEWAY)
 
 verify-menu: ## Prove the CMS-driven navigation renders identically
-	node tools/verify-megamenu.mjs $(GATEWAY)/api
+	node tools/verify-megamenu.mjs $(GATEWAY)
 
 ## ── Operations ───────────────────────────────────────────────────────────────
 
