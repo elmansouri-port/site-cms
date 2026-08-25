@@ -406,7 +406,7 @@ pagesRouter.get('/:key/preview-url', asyncHandler(async (req, res) => {
   if (!page) throw notFoundError('No such page');
   const locale = String(req.query.locale || page.locales?.[0] || 'fr');
   const target = `/${locale}${page.route ? `/${page.route}` : ''}`;
-  const url = `${config.siteUrl}/api/preview?secret=${encodeURIComponent(config.previewSecret)}&redirect=${encodeURIComponent(target)}`;
+  const url = `${config.siteUrl}/cms/preview?secret=${encodeURIComponent(config.previewSecret)}&redirect=${encodeURIComponent(target)}`;
   res.json({ url, target });
 }));
 

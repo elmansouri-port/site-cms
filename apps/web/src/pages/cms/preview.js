@@ -1,5 +1,5 @@
 /*
- * /api/preview — turn draft rendering on or off for this browser.
+ * /cms/preview — turn draft rendering on or off for this browser.
  *
  * The CMS links an editor here with the shared secret; the cookie that comes
  * back makes every later request render drafts and annotate editable strings.

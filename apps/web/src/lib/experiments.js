@@ -31,7 +31,16 @@ function pickWeighted(variants) {
 export function resolveExperiments(experiments, { cookies, url }) {
   const variants = {};
   const assignments = [];
-  let paramActive = false;
+
+  // A `?version=` URL is a campaign entry point and must not be indexed
+  // (reco.md 3.2 and 5.1) — whether or not it names a variant that exists.
+  // Judging that on the parameter alone means a typo in a campaign link cannot
+  // accidentally put a duplicate page into the index.
+  const paramNames = new Set(['version']);
+  for (const exp of experiments || []) {
+    if (exp.mode === 'param') paramNames.add(exp.paramName || 'version');
+  }
+  let paramActive = [...paramNames].some(name => url.searchParams.has(name));
 
   for (const exp of experiments || []) {
     if (exp.mode === 'param') {
@@ -39,9 +48,8 @@ export function resolveExperiments(experiments, { cookies, url }) {
       if (!value) continue;
       const match = (exp.variants || []).find(v => v.key === value);
       if (!match) continue;
-      // Campaign entry points are never indexed and never remembered.
+      // Campaign entry points are never remembered: no cookie is written.
       variants[exp.key] = match.key;
-      paramActive = true;
       continue;
     }
 

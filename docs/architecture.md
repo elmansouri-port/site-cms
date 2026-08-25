@@ -82,7 +82,7 @@ without the marketing site noticing.
 Every cached value is namespaced with a revision counter in Redis. Publishing
 increments it, which retires the whole previous generation in a single write —
 no key hunting and no half-stale pages. The API then calls the frontend's
-`/api/revalidate` webhook so the Astro process drops its own copies.
+`/cms/revalidate` webhook so the Astro process drops its own copies.
 
 Both layers degrade instead of failing:
 

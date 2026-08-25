@@ -1,5 +1,5 @@
 /*
- * /api/revalidate — the publish webhook (reco.md 7).
+ * /cms/revalidate — the publish webhook (reco.md 7).
  *
  * The CMS calls this with a shared secret after a publish; the frontend drops
  * the affected entries from its local cache so the next request rebuilds from

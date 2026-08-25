@@ -74,7 +74,7 @@ content-source/i18n/*.json           the copy, per language
         ▼
 MongoDB
   pages          document scaffolding + an ordered array of section blocks
-  contentstrings 1 863 strings × 5 languages, addressed by key
+  contentstrings 1 521 strings × 3 languages, addressed by key
   navigations    navbar and megamenus, per language, drag-ordered
   blogposts      the dynamic content type
   media          uploads + an index of the images that ship with the build
@@ -165,7 +165,7 @@ recording can be filtered by variant.
 Reads go through Redis, keyed by a site revision number. Publishing anything
 increments the revision, which retires the entire previous generation in one
 write — no key hunting, no stale fragments. The API then calls the frontend's
-`/api/revalidate` webhook so it drops its own in-process copies.
+`/cms/revalidate` webhook so it drops its own in-process copies.
 
 If Redis is unreachable the API keeps serving from MongoDB, and if the API is
 unreachable the frontend serves its last known copy. A slower marketing site

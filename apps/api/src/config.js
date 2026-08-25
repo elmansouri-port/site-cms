@@ -28,7 +28,7 @@ export const config = {
   // Shared with the frontend: lets it read drafts and bust its own cache.
   previewSecret: process.env.PREVIEW_SECRET || 'dev-preview-secret',
   revalidateSecret: process.env.REVALIDATE_SECRET || 'dev-revalidate-secret',
-  revalidateUrl: process.env.REVALIDATE_URL || 'http://localhost:3000/api/revalidate',
+  revalidateUrl: process.env.REVALIDATE_URL || 'http://localhost:3000/cms/revalidate',
 
   cache: {
     enabled: bool(process.env.CACHE_ENABLED, true),

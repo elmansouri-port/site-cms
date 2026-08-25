@@ -18,6 +18,7 @@ export async function GET({ url }) {
       'Allow: /',
       'Disallow: /api/',
       'Disallow: /admin/',
+      'Disallow: /cms/',
       'Disallow: /*?version=*',
       '',
       `Sitemap: ${baseUrl}/sitemap.xml`,

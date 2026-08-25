@@ -36,7 +36,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const { request, url, cookies, locals } = context;
 
   if (STATIC_PREFIX.test(url.pathname)) return next();
-  if (url.pathname.startsWith('/api/')) return next();
+  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/cms/')) return next();
   if (ROOT_ROUTES.has(url.pathname)) return next();
 
   let boot;
@@ -76,7 +76,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   });
   writeAssignments(cookies, assignments);
 
-  // 4. Preview: the CMS sets this cookie through /api/preview.
+  // 4. Preview: the CMS sets this cookie through /cms/preview.
   const preview = cookies.get(config.previewCookie)?.value === config.previewSecret;
 
   locals.locale = locale;
