@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- ── Primary SEO ── -->
+    <title data-i18n="blog-the-power-of-rainbow.meta.title">The Power of Rainbow : transformer le travail d'équipe moderne - Blog Rainbow</title>
+    <meta name="description" content="Découvrez comment Rainbow unifie messagerie, vidéo et webinaires dans une plateforme souveraine européenne pour transformer la collaboration en entreprise." data-i18n-attr="content:blog-the-power-of-rainbow.meta.description">
+    <meta name="author" content="Marie Hillion">
+    <meta name="robots" content="index,follow">
+    <meta name="keywords" content="Rainbow, collaboration, webinar, communication unifiée, télétravail, RGPD, sécurité des données" data-i18n-attr="content:blog-the-power-of-rainbow.meta.keywords">
+
+    <!-- ── Canonical (set by JS at runtime) ── -->
+    <link rel="canonical" id="meta-canonical" href="">
+
+    <!-- ── Open Graph ── -->
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="The Power of Rainbow : transformer le travail d'équipe moderne" data-i18n-attr="content:blog-the-power-of-rainbow.meta.title_2">
+    <meta property="og:description" content="Découvrez comment Rainbow unifie messagerie, vidéo et webinaires dans une plateforme souveraine européenne pour transformer la collaboration en entreprise." data-i18n-attr="content:blog-the-power-of-rainbow.meta.description">
+    <meta property="og:url" id="meta-og-url" content="">
+    <meta property="og:image" id="meta-og-image" content="">
+    <meta property="og:image:alt" content="Deux collègues collaborant sur la plateforme Rainbow dans un open space moderne">
+    <meta property="og:site_name" content="Blog Rainbow – Alcatel-Lucent">
+    <meta property="article:published_time" content="2026-07-01T00:00:00+02:00">
+    <meta property="article:modified_time" content="2026-07-06T00:00:00+02:00">
+    <meta property="article:author" content="Marie Hillion">
+    <meta property="article:section" content="Collaboration">
+    <meta property="article:tag" content="Rainbow">
+    <meta property="article:tag" content="collaboration">
+    <meta property="article:tag" content="webinar">
+    <meta property="article:tag" content="communication unifiée">
+
+    <!-- ── Twitter Card ── -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="The Power of Rainbow : transformer le travail d'équipe moderne" data-i18n-attr="content:blog-the-power-of-rainbow.meta.title_2">
+    <meta name="twitter:description" content="Découvrez comment Rainbow unifie messagerie, vidéo et webinaires dans une plateforme souveraine européenne." data-i18n-attr="content:blog-the-power-of-rainbow.meta.description_2">
+    <meta name="twitter:image" id="meta-twitter-image" content="">
+    <meta name="twitter:image:alt" content="Deux collègues collaborant sur la plateforme Rainbow dans un open space moderne">
+    <meta name="twitter:creator" content="@ALEnterprise">
+    <meta name="twitter:site" content="@ALEnterprise">
+
+    <!-- ── Tailwind + Fonts ── -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 300: '#c4b5fd', 400: '#a78bfa', 500: '#5e2d91', 600: '#4a2373', 700: '#3c1c5e' },
+                        navy: { 900: '#1e1b4b', 800: '#312e81', 700: '#3730a3' }
+                    },
+                    fontFamily: { sans: ['Google Sans', 'system-ui', 'sans-serif'] },
+                    borderRadius: { btn: '10px' }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/mega-menu.css">
+
+    <!-- ── JSON-LD structured data (populated by inline script at bottom of body) ── -->
+    <script id="json-ld-main" type="application/ld+json" data-i18n-raw="blog-the-power-of-rainbow.meta.schema">{}</script>
+
+    <style>
+        /* ── Skip link ── */
+        .skip-link { position: absolute; left: 0.5rem; top: 0.5rem; z-index: 9999; padding: 0.5rem 1rem; background: #5e2d91; color: #fff; border-radius: 8px; font-size: 0.875rem; font-weight: 600; transform: translateY(-200%); transition: transform .2s; text-decoration: none; }
+        .skip-link:focus { transform: translateY(0); }
+
+        /* ── Nav ── */
+
+        /* ── Breadcrumb ── */
+        .breadcrumb-nav ol { display: flex; align-items: center; flex-wrap: wrap; gap: 0.375rem; list-style: none; padding: 0; margin: 0; }
+        .breadcrumb-nav li { display: flex; align-items: center; gap: 0.375rem; font-size: 0.8125rem; color: #9ca3af; }
+        .breadcrumb-nav li a { color: #9ca3af; text-decoration: none; transition: color .15s; }
+        .breadcrumb-nav li a:hover { color: #5e2d91; }
+        .breadcrumb-nav li[aria-current="page"] span { color: #374151; font-weight: 500; }
+        .breadcrumb-sep { color: #d1d5db; }
+
+        /* ── Article prose ── */
+        .prose-article h2 { font-size: 1.5rem; font-weight: 700; color: #1e1b4b; margin-top: 2.5rem; margin-bottom: 1rem; scroll-margin-top: 96px; }
+        .prose-article h3 { font-size: 1.125rem; font-weight: 600; color: #312e81; margin-top: 1.75rem; margin-bottom: 0.75rem; scroll-margin-top: 96px; }
+        .prose-article p { color: #374151; line-height: 1.8; margin-bottom: 1.25rem; font-size: 1rem; }
+        .prose-article ul { margin-bottom: 1.25rem; padding-left: 1.5rem; list-style: none; }
+        .prose-article ul li { position: relative; padding-left: 1.25rem; margin-bottom: 0.6rem; color: #374151; font-size: 1rem; line-height: 1.75; }
+        .prose-article ul li::before { content: ''; position: absolute; left: 0; top: 0.55rem; width: 8px; height: 8px; border-radius: 50%; background: #5e2d91; }
+
+        /* ── Key points box ── */
+        .key-points-box { background: #f0f5ff; border-radius: 16px; padding: 1.75rem 2rem; margin-bottom: 2rem; }
+        .key-points-box h2 { font-size: 1.0625rem; font-weight: 700; color: #1e3a6e; margin-bottom: 1rem; margin-top: 0; }
+        .key-points-box li { color: #1e3264 !important; }
+        .key-points-box li::before { background: #3730a3 !important; border-radius: 2px !important; width: 7px !important; height: 7px !important; }
+
+        /* ── Inline CTA banner ── */
+        .inline-cta { background: linear-gradient(135deg, #1e1b4b 0%, #3730a3 100%); border-radius: 14px; padding: 1.5rem 2rem; margin: 2rem 0; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem; }
+        .inline-cta p { color: #e0e7ff !important; margin-bottom: 0 !important; font-weight: 600; font-size: 0.9375rem; }
+        .inline-cta a { flex-shrink: 0; padding: 8px 20px; border-radius: 8px; background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.25); color: #fff; font-size: 0.875rem; font-weight: 600; text-decoration: none; transition: background .18s; display: inline-flex; align-items: center; gap: 6px; }
+        .inline-cta a:hover { background: rgba(255,255,255,0.2); }
+
+        /* ── Sticky sidebar ── */
+        .sidebar-sticky { position: sticky; top: 88px; max-height: calc(100vh - 100px); overflow-y: auto; scrollbar-width: none; }
+        .sidebar-sticky::-webkit-scrollbar { display: none; }
+
+        /* ── ToC ── */
+        .toc-container { border: 1.5px solid #e9e5ff; border-radius: 14px; background: #fff; overflow: hidden; margin-bottom: 1.25rem; }
+        .toc-toggle { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; font-size: 0.9375rem; font-weight: 700; color: #1e1b4b; background: none; border: none; cursor: pointer; }
+        .toc-chevron { transition: transform .2s; }
+        .toc-chevron.open { transform: rotate(180deg); }
+        .toc-list { padding: 0 18px 14px; display: none; list-style: none; margin: 0; }
+        .toc-list.visible { display: block; }
+        .toc-list li { margin: 0; }
+        .toc-list li::before { display: none; }
+        .toc-list a { display: block; padding: 5px 0; font-size: 0.8125rem; color: #5e2d91; text-decoration: none; border-left: 2px solid transparent; padding-left: 10px; transition: border-color .15s, color .15s; }
+        .toc-list a:hover, .toc-list a.active { border-left-color: #5e2d91; color: #3c1c5e; font-weight: 600; }
+
+        /* ── Resource card ── */
+        .resource-card { border: 1.5px solid #e9e5ff; border-radius: 16px; overflow: hidden; background: #fff; box-shadow: 0 4px 20px rgba(94,45,145,.06); }
+        .resource-card-img-placeholder { width: 100%; height: 160px; background: linear-gradient(135deg, #1e1b4b 0%, #3730a3 100%); display: flex; align-items: flex-end; padding: 14px; }
+        .resource-card-body { padding: 1.125rem 1.25rem 1.375rem; }
+        .resource-card-type { display: inline-flex; align-items: center; gap: 6px; font-size: 0.8125rem; font-weight: 700; color: #ea580c; margin-bottom: 0.625rem; }
+        .resource-card-title { font-size: 1rem; font-weight: 700; color: #1e1b4b; margin-bottom: 0.75rem; line-height: 1.4; }
+        .resource-card-link { display: inline-flex; align-items: center; gap: 5px; font-size: 0.875rem; font-weight: 600; color: #5e2d91; text-decoration: none; }
+        .resource-card-link:hover { color: #3c1c5e; gap: 8px; }
+
+        /* ── Article images ── */
+        .article-img { width: 100%; border-radius: 14px; display: block; }
+        .article-figure { margin: 2rem 0; }
+        .article-figure figcaption { text-align: center; font-size: 0.8125rem; color: #6b7280; margin-top: 0.625rem; }
+
+        /* ── Author avatar ── */
+        .avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #5e2d91, #a78bfa); display: inline-flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 0.75rem; flex-shrink: 0; }
+
+        /* ── Article tags ── */
+        .tag-pill { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 500; background: #f5f3ff; color: #5e2d91; border: 1px solid #ddd6fe; text-decoration: none; transition: background .15s; }
+        .tag-pill:hover { background: #ede9fe; }
+
+        /* mobile submenu */
+        .mobile-submenu { padding-left: 1rem; border-left: 2px solid #ede9fe; }
+        .mobile-submenu a { color: #5e2d91; font-size: 0.875rem; }
+    </style>
+</head>
+
+<body class="font-sans text-gray-700 antialiased">
+
+    <!-- Skip to main content -->
+    <a class="skip-link" href="#main-content" data-i18n="blog-the-power-of-rainbow.body.aller-au-contenu-principal">Aller au contenu principal</a>
+
+    <!-- ===== SITE HEADER ===== -->
+    <header role="banner">
+    <nav id="navbar" class="fixed top-0 w-full z-50 glass-nav">
+        <div class="max-w-6xl mx-auto px-6 flex items-center justify-between h-16">
+            <a href="/fr" class="flex items-center gap-2.5 shrink-0">
+                <img src="/images/Rainbow-AL-logo-banner.webp" alt="Rainbow" class="h-12 w-auto" data-i18n-attr="alt:common.nav.rainbow_alt">
+            </a>
+            <div class="hidden lg:flex items-center justify-center flex-1 gap-8">
+                <div class="nav-dropdown">
+                    <a href="#" class="text-sm text-gray-500 hover:text-navy-900 transition-colors font-medium">
+                        <span data-i18n="common.nav.produits">Produits</span>
+                        <svg class="chevron w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                    </a>
+
+                </div>
+                <a href="/fr/tarifs" class="text-sm text-gray-500 hover:text-navy-900 transition-colors font-medium" style="font-size:1rem" data-i18n="common.nav.tarifs">Tarifs</a>
+                <div class="nav-dropdown">
+                    <a href="#" class="text-sm text-gray-500 hover:text-navy-900 transition-colors font-medium" data-i18n-rich="common.nav.ressources-path-stroke-linecap_4">Ressources
+                        <svg class="chevron w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                    </a>
+
+                </div>
+            </div>
+            <div class="hidden lg:flex items-center gap-4 shrink-0">
+                <div class="lang-switcher" id="lang-switcher">
+                    <button onclick="document.getElementById('lang-switcher').classList.toggle('open')">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"/></svg>
+                        <span id="lang-current" data-i18n="common.nav.en">EN</span>
+                        <svg class="lang-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div class="lang-dropdown" id="lang-dropdown"></div>
+                </div>
+                <a href="https://web.openrainbow.net/rb/2.176.0/login" class="px-5 py-2.5 rounded-btn border-2 border-brand-500 text-purple-900 hover:bg-gray-50 text-sm font-semibold transition-all active:scale-95 inline-flex items-center justify-center" data-i18n="common.nav.se-connecter">Se connecter</a>
+                <a href="https://web.openrainbow.net/rb/2.177.4/trial" class="px-5 py-2.5 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold whitespace-nowrap shadow-md hover:shadow-lg transition-all" data-i18n="common.nav.essai-gratuit">Essai gratuit</a>
+            </div>
+            <button id="mobile-menu-btn" class="lg:hidden p-2" aria-label="Menu" data-i18n-attr="aria-label:common.nav.menu_aria-label_4">
+                <svg class="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+        </div>
+        <div id="mobile-menu" class="lg:hidden hidden border-t border-gray-100 bg-white px-5 pt-2 pb-6 shadow-lg space-y-1">
+            <a href="#" class="mob-section-hdr"><span data-i18n="common.nav.produits">Produits</span></a>
+            <div class="mobile-submenu space-y-1">
+                <a href="/fr/products/collaboration" class="block py-1" data-i18n="common.nav.rainbow-collaboration">Rainbow Collaboration</a>
+                <a href="/fr/products/webinar" class="block py-1" data-i18n="common.nav.rainbow-webinar">Rainbow Webinar</a>
+            </div>
+            <a href="/fr/tarifs" class="mob-section-hdr" data-i18n="common.nav.tarifs">Tarifs</a>
+            <a href="#" class="mob-section-hdr" data-i18n="common.nav.ressources">Ressources</a>
+            <div class="mobile-submenu space-y-1">
+                <a href="/fr/blog" class="block py-1" data-i18n="common.nav.blog">Blog</a>
+                <a href="/fr/reviews" class="block py-1" data-i18n="common.nav.avis">Avis</a>
+                <a href="/fr/support" class="block py-1" data-i18n="common.nav.support">Support</a>
+                <a href="/fr/tutorials" class="block py-1" data-i18n="common.nav.tutoriels">Tutoriels</a>
+            </div>
+            <div class="h-px bg-gray-100 mx-1 my-2"></div>
+            <div id="mobile-lang-switcher" class="flex flex-wrap gap-2 px-1 py-1"></div>
+            <div class="flex flex-col gap-2.5 pt-3">
+                <a href="https://web.openrainbow.net/rb/2.176.0/login" class="w-full text-center px-6 py-3 rounded-btn border-2 border-brand-500 text-purple-900 hover:bg-gray-50 text-base font-semibold transition-all active:scale-95" data-i18n="common.nav.se-connecter">Se connecter</a>
+                <a href="https://web.openrainbow.net/rb/2.177.4/trial" class="w-full text-center px-6 py-3 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-base font-semibold shadow-md hover:shadow-lg transition-all active:scale-95" data-i18n="common.nav.essai-gratuit">Essai gratuit</a>
+            </div>
+        </div>
+    </nav>
+    </header>
+
+    <!-- ===== MAIN ===== -->
+    <main id="main-content">
+
+        <!-- ── Breadcrumb ── -->
+        <nav aria-label="Fil d'Ariane" class="breadcrumb-nav pt-20 pb-3 px-6" data-i18n-attr="aria-label:blog-the-power-of-rainbow.body.fil-d-ariane_aria-label">
+            <div class="max-w-6xl mx-auto">
+                <ol>
+                    <li><a href="/fr" data-i18n="common.nav.accueil">Accueil</a><span class="breadcrumb-sep" aria-hidden="true">›</span></li>
+                    <li><a href="/fr/blog" data-i18n="common.nav.blog">Blog</a><span class="breadcrumb-sep" aria-hidden="true">›</span></li>
+                    <li><a href="/fr/blog#collaboration" data-i18n="common.nav.collaboration">Collaboration</a><span class="breadcrumb-sep" aria-hidden="true">›</span></li>
+                    <li aria-current="page"><span data-i18n="common.nav.the-power-of-rainbow">The Power of Rainbow</span></li>
+                </ol>
+            </div>
+        </nav>
+
+        <!-- ── Article ── -->
+        <article itemscope itemtype="https://schema.org/BlogPosting">
+            <meta itemprop="datePublished" content="2026-07-01T00:00:00+02:00">
+            <meta itemprop="dateModified" content="2026-07-06T00:00:00+02:00">
+            <meta itemprop="inLanguage" content="fr">
+            <meta itemprop="wordCount" content="1200">
+            <meta itemprop="articleSection" content="Collaboration">
+            <meta itemprop="keywords" content="Rainbow, collaboration, webinar, communication unifiée, RGPD, sécurité des données">
+
+            <!-- Article Header -->
+            <header class="bg-white pt-4 pb-16 px-6 border-b border-gray-100">
+                <div class="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+                    <div>
+                        <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-brand-50 text-brand-600 border border-brand-200 mb-5" itemprop="articleSection" data-i18n="blog-the-power-of-rainbow.body.collaboration">Collaboration</span>
+
+                        <h1 class="text-3xl sm:text-4xl lg:text-[2.6rem] font-extrabold text-navy-900 leading-[1.18] tracking-tight mb-6" itemprop="headline" data-i18n="blog-the-power-of-rainbow.body.the-power-of-rainbow-transformer">
+                            The Power of Rainbow&nbsp;: transformer le travail d'équipe moderne
+                        </h1>
+
+                        <div class="text-gray-500 text-sm mb-5 flex flex-wrap gap-x-2 gap-y-1 items-center" data-i18n-rich="blog-the-power-of-rainbow.body.publie-le-1-juillet-2026-mis-a">
+                            Publié le <time datetime="2026-07-01" itemprop="datePublished" class="font-bold text-navy-900 ml-1">1 juillet 2026</time>
+                            <span aria-hidden="true">&middot;</span>
+                            Mis à jour le <time datetime="2026-07-06" itemprop="dateModified" class="font-bold text-navy-900 ml-1">3 juillet 2026</time>
+                            <span aria-hidden="true">&middot;</span>
+                            <span>Lecture&nbsp;: <strong class="text-navy-900">8 minutes</strong></span>
+                        </div>
+
+                        <address class="not-italic flex items-center gap-3" itemprop="author" itemscope itemtype="https://schema.org/Person">
+                            <span class="avatar" aria-hidden="true" data-i18n="blog-the-power-of-rainbow.body.mh">MH</span>
+                            <span class="text-gray-500 text-sm" data-i18n-rich="blog-the-power-of-rainbow.body.ecrit-par-marie-hillion">Écrit par <strong class="text-gray-900" itemprop="name">Marie Hillion</strong></span>
+                            <meta itemprop="jobTitle" content="Responsable Marketing Produit">
+                        </address>
+                    </div>
+
+                    <figure class="relative m-0" itemprop="image" itemscope itemtype="https://schema.org/ImageObject">
+                        <img
+                            src="/images/collaboration_hero.jpg"
+                            alt="Deux collègues collaborant sur la plateforme Rainbow dans un open space moderne"
+                            width="800" height="450"
+                            loading="eager"
+                            decoding="auto"
+                            class="w-full h-72 lg:h-80 object-cover rounded-2xl shadow-lg"
+                            itemprop="url" data-i18n-attr="alt:blog-the-power-of-rainbow.body.deux-collegues-collaborant-sur-la_alt">
+                        <div class="absolute inset-0 rounded-2xl ring-1 ring-black/5 pointer-events-none" aria-hidden="true"></div>
+                        <meta itemprop="width" content="800">
+                        <meta itemprop="height" content="450">
+                    </figure>
+                </div>
+            </header>
+
+            <!-- ===== PADDING BOX START ===== -->
+            <div class="px-4 md:px-6 lg:px-8 pb-0">
+                <div class="rounded-[32px] shadow-sm border border-brand-100/50 relative" style="overflow: clip; background: linear-gradient(180deg, #f5f3ff 0%, #ffffff 560px);">
+
+                    <div class="py-16 px-8 lg:px-12">
+                        <div class="max-w-6xl mx-auto flex flex-col lg:flex-row gap-12 lg:gap-16">
+
+                            <!-- ── Article body ── -->
+                            <div class="flex-1 min-w-0 prose-article" itemprop="articleBody">
+
+                                <p data-i18n="blog-the-power-of-rainbow.body.dans-un-monde-ou-le-travail-a">Dans un monde où le travail à distance et les équipes hybrides sont devenus la norme, les entreprises font face à un défi majeur : maintenir une communication fluide, une collaboration efficace et un engagement fort, peu importe où se trouvent leurs collaborateurs. Rainbow, la plateforme de communication unifiée d'Alcatel-Lucent, a été conçue précisément pour répondre à ces enjeux.</p>
+                                <p data-i18n="blog-the-power-of-rainbow.body.mais-si-vous-n-avez-jamais-utilise">Mais si vous n'avez jamais utilisé Rainbow en entreprise, il peut être difficile de savoir par où commencer... Pas de soucis, c'est moins complexe qu'il n'y paraît&nbsp;!</p>
+
+                                <!-- Key points summary box -->
+                                <div class="key-points-box" role="note" aria-label="Points essentiels de l'article" data-i18n-attr="aria-label:blog-the-power-of-rainbow.body.points-essentiels-de-l-article_aria-label">
+                                    <h2 data-i18n="blog-the-power-of-rainbow.body.points-essentiels">Points essentiels</h2>
+                                    <ul>
+                                        <li data-i18n="blog-the-power-of-rainbow.body.rainbow-centralise-messagerie">Rainbow centralise messagerie, vidéo, webinaires et partage de fichiers dans une seule plateforme souveraine hébergée en Europe.</li>
+                                        <li data-i18n="blog-the-power-of-rainbow.body.des-economies-significatives-sont">Des économies significatives sont réalisées grâce à la consolidation des outils de communication dispersés.</li>
+                                        <li data-i18n="blog-the-power-of-rainbow.body.l-interactivite-est-favorisee-avec">L'interactivité est favorisée avec des sondages, Q&amp;A en temps réel et des espaces de travail collaboratifs.</li>
+                                        <li data-i18n="blog-the-power-of-rainbow.body.le-taux-d-adoption-de-rainbow-est">Le taux d'adoption de Rainbow est 40&nbsp;% supérieur aux plateformes concurrentes grâce à sa prise en main intuitive.</li>
+                                        <li data-i18n="blog-the-power-of-rainbow.body.rainbow-repond-aux-exigences-rgpd">Rainbow répond aux exigences RGPD, HDS et ISO&nbsp;27001, essentielles pour les secteurs sensibles comme la santé et le secteur public.</li>
+                                    </ul>
+                                </div>
+
+                                <!-- Section 1 -->
+                                <section aria-labelledby="pourquoi-rainbow">
+                                    <h2 id="pourquoi-rainbow" data-i18n="blog-the-power-of-rainbow.body.pourquoi-rainbow-change-la-donne">Pourquoi Rainbow change la donne</h2>
+                                    <p data-i18n="blog-the-power-of-rainbow.body.la-plupart-des-entreprises">La plupart des entreprises jonglent avec une dizaine d'outils différents : un logiciel de messagerie, une solution de visioconférence, un outil de gestion de fichiers, une plateforme de webinaires… Rainbow unifie tout cela sous un seul toit, éliminant la friction du changement de contexte constant et réduisant la charge cognitive de vos équipes.</p>
+                                    <p data-i18n-rich="blog-the-power-of-rainbow.body.la-plateforme-s-articule-autour-de">La plateforme s'articule autour de deux offres complémentaires : <strong>Rainbow Collaboration</strong>, pour les échanges quotidiens en équipe, et <strong>Rainbow Webinar</strong>, pour les événements en ligne à grande échelle. Ensemble, elles couvrent l'intégralité du spectre de communication de votre organisation.</p>
+
+                                    <figure class="article-figure">
+                                        <img
+                                            src="/images/collaboration.png"
+                                            alt="Interface Rainbow Collaboration montrant les canaux de messagerie, les espaces d'équipe et le fil de discussion"
+                                            width="800" height="500"
+                                            loading="lazy"
+                                            decoding="async"
+                                            class="article-img" data-i18n-attr="alt:blog-the-power-of-rainbow.body.interface-rainbow-collaboration_alt">
+                                        <figcaption data-i18n="blog-the-power-of-rainbow.body.interface-rainbow-collaboration">Interface Rainbow Collaboration  canaux, messages et espaces de travail unifiés.</figcaption>
+                                    </figure>
+                                </section>
+
+                                <!-- Section 2 -->
+                                <section aria-labelledby="collaboration">
+                                    <h2 id="collaboration" data-i18n="blog-the-power-of-rainbow.body.rainbow-collaboration-au-c-ur-du">Rainbow Collaboration&nbsp;: au cœur du travail quotidien</h2>
+                                    <p data-i18n="blog-the-power-of-rainbow.body.rainbow-collaboration-est-bien">Rainbow Collaboration est bien plus qu'une simple application de messagerie. C'est un espace de travail complet où vos équipes peuvent communiquer, partager et construire ensemble, en temps réel ou en asynchrone.</p>
+
+                                    <h3 id="messagerie-equipe" data-i18n="blog-the-power-of-rainbow.body.messagerie-et-espaces-d-equipe">Messagerie et espaces d'équipe</h3>
+                                    <p data-i18n="blog-the-power-of-rainbow.body.les-canaux-thematiques-permettent">Les canaux thématiques permettent d'organiser les échanges par projet, par département ou par sujet. Les messages sont recherchables, les fichiers partagés sont indexés, et chaque discussion a un historique accessible à tous les membres.</p>
+
+                                    <h3 id="videoconferences" data-i18n="blog-the-power-of-rainbow.body.videoconferences-haute-qualite">Vidéoconférences haute qualité</h3>
+                                    <p data-i18n="blog-the-power-of-rainbow.body.jusqu-a-200-participants-peuvent">Jusqu'à 200 participants peuvent se rejoindre en visioconférence depuis n'importe quel appareil. Le partage d'écran, les tableaux blancs collaboratifs et les salles de sous-groupes (breakout rooms) transforment chaque réunion en une session de travail productive.</p>
+
+                                    <ul>
+                                        <li data-i18n="blog-the-power-of-rainbow.body.visioconference-jusqu-a-200">Visioconférence jusqu'à 200 participants</li>
+                                        <li data-i18n="blog-the-power-of-rainbow.body.partage-d-ecran-et-tableaux-blancs">Partage d'écran et tableaux blancs en temps réel</li>
+                                        <li data-i18n="blog-the-power-of-rainbow.body.salles-de-sous-groupes-pour">Salles de sous-groupes pour ateliers et workshops</li>
+                                        <li data-i18n="blog-the-power-of-rainbow.body.enregistrement-des-reunions-avec">Enregistrement des réunions avec transcription automatique</li>
+                                        <li data-i18n="blog-the-power-of-rainbow.body.integration-calendrier-outlook">Intégration calendrier (Outlook, Google Calendar)</li>
+                                    </ul>
+
+                                    <div class="inline-cta" role="complementary" aria-label="Offre d'essai Rainbow Collaboration" data-i18n-attr="aria-label:blog-the-power-of-rainbow.body.offre-d-essai-rainbow_aria-label">
+                                        <p data-i18n="blog-the-power-of-rainbow.body.decouvrez-rainbow-collaboration">Découvrez Rainbow Collaboration&nbsp;: essayez gratuitement pendant 30 jours, sans carte bancaire.</p>
+                                        <a href="/fr/tarifs" data-i18n-rich="blog-the-power-of-rainbow.body.demarrer-l-essai-gratuit-path">
+                                            Démarrer l'essai gratuit
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                                        </a>
+                                    </div>
+                                </section>
+
+                                <!-- Section 3 -->
+                                <section aria-labelledby="webinar">
+                                    <h2 id="webinar" data-i18n="blog-the-power-of-rainbow.body.rainbow-webinar-vos-evenements-a">Rainbow Webinar&nbsp;: vos événements à grande échelle</h2>
+                                    <p data-i18n="blog-the-power-of-rainbow.body.formations-internes-conferences">Formations internes, conférences clients, lancements de produits, assemblées générales… Rainbow Webinar vous offre un studio professionnel entièrement dans votre navigateur. Fini les problèmes techniques de dernière minute et les outils compliqués à configurer.</p>
+
+                                    <h3 id="studio-navigateur" data-i18n="blog-the-power-of-rainbow.body.un-studio-complet-dans-le">Un studio complet dans le navigateur</h3>
+                                    <p data-i18n="blog-the-power-of-rainbow.body.la-salle-de-preparation-backstage">La salle de préparation (backstage) permet aux intervenants de se préparer et de répéter avant que les participants arrivent. Le modérateur contrôle le déroulé de l'événement&nbsp;: ouverture de la parole, gestion des questions, lancement de sondages, partage de ressources.</p>
+
+                                    <h3 id="engagement-interactivite" data-i18n="blog-the-power-of-rainbow.body.engagement-et-interactivite">Engagement et interactivité</h3>
+                                    <p data-i18n="blog-the-power-of-rainbow.body.les-participants-ne-sont-pas-de">Les participants ne sont pas de simples spectateurs. Sondages en temps réel, Q&amp;A modérés, réactions émoji, chat dédié&nbsp;: Rainbow Webinar transforme chaque événement en une expérience interactive et mémorable.</p>
+
+                                    <ul>
+                                        <li data-i18n="blog-the-power-of-rainbow.body.webinars-jusqu-a-10-000">Webinars jusqu'à 10&nbsp;000 participants simultanés</li>
+                                        <li data-i18n="blog-the-power-of-rainbow.body.sondages-q-a-et-reactions-en-temps">Sondages, Q&amp;A et réactions en temps réel</li>
+                                        <li data-i18n="blog-the-power-of-rainbow.body.enregistrement-et-rediffusion">Enregistrement et rediffusion automatiques (replay on demand)</li>
+                                        <li data-i18n="blog-the-power-of-rainbow.body.analytics-d-engagement-detailles">Analytics d'engagement détaillés post-événement</li>
+                                        <li data-i18n="blog-the-power-of-rainbow.body.page-d-inscription-et-landing-page">Page d'inscription et landing page personnalisables</li>
+                                    </ul>
+
+                                    <figure class="article-figure">
+                                        <img
+                                            src="/images/webinar_live.png"
+                                            alt="Interface Rainbow Webinar en direct avec panneau de présentation, sondage actif et liste des participants"
+                                            width="800" height="500"
+                                            loading="lazy"
+                                            decoding="async"
+                                            class="article-img" data-i18n-attr="alt:blog-the-power-of-rainbow.body.interface-rainbow-webinar-en_alt">
+                                        <figcaption data-i18n="blog-the-power-of-rainbow.body.rainbow-webinar-en-session-live">Rainbow Webinar en session live  sondage, Q&amp;A et gestion des participants.</figcaption>
+                                    </figure>
+                                </section>
+
+                                <!-- Section 4 -->
+                                <section aria-labelledby="securite">
+                                    <h2 id="securite" data-i18n="blog-the-power-of-rainbow.body.securite-et-souverainete-des">Sécurité et souveraineté des données</h2>
+                                    <p data-i18n="blog-the-power-of-rainbow.body.dans-un-contexte-de-renforcement">Dans un contexte de renforcement réglementaire (RGPD, NIS2, HDS), la question de la souveraineté des données n'est plus optionnelle. Rainbow est hébergé en Europe, sur une infrastructure certifiée ISO&nbsp;27001, et répond aux exigences HDS pour les établissements de santé.</p>
+                                    <p data-i18n="blog-the-power-of-rainbow.body.contrairement-aux-plateformes">Contrairement aux plateformes américaines qui soumettent vos données au CLOUD Act, Rainbow garantit que vos communications restent sous juridiction européenne. C'est un différenciateur majeur pour les secteurs public, de la santé, de la défense et des services financiers.</p>
+                                    <ul>
+                                        <li data-i18n="blog-the-power-of-rainbow.body.hebergement-souverain-en-europe">Hébergement souverain en Europe (France &amp; Allemagne)</li>
+                                        <li data-i18n="blog-the-power-of-rainbow.body.certifications-iso-27001-hds-anssi">Certifications ISO&nbsp;27001, HDS, ANSSI</li>
+                                        <li data-i18n="blog-the-power-of-rainbow.body.chiffrement-de-bout-en-bout-pour">Chiffrement de bout en bout pour les communications sensibles</li>
+                                        <li data-i18n="blog-the-power-of-rainbow.body.conformite-rgpd-native-avec">Conformité RGPD native avec contrat DPA fourni</li>
+                                        <li data-i18n="blog-the-power-of-rainbow.body.audit-logs-et-tracabilite-complete">Audit logs et traçabilité complète pour les exigences de conformité</li>
+                                    </ul>
+                                </section>
+
+                                <!-- Section 5 -->
+                                <section aria-labelledby="adoption">
+                                    <h2 id="adoption" data-i18n="blog-the-power-of-rainbow.body.adoption-et-deploiement-en">Adoption et déploiement en entreprise</h2>
+                                    <p data-i18n="blog-the-power-of-rainbow.body.la-meilleure-plateforme-du-monde">La meilleure plateforme du monde ne vaut rien si vos équipes ne l'adoptent pas. Rainbow a été conçu avec une obsession pour l'expérience utilisateur&nbsp;: interface intuitive, applications natives sur toutes les plateformes (Windows, Mac, iOS, Android), et une courbe d'apprentissage quasi nulle.</p>
+                                    <p data-i18n="blog-the-power-of-rainbow.body.l-integration-avec-vos-outils">L'intégration avec vos outils existants (Microsoft 365, Salesforce, ServiceNow, et plus de 50 connecteurs métiers) permet à Rainbow de s'inscrire naturellement dans les flux de travail actuels, sans bousculer les habitudes de vos équipes.</p>
+
+                                    <div class="inline-cta" role="complementary" aria-label="Télécharger le rapport Rainbow 2026" data-i18n-attr="aria-label:blog-the-power-of-rainbow.body.telecharger-le-rapport-rainbow_aria-label">
+                                        <p data-i18n="blog-the-power-of-rainbow.body.rainbow-2026-benchmark-report">Rainbow 2026 Benchmark Report&nbsp;: découvrez les chiffres clés de l'adoption de la communication unifiée en entreprise.</p>
+                                        <a href="#" onclick="event.preventDefault(); document.getElementById('whitepaper-modal-cover').open();" data-i18n-rich="blog-the-power-of-rainbow.body.telecharger-le-rapport-path-stroke">
+                                            Télécharger le rapport
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                        </a>
+                                    </div>
+                                </section>
+
+                                <!-- Section 6 -->
+                                <section aria-labelledby="conclusion">
+                                    <h2 id="conclusion" data-i18n="blog-the-power-of-rainbow.body.conclusion-rainbow-un">Conclusion&nbsp;: Rainbow, un investissement stratégique</h2>
+                                    <p data-i18n="blog-the-power-of-rainbow.body.adopter-rainbow-c-est-choisir-une">Adopter Rainbow, c'est choisir une plateforme qui grandit avec votre organisation. Que vous soyez une PME de 20 personnes ou un grand groupe de 50&nbsp;000 collaborateurs, Rainbow s'adapte à vos besoins, à votre secteur et à vos contraintes réglementaires.</p>
+                                    <p data-i18n="blog-the-power-of-rainbow.body.la-vraie-question-n-est-plus-de">La vraie question n'est plus de savoir si vous devez unifier vos outils de communication, mais de savoir quand. Et plus tôt vous le faites, plus vite vous récupérez en productivité, en sécurité et en engagement de vos équipes.</p>
+                                </section>
+
+
+
+                            </div><!-- /article body -->
+
+                            <!-- ── Sidebar aside ── -->
+                            <aside aria-label="Navigation de l'article et ressources complémentaires" class="w-full lg:w-72 xl:w-80 shrink-0" data-i18n-attr="aria-label:blog-the-power-of-rainbow.body.navigation-de-l-article-et_aria-label">
+                                <div class="sidebar-sticky">
+
+                                    <!-- Table of Contents -->
+                                    <nav aria-label="Table des matières" class="toc-container mb-5" data-i18n-attr="aria-label:blog-the-power-of-rainbow.body.table-des-matieres_aria-label">
+                                        <button class="toc-toggle" onclick="toggleToc(this)" aria-expanded="false" aria-controls="toc-list">
+                                            <span data-i18n="common.nav.sommaire">Sommaire</span>
+                                            <svg class="toc-chevron w-4 h-4 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                                        </button>
+                                        <ol class="toc-list" id="toc-list">
+                                            <li><a href="#pourquoi-rainbow" data-i18n="common.nav.pourquoi-rainbow-change-la-donne">Pourquoi Rainbow change la donne</a></li>
+                                            <li><a href="#collaboration" data-i18n="common.nav.rainbow-collaboration">Rainbow Collaboration</a></li>
+                                            <li><a href="#webinar" data-i18n="common.nav.rainbow-webinar">Rainbow Webinar</a></li>
+                                            <li><a href="#securite" data-i18n="common.nav.securite-et-souverainete-des">Sécurité et souveraineté des données</a></li>
+                                            <li><a href="#adoption" data-i18n="common.nav.adoption-en-entreprise">Adoption en entreprise</a></li>
+                                            <li><a href="#conclusion" data-i18n="common.nav.conclusion">Conclusion</a></li>
+                                        </ol>
+                                    </nav>
+
+                                    <!-- Resource / Recommendation card -->
+                                    <div class="resource-card" role="complementary" aria-label="Ressource recommandée" data-i18n-attr="aria-label:blog-the-power-of-rainbow.body.ressource-recommandee_aria-label">
+                                        <div class="resource-card-img-placeholder" aria-hidden="true">
+                                            <p class="text-white text-sm font-semibold leading-snug max-w-[200px]" data-i18n="blog-the-power-of-rainbow.body.rainbow-business-impact-report">Rainbow Business Impact Report&nbsp;: 2026 Benchmark</p>
+                                        </div>
+                                        <div class="resource-card-body">
+                                            <p class="resource-card-type" data-i18n-rich="blog-the-power-of-rainbow.body.path-stroke-linecap-round-stroke">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                                Rapports
+                                            </p>
+                                            <p class="resource-card-title" data-i18n="blog-the-power-of-rainbow.body.rainbow-2026-business-impact">Rainbow 2026 Business Impact Report</p>
+                                            <a href="#" class="resource-card-link" aria-label="Télécharger le Rainbow 2026 Business Impact Report" onclick="event.preventDefault(); document.getElementById('whitepaper-modal').open();" data-i18n-rich="blog-the-power-of-rainbow.body.path-stroke-linecap-round-stroke_2" data-i18n-attr="aria-label:blog-the-power-of-rainbow.body.telecharger-le-rainbow-2026_aria-label">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                                En savoir plus
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <!-- Share links -->
+                                    <div class="mt-5 flex items-center gap-3">
+                                        <span class="text-xs text-gray-400 font-medium uppercase tracking-wide" id="share-label" data-i18n="blog-the-power-of-rainbow.body.partager">Partager</span>
+                                        <a href="#" id="share-linkedin" aria-label="Partager cet article sur LinkedIn" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-full bg-brand-50 hover:bg-brand-100 flex items-center justify-center transition-colors" data-i18n-attr="aria-label:blog-the-power-of-rainbow.body.partager-cet-article-sur-linkedin_aria-label">
+                                            <svg class="w-4 h-4 text-brand-500" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                                        </a>
+                                        <a href="#" id="share-x" aria-label="Partager cet article sur X (Twitter)" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-full bg-brand-50 hover:bg-brand-100 flex items-center justify-center transition-colors" data-i18n-attr="aria-label:blog-the-power-of-rainbow.body.partager-cet-article-sur-x-twitter_aria-label">
+                                            <svg class="w-4 h-4 text-brand-500" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                                        </a>
+                                        <button onclick="copyLink(event)" aria-label="Copier le lien de cet article" class="w-8 h-8 rounded-full bg-brand-50 hover:bg-brand-100 flex items-center justify-center transition-colors" data-i18n-attr="aria-label:blog-the-power-of-rainbow.body.copier-le-lien-de-cet-article_aria-label">
+                                            <svg class="w-4 h-4 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                                        </button>
+                                    </div>
+
+                                </div>
+                            </aside>
+
+                        </div>
+                    </div>
+
+                </div><!-- /.rounded box -->
+            </div><!-- /.padding box -->
+            <!-- ===== PADDING BOX END ===== -->
+
+        </article>
+
+        <!-- ── Related Articles (outside article, own card) ── -->
+        <section aria-labelledby="related-articles-heading" class="px-4 md:px-6 lg:px-8 pb-4 md:pb-6 lg:pb-8 mt-4">
+            <div class="rounded-[32px] shadow-sm border border-brand-100/50 py-16 px-8 lg:px-12 relative" style="overflow: clip; background: linear-gradient(180deg, #f5f3ff 0%, #ffffff 400px);">
+                <div class="max-w-6xl mx-auto">
+                    <h2 id="related-articles-heading" class="text-2xl font-bold text-navy-900 mb-8" data-i18n="blog-the-power-of-rainbow.body.articles-similaires">Articles similaires</h2>
+                    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                        <article class="group bg-white rounded-2xl border border-brand-100/60 overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col">
+                            <a href="/fr/blog/qu-est-ce-qu-un-webinar" class="flex flex-col flex-1">
+                                <div class="h-44 bg-gradient-to-br from-brand-100 to-indigo-100 flex items-center justify-center" aria-hidden="true">
+                                    <svg class="w-12 h-12 text-brand-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.069A1 1 0 0121 8.82v6.36a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                </div>
+                                <div class="p-5 flex flex-col flex-1">
+                                    <span class="text-xs font-semibold text-brand-500 uppercase tracking-wide mb-2" data-i18n="blog-the-power-of-rainbow.body.webinar">Webinar</span>
+                                    <h3 class="font-bold text-navy-900 text-sm leading-snug mb-3 group-hover:text-brand-600 transition-colors" data-i18n="blog-the-power-of-rainbow.body.qu-est-ce-qu-un-webinar-et-comment">Qu'est-ce qu'un webinar et comment l'organiser&nbsp;? [Guide 2026]</h3>
+                                    <p class="text-gray-500 text-xs leading-relaxed flex-1" data-i18n="blog-the-power-of-rainbow.body.tout-ce-que-vous-devez-savoir-pour">Tout ce que vous devez savoir pour planifier, animer et mesurer l'impact de vos webinaires.</p>
+                                    <div class="mt-4 text-xs text-gray-400" data-i18n-rich="blog-the-power-of-rainbow.body.15-juin-2026-13-min-de-lecture"><time datetime="2026-06-15">15 juin 2026</time> · 13 min de lecture</div>
+                                </div>
+                            </a>
+                        </article>
+
+                        <article class="group bg-white rounded-2xl border border-brand-100/60 overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col">
+                            <a href="/fr/blog/engagement-equipes-distance" class="flex flex-col flex-1">
+                                <div class="h-44 bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center" aria-hidden="true">
+                                    <svg class="w-12 h-12 text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                                </div>
+                                <div class="p-5 flex flex-col flex-1">
+                                    <span class="text-xs font-semibold text-brand-500 uppercase tracking-wide mb-2" data-i18n="blog-the-power-of-rainbow.body.travail-hybride">Travail hybride</span>
+                                    <h3 class="font-bold text-navy-900 text-sm leading-snug mb-3 group-hover:text-brand-600 transition-colors" data-i18n="blog-the-power-of-rainbow.body.5-strategies-pour-booster-l">5 stratégies pour booster l'engagement de vos équipes à distance</h3>
+                                    <p class="text-gray-500 text-xs leading-relaxed flex-1" data-i18n="blog-the-power-of-rainbow.body.comment-maintenir-la-cohesion-et">Comment maintenir la cohésion et la motivation dans un environnement de travail distribué.</p>
+                                    <div class="mt-4 text-xs text-gray-400" data-i18n-rich="blog-the-power-of-rainbow.body.20-juin-2026-7-min-de-lecture"><time datetime="2026-06-20">20 juin 2026</time> · 7 min de lecture</div>
+                                </div>
+                            </a>
+                        </article>
+
+                        <article class="group bg-white rounded-2xl border border-brand-100/60 overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col">
+                            <a href="/fr/blog/rgpd-communication-entreprise-2026" class="flex flex-col flex-1">
+                                <div class="h-44 bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center" aria-hidden="true">
+                                    <svg class="w-12 h-12 text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                </div>
+                                <div class="p-5 flex flex-col flex-1">
+                                    <span class="text-xs font-semibold text-brand-500 uppercase tracking-wide mb-2" data-i18n="blog-the-power-of-rainbow.body.securite">Sécurité</span>
+                                    <h3 class="font-bold text-navy-900 text-sm leading-snug mb-3 group-hover:text-brand-600 transition-colors" data-i18n="blog-the-power-of-rainbow.body.rgpd-et-communication-d-entreprise">RGPD et communication d'entreprise : ce que vous devez savoir en 2026</h3>
+                                    <p class="text-gray-500 text-xs leading-relaxed flex-1" data-i18n="blog-the-power-of-rainbow.body.les-obligations-legales-et-les">Les obligations légales et les bonnes pratiques pour protéger les données de vos collaborateurs.</p>
+                                    <div class="mt-4 text-xs text-gray-400" data-i18n-rich="blog-the-power-of-rainbow.body.28-juin-2026-10-min-de-lecture"><time datetime="2026-06-28">28 juin 2026</time> · 10 min de lecture</div>
+                                </div>
+                            </a>
+                        </article>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ===== SITE FOOTER ===== -->
+    <footer class="footer-premium text-gray-400 relative z-10 overflow-hidden">
+        <!-- Top hairline glow -->
+        <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-300/60 to-transparent"></div>
+        <!-- Ambient purple wash -->
+        <div class="pointer-events-none absolute inset-0" style="background:
+            radial-gradient(ellipse 70% 55% at 50% -8%, rgba(124,58,237,0.32) 0%, rgba(124,58,237,0.10) 34%, transparent 68%),
+            radial-gradient(ellipse 55% 60% at 88% 108%, rgba(207,0,114,0.16) 0%, transparent 62%),
+            radial-gradient(ellipse 45% 50% at 6% 96%, rgba(94,45,145,0.20) 0%, transparent 60%);"></div>
+        <!-- Soft focal glow behind the CTA -->
+        <div class="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-[760px] h-[440px] bg-brand-500/25 rounded-full blur-[150px]"></div>
+
+        <div class="max-w-6xl mx-auto px-6 relative">
+            <!-- ===== CTA BAND ===== -->
+            <div class="text-center pt-24 pb-16 md:pt-28 md:pb-20 border-b border-white/10">
+                <div class="mb-9">
+                    <img src="/images/rainbow-logo.png" alt="Rainbow" class="w-[70px] h-[70px] object-contain mx-auto" data-i18n-attr="alt:common.footer.rainbow_alt">
+                </div>
+                <h2 class="text-2xl md:text-4xl lg:text-[2.6rem] font-semibold text-white tracking-[-0.025em] leading-[1.18] max-w-4xl mx-auto" style="text-wrap:balance" data-i18n="common.footer.la-prochaine-conversation-de-votre_3">
+                    La prochaine conversation de votre &eacute;quipe m&eacute;rite une infrastructure qui la prot&egrave;ge
+                </h2>
+                <p class="mt-5 text-base md:text-lg text-gray-300/90 max-w-xl mx-auto" style="text-wrap:balance" data-i18n="common.footer.essayez-nos-solutions-rainbow_4">
+                    Essayez nos solutions Rainbow gratuitement pendant 30 jours. Sans carte bancaire.
+                </p>
+                <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a href="/fr/tarifs" class="group inline-flex items-center justify-center gap-2.5 px-9 py-4 rounded-[14px] text-white text-base font-bold tracking-tight"
+                       style="background:#5e2d91;" data-i18n-rich="common.footer.commencez-l-essai-gratuit-path_4">
+                        Commencez l'essai gratuit
+                        <svg class="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                    </a>
+                    <a href="/fr/tarifs" class="inline-flex items-center justify-center px-9 py-4 rounded-[14px] text-white text-base font-bold tracking-tight border border-white/25 hover:bg-white/10 hover:border-white/40 transition-colors" data-i18n="common.footer.voir-les-tarifs_5">
+                        Voir les tarifs
+                    </a>
+                </div>
+            </div>
+
+            <!-- ===== LINK COLUMNS ===== -->
+            <div class="flex flex-col lg:flex-row lg:justify-between gap-12 lg:gap-16 py-16">
+                <!-- Brand -->
+                <div class="max-w-xs">
+                    <img src="/images/ale_white.png" alt="Alcatel-Lucent" class="h-11 w-auto opacity-90 mb-6" data-i18n-attr="alt:common.footer.alcatel-lucent_alt">
+                    <address class="not-italic text-sm text-gray-400 leading-relaxed" data-i18n-rich="common.footer.ale-international-32-avenue-kl-ber_4">
+                        ALE International<br>
+                        32 avenue Kl&eacute;ber<br>
+                        92700 Colombes, France
+                    </address>
+                </div>
+                <!-- Columns -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-8 sm:gap-14">
+                    <div>
+                        <h4 class="text-[11px] font-bold text-white uppercase tracking-[0.16em] mb-5" data-i18n="common.footer.solutions_4">Solutions</h4>
+                        <ul class="space-y-3.5 text-sm">
+                            <li><a href="/fr/products/collaboration" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.rainbow-collaboration">Rainbow Collaboration</a></li>
+                            <li><a href="/fr/products/webinar" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.rainbow-webinar">Rainbow Webinar</a></li>
+                            <li><a href="/fr/tarifs" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.tarifs">Tarifs</a></li>
+                            <li><a href="/fr/telecharger-application-rainbow" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.t-l-chargements">T&eacute;l&eacute;chargements</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.api">API</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-[11px] font-bold text-white uppercase tracking-[0.16em] mb-5" data-i18n="common.footer.developers_2">Developers</h4>
+                        <ul class="space-y-3.5 text-sm">
+                            <li><a href="/fr/centre-aide-rainbow" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.centre-d-aide_3">Centre d'aide</a></li>
+                            <li><a href="/fr/faq" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.faq">FAQ</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.guide-technique">Guide technique</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.code-samples_4">Code samples</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.int-grations">Int&eacute;grations</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.forum-dev_2">Forum dev</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-[11px] font-bold text-white uppercase tracking-[0.16em] mb-5" data-i18n="common.footer.company_2">Company</h4>
+                        <ul class="space-y-3.5 text-sm">
+                            <li><a href="/fr/a-propos-de-rainbow" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.a-propos_3">A propos</a></li>
+                            <li><a href="/fr/rainbow-donnees-hebergees-en-france" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.souverainet_5">Souverainet&eacute;</a></li>
+                            <li><a href="/fr/partenaires" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.devenir-partenaire">Devenir partenaire</a></li>
+                            <li><a href="/fr/trouver-un-partenaire" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.trouver-un-partenaire">Trouver un partenaire</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.carri-res">Carri&egrave;res</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.presse">Presse</a></li>
+                            <li><a href="/fr/form-al" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.contact_2">Contact</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== BOTTOM BAR ===== -->
+            <div class="border-t border-white/10 py-8 flex flex-col gap-6">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-5">
+                    <div class="flex items-center gap-3">
+                        <a href="#" aria-label="X" class="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 ring-1 ring-white/10 hover:ring-white/20 flex items-center justify-center transition-all">
+                            <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                        </a>
+                        <a href="#" aria-label="LinkedIn" class="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 ring-1 ring-white/10 hover:ring-white/20 flex items-center justify-center transition-all" data-i18n-attr="aria-label:common.footer.linkedin_aria-label">
+                            <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                        </a>
+                    </div>
+                    <div class="flex items-center gap-6 text-sm">
+                        <a href="/fr/privacy" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.privacy_2">Privacy</a>
+                        <a href="/fr/legal" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.terms_6">Terms</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.cookies">Cookies</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.gdpr">GDPR</a>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 leading-relaxed" data-i18n-rich="common.footer.ale-international-ale-usa-inc-all_3">&copy;ALE International, ALE USA Inc. All rights reserved in all countries. The Alcatel-Lucent name and logo are trademarks of Nokia used under license by ALE. To view a list of proprietary ALE trademarks, visit: <a href="https://www.al-enterprise.com/en/legal/trademarks-copyright" target="_blank" rel="noopener" class="hover:text-white transition-colors underline-offset-2 hover:underline">www.al-enterprise.com/en/legal/trademarks-copyright</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ===== SCRIPTS ===== -->
+    <script>
+        // ── Mobile menu is handled by /js/mega-menu.js (shared navbar behavior) ──
+
+        // ── ToC toggle ──
+        function toggleToc(btn) {
+            var list = document.getElementById('toc-list');
+            var chevron = btn.querySelector('.toc-chevron');
+            var isOpen = list.classList.contains('visible');
+            list.classList.toggle('visible', !isOpen);
+            chevron.classList.toggle('open', !isOpen);
+            btn.setAttribute('aria-expanded', String(!isOpen));
+        }
+
+        // ── ToC scroll spy ──
+        (function () {
+            var sections = ['pourquoi-rainbow', 'collaboration', 'webinar', 'securite', 'adoption', 'conclusion'];
+            var tocLinks = document.querySelectorAll('.toc-list a');
+            var paused = false;
+            var pauseTimer = null;
+
+            function setActive(id) {
+                tocLinks.forEach(function (link) {
+                    link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+                });
+            }
+
+            function computeActive() {
+                var threshold = window.innerHeight * 0.35;
+                var active = sections[0];
+                sections.forEach(function (id) {
+                    var el = document.getElementById(id);
+                    if (el && el.getBoundingClientRect().top <= threshold) active = id;
+                });
+                return active;
+            }
+
+            // On click: set immediately, then block scroll events for 500 ms so the
+            // mid-animation scroll doesn't override the correct highlight.
+            tocLinks.forEach(function (link) {
+                link.addEventListener('click', function () {
+                    var href = link.getAttribute('href');
+                    if (href && href.startsWith('#')) {
+                        setActive(href.slice(1));
+                        paused = true;
+                        clearTimeout(pauseTimer);
+                        pauseTimer = setTimeout(function () { paused = false; }, 500);
+                    }
+                });
+            });
+
+            window.addEventListener('scroll', function () {
+                if (!paused) setActive(computeActive());
+            }, { passive: true });
+        })();
+
+        // ── Copy link ──
+        function copyLink(e) {
+            navigator.clipboard.writeText(window.location.href).then(function () {
+                var btn = e.currentTarget;
+                var orig = btn.getAttribute('aria-label');
+                btn.setAttribute('aria-label', 'Lien copié !');
+                setTimeout(function () { btn.setAttribute('aria-label', orig); }, 2000);
+            });
+        }
+
+        // ── Dynamic SEO: canonical, OG, Twitter, share URLs, JSON-LD ──
+        (function () {
+            var origin = location.origin;
+            var url    = location.href;
+            var imgUrl = origin + '/images/collaboration_hero.jpg';
+            var title  = document.title;
+            var desc   = document.querySelector('meta[name="description"]').content;
+
+            // Canonical
+            document.getElementById('meta-canonical').href = url;
+
+            // Open Graph
+            document.getElementById('meta-og-url').setAttribute('content', url);
+            document.getElementById('meta-og-image').setAttribute('content', imgUrl);
+
+            // Twitter
+            document.getElementById('meta-twitter-image').setAttribute('content', imgUrl);
+
+            // Share buttons
+            var liEl = document.getElementById('share-linkedin');
+            var xEl  = document.getElementById('share-x');
+            if (liEl) liEl.href = 'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(url);
+            if (xEl)  xEl.href  = 'https://twitter.com/intent/tweet?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(title);
+
+            // JSON-LD @graph
+            var graph = [
+                {
+                    '@type': 'BlogPosting',
+                    headline: 'The Power of Rainbow : transformer le travail d’équipe moderne',
+                    description: desc,
+                    image: { '@type': 'ImageObject', url: imgUrl, width: 800, height: 450 },
+                    url: url,
+                    datePublished: '2026-07-01T00:00:00+02:00',
+                    dateModified:  '2026-07-06T00:00:00+02:00',
+                    inLanguage: 'fr',
+                    wordCount: 1200,
+                    articleSection: 'Collaboration',
+                    keywords: 'Rainbow, collaboration, webinar, communication unifiée, télétravail, RGPD, sécurité des données',
+                    author: {
+                        '@type': 'Person',
+                        name: 'Marie Hillion',
+                        jobTitle: 'Responsable Marketing Produit',
+                        description: 'Responsable Marketing Produit chez Alcatel-Lucent, Marie accompagne les équipes dans leur transformation numérique depuis plus de 8 ans.',
+                        worksFor: { '@type': 'Organization', name: 'Alcatel-Lucent' }
+                    },
+                    publisher: {
+                        '@type': 'Organization',
+                        name: 'Alcatel-Lucent',
+                        url: origin,
+                        logo: { '@type': 'ImageObject', url: origin + '/images/Rainbow-AL-logo-banner.webp', width: 120, height: 32 }
+                    },
+                    mainEntityOfPage: { '@type': 'WebPage', '@id': url }
+                },
+                {
+                    '@type': 'BreadcrumbList',
+                    itemListElement: [
+                        { '@type': 'ListItem', position: 1, name: 'Accueil',       item: origin + '/' },
+                        { '@type': 'ListItem', position: 2, name: 'Blog',          item: origin + '/blog' },
+                        { '@type': 'ListItem', position: 3, name: 'Collaboration', item: origin + '/blog#collaboration' },
+                        { '@type': 'ListItem', position: 4, name: 'The Power of Rainbow', item: url }
+                    ]
+                },
+                {
+                    '@type': 'Organization',
+                    name: 'Alcatel-Lucent',
+                    url: origin,
+                    logo: origin + '/images/Rainbow-AL-logo-banner.webp',
+                    sameAs: [
+                        'https://www.linkedin.com/company/alcatel-lucent-enterprise/',
+                        'https://twitter.com/ALEnterprise'
+                    ]
+                },
+                {
+                    '@type': 'WebPage',
+                    name: title,
+                    description: desc,
+                    url: url,
+                    primaryImageOfPage: { '@type': 'ImageObject', url: imgUrl }
+                }
+            ];
+
+            var ldEl = document.getElementById('json-ld-main');
+            if (ldEl) ldEl.textContent = JSON.stringify({ '@context': 'https://schema.org', '@graph': graph });
+        })();
+    </script>
+    <script src="/js/mega-menu.js"></script>
+    <script src="/js/i18n.js"></script>
+
+    <!-- Whitepaper download modal — LAVENDER cover (default).
+         Opened by the sidebar resource card "En savoir plus". -->
+    <whitepaper-download-form
+        id="whitepaper-modal"
+        modal
+        doc-label="Guide 2026"
+        doc-title="Comment choisir sa solution de communication unifiée pour votre PME"
+        doc-meta="PDF · 24 pages · 12 min de lecture"
+        highlights="Comparer les solutions UCaaS du marché|Les critères qui comptent : coûts, sécurité, intégration|Une grille de décision prête à l’emploi"
+        heading="Recevez le <span class=&quot;wf-accent&quot;>livre blanc</span>"
+        subtitle="Renseignez vos coordonnées, le PDF se télécharge immédiatement."
+        submit-label="Télécharger le PDF">
+    </whitepaper-download-form>
+
+    <!-- Same modal, but with a real COVER IMAGE instead of the type-only cover.
+         Opened by the mid-article CTA "Télécharger le rapport".
+
+         TO USE THE REAL LIVRE BLANC COVER: drop the file in /images/ and point
+         `image` at it, e.g. image="/images/livre-blanc-ucaas-2026.webp".
+         Any dimensions work — the slot is an A4-portrait frame and the image is
+         object-fit:cover'd, so it will never stretch or distort. Portrait
+         artwork around 400x566px or larger looks best.
+         `image` is currently set to an existing photo as a placeholder. -->
+    <whitepaper-download-form
+        id="whitepaper-modal-cover"
+        modal
+        image="/images/GUIDES.jpg"
+        image-alt="Couverture du livre blanc : choisir sa solution de communication unifiée"
+        doc-label="Guide 2026"
+        doc-title="Comment choisir sa solution de communication unifiée pour votre PME"
+        doc-meta="PDF · 24 pages · 12 min de lecture"
+        highlights="Comparer les solutions UCaaS du marché|Les critères qui comptent : coûts, sécurité, intégration|Une grille de décision prête à l’emploi"
+        heading="Recevez le <span class=&quot;wf-accent&quot;>livre blanc</span>"
+        subtitle="Renseignez vos coordonnées, le PDF se télécharge immédiatement."
+        submit-label="Télécharger le PDF">
+    </whitepaper-download-form>
+    <script src="/js/components/whitepaper-download-form.js"></script>
+<!-- impeccable-live-start -->
+<script src="http://localhost:8400/live.js?token=7e1a9f72-559f-41b5-9268-cc7ffe4bf926"></script>
+<!-- impeccable-live-end -->
+</body>
+</html>

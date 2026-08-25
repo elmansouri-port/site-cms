@@ -1,0 +1,57 @@
+---
+/*
+ * ArticleList — blog cards, fetched server-side so the copy is in the HTML.
+ *
+ * This is the hybrid slot of reco.md 2.3: the surrounding page is authored,
+ * this list comes from the database and updates the moment an article is
+ * published.
+ */
+import { blogList } from '../../lib/site.js';
+
+const { data = {}, locale } = Astro.props;
+const { title = '', subtitle = '', limit = 3, category = '', ctaLabel = '' } = data;
+
+let items = [];
+try {
+  const result = await blogList(locale, { limit: String(limit), ...(category ? { category } : {}) });
+  items = result?.items || [];
+} catch (err) {
+  console.warn('[article_list] could not load articles:', err.message);
+}
+
+const dateFormat = new Intl.DateTimeFormat(locale, { year: 'numeric', month: 'long', day: 'numeric' });
+---
+
+<div class="max-w-6xl mx-auto px-6">
+  {title && <h2 class="text-3xl md:text-4xl font-bold text-gray-900 text-center">{title}</h2>}
+  {subtitle && <p class="mt-4 text-gray-600 text-center max-w-2xl mx-auto">{subtitle}</p>}
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+    {items.map((post) => (
+      <article class="rounded-2xl overflow-hidden border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow flex flex-col">
+        {post.coverImage && (
+          <img src={post.coverImage} alt={post.coverAlt || ''} width="640" height="360" loading="lazy" decoding="async" class="w-full h-48 object-cover" />
+        )}
+        <div class="p-6 flex flex-col flex-1">
+          {post.category && <span class="text-xs font-semibold uppercase tracking-wide text-brand-500">{post.category}</span>}
+          <h3 class="mt-2 text-lg font-semibold text-gray-900">
+            <a href={`/${locale}/blog/${post.slug}`} class="hover:text-brand-500 transition-colors">{post.title}</a>
+          </h3>
+          {post.excerpt && <p class="mt-2 text-gray-600 text-sm flex-1">{post.excerpt}</p>}
+          <p class="mt-4 text-xs text-gray-400">
+            {post.publishedAt && <time datetime={new Date(post.publishedAt).toISOString()}>{dateFormat.format(new Date(post.publishedAt))}</time>}
+            {post.readingMinutes ? <span> · {post.readingMinutes} min</span> : null}
+          </p>
+        </div>
+      </article>
+    ))}
+  </div>
+
+  {ctaLabel && (
+    <div class="text-center mt-10">
+      <a href={`/${locale}/blog`} class="px-7 py-3 rounded-btn border border-gray-300 text-gray-700 font-medium hover:border-brand-500 hover:text-brand-500 transition-colors inline-block">
+        {ctaLabel}
+      </a>
+    </div>
+  )}
+</div>

@@ -1,0 +1,58 @@
+---
+/*
+ * VideoBlock — an inline video with an optional poster (reco.md 11).
+ *
+ * When a thumbnail is supplied it is the poster, so the frame is visible
+ * before the file loads and the layout never shifts; without one the browser
+ * falls back to its default behaviour, exactly as before.
+ */
+const { data = {} } = Astro.props;
+const {
+  title = '',
+  src = '',
+  youtubeId = '',
+  thumbnail = '',
+  caption = '',
+  width = 1280,
+  height = 720,
+  autoplay = false,
+  loop = false,
+  muted = true,
+} = data;
+---
+
+<div class="max-w-5xl mx-auto px-6">
+  {title && <h2 class="text-3xl md:text-4xl font-bold text-gray-900 text-center mb-8">{title}</h2>}
+
+  <div class="relative rounded-2xl overflow-hidden shadow-xl bg-black" style={`aspect-ratio:${width}/${height}`}>
+    {youtubeId ? (
+      <iframe
+        class="absolute inset-0 w-full h-full"
+        src={`https://www.youtube.com/embed/${youtubeId}`}
+        title={title || 'Video'}
+        width={width}
+        height={height}
+        loading="lazy"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen
+      />
+    ) : (
+      <video
+        class="absolute inset-0 w-full h-full object-cover"
+        src={src}
+        poster={thumbnail || undefined}
+        width={width}
+        height={height}
+        controls
+        playsinline
+        preload={thumbnail ? 'none' : 'metadata'}
+        autoplay={autoplay || undefined}
+        loop={loop || undefined}
+        muted={muted || undefined}
+      />
+    )}
+  </div>
+
+  {caption && <p class="mt-4 text-sm text-gray-500 text-center">{caption}</p>}
+</div>

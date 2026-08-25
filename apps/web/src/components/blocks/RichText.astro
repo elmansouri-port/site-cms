@@ -1,0 +1,14 @@
+---
+/*
+ * RichText — a prose column. The HTML comes from the CMS editor and is
+ * injected as markup, never escaped into text.
+ */
+const { data = {} } = Astro.props;
+const { title = '', html = '', width = 'prose' } = data;
+const widthClass = width === 'wide' ? 'max-w-5xl' : 'max-w-3xl';
+---
+
+<div class={`${widthClass} mx-auto px-6`}>
+  {title && <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-6">{title}</h2>}
+  <div class="prose-article text-gray-600 leading-relaxed" set:html={html} />
+</div>

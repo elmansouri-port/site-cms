@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="products.meta.title">Products - Rainbow by Alcatel-Lucent</title>
+    <meta name="description"
+        content="Explore the Rainbow product family: Collaboration, Webinar, and Smart Hotel solutions by Alcatel-Lucent." data-i18n-attr="content:products.meta.description">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 300: '#c4b5fd', 400: '#a78bfa', 500: '#5e2d91', 600: '#4a2373', 700: '#3c1c5e' },
+                        navy: { 900: '#1e1b4b', 800: '#312e81', 700: '#3730a3' }
+                    },
+                    fontFamily: { sans: ["Google Sans", "system-ui", "sans-serif"] }, borderRadius: { btn: "10px" }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        .lang-switcher {
+            position: relative;
+        }
+
+        .lang-switcher button {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.8125rem;
+            color: #64748b;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: color 0.2s;
+        }
+
+        .lang-switcher button:hover {
+            color: #0f172a;
+        }
+
+        .lang-switcher .lang-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: #fff;
+            border: 1px solid #e9e5ff;
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(124, 58, 237, 0.08);
+            min-width: 140px;
+            z-index: 200;
+            padding: 4px 0;
+            margin-top: 4px;
+        }
+
+        .lang-switcher.open .lang-dropdown {
+            display: block;
+        }
+
+        .lang-dropdown button {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 8px 14px;
+            font-size: 0.8125rem;
+            color: #374151;
+            border: none;
+            background: none;
+            cursor: pointer;
+        }
+
+        .lang-dropdown button:hover {
+            background: #f5f3ff;
+        }
+
+        .lang-dropdown button.active {
+            color: #7c3aed;
+            font-weight: 600;
+        }
+
+        /* ── Floating anchor nav ── */
+        .float-nav {
+            position: fixed;
+            top: 76px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-6px);
+            z-index: 45;
+            background: #ede9fe;
+            border-radius: 999px;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            box-shadow: 0 4px 24px rgba(94,45,145,.13), 0 1px 4px rgba(94,45,145,.08);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .25s ease, transform .25s ease;
+            white-space: nowrap;
+        }
+        .float-nav.visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%) translateY(0);
+        }
+        .float-nav-item {
+            padding: 8px 22px;
+            border-radius: 999px;
+            font-size: .875rem;
+            font-weight: 500;
+            color: #5e2d91;
+            cursor: pointer;
+            transition: background .18s, font-weight .18s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .float-nav-item:hover {
+            background: rgba(255,255,255,.55);
+        }
+        .float-nav-item.active {
+            background: #fff;
+            font-weight: 700;
+            box-shadow: 0 1px 6px rgba(94,45,145,.12);
+        }
+    </style>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/mega-menu.css">
+</head>
+
+<body  data-i18n="products.body.nothing-here">
+nothing here !
+</body>
+
+</html>

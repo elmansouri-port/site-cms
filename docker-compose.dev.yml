@@ -1,0 +1,29 @@
+# Development overlay: run MongoDB and Redis in Docker, the three Node apps on
+# the host with hot reload.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d mongo redis
+#   npm run dev
+#
+# The database ports are published so the host processes can reach them; that is
+# why this lives in an overlay and not in the production compose file.
+
+services:
+  mongo:
+    ports:
+      - "27017:27017"
+
+  redis:
+    ports:
+      - "6379:6379"
+
+  api:
+    profiles: ["full"]
+
+  web:
+    profiles: ["full"]
+
+  cms:
+    profiles: ["full"]
+
+  gateway:
+    profiles: ["full"]

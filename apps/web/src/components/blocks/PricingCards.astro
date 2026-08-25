@@ -1,0 +1,76 @@
+---
+/*
+ * PricingCards — plan cards with the monthly/yearly toggle.
+ *
+ * Both prices are always in the markup; the toggle is the site's existing
+ * client-side switch, which shows one and hides the other. Nothing here needs
+ * to know which period is active.
+ */
+const { data = {} } = Astro.props;
+const {
+  title = '',
+  subtitle = '',
+  monthlyLabel = 'Monthly',
+  yearlyLabel = 'Yearly',
+  showToggle = true,
+  plans = [],
+  footnotes = [],
+} = data;
+---
+
+<div class="max-w-6xl mx-auto px-6">
+  {title && <h2 class="text-3xl md:text-4xl font-bold text-gray-900 text-center">{title}</h2>}
+  {subtitle && <p class="mt-4 text-gray-600 text-center max-w-2xl mx-auto">{subtitle}</p>}
+
+  {showToggle && (
+    <div class="flex justify-center mt-8">
+      <div id="billing-toggle" class="inline-flex items-center gap-1 p-1 rounded-full bg-gray-100">
+        <button type="button" data-period="monthly" class="px-4 py-2 rounded-full text-sm font-medium bg-white shadow-sm">{monthlyLabel}</button>
+        <button type="button" data-period="yearly" class="px-4 py-2 rounded-full text-sm font-medium text-gray-600">{yearlyLabel}</button>
+      </div>
+    </div>
+  )}
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+    {plans.map((plan) => (
+      <div class={`pricing-card p-8 rounded-2xl border bg-white flex flex-col ${plan.highlighted ? 'border-brand-500 shadow-xl' : 'border-gray-200 shadow-sm'}`}>
+        {plan.badge && <span class="self-start mb-3 px-3 py-1 rounded-full bg-brand-50 text-brand-500 text-xs font-semibold uppercase tracking-wide">{plan.badge}</span>}
+        <h3 class="text-xl font-semibold text-gray-900">{plan.name}</h3>
+        {plan.description && <p class="mt-2 text-gray-600 text-sm">{plan.description}</p>}
+        <p class="mt-6">
+          <span class="price-monthly text-4xl font-bold text-gray-900">{plan.priceMonthly}</span>
+          <span class="price-yearly text-4xl font-bold text-gray-900 hidden">{plan.priceYearly}</span>
+          {plan.period && <span class="text-gray-500 text-sm"> {plan.period}</span>}
+        </p>
+        {plan.features?.length > 0 && (
+          <ul class="mt-6 space-y-3 flex-1">
+            {plan.features.map((feature) => (
+              <li class="flex items-start gap-2 text-gray-600">
+                <svg class="w-5 h-5 text-brand-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>{feature}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+        {plan.ctaLabel && (
+          <a href={plan.ctaHref} class={`mt-8 text-center px-6 py-3 rounded-btn font-medium transition-colors ${plan.highlighted ? 'bg-brand-500 text-white hover:bg-brand-600' : 'border border-gray-300 text-gray-700 hover:border-brand-500 hover:text-brand-500'}`}>
+            {plan.ctaLabel}
+          </a>
+        )}
+      </div>
+    ))}
+  </div>
+
+  {footnotes.length > 0 && (
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
+      {footnotes.map((note) => (
+        <div class="p-5 rounded-xl bg-gray-50 text-sm text-gray-600">
+          {note.title && <p class="font-semibold text-gray-900 mb-1">{note.title}</p>}
+          <p>{note.text}</p>
+        </div>
+      ))}
+    </div>
+  )}
+</div>

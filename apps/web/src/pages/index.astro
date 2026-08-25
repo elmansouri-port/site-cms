@@ -1,0 +1,13 @@
+---
+/*
+ * `/` never renders: the middleware has already picked a locale and redirected.
+ * This route exists so a direct hit that somehow reaches Astro still lands
+ * somewhere sensible rather than on a 404.
+ */
+export const prerender = false;
+
+import { config } from '../lib/config.js';
+
+const locale = Astro.locals.locale || config.defaultLocale;
+return Astro.redirect(`/${locale}/`, 302);
+---

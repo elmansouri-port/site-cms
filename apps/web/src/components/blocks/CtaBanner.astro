@@ -1,0 +1,38 @@
+---
+/*
+ * CtaBanner — the closing call to action used across the site.
+ */
+const { data = {} } = Astro.props;
+const {
+  title = '',
+  subtitle = '',
+  primaryLabel = '',
+  primaryHref = '',
+  secondaryLabel = '',
+  secondaryHref = '',
+  background = '',
+} = data;
+
+const style = background ? `background-image:linear-gradient(rgba(94,45,145,.88),rgba(94,45,145,.88)),url('${background}');background-size:cover;background-position:center;` : '';
+---
+
+<div class="max-w-6xl mx-auto px-6">
+  <div class="sp-cta-banner rounded-3xl bg-brand-500 text-white px-8 py-14 md:px-16 text-center" style={style}>
+    {title && <h2 class="text-3xl md:text-4xl font-bold">{title}</h2>}
+    {subtitle && <p class="mt-4 text-white/85 text-lg max-w-2xl mx-auto">{subtitle}</p>}
+    {(primaryLabel || secondaryLabel) && (
+      <div class="flex flex-col sm:flex-row gap-4 justify-center mt-9">
+        {primaryLabel && (
+          <a href={primaryHref} class="px-7 py-3 rounded-btn bg-white text-brand-500 font-medium hover:bg-gray-100 transition-colors">
+            {primaryLabel}
+          </a>
+        )}
+        {secondaryLabel && (
+          <a href={secondaryHref} class="px-7 py-3 rounded-btn border border-white/60 text-white font-medium hover:bg-white/10 transition-colors">
+            {secondaryLabel}
+          </a>
+        )}
+      </div>
+    )}
+  </div>
+</div>

@@ -1,0 +1,27 @@
+---
+/*
+ * BlockWrapper — universal block fields (reco.md / CMS_PAGE_SECTIONS section 0).
+ *
+ * Spacing lives here, never inside a block template, so an editor changes the
+ * rhythm of a page from one pair of dropdowns and every block obeys the same
+ * scale. The anchor id is what the floating section nav links to.
+ */
+const SPACING = {
+  none: { top: 'pt-0', bottom: 'pb-0' },
+  xs: { top: 'pt-4', bottom: 'pb-4' },
+  sm: { top: 'pt-10', bottom: 'pb-10' },
+  md: { top: 'pt-16', bottom: 'pb-16' },
+  lg: { top: 'pt-20', bottom: 'pb-20' },
+  xl: { top: 'pt-28', bottom: 'pb-28' },
+  '2xl': { top: 'pt-32', bottom: 'pb-32' },
+};
+
+const { layout = {}, anchorId = null, class: extra = '' } = Astro.props;
+const top = SPACING[layout?.spacingTop || 'lg']?.top ?? SPACING.lg.top;
+const bottom = SPACING[layout?.spacingBottom || 'lg']?.bottom ?? SPACING.lg.bottom;
+const classes = ['section-anchor', top, bottom, extra].filter(Boolean).join(' ');
+---
+
+<section id={anchorId || undefined} class={classes}>
+  <slot />
+</section>

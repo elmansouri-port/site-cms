@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="telecharger-application-rainbow.meta.title">Téléchargez l'application Rainbow  Windows, Mac, iOS, Android | Rainbow by ALE</title>
+    <meta name="description" content="Téléchargez l'application Rainbow pour Mac ou Windows en moins de 2 minutes." data-i18n-attr="content:telecharger-application-rainbow.meta.description">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://rainbow-portal.example.com/telecharger-application-rainbow">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Téléchargez l'application Rainbow" data-i18n-attr="content:telecharger-application-rainbow.meta.title_2">
+    <meta property="og:description" content="Téléchargez l'application Rainbow pour Mac ou Windows en moins de 2 minutes." data-i18n-attr="content:telecharger-application-rainbow.meta.description">
+    <meta property="og:url" content="https://rainbow-portal.example.com/telecharger-application-rainbow">
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json" data-i18n-raw="telecharger-application-rainbow.meta.schema">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Rainbow by Alcatel-Lucent",
+        "operatingSystem": "Windows, macOS, iOS, Android, Web",
+        "applicationCategory": "CommunicationApplication",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+    }
+    </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 300: '#c4b5fd', 400: '#a78bfa', 500: '#5e2d91', 600: '#4a2373', 700: '#3c1c5e' },
+                        navy: { 900: '#1e1b4b', 800: '#312e81', 700: '#3730a3' }
+                    },
+                    fontFamily: { sans: ['Google Sans', 'system-ui', 'sans-serif'] },
+                    borderRadius: { btn: '10px' }
+                }
+            }
+        }
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/mega-menu.css">
+    <style>
+        .section-anchor { scroll-margin-top: 110px; }
+    </style>
+</head>
+<body class="font-sans text-gray-700 antialiased bg-white">
+
+    <!-- ===== NAV ===== -->
+    <nav id="navbar" class="fixed top-0 w-full z-50 glass-nav">
+        <div class="max-w-6xl mx-auto px-6 flex items-center justify-between h-16">
+            <a href="/fr" class="flex items-center gap-2.5 shrink-0">
+                <img src="/images/Rainbow-AL-logo-banner.webp" alt="Rainbow" class="h-12 w-auto" data-i18n-attr="alt:common.nav.rainbow_alt">
+            </a>
+            <div class="hidden lg:flex items-center justify-center flex-1 gap-8">
+                <div class="nav-dropdown">
+                    <a href="#" class="text-sm text-gray-500 hover:text-navy-900 transition-colors font-medium">
+                        <span data-i18n="common.nav.produits">Produits</span>
+                        <svg class="chevron w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                    </a>
+
+                </div>
+                <a href="/fr/tarifs" class="text-sm text-gray-500 hover:text-navy-900 transition-colors font-medium" style="font-size:1rem" data-i18n="common.nav.tarifs">Tarifs</a>
+                <div class="nav-dropdown">
+                    <a href="#" class="text-sm text-gray-500 hover:text-navy-900 transition-colors font-medium" data-i18n-rich="common.nav.ressources-path-stroke-linecap_5">Ressources
+                        <svg class="chevron w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                    </a>
+
+                </div>
+            </div>
+            <div class="hidden lg:flex items-center gap-4 shrink-0">
+                <div class="lang-switcher" id="lang-switcher">
+                    <button onclick="document.getElementById('lang-switcher').classList.toggle('open')">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"/></svg>
+                        <span id="lang-current" data-i18n="common.nav.en_3">EN</span>
+                        <svg class="lang-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div class="lang-dropdown" id="lang-dropdown"></div>
+                </div>
+                <a href="https://web.openrainbow.net/rb/2.176.0/login" class="px-5 py-2.5 rounded-btn border-2 border-brand-500 text-purple-900 hover:bg-gray-50 text-sm font-semibold transition-all active:scale-95 inline-flex items-center justify-center" data-i18n="common.nav.se-connecter_3">Se connecter</a>
+                <a href="https://web.openrainbow.net/rb/2.177.4/trial" class="px-5 py-2.5 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold whitespace-nowrap shadow-md hover:shadow-lg transition-all" data-i18n="common.nav.essai-gratuit_3">Essai gratuit</a>
+            </div>
+            <button id="mobile-menu-btn" class="lg:hidden p-2" aria-label="Menu" data-i18n-attr="aria-label:common.nav.menu_aria-label_5">
+                <svg class="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+        </div>
+        <div id="mobile-menu" class="lg:hidden hidden border-t border-gray-100 bg-white px-5 pt-2 pb-6 shadow-lg space-y-1">
+            <a href="#" class="mob-section-hdr"><span data-i18n="common.nav.produits">Produits</span></a>
+            <div class="mobile-submenu space-y-1">
+                <a href="/fr/products/collaboration" class="block py-1" data-i18n="common.nav.rainbow-collaboration">Rainbow Collaboration</a>
+                <a href="/fr/products/webinar" class="block py-1" data-i18n="common.nav.rainbow-webinar">Rainbow Webinar</a>
+            </div>
+            <a href="/fr/tarifs" class="mob-section-hdr" data-i18n="common.nav.tarifs">Tarifs</a>
+            <a href="#" class="mob-section-hdr" data-i18n="common.nav.ressources">Ressources</a>
+            <div class="mobile-submenu space-y-1">
+                <a href="/fr/blog" class="block py-1" data-i18n="common.nav.blog">Blog</a>
+                <a href="/fr/reviews" class="block py-1" data-i18n="common.nav.avis">Avis</a>
+                <a href="/fr/support" class="block py-1" data-i18n="common.nav.support">Support</a>
+                <a href="/fr/tutorials" class="block py-1" data-i18n="common.nav.tutoriels">Tutoriels</a>
+            </div>
+            <div class="h-px bg-gray-100 mx-1 my-2"></div>
+            <div id="mobile-lang-switcher" class="flex flex-wrap gap-2 px-1 py-1"></div>
+            <div class="flex flex-col gap-2.5 pt-3">
+                <a href="https://web.openrainbow.net/rb/2.176.0/login" class="w-full text-center px-6 py-3 rounded-btn border-2 border-brand-500 text-purple-900 hover:bg-gray-50 text-base font-semibold transition-all active:scale-95" data-i18n="common.nav.se-connecter_3">Se connecter</a>
+                <a href="https://web.openrainbow.net/rb/2.177.4/trial" class="w-full text-center px-6 py-3 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-base font-semibold shadow-md hover:shadow-lg transition-all active:scale-95" data-i18n="common.nav.essai-gratuit_3">Essai gratuit</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== HERO ===== -->
+    <header class="relative pt-40 pb-20 px-6 overflow-hidden bg-white">
+        <div class="absolute top-0 left-0 w-[300px] h-[700px] bg-purple-500 rounded-full blur-[200px] opacity-30 pointer-events-none"></div>
+        <div class="absolute bottom-0 right-0 w-[300px] h-[700px] bg-pink-500 rounded-full blur-[220px] opacity-30 pointer-events-none"></div>
+
+        <div class="max-w-3xl mx-auto text-center relative z-10 animate-on-scroll">
+            <p class="text-sm md:text-base font-bold uppercase tracking-[0.15em] mb-4 hero-badge-gradient" data-i18n="telecharger-application-rainbow.body.t-l-chargements">
+                T&eacute;l&eacute;chargements
+            </p>
+            <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold tracking-[-0.03em] leading-[1.2] mb-6 text-gray-900" data-i18n-rich="telecharger-application-rainbow.body.t-l-chargez-l-application-rainbow">
+                T&eacute;l&eacute;chargez l'application <span class="text-brand-500">Rainbow</span>
+            </h1>
+            <p class="text-base md:text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed mb-10" data-i18n="telecharger-application-rainbow.body.l-application-de-communication-et">
+                L'application de communication et collaboration cloud d'Alcatel-Lucent, disponible gratuitement sur Windows, Mac, iOS et Android.
+            </p>
+
+            <div class="flex flex-wrap items-center justify-center gap-x-7 gap-y-3">
+                <span class="inline-flex items-center gap-2">
+                    <svg class="w-[18px] h-[18px] text-green-500 shrink-0" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="M8 12.5l2.5 2.5L16 9" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span class="text-sm font-medium text-gray-900" data-i18n="telecharger-application-rainbow.body.h-berg-en-france">H&eacute;berg&eacute; en France</span>
+                </span>
+                <span class="inline-flex items-center gap-2">
+                    <svg class="w-[18px] h-[18px] text-green-500 shrink-0" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="M8 12.5l2.5 2.5L16 9" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span class="text-sm font-medium text-gray-900" data-i18n="telecharger-application-rainbow.body.installation-gratuite">Installation gratuite</span>
+                </span>
+                <span class="inline-flex items-center gap-2">
+                    <svg class="w-[18px] h-[18px] text-green-500 shrink-0" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="M8 12.5l2.5 2.5L16 9" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span class="text-sm font-medium text-gray-900" data-i18n="telecharger-application-rainbow.body.mises-jour-automatiques">Mises &agrave; jour automatiques</span>
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- PADDING BOX (wraps all sections after the hero) -->
+    <div class="px-4 md:px-6 lg:px-8 pt-10 md:pt-16 pb-4 md:pb-6 lg:pb-8">
+        <div class="rounded-[32px] shadow-sm border overflow-hidden relative" style="border-color:#67527d45;">
+
+            <!-- ===== BUREAU (WINDOWS / MAC) ===== -->
+            <section id="bureau" class="section-anchor py-20 lg:py-24 px-6 bg-white">
+                <div class="max-w-5xl mx-auto grid sm:grid-cols-2 gap-6 animate-stagger">
+                    <div class="flex flex-col border border-brand-200 bg-white rounded-2xl p-8 hover:shadow-lg transition-all duration-300">
+                        <div class="w-11 h-11 rounded-full bg-brand-50 flex items-center justify-center mb-5">
+                            <svg class="w-5 h-5 text-brand-500" fill="currentColor" viewBox="0 0 448 512"><path d="M0 93.7l183.6-25.3v177.4H0V93.7zm0 324.6l183.6 25.3V268.4H0v149.9zm203.8 28L448 480V268.4H203.8v177.9zm0-380.6v180.1H448V32L203.8 65.7z"/></svg>
+                        </div>
+                        <h2 class="text-xl font-bold text-navy-900 mb-3" data-i18n="telecharger-application-rainbow.bureau.rainbow-pour-windows">Rainbow pour Windows</h2>
+                        <p class="text-sm text-gray-600 leading-relaxed mb-6 min-h-[2.75rem]" data-i18n="telecharger-application-rainbow.bureau.version-64-bits-recommand-e">Version 64 bits recommand&eacute;e, compatible avec la quasi-totalit&eacute; des postes de travail r&eacute;cents.</p>
+                        <a href="#" class="inline-flex items-center justify-center px-6 py-3 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-sm font-bold whitespace-nowrap shadow-md hover:shadow-lg transition-all active:scale-95 mb-4" data-i18n="telecharger-application-rainbow.bureau.t-l-charger-pour-windows-64-bits">
+                            T&eacute;l&eacute;charger pour Windows (64 bits)
+                        </a>
+                        <div class="flex flex-col gap-1.5 mt-auto">
+                            <a href="https://help.openrainbow.com/hc/en-us/articles/11848636048274-Software-Policies-Prerequisites" target="_blank" rel="noopener" class="text-sm font-semibold text-brand-500 hover:text-brand-600" data-i18n="telecharger-application-rainbow.bureau.voir-les-pr-requis-syst-me">Voir les pr&eacute;requis syst&egrave;me</a>
+                            <a href="#" class="text-sm font-semibold text-brand-500 hover:text-brand-600" data-i18n="telecharger-application-rainbow.bureau.version-32-bits">Version 32 bits</a>
+                        </div>
+                    </div>
+                    <div class="flex flex-col border border-brand-200 bg-white rounded-2xl p-8 hover:shadow-lg transition-all duration-300">
+                        <div class="w-11 h-11 rounded-full bg-brand-50 flex items-center justify-center mb-5">
+                            <svg class="w-5 h-5 text-brand-500" fill="currentColor" viewBox="0 0 384 512"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.6-67.9 35.5-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.9z"/></svg>
+                        </div>
+                        <h2 class="text-xl font-bold text-navy-900 mb-3" data-i18n="telecharger-application-rainbow.bureau.rainbow-pour-mac">Rainbow pour Mac</h2>
+                        <p class="text-sm text-gray-600 leading-relaxed mb-6 min-h-[2.75rem]" data-i18n="telecharger-application-rainbow.bureau.une-seule-version-universelle">Une seule version universelle, compatible avec les Mac Intel et Apple Silicon r&eacute;cents.</p>
+                        <a href="#" class="inline-flex items-center justify-center px-6 py-3 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-sm font-bold whitespace-nowrap shadow-md hover:shadow-lg transition-all active:scale-95 mb-4" data-i18n="telecharger-application-rainbow.bureau.t-l-charger-pour-mac-64-bits">
+                            T&eacute;l&eacute;charger pour Mac (64 bits)
+                        </a>
+                        <div class="flex flex-col gap-1.5 mt-auto">
+                            <a href="https://help.openrainbow.com/hc/en-us/articles/11848636048274-Software-Policies-Prerequisites" target="_blank" rel="noopener" class="text-sm font-semibold text-brand-500 hover:text-brand-600" data-i18n="telecharger-application-rainbow.bureau.voir-les-pr-requis-syst-me">Voir les pr&eacute;requis syst&egrave;me</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== MOBILE ===== -->
+            <section id="mobile" class="section-anchor py-20 lg:py-28 px-6 border-t border-gray-100" style="background: radial-gradient(ellipse 70% 90% at 50% 0%, rgba(124,58,237,0.08) 0%, transparent 55%), #f9f8fe;">
+                <div class="max-w-2xl mx-auto text-center animate-on-scroll">
+                    <h2 class="text-2xl md:text-4xl font-extrabold text-navy-900 tracking-tight leading-[1.15] mb-6" data-i18n="telecharger-application-rainbow.mobile.rainbow-vous-suit-sur-smartphone">
+                        Rainbow vous suit sur smartphone et tablette
+                    </h2>
+                    <p class="text-base md:text-lg text-gray-500 leading-relaxed mb-10" data-i18n="telecharger-application-rainbow.mobile.restez-joignable-et-connect-vos">
+                        Restez joignable et connect&eacute; &agrave; vos &eacute;quipes, o&ugrave; que vous soyez, avec la m&ecirc;me exp&eacute;rience Rainbow sur iOS et Android.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <a href="#" class="inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-btn bg-navy-900 hover:bg-black text-white text-sm font-bold transition-all active:scale-95" data-i18n-rich="telecharger-application-rainbow.mobile.path-d-m318-7-268-7c-2-36-7-16-4">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 384 512"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.6-67.9 35.5-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.9z"/></svg>
+                            T&eacute;l&eacute;charger sur l'App Store (iOS)
+                        </a>
+                        <a href="#" class="inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-btn bg-navy-900 hover:bg-black text-white text-sm font-bold transition-all active:scale-95" data-i18n-rich="telecharger-application-rainbow.mobile.path-d-m420-55-301-93a24-24-0-1-1">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 576 512"><path d="M420.55,301.93a24,24,0,1,1,24-24,24,24,0,0,1-24,24m-265.1,0a24,24,0,1,1,24-24,24,24,0,0,1-24,24m273.7-144.48,47.94-83a10,10,0,1,0-17.27-10h0l-48.54,84.07a301.25,301.25,0,0,0-246,0L116.76,64.45a10,10,0,1,0-17.27,10h0l47.94,83C64.53,202.22,8.24,285.55,0,384H576c-8.24-98.45-64.54-181.78-146.85-226.55"/></svg>
+                            T&eacute;l&eacute;charger sur Google Play (Android)
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== ÉTAPES ===== -->
+            <section id="etapes" class="section-anchor py-20 lg:py-28 px-6 bg-white border-t border-gray-100">
+                <div class="max-w-3xl mx-auto text-center mb-14 animate-on-scroll">
+                    <h2 class="text-2xl md:text-4xl font-extrabold text-navy-900 tracking-tight leading-[1.15]" data-i18n="telecharger-application-rainbow.etapes.comment-installer-rainbow-en-3">
+                        Comment installer Rainbow en 3 &eacute;tapes
+                    </h2>
+                </div>
+
+                <div class="max-w-5xl mx-auto grid sm:grid-cols-3 gap-6 animate-stagger">
+                    <div class="border border-brand-200 bg-white rounded-2xl p-7">
+                        <span class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-brand-500 text-white text-sm font-extrabold mb-5">1</span>
+                        <h3 class="text-base font-bold text-navy-900 mb-2" data-i18n="telecharger-application-rainbow.etapes.t-l-chargez-l-installateur">T&eacute;l&eacute;chargez l'installateur</h3>
+                        <p class="text-sm text-gray-600 leading-relaxed" data-i18n="telecharger-application-rainbow.etapes.choisissez-la-version-adapt-e">Choisissez la version adapt&eacute;e &agrave; votre syst&egrave;me d'exploitation ci-dessus, en 64 bits par d&eacute;faut sous Windows.</p>
+                    </div>
+                    <div class="border border-brand-200 bg-white rounded-2xl p-7">
+                        <span class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-brand-500 text-white text-sm font-extrabold mb-5">2</span>
+                        <h3 class="text-base font-bold text-navy-900 mb-2" data-i18n="telecharger-application-rainbow.etapes.lancez-l-installation">Lancez l'installation</h3>
+                        <p class="text-sm text-gray-600 leading-relaxed" data-i18n="telecharger-application-rainbow.etapes.ex-cutez-le-fichier-t-l-charg-et">Ex&eacute;cutez le fichier t&eacute;l&eacute;charg&eacute; et suivez l'assistant d'installation&nbsp;: aucune configuration technique n'est requise.</p>
+                    </div>
+                    <div class="border border-brand-200 bg-white rounded-2xl p-7">
+                        <span class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-brand-500 text-white text-sm font-extrabold mb-5">3</span>
+                        <h3 class="text-base font-bold text-navy-900 mb-2" data-i18n="telecharger-application-rainbow.etapes.connectez-vous">Connectez-vous</h3>
+                        <p class="text-sm text-gray-600 leading-relaxed" data-i18n="telecharger-application-rainbow.etapes.ouvrez-rainbow-connectez-vous-avec">Ouvrez Rainbow, connectez-vous avec vos identifiants ou cr&eacute;ez un compte gratuit pour d&eacute;marrer.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== FAQ ===== -->
+            <section id="faq" class="section-anchor py-20 lg:py-28 px-6 bg-gray-50 border-t border-gray-100">
+                <div class="max-w-2xl mx-auto">
+                    <div class="text-center mb-14 animate-on-scroll">
+                        <h2 class="text-2xl md:text-4xl font-extrabold text-navy-900 tracking-tight leading-[1.15]" data-i18n="telecharger-application-rainbow.faq.questions-concernant-l">
+                            Questions concernant l'installation de Rainbow
+                        </h2>
+                    </div>
+
+                    <div class="space-y-4 animate-stagger">
+                        <div class="faq-card">
+                            <button class="faq-card-button" aria-expanded="false">
+                                <span class="faq-card-question" data-i18n="telecharger-application-rainbow.faq.rainbow-est-il-gratuit-t-l-charger">Rainbow est-il gratuit &agrave; t&eacute;l&eacute;charger&nbsp;?</span>
+                                <svg class="faq-card-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                            <div class="faq-card-answer-wrapper">
+                                <div class="faq-card-answer-inner">
+                                    <div class="faq-card-answer-border">
+                                        <p class="faq-card-answer" data-i18n="telecharger-application-rainbow.faq.oui-le-t-l-chargement-et-l">Oui, le t&eacute;l&eacute;chargement et l'installation de l'application Rainbow sont gratuits sur tous les appareils. Un compte Rainbow est n&eacute;cessaire pour vous connecter une fois l'application install&eacute;e.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="faq-card">
+                            <button class="faq-card-button" aria-expanded="false">
+                                <span class="faq-card-question" data-i18n="telecharger-application-rainbow.faq.quelle-version-choisir-32-bits-ou">Quelle version choisir, 32 bits ou 64 bits, sur Windows&nbsp;?</span>
+                                <svg class="faq-card-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                            <div class="faq-card-answer-wrapper">
+                                <div class="faq-card-answer-inner">
+                                    <div class="faq-card-answer-border">
+                                        <p class="faq-card-answer" data-i18n="telecharger-application-rainbow.faq.la-quasi-totalit-des-ordinateurs-r">La quasi-totalit&eacute; des ordinateurs r&eacute;cents fonctionnent en 64 bits&nbsp;: c'est la version recommand&eacute;e par d&eacute;faut. La version 32 bits est r&eacute;serv&eacute;e aux configurations plus anciennes ou sp&eacute;cifiques.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="faq-card">
+                            <button class="faq-card-button" aria-expanded="false">
+                                <span class="faq-card-question" data-i18n="telecharger-application-rainbow.faq.comment-mettre-jour-rainbow">Comment mettre &agrave; jour Rainbow&nbsp;?</span>
+                                <svg class="faq-card-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                            <div class="faq-card-answer-wrapper">
+                                <div class="faq-card-answer-inner">
+                                    <div class="faq-card-answer-border">
+                                        <p class="faq-card-answer" data-i18n="telecharger-application-rainbow.faq.rainbow-se-met-jour">Rainbow se met &agrave; jour automatiquement d&egrave;s qu'une nouvelle version est disponible. Vous pourrez aussi t&eacute;l&eacute;charger le dernier installeur depuis cette page &agrave; tout moment.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="faq-card">
+                            <button class="faq-card-button" aria-expanded="false">
+                                <span class="faq-card-question" data-i18n="telecharger-application-rainbow.faq.ai-je-besoin-d-un-compte-pour">Ai-je besoin d'un compte pour utiliser Rainbow apr&egrave;s l'installation&nbsp;?</span>
+                                <svg class="faq-card-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                            <div class="faq-card-answer-wrapper">
+                                <div class="faq-card-answer-inner">
+                                    <div class="faq-card-answer-border">
+                                        <p class="faq-card-answer" data-i18n="telecharger-application-rainbow.faq.oui-une-fois-l-application-install">Oui. Une fois l'application install&eacute;e, connectez-vous avec vos identifiants Rainbow ou cr&eacute;ez un compte gratuit si vous n'en poss&eacute;dez pas encore.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="faq-card">
+                            <button class="faq-card-button" aria-expanded="false">
+                                <span class="faq-card-question" data-i18n="telecharger-application-rainbow.faq.rainbow-propose-t-il-un-d">Rainbow propose-t-il un d&eacute;ploiement pour les &eacute;quipes IT&nbsp;?</span>
+                                <svg class="faq-card-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                            <div class="faq-card-answer-wrapper">
+                                <div class="faq-card-answer-inner">
+                                    <div class="faq-card-answer-border">
+                                        <p class="faq-card-answer" data-i18n="telecharger-application-rainbow.faq.oui-un-package-d-installation-msi">Oui, un package d'installation .msi est disponible pour les d&eacute;ploiements en entreprise, avec un connecteur LDAP pour synchroniser vos annuaires existants.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== BLOC CTA ===== -->
+            <section class="py-20 lg:py-24 px-6 bg-white border-t border-gray-100">
+                <div class="max-w-2xl mx-auto text-center animate-on-scroll">
+                    <h2 class="text-xl md:text-2xl font-extrabold text-navy-900 tracking-tight leading-[1.2] mb-4" data-i18n="telecharger-application-rainbow.body.pas-encore-de-compte-rainbow">
+                        Pas encore de compte Rainbow&nbsp;?
+                    </h2>
+                    <p class="text-base text-gray-500 leading-relaxed mb-8" data-i18n="telecharger-application-rainbow.body.cr-ez-votre-compte-gratuit-en">
+                        Cr&eacute;ez votre compte gratuit en quelques minutes et commencez &agrave; collaborer d&egrave;s aujourd'hui.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <a href="/fr/tarifs" class="px-8 py-3 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-base font-bold whitespace-nowrap shadow-md hover:shadow-lg transition-all active:scale-95 inline-flex items-center justify-center" data-i18n="telecharger-application-rainbow.body.commencez-l-essai-gratuit">
+                            Commencez l'essai gratuit
+                        </a>
+                        <a href="/fr/centre-aide-rainbow" class="px-8 py-3 rounded-btn border-2 border-brand-500 text-purple-900 hover:bg-gray-50 text-base font-bold transition-all active:scale-95 inline-flex items-center justify-center" data-i18n="telecharger-application-rainbow.body.besoin-d-aide-pour-d-marrer">
+                            Besoin d'aide pour d&eacute;marrer&nbsp;?
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer-premium text-gray-400 relative z-10 overflow-hidden">
+        <!-- Top hairline glow -->
+        <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-300/60 to-transparent"></div>
+        <!-- Ambient purple wash -->
+        <div class="pointer-events-none absolute inset-0" style="background:
+            radial-gradient(ellipse 70% 55% at 50% -8%, rgba(124,58,237,0.32) 0%, rgba(124,58,237,0.10) 34%, transparent 68%),
+            radial-gradient(ellipse 55% 60% at 88% 108%, rgba(207,0,114,0.16) 0%, transparent 62%),
+            radial-gradient(ellipse 45% 50% at 6% 96%, rgba(94,45,145,0.20) 0%, transparent 60%);"></div>
+        <!-- Soft focal glow behind the CTA -->
+        <div class="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-[760px] h-[440px] bg-brand-500/25 rounded-full blur-[150px]"></div>
+
+        <div class="max-w-6xl mx-auto px-6 relative">
+            <!-- ===== CTA BAND ===== -->
+            <div class="text-center pt-24 pb-16 md:pt-28 md:pb-20 border-b border-white/10">
+                <div class="mb-9">
+                    <img src="/images/rainbow-logo.png" alt="Rainbow" class="w-[70px] h-[70px] object-contain mx-auto" data-i18n-attr="alt:common.footer.rainbow_alt">
+                </div>
+                <h2 class="text-2xl md:text-4xl lg:text-[2.6rem] font-semibold text-white tracking-[-0.025em] leading-[1.18] max-w-4xl mx-auto" style="text-wrap:balance" data-i18n="common.footer.la-prochaine-conversation-de-votre_10">
+                    La prochaine conversation de votre &eacute;quipe m&eacute;rite une infrastructure qui la prot&egrave;ge
+                </h2>
+                <p class="mt-5 text-base md:text-lg text-gray-300/90 max-w-xl mx-auto" style="text-wrap:balance" data-i18n="common.footer.essayez-nos-solutions-rainbow_9">
+                    Essayez nos solutions Rainbow gratuitement pendant 30 jours. Sans carte bancaire.
+                </p>
+                <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a href="/fr/tarifs" class="group inline-flex items-center justify-center gap-2.5 px-9 py-4 rounded-[14px] text-white text-base font-bold tracking-tight"
+                       style="background:#5e2d91;" data-i18n-rich="common.footer.commencez-l-essai-gratuit-path_5">
+                        Commencez l'essai gratuit
+                        <svg class="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                    </a>
+                    <a href="/fr/tarifs" class="inline-flex items-center justify-center px-9 py-4 rounded-[14px] text-white text-base font-bold tracking-tight border border-white/25 hover:bg-white/10 hover:border-white/40 transition-colors" data-i18n="common.footer.voir-les-tarifs_7">
+                        Voir les tarifs
+                    </a>
+                </div>
+            </div>
+
+            <!-- ===== LINK COLUMNS ===== -->
+            <div class="flex flex-col lg:flex-row lg:justify-between gap-12 lg:gap-16 py-16">
+                <!-- Brand -->
+                <div class="max-w-xs">
+                    <img src="/images/ale_white.png" alt="Alcatel-Lucent" class="h-11 w-auto opacity-90 mb-6" data-i18n-attr="alt:common.footer.alcatel-lucent_alt">
+                    <address class="not-italic text-sm text-gray-400 leading-relaxed" data-i18n-rich="common.footer.ale-international-32-avenue-kl-ber_7">
+                        ALE International<br>
+                        32 avenue Kl&eacute;ber<br>
+                        92700 Colombes, France
+                    </address>
+                </div>
+                <!-- Columns -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-8 sm:gap-14">
+                    <div>
+                        <h4 class="text-[11px] font-bold text-white uppercase tracking-[0.16em] mb-5" data-i18n="common.footer.solutions_10">Solutions</h4>
+                        <ul class="space-y-3.5 text-sm">
+                            <li><a href="/fr/products/collaboration" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.rainbow-collaboration">Rainbow Collaboration</a></li>
+                            <li><a href="/fr/products/webinar" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.rainbow-webinar">Rainbow Webinar</a></li>
+                            <li><a href="/fr/tarifs" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.tarifs">Tarifs</a></li>
+                            <li><a href="/fr/telecharger-application-rainbow" class="text-white font-semibold" data-i18n="common.footer.t-l-chargements">T&eacute;l&eacute;chargements</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-[11px] font-bold text-white uppercase tracking-[0.16em] mb-5" data-i18n="common.footer.developers_7">Developers</h4>
+                        <ul class="space-y-3.5 text-sm">
+                            <li><a href="/fr/centre-aide-rainbow" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.centre-d-aide_3">Centre d'aide</a></li>
+                            <li><a href="/fr/faq" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.faq">FAQ</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.guide-technique">Guide technique</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.code-samples_7">Code samples</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.int-grations">Int&eacute;grations</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.forum-dev_6">Forum dev</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-[11px] font-bold text-white uppercase tracking-[0.16em] mb-5" data-i18n="common.footer.company_7">Company</h4>
+                        <ul class="space-y-3.5 text-sm">
+                            <li><a href="/fr/a-propos-de-rainbow" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.a-propos_6">A propos</a></li>
+                            <li><a href="/fr/rainbow-donnees-hebergees-en-france" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.souverainet_10">Souverainet&eacute;</a></li>
+                            <li><a href="/fr/partenaires" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.devenir-partenaire">Devenir partenaire</a></li>
+                            <li><a href="/fr/trouver-un-partenaire" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.trouver-un-partenaire">Trouver un partenaire</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.carri-res">Carri&egrave;res</a></li>
+                            <li><a href="/fr/form-al" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.contact_7">Contact</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== BOTTOM BAR ===== -->
+            <div class="border-t border-white/10 py-8 flex flex-col gap-6">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-5">
+                    <div class="flex items-center gap-3">
+                        <a href="#" aria-label="X" class="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 ring-1 ring-white/10 hover:ring-white/20 flex items-center justify-center transition-all">
+                            <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                        </a>
+                        <a href="#" aria-label="LinkedIn" class="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 ring-1 ring-white/10 hover:ring-white/20 flex items-center justify-center transition-all" data-i18n-attr="aria-label:common.footer.linkedin_aria-label">
+                            <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                        </a>
+                    </div>
+                    <div class="flex items-center gap-6 text-sm">
+                        <a href="/fr/privacy" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.privacy_7">Privacy</a>
+                        <a href="/fr/legal" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.terms_13">Terms</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.cookies">Cookies</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.gdpr_5">GDPR</a>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 leading-relaxed" data-i18n-rich="common.footer.ale-international-ale-usa-inc-all_8">&copy;ALE International, ALE USA Inc. All rights reserved in all countries. The Alcatel-Lucent name and logo are trademarks of Nokia used under license by ALE. To view a list of proprietary ALE trademarks, visit: <a href="https://www.al-enterprise.com/en/legal/trademarks-copyright" target="_blank" rel="noopener" class="hover:text-white transition-colors underline-offset-2 hover:underline">www.al-enterprise.com/en/legal/trademarks-copyright</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ===== SCRIPTS ===== -->
+    <script src="/js/mega-menu.js"></script>
+    <script src="/js/i18n.js"></script>
+    <script>
+        // Scroll-triggered animations
+        (function() {
+            var observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+            document.querySelectorAll('.animate-on-scroll, .animate-stagger').forEach(function(el) {
+                observer.observe(el);
+            });
+        })();
+
+        // Navbar scroll shadow
+        var nav = document.getElementById('navbar');
+        window.addEventListener('scroll', function(){
+            nav.style.boxShadow = window.scrollY > 8 ? '0 1px 12px rgba(30,27,75,.07)' : '';
+        }, {passive:true});
+
+        // Static FAQ accordion
+        document.querySelectorAll('.faq-card-button').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var card = btn.closest('.faq-card');
+                var wasOpen = card.classList.contains('open');
+                document.querySelectorAll('.faq-card').forEach(function (c) {
+                    c.classList.remove('open');
+                    var b = c.querySelector('.faq-card-button');
+                    if (b) b.setAttribute('aria-expanded', 'false');
+                });
+                if (!wasOpen) {
+                    card.classList.add('open');
+                    btn.setAttribute('aria-expanded', 'true');
+                }
+            });
+        });
+    </script>
+<!-- impeccable-live-start -->
+<script src="http://localhost:8400/live.js?token=7e1a9f72-559f-41b5-9268-cc7ffe4bf926"></script>
+<!-- impeccable-live-end -->
+</body>
+</html>

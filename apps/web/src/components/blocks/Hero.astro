@@ -1,0 +1,68 @@
+---
+/*
+ * Hero — centred headline, supporting copy, up to two calls to action and an
+ * optional product shot. Matches the homepage hero's visual language so a
+ * CMS-built landing page sits next to the authored pages without looking new.
+ */
+const { data = {} } = Astro.props;
+const {
+  eyebrow = '',
+  title = '',
+  highlight = '',
+  subtitle = '',
+  primaryLabel = '',
+  primaryHref = '',
+  secondaryLabel = '',
+  secondaryHref = '',
+  image = '',
+  imageAlt = '',
+  imageWidth = 1200,
+  imageHeight = 675,
+  align = 'center',
+} = data;
+
+const alignClass = align === 'left' ? 'text-left items-start' : 'text-center items-center';
+---
+
+<div class={`max-w-6xl mx-auto px-6 flex flex-col ${alignClass}`}>
+  {eyebrow && (
+    <span class="inline-block mb-4 px-3 py-1 rounded-full bg-brand-50 text-brand-500 text-sm font-medium">
+      {eyebrow}
+    </span>
+  )}
+  {title && (
+    <h1 class="text-4xl md:text-6xl font-bold text-gray-900 leading-tight max-w-4xl">
+      {title}{highlight && <span class="text-brand-500"> {highlight}</span>}
+    </h1>
+  )}
+  {subtitle && <p class="mt-6 text-lg md:text-xl text-gray-600 max-w-2xl">{subtitle}</p>}
+
+  {(primaryLabel || secondaryLabel) && (
+    <div class="flex flex-col sm:flex-row gap-4 mt-10">
+      {primaryLabel && (
+        <a href={primaryHref} class="px-7 py-3 rounded-btn bg-brand-500 text-white font-medium hover:bg-brand-600 transition-colors">
+          {primaryLabel}
+        </a>
+      )}
+      {secondaryLabel && (
+        <a href={secondaryHref} class="px-7 py-3 rounded-btn border border-gray-300 text-gray-700 font-medium hover:border-brand-500 hover:text-brand-500 transition-colors">
+          {secondaryLabel}
+        </a>
+      )}
+    </div>
+  )}
+
+  {image && (
+    <div class="w-full max-w-5xl mt-14">
+      <img
+        src={image}
+        alt={imageAlt}
+        width={imageWidth}
+        height={imageHeight}
+        loading="eager"
+        decoding="async"
+        class="w-full h-auto rounded-2xl shadow-xl"
+      />
+    </div>
+  )}
+</div>

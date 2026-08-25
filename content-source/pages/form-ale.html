@@ -1,0 +1,1892 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Réserver un échange  Rainbow by Alcatel-Lucent</title>
+    <meta name="description"
+        content="Réservez un échange de 30 minutes avec un expert Rainbow. Posez toutes vos questions avant de vous lancer.">
+    <meta name="robots" content="noindex,follow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand: #5e2d91;
+            --brand-600: #4a2373;
+            --brand-50: #f5f3ff;
+            --brand-100: #ede9fe;
+            --brand-300: #c4b5fd;
+            --navy: #1e1b4b;
+            --ink: #1e1b4b;
+            --muted: #6b6a85;
+            --line: #eceafc;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Google Sans', system-ui, sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(1100px 560px at 12% -8%, #ede9fe 0%, transparent 55%),
+                radial-gradient(900px 480px at 105% 108%, #e6edff 0%, transparent 52%),
+                #f4f2fb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        /* ---- Shell ---- */
+        .shell {
+            width: 100%;
+            max-width: 1080px;
+            height: min(700px, calc(100vh - 40px));
+            min-height: 520px;
+            background: #fff;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 30px 70px -28px rgba(30, 27, 75, .4), 0 6px 20px rgba(30, 27, 75, .07);
+            display: grid;
+            grid-template-columns: 300px 1fr;
+        }
+
+        @media (max-width:860px) {
+            body {
+                overflow: auto;
+                align-items: flex-start;
+                padding: 16px;
+            }
+
+            .shell {
+                grid-template-columns: 1fr;
+                height: auto;
+                max-width: 660px;
+                min-height: 0;
+                border-radius: 20px;
+            }
+        }
+
+        @media (max-width:520px) {
+            body {
+                padding: 8px 0 0;
+            }
+
+            .shell {
+                border-radius: 0;
+                max-width: 100%;
+                box-shadow: none;
+            }
+        }
+
+        /* ---- Info panel (left) ---- */
+        .info-panel {
+            padding: 32px 30px;
+            background: linear-gradient(155deg, #fbfaff 0%, #ece6fa 60%, #e4dcf4 100%);
+            border-right: 1px solid var(--line);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .brand-row {
+            margin-bottom: 26px;
+        }
+
+        .brand-row img {
+            height: 54px;
+            width: auto;
+        }
+
+        .info-headline {
+            font-size: 1.38rem;
+            font-weight: 700;
+            line-height: 1.25;
+            letter-spacing: -.025em;
+            color: var(--navy);
+            margin-bottom: 10px;
+        }
+
+        .info-sub {
+            font-size: .9rem;
+            color: var(--muted);
+            line-height: 1.55;
+            margin-bottom: 22px;
+        }
+
+        .meta-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            color: var(--brand-600);
+            font-size: .86rem;
+            font-weight: 600;
+        }
+
+        .meta-ic {
+            width: 30px;
+            height: 30px;
+            flex-shrink: 0;
+            border-radius: 8px;
+            background: rgba(94, 45, 145, .12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--brand);
+        }
+
+        .meta-ic svg {
+            width: 17px;
+            height: 17px;
+        }
+
+        .prog-title {
+            font-size: .68rem;
+            font-weight: 700;
+            letter-spacing: .15em;
+            text-transform: uppercase;
+            color: #9a91ba;
+            margin: 26px 0 14px;
+        }
+
+        .prog-item {
+            display: flex;
+            gap: 11px;
+            margin-bottom: 13px;
+        }
+
+        .prog-check {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            background: var(--brand);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            margin-top: 1px;
+        }
+
+        .prog-check svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        .prog-item p {
+            font-size: .85rem;
+            color: #514c66;
+            line-height: 1.5;
+        }
+
+        /* ---- Summary (steps 2-3) ---- */
+        .summary-card {
+            background: #fff;
+            border: 1.5px solid var(--line);
+            border-radius: 14px;
+            padding: 18px;
+        }
+
+        .summary-title {
+            font-size: .68rem;
+            font-weight: 700;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            color: #9a91ba;
+            margin-bottom: 13px;
+        }
+
+        .summary-line {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 12px;
+            font-size: .88rem;
+            color: var(--navy);
+            font-weight: 600;
+        }
+
+        .summary-line:last-child {
+            margin-bottom: 0;
+        }
+
+        .summary-line svg {
+            width: 17px;
+            height: 17px;
+            flex-shrink: 0;
+            color: var(--brand);
+            margin-top: 1px;
+        }
+
+        /* ---- Main panel (right) ---- */
+        .main-panel {
+            position: relative;
+            padding: 34px 34px 30px 34px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        @media (max-width:860px) {
+            .info-panel {
+                border-right: none;
+                border-bottom: 1px solid var(--line);
+            }
+        }
+
+        @media (max-width:580px) {
+
+            .info-panel,
+            .main-panel {
+                padding: 22px 20px;
+            }
+        }
+
+        @media (max-width:520px) {
+
+            .info-panel,
+            .main-panel {
+                padding: 18px 16px;
+            }
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+            animation: fadeUp .3s ease;
+        }
+
+        .step-title {
+            font-size: 1.18rem;
+            font-weight: 700;
+            letter-spacing: -.02em;
+            color: var(--navy);
+            margin-bottom: 12px;
+            padding-right: 120px;
+        }
+
+        .step-sub {
+            color: var(--muted);
+            font-size: .88rem;
+            margin: -10px 0 18px;
+        }
+
+        /* ---- Progress dots ---- */
+        .progress-dots {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .pdot {
+            height: 6px;
+            border-radius: 3px;
+            background: var(--line);
+            transition: all .35s cubic-bezier(.16, 1, .3, 1);
+            width: 20px;
+        }
+
+        .pdot.active {
+            background: var(--brand);
+            width: 36px;
+        }
+
+        .pdot.done {
+            background: var(--brand-300);
+            width: 20px;
+        }
+
+        .pdot-label {
+            font-size: .74rem;
+            color: var(--muted);
+            margin-left: 8px;
+            font-weight: 600;
+            transition: opacity .25s;
+        }
+
+        /* ---- Booking columns ---- */
+        .book-cols {
+            display: grid;
+            grid-template-columns: 1fr 196px;
+            gap: 24px;
+            align-items: stretch;
+            flex: 1;
+            min-height: 0;
+            margin-top: 40px;
+        }
+
+        @media (max-width:680px) {
+            .book-cols {
+                grid-template-columns: 1fr 160px;
+                gap: 14px;
+            }
+        }
+
+        @media (max-width:480px) {
+            .book-cols {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+        }
+
+        /* ---- Calendar ---- */
+        .cal-col {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cal-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .cal-month {
+            font-size: .98rem;
+            font-weight: 700;
+            color: var(--navy);
+            text-transform: capitalize;
+        }
+
+        .cal-nav {
+            width: 32px;
+            height: 32px;
+            border-radius: 9px;
+            border: 1.5px solid var(--line);
+            background: #fff;
+            color: var(--brand);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all .15s;
+        }
+
+        .cal-nav:hover:not(:disabled) {
+            background: var(--brand-50);
+            border-color: var(--brand-300);
+            box-shadow: 0 2px 6px -2px rgba(94, 45, 145, .2);
+        }
+
+        .cal-nav:disabled {
+            opacity: .3;
+            cursor: default;
+        }
+
+        .cal-nav svg {
+            width: 17px;
+            height: 17px;
+        }
+
+        .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 34px;
+        }
+
+        .cal-wd {
+            text-align: center;
+            font-size: .66rem;
+            font-weight: 700;
+            color: #a9a2c4;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            padding: 3px 0;
+        }
+
+        .cal-day {
+            aspect-ratio: 1;
+            border: none;
+            background: transparent;
+            color: #3a3652;
+            font-size: .86rem;
+            font-weight: 500;
+            border-radius: 9px;
+            cursor: pointer;
+            transition: all .12s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: inherit;
+        }
+
+        @media (min-width:861px) {
+            .book-cols {
+                grid-template-rows: 1fr;
+            }
+
+            .cal-col {
+                flex: 1;
+                min-height: 0;
+            }
+
+            #cal-days {
+                grid-auto-rows: 36px;
+                align-content: start;
+            }
+
+            .cal-day {
+                aspect-ratio: auto;
+            }
+
+            .cal-empty {
+                aspect-ratio: auto;
+            }
+        }
+
+        .cal-day:hover:not(:disabled):not(.selected) {
+            background: var(--brand-50);
+            color: var(--brand-600);
+            transform: scale(1.07);
+        }
+
+        .cal-day:disabled {
+            color: #cfcbdd;
+            cursor: default;
+        }
+
+        .cal-day.today:not(.selected) {
+            box-shadow: inset 0 0 0 1.5px var(--brand-300);
+            font-weight: 700;
+            color: var(--brand);
+        }
+
+        .cal-day.selected {
+            background: var(--brand);
+            color: #fff;
+            font-weight: 700;
+            box-shadow: 0 6px 16px -4px rgba(94, 45, 145, .6);
+            transform: scale(1.05);
+        }
+
+        .cal-empty {
+            aspect-ratio: 1;
+        }
+
+        /* ---- Slots ---- */
+        .slots-col {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .slots-label {
+            font-size: .7rem;
+            font-weight: 700;
+            color: #7b71a3;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: .12em;
+            flex-shrink: 0;
+        }
+
+        #slots-area {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .slots-scroll {
+            flex: 1 1 0;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .slots-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .slots-scroll::-webkit-scrollbar-thumb {
+            background: #dcd7f0;
+            border-radius: 3px;
+        }
+
+        .slot {
+            padding: 9px 8px;
+            border: 1.5px solid #e3def4;
+            background: #fff;
+            color: var(--brand-600);
+            border-radius: 10px;
+            font-size: .86rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all .13s;
+            font-family: inherit;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .tz-note {
+            font-size: .68rem;
+            color: #a9a2c4;
+            text-align: center;
+            margin-top: 8px;
+            flex-shrink: 0;
+        }
+
+        .slot:disabled {
+            cursor: not-allowed;
+            background: #f7f6fb;
+            border-color: #eceafc;
+            color: #b9b3ce;
+            text-decoration: line-through;
+            font-weight: 500;
+        }
+
+        .slot:disabled:hover {
+            transform: none;
+            box-shadow: none;
+            border-color: #eceafc;
+            background: #f7f6fb;
+        }
+
+        .slot:hover:not(.selected):not(:disabled) {
+            border-color: var(--brand);
+            background: var(--brand-50);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px -3px rgba(94, 45, 145, .22);
+        }
+
+        .slot.selected {
+            background: var(--brand);
+            color: #fff;
+            border-color: var(--brand);
+            box-shadow: 0 4px 12px -3px rgba(94, 45, 145, .45);
+        }
+
+        .slots-awaiting {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-align: center;
+            background: var(--brand-50);
+            border: 1.5px dashed var(--brand-300);
+            border-radius: 12px;
+            padding: 20px 12px;
+            min-height: 100px;
+        }
+
+        .slots-awaiting svg {
+            width: 22px;
+            height: 22px;
+            color: var(--brand);
+            opacity: .4;
+        }
+
+        .slots-awaiting p {
+            font-size: .73rem;
+            line-height: 1.5;
+            color: #9b91c8;
+        }
+
+        /* ---- Time chip (selected slot) ---- */
+        @keyframes chipIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px) scale(.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .time-chip {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 11px 13px;
+            background: var(--brand-50);
+            border: 1.5px solid var(--brand);
+            color: var(--navy);
+            border-radius: 10px;
+            width: 100%;
+            font-family: inherit;
+            cursor: pointer;
+            flex-shrink: 0;
+            animation: chipIn .3s cubic-bezier(.16, 1, .3, 1) both;
+            transition: background .13s, border-color .13s;
+        }
+
+        .time-chip:hover {
+            background: var(--brand-100);
+        }
+
+        .chip-time {
+            font-size: .92rem;
+            font-weight: 700;
+            color: var(--brand);
+            letter-spacing: .01em;
+        }
+
+        .chip-edit {
+            display: flex;
+            align-items: center;
+            color: var(--brand);
+            opacity: .4;
+            transition: opacity .13s;
+        }
+
+        .time-chip:hover .chip-edit {
+            opacity: .9;
+        }
+
+        .chip-edit svg {
+            width: 13px;
+            height: 13px;
+        }
+
+        /* ---- Solution section (right column, state 2) ---- */
+        .sol-section {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .section-label {
+            font-size: .68rem;
+            font-weight: 700;
+            color: #7b71a3;
+            text-transform: uppercase;
+            letter-spacing: .12em;
+            flex-shrink: 0;
+        }
+
+        .slots-sol-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .sol-btn {
+            position: relative;
+            min-height: 52px;
+            padding: 11px 40px 11px 14px;
+            border: 1.5px solid #e3def4;
+            background: #fff;
+            color: var(--navy);
+            border-radius: 11px;
+            cursor: pointer;
+            transition: border-color .15s, background .15s, box-shadow .15s;
+            font-family: inherit;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 3px;
+        }
+
+        .sol-btn:hover:not(.selected) {
+            border-color: var(--brand-300);
+            background: var(--brand-50);
+            box-shadow: 0 2px 8px -2px rgba(94, 45, 145, .15);
+        }
+
+        .sol-btn.selected {
+            border-color: var(--brand);
+            background: var(--brand-50);
+            box-shadow: 0 2px 10px -2px rgba(94, 45, 145, .22);
+        }
+
+        .sol-btn.selected::after {
+            content: '';
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--brand) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4.5 12.75l6 6 9-13.5'/%3E%3C/svg%3E") center / 11px no-repeat;
+        }
+
+        .sol-btn .sol-name {
+            font-size: .83rem;
+            font-weight: 700;
+            line-height: 1.25;
+        }
+
+        .sol-btn .sol-desc {
+            font-size: .71rem;
+            color: var(--muted);
+        }
+
+        /* ---- Mobile slots + info collapse ---- */
+        @media (max-width:860px) {
+            .info-sub {
+                display: none;
+            }
+
+            .prog-title,
+            .prog-item {
+                display: none;
+            }
+
+            .info-panel {
+                padding-bottom: 18px;
+            }
+
+            .book-cols {
+                gap: 12px;
+                margin-top: 12px;
+            }
+
+            .cal-grid {
+                gap: 8px;
+            }
+
+            .slots-col {
+                min-height: 0;
+            }
+        }
+
+        @media (max-width:520px) {
+            .cal-grid {
+                gap: 6px;
+            }
+
+            .slots-col {
+                min-height: 160px;
+            }
+
+            .meta-row {
+                font-size: .82rem;
+                margin-bottom: 8px;
+            }
+
+            .slots-scroll {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+                overflow: visible;
+                flex: none;
+            }
+
+            .sol-btn {
+                flex: none;
+                min-height: 52px;
+            }
+        }
+
+        /* ---- Buttons ---- */
+        .btn-primary {
+            margin-top: 20px;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: var(--brand);
+            color: #fff;
+            font-size: .98rem;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--brand-600);
+            transform: translateY(-1px);
+            box-shadow: 0 12px 24px -8px rgba(94, 45, 145, .55);
+        }
+
+        .btn-primary:disabled {
+            opacity: .35;
+            cursor: not-allowed;
+        }
+
+        .btn-primary svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .btn-primary.ready {
+            box-shadow: 0 6px 20px -4px rgba(94, 45, 145, .42);
+        }
+
+        @media (max-width:860px) {
+            .step .btn-primary {
+                width: 100%;
+            }
+        }
+
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: none;
+            border: none;
+            color: var(--muted);
+            font-size: .86rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            margin-bottom: 14px;
+            padding: 2px 0;
+            transition: color .15s;
+            align-self: flex-start;
+        }
+
+        .btn-back:hover {
+            color: var(--brand);
+        }
+
+        .btn-back svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* ---- Form ---- */
+        #booking-form {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        /* push the submit button to the bottom of the form (desktop) */
+        #booking-form .btn-primary {
+            margin-top: auto;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px 14px;
+        }
+
+        @media (max-width:520px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .field.full {
+            grid-column: 1 / -1;
+        }
+
+        .field label {
+            font-size: .78rem;
+            font-weight: 600;
+            color: #4b4666;
+            margin-bottom: 6px;
+        }
+
+        .field label .opt {
+            color: #a9a2c4;
+            font-weight: 400;
+        }
+
+        .field input,
+        .field textarea {
+            width: 100%;
+            padding: 11px 13px;
+            border-radius: 10px;
+            border: 1.5px solid #e3def4;
+            background: #fff;
+            color: var(--navy);
+            font-size: .9rem;
+            font-family: inherit;
+            outline: none;
+            transition: box-shadow .15s, border-color .15s;
+        }
+
+        .field input::placeholder,
+        .field textarea::placeholder {
+            color: #a9a2c4;
+        }
+
+        .field input:focus,
+        .field textarea:focus {
+            border-color: var(--brand);
+            box-shadow: 0 0 0 3px rgba(94, 45, 145, .13);
+        }
+
+        .field textarea {
+            resize: none;
+            min-height: 58px;
+        }
+
+        .field .err {
+            font-size: .72rem;
+            color: #dc2626;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .field.invalid input,
+        .field.invalid textarea {
+            border-color: #f87171;
+        }
+
+        .field.invalid .err {
+            display: block;
+        }
+
+        .consent {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin-top: 14px;
+            margin-bottom: 14px;
+        }
+
+        .consent input {
+            width: 17px;
+            height: 17px;
+            margin-top: 2px;
+            flex-shrink: 0;
+            accent-color: var(--brand);
+            cursor: pointer;
+        }
+
+        .consent label {
+            font-size: .8rem;
+            color: var(--muted);
+            line-height: 1.45;
+            cursor: pointer;
+        }
+
+        .consent.invalid label {
+            color: #dc2626;
+        }
+
+        .submit-error {
+            font-size: .8rem;
+            color: #dc2626;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 9px 12px;
+            margin-bottom: 14px;
+            display: none;
+        }
+
+        .submit-error.visible {
+            display: block;
+        }
+
+        /* ---- Language switcher ---- */
+        .lang-switch {
+            position: absolute;
+            top: 26px;
+            right: 32px;
+            display: flex;
+            gap: 2px;
+            background: var(--brand-50);
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 3px;
+            z-index: 20;
+        }
+
+        @media (max-width:560px) {
+            .lang-switch {
+                top: 20px;
+                right: 18px;
+            }
+        }
+
+        .lang-btn {
+            border: none;
+            background: none;
+            color: var(--brand-600);
+            font-size: .76rem;
+            font-weight: 700;
+            padding: 5px 11px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all .14s;
+        }
+
+        .lang-btn:hover {
+            color: var(--brand);
+        }
+
+        .lang-btn.active {
+            background: var(--brand);
+            color: #fff;
+        }
+
+        /* ---- Success ---- */
+        .success-wrap {
+            text-align: center;
+            margin: auto 0;
+            padding: 20px 0;
+        }
+
+        .success-ic {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #d1fae5, #a7f3d0);
+            border: 2px solid #6ee7b7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 22px;
+            box-shadow: 0 8px 20px -6px rgba(22, 163, 74, .3);
+        }
+
+        .success-ic svg {
+            width: 34px;
+            height: 34px;
+            color: #16a34a;
+        }
+
+        .success-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 9px;
+        }
+
+        .success-sub {
+            color: var(--muted);
+            font-size: .92rem;
+            line-height: 1.6;
+            max-width: 400px;
+            margin: 0 auto 24px;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes revealSlot {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="shell">
+
+        <!-- ============ INFO PANEL ============ -->
+        <aside class="info-panel">
+            <div class="brand-row">
+                <img src="data:image/webp;base64,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"
+                    alt="Rainbow by Alcatel-Lucent">
+            </div>
+
+            <h1 class="info-headline" data-i18n="headline">Un échange pour répondre à vos questions</h1>
+            <p class="info-sub" data-i18n="subhead">Avant de vous lancer, parlez à quelqu'un qui connaît Rainbow de
+                l'intérieur.</p>
+
+            <div class="meta-row">
+                <span class="meta-ic"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="9" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2" />
+                    </svg></span>
+                <span data-i18n="duration">Durée : 30 minutes</span>
+            </div>
+            <div class="meta-row">
+                <span class="meta-ic"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+                    </svg></span>
+                <span data-i18n="via">Par visioconférence Rainbow</span>
+            </div>
+
+            <div id="panel-programme">
+                <p class="prog-title" data-i18n="prog_title">Au programme</p>
+                <div class="prog-item">
+                    <span class="prog-check"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            stroke-width="3">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg></span>
+                    <p data-i18n="prog1">Un tour des fonctionnalités utiles à votre usage : sondages, rapports, IA,
+                        selon vos besoins.</p>
+                </div>
+                <div class="prog-item">
+                    <span class="prog-check"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            stroke-width="3">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg></span>
+                    <p data-i18n="prog2">Des conseils de configuration adaptés à la taille et au secteur de votre
+                        structure.</p>
+                </div>
+                <div class="prog-item">
+                    <span class="prog-check"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            stroke-width="3">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg></span>
+                    <p data-i18n="prog3">Toutes vos questions, sans filtre commercial  un vrai échange avec un expert
+                        produit.</p>
+                </div>
+            </div>
+
+            <div id="panel-summary" hidden>
+                <div class="summary-card">
+                    <p class="summary-title" data-i18n="summary_title">Votre rendez-vous</p>
+                    <div class="summary-line">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                        </svg>
+                        <span id="sum-datetime"></span>
+                    </div>
+                    <div class="summary-line">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+                        </svg>
+                        <span id="sum-solution"></span>
+                    </div>
+                    <div class="summary-line">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918" />
+                        </svg>
+                        <span id="sum-lang"></span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ============ MAIN PANEL ============ -->
+        <main class="main-panel">
+            <div class="lang-switch" id="lang-switch">
+                <button class="lang-btn active" data-lang="fr">FR</button>
+                <button class="lang-btn" data-lang="en">EN</button>
+                <button class="lang-btn" data-lang="de">DE</button>
+            </div>
+
+            <!-- STEP 1 : booking -->
+            <section id="step-1" class="step">
+                <h2 class="step-title" data-i18n="step1_title">Choisissez une date et une heure</h2>
+                <div class="progress-dots">
+                    <div class="pdot active" id="pdot-0"></div>
+                    <div class="pdot" id="pdot-1"></div>
+                    <div class="pdot" id="pdot-2"></div>
+                    <span class="pdot-label" id="pdot-label"></span>
+                </div>
+
+                <div class="book-cols">
+                    <div class="cal-col">
+                        <div class="cal-head">
+                            <button class="cal-nav" id="cal-prev" aria-label="Précédent"><svg fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                                </svg></button>
+                            <span class="cal-month" id="cal-month"></span>
+                            <button class="cal-nav" id="cal-next" aria-label="Suivant"><svg fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                                </svg></button>
+                        </div>
+                        <div class="cal-grid" id="cal-weekdays"></div>
+                        <div class="cal-grid" id="cal-days" style="margin-top:5px;"></div>
+                    </div>
+
+                    <div class="slots-col">
+                        <p class="slots-label" id="slots-label" data-i18n="slots_title">Créneaux disponibles</p>
+                        <div id="slots-area">
+                            <div class="slots-awaiting">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                                </svg>
+                                <p data-i18n="pick_date_hint">Sélectionnez une date pour voir les créneaux.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shown when the workflow answers 409: the slot was taken between
+                     loading this page and submitting the form. -->
+                <p class="submit-error" id="slot-error"></p>
+
+                <button class="btn-primary" id="btn-continue" disabled>
+                    <span data-i18n="continue">Continuer</span>
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </button>
+            </section>
+
+            <!-- STEP 2 : form -->
+            <section id="step-2" class="step" hidden>
+                <button class="btn-back" id="btn-back"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                        stroke-width="2.2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                    </svg><span data-i18n="back">Retour</span></button>
+                <h2 class="step-title" data-i18n="form_title">Vos coordonnées</h2>
+                <p class="step-sub" data-i18n="form_sub">Dernière étape avant de confirmer votre rendez-vous.</p>
+
+                <form id="booking-form" novalidate>
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="f-first" data-i18n="fn">Prénom</label>
+                            <input id="f-first" type="text" autocomplete="given-name">
+                            <span class="err" data-i18n="err_required">Ce champ est requis.</span>
+                        </div>
+                        <div class="field">
+                            <label for="f-last" data-i18n="ln">Nom</label>
+                            <input id="f-last" type="text" autocomplete="family-name">
+                            <span class="err" data-i18n="err_required">Ce champ est requis.</span>
+                        </div>
+                        <div class="field full">
+                            <label for="f-email" data-i18n="email">E-mail professionnel</label>
+                            <input id="f-email" type="email" autocomplete="email">
+                            <span class="err" data-err="email">Adresse e-mail invalide.</span>
+                        </div>
+                        <div class="field">
+                            <label for="f-company" data-i18n="company">Société</label>
+                            <input id="f-company" type="text" autocomplete="organization">
+                            <span class="err" data-i18n="err_required">Ce champ est requis.</span>
+                        </div>
+                        <div class="field">
+                            <label for="f-phone"><span data-i18n="phone">Téléphone</span> <span class="opt"
+                                    data-i18n="optional">(facultatif)</span></label>
+                            <input id="f-phone" type="tel" autocomplete="tel">
+                        </div>
+                        <div class="field full">
+                            <label for="f-msg"><span data-i18n="message">Un sujet précis à aborder ?</span> <span
+                                    class="opt" data-i18n="optional">(facultatif)</span></label>
+                            <textarea id="f-msg" data-i18n-ph="message_ph"
+                                placeholder="Dites-nous en quelques mots…"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="consent" id="consent-wrap">
+                        <input id="f-consent" type="checkbox">
+                        <label for="f-consent" data-i18n="consent">J'accepte d'être recontacté(e) au sujet de ma
+                            demande.</label>
+                    </div>
+
+                    <p class="submit-error" id="submit-error" data-i18n="submit_error">Une erreur est survenue lors de l'envoi. Veuillez réessayer.</p>
+
+                    <button class="btn-primary" type="submit" id="btn-submit">
+                        <span data-i18n="confirm">Confirmer le rendez-vous</span>
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg>
+                    </button>
+                </form>
+            </section>
+
+            <!-- STEP 3 : success -->
+            <section id="step-3" class="step" hidden>
+                <div class="success-wrap">
+                    <div class="success-ic"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            stroke-width="2.2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg></div>
+                    <h2 class="success-title" data-i18n="success_title">C'est confirmé !</h2>
+                    <p class="success-sub" data-i18n="success_sub">Votre rendez-vous est réservé. Vous recevrez un
+                        e-mail de confirmation avec le lien de visioconférence.</p>
+                    <button class="btn-back" id="btn-restart"
+                        style="justify-content:center;margin:0 auto;align-self:center;"><svg fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg><span data-i18n="new_booking">Réserver un autre créneau</span></button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        /* ================================================================
+           IP-BASED LANGUAGE DETECTION
+           Detects the visitor's country via ipapi.co and sets the initial
+           language automatically. Skipped if the user already chose manually
+           (stored in sessionStorage under 'lang-manual').
+           FR/BE/LU/MC/CH/SN/CI/MA/DZ/TN/CM/ML/BF → fr
+           DE/AT/LI → de    |    all others → en
+           ================================================================ */
+        (function detectLangByIP() {
+            try {
+                if (sessionStorage.getItem('lang-manual')) return;
+                fetch('https://ipapi.co/json/')
+                    .then(function (r) { return r.json(); })
+                    .then(function (d) {
+                        var c = (d.country_code || '').toUpperCase();
+                        var FR = ['FR', 'BE', 'LU', 'MC', 'CH', 'SN', 'CI', 'MA', 'DZ', 'TN', 'CM', 'ML', 'BF'];
+                        var DE = ['DE', 'AT', 'LI'];
+                        window.__ipLang = FR.indexOf(c) > -1 ? 'fr' : DE.indexOf(c) > -1 ? 'de' : 'en';
+                        if (typeof window.__applyIpLang === 'function') window.__applyIpLang();
+                    })
+                    .catch(function () { });
+            } catch (e) { }
+        })();
+        /* ================================================================ */
+
+        (function () {
+            'use strict';
+
+            var I18N = {
+                fr: {
+                    title: "Réserver un échange  Rainbow", headline: "Un échange pour répondre à vos questions",
+                    subhead: "Avant de vous lancer, parlez à quelqu'un qui connaît Rainbow de l'intérieur.",
+                    duration: "Durée : 30 minutes", via: "Par visioconférence Rainbow", prog_title: "Au programme",
+                    prog1: "Un tour des fonctionnalités utiles à votre usage : sondages, rapports, IA, selon vos besoins.",
+                    prog2: "Des conseils de configuration adaptés à la taille et au secteur de votre structure.",
+                    prog3: "Toutes vos questions, sans filtre commercial  un vrai échange avec un expert produit.",
+                    step1_title: "Choisissez une date et une heure",
+                    guide0: "Choisissez une date", guide1: "Choisissez un horaire", guide2: "Votre sujet d'intérêt ?", guide3: "Tout est prêt !",
+                    slots_title: "Créneaux disponibles",
+                    pick_date_hint: "Sélectionnez une date pour voir les créneaux.",
+                    tz_note: "Heures affichées : {tz}", avail_error: "Impossible de charger les disponibilités. Réessayez dans un instant.",
+                    slot_taken: "Déjà réservé", slot_past: "Trop proche pour être réservé",
+                    no_slots: "Aucun créneau disponible ce jour. Choisissez une autre date.",
+                    slot_lost: "Ce créneau vient d’être réservé. Choisissez-en un autre.",
+                    solution_title: "Quelle solution ?",
+                    creneau_title: "Votre créneau",
+                    sol_both: "Les deux", sol_webinar_d: "Événements en direct", sol_collab_d: "Travail d'équipe", sol_both_d: "Webinar + Collab",
+                    continue: "Continuer", back: "Retour", form_title: "Vos coordonnées",
+                    form_sub: "Dernière étape avant de confirmer votre rendez-vous.", fn: "Prénom", ln: "Nom",
+                    email: "E-mail professionnel", company: "Société", phone: "Téléphone", optional: "(facultatif)",
+                    message: "Un sujet précis à aborder ?", message_ph: "Dites-nous en quelques mots…",
+                    consent: "J'accepte d'être recontacté(e) au sujet de ma demande.", confirm: "Confirmer le rendez-vous",
+                    summary_title: "Votre rendez-vous", success_title: "Vérifiez votre boîte mail",
+                    success_sub: "Votre créneau est réservé pendant 60 minutes. Nous venons de vous envoyer un e-mail : cliquez sur le bouton de confirmation pour finaliser votre rendez-vous.",
+                    err_required: "Ce champ est requis.", err_email: "Adresse e-mail invalide.",
+                    new_booking: "Réserver un autre créneau", langname: "Français",
+                    quota_error: "Vous avez déjà atteint le nombre maximum de rendez-vous à venir. Annulez ou déplacez un rendez-vous existant, ou contactez-nous.",
+                    sending: "Envoi en cours…", submit_error: "Une erreur est survenue lors de l'envoi. Veuillez réessayer."
+                },
+                en: {
+                    title: "Book a call  Rainbow", headline: "A conversation to answer your questions",
+                    subhead: "Before you dive in, talk to someone who knows Rainbow inside out.",
+                    duration: "Duration: 30 minutes", via: "By Rainbow video call", prog_title: "What we'll cover",
+                    prog1: "A tour of the features that matter for you: polls, reports, AI  based on your needs.",
+                    prog2: "Setup advice tailored to the size and sector of your organization.",
+                    prog3: "All your questions, no sales filter  a real conversation with a product expert.",
+                    step1_title: "Pick a date and time",
+                    guide0: "Pick a date", guide1: "Pick a time", guide2: "Your area of interest?", guide3: "All set  continue!",
+                    slots_title: "Available slots",
+                    pick_date_hint: "Select a date to see available slots.",
+                    tz_note: "Times shown in {tz}", avail_error: "Could not load availability. Please try again in a moment.",
+                    slot_taken: "Already booked", slot_past: "Too soon to book",
+                    no_slots: "No slots available on this day. Please pick another date.",
+                    slot_lost: "That slot has just been taken. Please choose another one.",
+                    solution_title: "Which solution?",
+                    creneau_title: "Your slot",
+                    sol_both: "Both", sol_webinar_d: "Live events", sol_collab_d: "Team work", sol_both_d: "Webinar + Collab",
+                    continue: "Continue", back: "Back", form_title: "Your details",
+                    form_sub: "One last step before confirming your booking.", fn: "First name", ln: "Last name",
+                    email: "Work email", company: "Company", phone: "Phone", optional: "(optional)",
+                    message: "Anything specific to discuss?", message_ph: "Tell us in a few words…",
+                    consent: "I agree to be contacted about my request.", confirm: "Confirm booking",
+                    summary_title: "Your booking", success_title: "Check your inbox",
+                    success_sub: "We are holding your slot for 60 minutes. We have just emailed you — click the confirmation button to finalise your booking.",
+                    err_required: "This field is required.", err_email: "Invalid email address.",
+                    new_booking: "Book another slot", langname: "English",
+                    quota_error: "You have reached the maximum number of upcoming meetings. Cancel or move an existing one, or get in touch.",
+                    sending: "Sending…", submit_error: "Something went wrong while sending your request. Please try again."
+                },
+                de: {
+                    title: "Termin buchen  Rainbow", headline: "Ein Gespräch, das Ihre Fragen beantwortet",
+                    subhead: "Bevor Sie starten, sprechen Sie mit jemandem, der Rainbow von innen kennt.",
+                    duration: "Dauer: 30 Minuten", via: "Per Rainbow-Videokonferenz", prog_title: "Das erwartet Sie",
+                    prog1: "Ein Überblick über die für Sie relevanten Funktionen: Umfragen, Berichte, KI – ganz nach Bedarf.",
+                    prog2: "Einrichtungstipps, abgestimmt auf Größe und Branche Ihres Unternehmens.",
+                    prog3: "Alle Ihre Fragen, ohne Verkaufsfilter – ein echtes Gespräch mit einem Produktexperten.",
+                    step1_title: "Datum und Uhrzeit wählen",
+                    guide0: "Datum wählen", guide1: "Uhrzeit wählen", guide2: "Ihr Interessengebiet?", guide3: "Fertig  weiter!",
+                    slots_title: "Verfügbare Termine",
+                    pick_date_hint: "Datum wählen, um Termine zu sehen.",
+                    tz_note: "Zeiten in {tz}", avail_error: "Verfügbarkeiten konnten nicht geladen werden. Bitte versuchen Sie es gleich erneut.",
+                    slot_taken: "Bereits gebucht", slot_past: "Zu kurzfristig",
+                    no_slots: "An diesem Tag sind keine Termine frei. Bitte wählen Sie ein anderes Datum.",
+                    slot_lost: "Dieser Termin wurde gerade vergeben. Bitte wählen Sie einen anderen.",
+                    solution_title: "Welche Lösung?",
+                    creneau_title: "Ihr Termin",
+                    sol_both: "Beide", sol_webinar_d: "Live-Events", sol_collab_d: "Teamarbeit", sol_both_d: "Webinar + Collab",
+                    continue: "Weiter", back: "Zurück", form_title: "Ihre Kontaktdaten",
+                    form_sub: "Ein letzter Schritt, um Ihren Termin zu bestätigen.", fn: "Vorname", ln: "Nachname",
+                    email: "Geschäftliche E-Mail", company: "Unternehmen", phone: "Telefon", optional: "(optional)",
+                    message: "Ein bestimmtes Thema?", message_ph: "Sagen Sie es uns in wenigen Worten…",
+                    consent: "Ich bin damit einverstanden, bezüglich meiner Anfrage kontaktiert zu werden.", confirm: "Termin bestätigen",
+                    summary_title: "Ihr Termin", success_title: "Prüfen Sie Ihr Postfach",
+                    success_sub: "Wir halten Ihren Termin 60 Minuten frei. Wir haben Ihnen gerade eine E-Mail geschickt — klicken Sie auf die Bestätigungsschaltfläche, um die Buchung abzuschließen.",
+                    err_required: "Dieses Feld ist erforderlich.", err_email: "Ungültige E-Mail-Adresse.",
+                    new_booking: "Weiteren Termin buchen", langname: "Deutsch",
+                    quota_error: "Sie haben die maximale Anzahl bevorstehender Termine erreicht. Sagen Sie einen bestehenden Termin ab oder verschieben Sie ihn, oder melden Sie sich bei uns.",
+                    sending: "Wird gesendet…", submit_error: "Beim Senden ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
+                }
+            };
+            var LOCALE = { fr: 'fr-FR', en: 'en-GB', de: 'de-DE' };
+            var BOOKING_API_URL = 'https://n8n.openrainbow.org/webhook/booking';
+            var AVAILABILITY_API_URL = 'https://n8n.openrainbow.org/webhook/availability';
+            var SOLUTIONS = [
+                { key: 'webinar', name: 'Rainbow Webinar' },
+                { key: 'collab', name: 'Rainbow Collaboration' },
+                { key: 'both', name: null }
+            ];
+
+            /* ---- Availability comes from the server -------------------------
+               Every rule lives in the availability workflow: the experts' working
+               hours in Africa/Casablanca, lunch, buffer between calls, daily cap,
+               time off, public holidays, the 2h minimum notice, and which expert
+               each language routes to. This page renders what it is told and
+               nothing more, so the rules can change without touching the page.
+
+               The API answers in UTC. We display in the VISITOR's own timezone
+               and say so, rather than making anyone convert Morocco time. */
+            var VIEW_TZ = (function () {
+                try { return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; }
+                catch (e) { return 'UTC'; }
+            })();
+
+            var slotsByDay = {};          // 'YYYY-MM-DD' (visitor-local) -> [slot]
+            var availabilityFailed = false;
+
+            function pad2(n) { return String(n).padStart(2, '0'); }
+            // Plain Date getters are already in the visitor's zone, which is the
+            // zone we render in -- so no conversion is needed here.
+            function dayKeyOf(date) {
+                return date.getFullYear() + '-' + pad2(date.getMonth() + 1) + '-' + pad2(date.getDate());
+            }
+            function slotLabel(iso) {
+                return new Intl.DateTimeFormat(LOCALE[lang], {
+                    hour: '2-digit', minute: '2-digit', hour12: false
+                }).format(new Date(iso));
+            }
+
+            function loadAvailability() {
+                // lang matters: it decides WHICH expert's calendar is returned.
+                return fetch(AVAILABILITY_API_URL + '?lang=' + encodeURIComponent(lang))
+                    .then(function (r) {
+                        if (!r.ok) throw new Error('availability request failed with status ' + r.status);
+                        return r.json();
+                    })
+                    .then(function (data) {
+                        slotsByDay = {};
+                        availabilityFailed = false;
+                        // Regroup by the visitor's calendar day: a late Morocco slot
+                        // can fall on the next day for someone further east.
+                        (data.days || []).forEach(function (d) {
+                            (d.slots || []).forEach(function (s) {
+                                var k = dayKeyOf(new Date(s.start));
+                                (slotsByDay[k] = slotsByDay[k] || []).push(s);
+                            });
+                        });
+                        Object.keys(slotsByDay).forEach(function (k) {
+                            slotsByDay[k].sort(function (a, b) { return a.start < b.start ? -1 : 1; });
+                        });
+                    })
+                    .catch(function (err) {
+                        console.error('[booking] availability unavailable:', err);
+                        slotsByDay = {};
+                        availabilityFailed = true;
+                    });
+            }
+
+            function daySlots(date) { return slotsByDay[dayKeyOf(date)] || []; }
+            function dayHasFreeSlot(date) {
+                return daySlots(date).some(function (s) { return s.available; });
+            }
+
+            var lang = 'fr';
+            // The URL's /fr /en /de segment is a stronger signal than IP-based
+            // guessing -- whatever page linked here already chose it.
+            var URL_LANG = (window.location.pathname.match(/\/(fr|en|de)(\/|$)/) || [])[1];
+            if (URL_LANG) lang = URL_LANG;
+            document.querySelectorAll('.lang-btn').forEach(function (b) {
+                b.classList.toggle('active', b.dataset.lang === lang);
+            });
+            function langSwitchUrl(newLang) {
+                var m = window.location.pathname.match(/^(.*?)\/(fr|en|de)(\/.*|$)/);
+                var base = m ? m[1] : '';
+                var rest = m ? m[3] : window.location.pathname;
+                return base + '/' + newLang + rest + window.location.search + window.location.hash;
+            }
+            var today = (function () { var d = new Date(); d.setHours(0, 0, 0, 0); return d; })();
+            var viewDate = new Date(today.getFullYear(), today.getMonth(), 1);
+            var sel = { date: null, slot: null, solution: null };
+
+            function t(k) { return (I18N[lang] && I18N[lang][k]) || I18N.fr[k] || k; }
+
+            /* Bridge: called by IP detection snippet (may fire before or after this IIFE) */
+            window.__applyIpLang = function () {
+                if (!window.__ipLang || window.__langManualSet || URL_LANG) return;
+                lang = window.__ipLang;
+                document.querySelectorAll('.lang-btn').forEach(function (b) {
+                    b.classList.toggle('active', b.dataset.lang === lang);
+                });
+                applyI18n();
+            };
+            /* If IP detection already resolved before this script ran -- but the
+               URL's own lang segment, if present, is a stronger signal. */
+            if (!URL_LANG && window.__ipLang && !window.__langManualSet) lang = window.__ipLang;
+
+            /* ---- Guided flow state machine ---- */
+            /* state 0=initial  1=date picked  2=time picked  3=solution picked (ready) */
+            function advanceGuide() {
+                var state = sel.date ? (sel.slot ? (sel.solution ? 3 : 2) : 1) : 0;
+
+                var d0 = document.getElementById('pdot-0');
+                var d1 = document.getElementById('pdot-1');
+                var d2 = document.getElementById('pdot-2');
+                if (d0) d0.className = 'pdot' + (state >= 1 ? ' done' : ' active');
+                if (d1) d1.className = 'pdot' + (state >= 2 ? ' done' : (state === 1 ? ' active' : ''));
+                if (d2) d2.className = 'pdot' + (state >= 3 ? ' done' : (state === 2 ? ' active' : ''));
+
+                var lbl = document.getElementById('pdot-label');
+                if (lbl) lbl.textContent = t('guide' + Math.min(state, 3));
+
+                var btn = document.getElementById('btn-continue');
+                if (btn) {
+                    btn.disabled = state < 3;
+                    btn.classList.toggle('ready', state === 3);
+                }
+            }
+
+            function applyI18n() {
+                document.documentElement.lang = lang;
+                document.title = t('title');
+                document.querySelectorAll('[data-i18n]').forEach(function (el) { el.textContent = t(el.getAttribute('data-i18n')); });
+                document.querySelectorAll('[data-i18n-ph]').forEach(function (el) { el.setAttribute('placeholder', t(el.getAttribute('data-i18n-ph'))); });
+                var emailErr = document.querySelector('[data-err="email"]'); if (emailErr) emailErr.textContent = t('err_email');
+                renderCalendar(); renderSlots(); advanceGuide(); updateSummary();
+            }
+
+            function sameDay(a, b) { return a && b && a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); }
+            function weekdayLabels() {
+                var base = new Date(Date.UTC(2021, 10, 1));
+                var fmt = new Intl.DateTimeFormat(LOCALE[lang], { weekday: 'short' });
+                var out = []; for (var i = 0; i < 7; i++) { var d = new Date(base); d.setUTCDate(1 + i); out.push(fmt.format(d).replace('.', '')); } return out;
+            }
+
+            function renderCalendar() {
+                document.getElementById('cal-month').textContent =
+                    new Intl.DateTimeFormat(LOCALE[lang], { month: 'long', year: 'numeric' }).format(viewDate);
+                var wd = document.getElementById('cal-weekdays'); wd.innerHTML = '';
+                weekdayLabels().forEach(function (l) { var s = document.createElement('div'); s.className = 'cal-wd'; s.textContent = l; wd.appendChild(s); });
+                var y = viewDate.getFullYear(), m = viewDate.getMonth();
+                var first = new Date(y, m, 1); var offset = (first.getDay() + 6) % 7;
+                var dim = new Date(y, m + 1, 0).getDate();
+                var grid = document.getElementById('cal-days'); grid.innerHTML = '';
+                for (var i = 0; i < offset; i++) { var e = document.createElement('div'); e.className = 'cal-empty'; grid.appendChild(e); }
+                for (var d = 1; d <= dim; d++) {
+                    var date = new Date(y, m, d); var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'cal-day'; btn.textContent = d;
+                    // A day with every slot taken (or entirely in the past) is not
+                    // selectable -- otherwise it opens onto an all-disabled list.
+                    // Selectable only if the API returned at least one free slot for
+                    // that day. Weekends, public holidays, expert time off and fully
+                    // booked days all arrive here as simply "no free slots".
+                    var disabled = date < today || !dayHasFreeSlot(date);
+                    if (disabled) { btn.disabled = true; }
+                    else {
+                        if (sameDay(date, today)) btn.classList.add('today');
+                        if (sameDay(date, sel.date)) btn.classList.add('selected');
+                        (function (dt) {
+                            btn.addEventListener('click', function () {
+                                sel.date = dt; sel.slot = null;
+                                document.getElementById('slot-error').classList.remove('visible');
+                                renderCalendar(); renderSlots(); advanceGuide();
+                            });
+                        })(date);
+                    }
+                    grid.appendChild(btn);
+                }
+                document.getElementById('cal-prev').disabled = (y === today.getFullYear() && m <= today.getMonth());
+            }
+
+            function addMins(t, m) { var p = t.split(':'), tot = +p[0] * 60 + +p[1] + m, h = Math.floor(tot / 60), min = tot % 60; return (h < 10 ? '0' : '') + h + ':' + (min < 10 ? '0' : '') + min; }
+
+            function renderSlots() {
+                var area = document.getElementById('slots-area'); area.innerHTML = '';
+                var label = document.getElementById('slots-label');
+                label.style.display = ''; // always reset visibility
+
+                /* State 0  no date: awaiting placeholder */
+                if (!sel.date) {
+                    label.textContent = t('slots_title');
+                    var aw = document.createElement('div'); aw.className = 'slots-awaiting';
+                    aw.innerHTML = '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>';
+                    var p = document.createElement('p'); p.textContent = t('pick_date_hint'); aw.appendChild(p);
+                    area.appendChild(aw);
+                    return;
+                }
+
+                /* State 1  date set, no time: time slot buttons */
+                if (!sel.slot) {
+                    label.textContent = new Intl.DateTimeFormat(LOCALE[lang], { weekday: 'short', day: 'numeric', month: 'short' }).format(sel.date);
+                    if (!dayHasFreeSlot(sel.date)) {
+                        var none = document.createElement('div'); none.className = 'slots-awaiting';
+                        var np = document.createElement('p'); np.textContent = availabilityFailed ? t('avail_error') : t('no_slots');
+                        none.appendChild(np); area.appendChild(none);
+                        return;
+                    }
+                    var wrap = document.createElement('div'); wrap.className = 'slots-scroll';
+                    daySlots(sel.date).forEach(function (s, i) {
+                        var b = document.createElement('button'); b.type = 'button';
+                        b.className = 'slot';
+                        b.textContent = slotLabel(s.start);
+                        b.style.cssText = 'opacity:0;animation:revealSlot .26s ease ' + (i * .038) + 's forwards;';
+                        if (s.available) {
+                            b.addEventListener('click', function () { sel.slot = s.start; renderSlots(); advanceGuide(); });
+                        } else {
+                            b.disabled = true;
+                            b.title = t(s.reason === 'lead_time' ? 'slot_past' : 'slot_taken');
+                        }
+                        wrap.appendChild(b);
+                    });
+                    area.appendChild(wrap);
+                    // Say which clock these times are on -- they are rendered in the
+                    // visitor's zone, which may not be the expert's.
+                    var tzNote = document.createElement('p');
+                    tzNote.className = 'tz-note';
+                    tzNote.textContent = t('tz_note').replace('{tz}', VIEW_TZ);
+                    area.appendChild(tzNote);
+                    return;
+                }
+
+                /* State 2  time set: créneau chip + solution picker, no visible label */
+                label.style.display = 'none';
+
+                /* ── Section 1: créneau ── */
+                var creneauSec = document.createElement('div'); creneauSec.style.cssText = 'display:flex;flex-direction:column;gap:6px;flex-shrink:0;';
+                var creneauLbl = document.createElement('p'); creneauLbl.className = 'section-label'; creneauLbl.textContent = t('creneau_title');
+                creneauSec.appendChild(creneauLbl);
+
+                var chip = document.createElement('button'); chip.type = 'button'; chip.className = 'time-chip';
+                chip.innerHTML = '<span class="chip-time">' + slotLabel(sel.slot) + ' – ' + slotLabel(new Date(Date.parse(sel.slot) + 30 * 60000).toISOString()) + '</span>'
+                    + '<span class="chip-edit"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">'
+                    + '<path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/>'
+                    + '</svg></span>';
+                chip.addEventListener('click', function () { sel.slot = null; sel.solution = null; renderSlots(); advanceGuide(); });
+                creneauSec.appendChild(chip);
+                area.appendChild(creneauSec);
+
+                /* ── Section 2: solution picker ── */
+                var solSec = document.createElement('div'); solSec.className = 'sol-section';
+                var solLbl = document.createElement('p'); solLbl.className = 'section-label'; solLbl.textContent = t('solution_title');
+                solSec.appendChild(solLbl);
+
+                var grid = document.createElement('div'); grid.className = 'slots-sol-grid';
+                SOLUTIONS.forEach(function (sol, i) {
+                    var b = document.createElement('button'); b.type = 'button';
+                    b.className = 'sol-btn' + (sel.solution === sol.key ? ' selected' : '');
+                    b.dataset.sol = sol.key;
+                    b.style.cssText = 'opacity:0;animation:revealSlot .32s cubic-bezier(.16,1,.3,1) ' + (0.1 + i * .11) + 's both;';
+                    var nameEl = document.createElement('span'); nameEl.className = 'sol-name'; nameEl.textContent = sol.name || t('sol_both');
+                    var descEl = document.createElement('span'); descEl.className = 'sol-desc'; descEl.textContent = t('sol_' + sol.key + '_d');
+                    b.appendChild(nameEl); b.appendChild(descEl);
+                    b.addEventListener('click', function () {
+                        grid.querySelectorAll('.sol-btn').forEach(function (x) { x.classList.remove('selected'); });
+                        b.classList.add('selected'); sel.solution = sol.key; advanceGuide();
+                    });
+                    grid.appendChild(b);
+                });
+                solSec.appendChild(grid);
+                area.appendChild(solSec);
+            }
+
+            function solutionLabel() { if (sel.solution === 'webinar') return 'Rainbow Webinar'; if (sel.solution === 'collab') return 'Rainbow Collaboration'; return t('sol_both'); }
+            function updateSummary() {
+                if (sel.date && sel.slot) {
+                    document.getElementById('sum-datetime').textContent =
+                        new Intl.DateTimeFormat(LOCALE[lang], { weekday: 'long', day: 'numeric', month: 'long' }).format(sel.date) + ' · ' + slotLabel(sel.slot);
+                }
+                document.getElementById('sum-solution').textContent = sel.solution ? solutionLabel() : '';
+                document.getElementById('sum-lang').textContent = t('langname');
+            }
+
+            function show(step) {
+                ['step-1', 'step-2', 'step-3'].forEach(function (id) { document.getElementById(id).hidden = (id !== step); });
+                document.getElementById('panel-programme').hidden = (step !== 'step-1');
+                document.getElementById('panel-summary').hidden = (step === 'step-1');
+            }
+
+            document.getElementById('cal-prev').addEventListener('click', function () { viewDate.setMonth(viewDate.getMonth() - 1); renderCalendar(); });
+            document.getElementById('cal-next').addEventListener('click', function () { viewDate.setMonth(viewDate.getMonth() + 1); renderCalendar(); });
+            document.getElementById('btn-continue').addEventListener('click', function () { updateSummary(); show('step-2'); });
+            document.getElementById('btn-back').addEventListener('click', function () { show('step-1'); });
+            document.getElementById('btn-restart').addEventListener('click', function () {
+                sel = { date: null, slot: null, solution: null };
+                document.getElementById('booking-form').reset();
+                document.getElementById('slot-error').classList.remove('visible');
+                show('step-1');
+                // Re-read availability: the booking we just made is now taken.
+                loadAvailability().then(function () {
+                    renderCalendar(); renderSlots(); advanceGuide();
+                });
+            });
+
+            function markField(field, invalid) { field.classList.toggle('invalid', invalid); return !invalid; }
+
+            function buildBookingPayload() {
+                var isoDatetime = '';
+                // The API handed us the exact instant, so nothing is converted here.
+                if (sel.slot) isoDatetime = sel.slot;
+                return {
+                    first_name: document.getElementById('f-first').value.trim(),
+                    last_name: document.getElementById('f-last').value.trim(),
+                    email: document.getElementById('f-email').value.trim(),
+                    company: document.getElementById('f-company').value.trim(),
+                    phone: document.getElementById('f-phone').value.trim(),
+                    message: document.getElementById('f-msg').value.trim(),
+                    datetime: isoDatetime,
+                    solution: sel.solution,
+                    lang: lang,
+                    // Every email about this booking is rendered in this zone.
+                    // Without it the backend can only guess, and showed raw UTC.
+                    timezone: VIEW_TZ
+                };
+            }
+
+            function submitBooking() {
+                var btn = document.getElementById('btn-submit');
+                var errBanner = document.getElementById('submit-error');
+                errBanner.classList.remove('visible');
+                btn.disabled = true;
+                var originalHTML = btn.innerHTML;
+                btn.innerHTML = '<span>' + t('sending') + '</span>';
+
+                fetch(BOOKING_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(buildBookingPayload())
+                })
+                    .then(function (r) {
+                        // 409 = someone booked this slot in the meantime. Not a
+                        // generic failure: we can recover by refreshing the picker.
+                        if (r.status === 429) {
+                            return r.json().catch(function () { return {}; }).then(function (body) {
+                                var e = new Error("quota_exceeded"); e.quota = body; throw e;
+                            });
+                        }
+                        if (r.status === 409) {
+                            return r.json().catch(function () { return {}; }).then(function (body) {
+                                var e = new Error('slot_unavailable'); e.conflict = body; throw e;
+                            });
+                        }
+                        if (!r.ok) throw new Error('Booking request failed with status ' + r.status);
+                        return r.text();
+                    })
+                    .then(function () {
+                        show('step-3');
+                    })
+                    .catch(function (err) {
+                        if (err && err.quota) {
+                            // Choosing another time will not help - the limit is
+                            // per person, not per slot.
+                            errBanner.textContent = err.quota.message || t("quota_error");
+                            errBanner.classList.add("visible");
+                            return;
+                        }
+                        if (err && err.conflict) {
+                            var slotBanner = document.getElementById('slot-error');
+                            slotBanner.textContent = err.conflict.message || t('slot_lost');
+                            slotBanner.classList.add('visible');
+                            sel.slot = null;
+                            show('step-1');
+                            loadAvailability().then(function () {
+                                renderCalendar(); renderSlots(); advanceGuide(); updateSummary();
+                            });
+                            return;
+                        }
+                        console.error('[booking] submission failed:', err);
+                        errBanner.classList.add('visible');
+                    })
+                    .finally(function () {
+                        btn.disabled = false;
+                        btn.innerHTML = originalHTML;
+                    });
+            }
+
+            document.getElementById('booking-form').addEventListener('submit', function (e) {
+                e.preventDefault(); var ok = true;
+                ['f-first', 'f-last', 'f-company'].forEach(function (id) { var inp = document.getElementById(id); if (!markField(inp.parentElement, !inp.value.trim())) ok = false; });
+                var email = document.getElementById('f-email'); var re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!markField(email.parentElement, !re.test(email.value.trim()))) ok = false;
+                var consent = document.getElementById('f-consent');
+                document.getElementById('consent-wrap').classList.toggle('invalid', !consent.checked); if (!consent.checked) ok = false;
+                if (!ok) return;
+                updateSummary(); submitBooking();
+            });
+
+            document.getElementById('lang-switch').addEventListener('click', function (e) {
+                var b = e.target.closest('.lang-btn'); if (!b) return;
+                lang = b.dataset.lang;
+                window.__langManualSet = true;
+                sessionStorage.setItem('lang-manual', '1');
+                // Keep the address bar in sync without reloading -- this page
+                // holds in-progress calendar/slot state that a real navigation
+                // would throw away.
+                if (window.history && window.history.replaceState) {
+                    window.history.replaceState(null, '', langSwitchUrl(lang));
+                }
+                document.querySelectorAll('.lang-btn').forEach(function (x) { x.classList.toggle('active', x === b); });
+                // The language decides WHICH expert is booked, so their calendar
+                // must be re-read -- the free slots are not the same.
+                sel.slot = null;
+                applyI18n();
+                loadAvailability().then(function () { renderCalendar(); renderSlots(); advanceGuide(); updateSummary(); });
+            });
+
+            applyI18n();
+            // Render immediately with everything enabled, then re-render once the
+            // booked slots arrive. The picker is never blocked on the network.
+            loadAvailability().then(function () {
+                renderCalendar(); renderSlots(); advanceGuide();
+            });
+        })();
+    </script>
+</body>
+
+</html>

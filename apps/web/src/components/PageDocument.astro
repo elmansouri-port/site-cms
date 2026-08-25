@@ -1,0 +1,35 @@
+---
+/*
+ * PageDocument — emits a composed page.
+ *
+ * The authored blocks are written out as the exact bytes the CMS stores, and
+ * component blocks are rendered by Astro in their place. Nothing re-serializes
+ * the markup in between, which is what keeps a migrated page identical to the
+ * page it was migrated from.
+ *
+ * A page made only of authored blocks — every page that came from the old
+ * static site — is emitted as a single fragment. Astro separates sibling
+ * template nodes with a newline, which would leave the output a couple of
+ * bytes away from the original; joining first avoids that entirely.
+ */
+import SectionRenderer from './SectionRenderer.astro';
+
+const { document, locale } = Astro.props;
+
+const hasComponents = document.parts.some(p => p.kind === 'component');
+const flat = hasComponents
+  ? null
+  : document.prologue + document.parts.map(p => p.html).join('') + document.epilogue;
+---
+
+{flat !== null ? <Fragment set:html={flat} /> : (
+  <>
+    <Fragment set:html={document.prologue} />
+    {document.parts.map((part) => (
+      part.kind === 'html'
+        ? <Fragment set:html={part.html} />
+        : <SectionRenderer block={part.block} locale={locale} />
+    ))}
+    <Fragment set:html={document.epilogue} />
+  </>
+)}

@@ -1,0 +1,538 @@
+{
+  "key": "main",
+  "label": "Main navigation",
+  "items": [
+    {
+      "key": "products",
+      "label": {
+        "fr": "produits",
+        "en": "products",
+        "de": "produkte"
+      },
+      "href": "/products",
+      "visible": true,
+      "target": "_self",
+      "megamenu": {
+        "enabled": true,
+        "main": {
+          "title": {
+            "fr": "Nos produits",
+            "en": "Our products",
+            "de": "Unsere Produkte"
+          },
+          "links": [
+            {
+              "label": {
+                "fr": "Rainbow Collaboration",
+                "en": "Rainbow Collaboration",
+                "de": "Rainbow Collaboration"
+              },
+              "description": {
+                "fr": "Messagerie d'équipe, canaux et partage de fichiers en un seul endroit.",
+                "en": "Team messaging, channels, and file sharing in one place.",
+                "de": "Team-Messaging, Kanäle und Dateiaustausch an einem Ort."
+              },
+              "mobileDescription": {
+                "fr": "Messagerie et canaux d'équipe.",
+                "en": "Team messaging and channels.",
+                "de": "Team-Messaging und Kanäle."
+              },
+              "href": "/products/collaboration",
+              "icon": "chat",
+              "badge": {},
+              "column": 1,
+              "variant": "item"
+            },
+            {
+              "label": {
+                "fr": "Rainbow Webinar",
+                "en": "Rainbow Webinar",
+                "de": "Rainbow Webinar"
+              },
+              "description": {
+                "fr": "Webinaires live et en replay avec outils d'engagement intégrés.",
+                "en": "Live and on-demand webinars with built-in engagement tools.",
+                "de": "Live- und Aufzeichnungs-Webinare mit integrierten Engagement-Tools."
+              },
+              "mobileDescription": {
+                "fr": "Webinaires live et en replay.",
+                "en": "Live and on-demand webinars.",
+                "de": "Live- und Aufzeichnungs-Webinare."
+              },
+              "href": "/products/webinar",
+              "icon": "video-camera",
+              "badge": {},
+              "column": 1,
+              "variant": "item"
+            },
+            {
+              "label": {
+                "fr": "Rainbow Smart Hotel",
+                "en": "Rainbow Smart Hotel",
+                "de": "Rainbow Smart Hotel"
+              },
+              "description": {
+                "fr": "Réservation de salles et gestion de calendrier pour les hôtels.",
+                "en": "Room booking and calendar management for hotels.",
+                "de": "Raumbuchung und Kalenderverwaltung für Hotels."
+              },
+              "mobileDescription": {
+                "fr": "Réservation de salles intelligente.",
+                "en": "Smart room booking.",
+                "de": "Intelligente Raumbuchung."
+              },
+              "href": "/products/smart-hotel",
+              "icon": "calendar",
+              "badge": {},
+              "column": 1,
+              "variant": "item"
+            },
+            {
+              "label": {
+                "fr": "Rainbow Analytics",
+                "en": "Rainbow Analytics",
+                "de": "Rainbow Analytics"
+              },
+              "description": {
+                "fr": "Rapports en temps réel et analyses de vos données de communication.",
+                "en": "Real-time reporting and analytics for your communication data.",
+                "de": "Echtzeit-Berichte und Analysen Ihrer Kommunikationsdaten."
+              },
+              "mobileDescription": {
+                "fr": "Rapports en temps réel.",
+                "en": "Real-time reporting.",
+                "de": "Echtzeit-Berichte."
+              },
+              "href": "/products/analytics",
+              "icon": "chart-bar",
+              "badge": {},
+              "column": 1,
+              "variant": "item"
+            },
+            {
+              "label": {
+                "fr": "Rainbow Voice",
+                "en": "Rainbow Voice",
+                "de": "Rainbow Voice"
+              },
+              "description": {
+                "fr": "Téléphonie cloud avec voix HD, SVI et routage d'appels.",
+                "en": "Cloud telephony with HD voice, IVR, and call routing.",
+                "de": "Cloud-Telefonie mit HD-Sprache, IVR und Anrufweiterleitung."
+              },
+              "mobileDescription": {
+                "fr": "Téléphonie cloud.",
+                "en": "Cloud telephony.",
+                "de": "Cloud-Telefonie."
+              },
+              "href": "/products/voice",
+              "icon": "phone",
+              "badge": {},
+              "column": 1,
+              "variant": "item"
+            },
+            {
+              "label": {
+                "fr": "Rainbow Security",
+                "en": "Rainbow Security",
+                "de": "Rainbow Security"
+              },
+              "description": {
+                "fr": "Chiffrement de niveau entreprise et contrôles de conformité.",
+                "en": "Enterprise-grade encryption and compliance controls.",
+                "de": "Verschlüsselung auf Unternehmensniveau und Compliance-Kontrollen."
+              },
+              "mobileDescription": {
+                "fr": "Conformité entreprise.",
+                "en": "Enterprise compliance.",
+                "de": "Unternehmens-Compliance."
+              },
+              "href": "/products/security",
+              "icon": "lock-closed",
+              "badge": {},
+              "column": 1,
+              "variant": "item"
+            }
+          ],
+          "seeAll": {
+            "fr": "Voir tous les produits",
+            "en": "See all products",
+            "de": "Alle Produkte ansehen"
+          },
+          "seeAllHref": "/products"
+        },
+        "features": {
+          "title": {
+            "fr": "À la une",
+            "en": "Featured",
+            "de": "Im Fokus"
+          },
+          "links": [
+            {
+              "label": {
+                "fr": "Rainbow Collaboration",
+                "en": "Rainbow Collaboration",
+                "de": "Rainbow Collaboration"
+              },
+              "description": {
+                "fr": "Messagerie, visioconférence et appels audio, propulsés par l'IA.",
+                "en": "Messaging, video conferencing, and voice calls, powered by AI.",
+                "de": "Messaging, Videokonferenzen und Sprachanrufe, unterstützt durch KI."
+              },
+              "mobileDescription": {},
+              "href": "/products/collaboration",
+              "icon": "chat",
+              "badge": {
+                "fr": "Populaire",
+                "en": "Popular",
+                "de": "Beliebt"
+              },
+              "column": 1,
+              "variant": "showcase"
+            },
+            {
+              "label": {
+                "fr": "Connectez vos outils",
+                "en": "Connect your tools",
+                "de": "Verbinden Sie Ihre Tools"
+              },
+              "description": {
+                "fr": "Google, Outlook, Teams &amp; plus",
+                "en": "Google, Outlook, Teams &amp; more",
+                "de": "Google, Outlook, Teams &amp; mehr"
+              },
+              "mobileDescription": {},
+              "href": "/integrations",
+              "icon": "calendar",
+              "badge": {
+                "fr": "Intégrations",
+                "en": "Integrations",
+                "de": "Integrationen"
+              },
+              "column": 1,
+              "variant": "cta"
+            }
+          ]
+        },
+        "footer": {
+          "text": {
+            "fr": "Besoin d'aide pour choisir ? Nous sommes là pour vous guider.",
+            "en": "Need help choosing? We're here to guide you.",
+            "de": "Unsicher bei der Wahl? Wir helfen Ihnen gerne weiter."
+          },
+          "secondaryLabel": {
+            "fr": "Contacter un expert",
+            "en": "Talk to an expert",
+            "de": "Experten kontaktieren"
+          },
+          "secondaryHref": "/form-al",
+          "primaryLabel": {
+            "fr": "Nous contacter",
+            "en": "Contact us",
+            "de": "Kontaktieren Sie uns"
+          },
+          "primaryHref": "/form-al"
+        }
+      }
+    },
+    {
+      "key": "ressources",
+      "label": {
+        "fr": "ressources",
+        "en": "resources",
+        "de": "ressourcen"
+      },
+      "href": "",
+      "visible": true,
+      "target": "_self",
+      "megamenu": {
+        "enabled": true,
+        "main": {
+          "title": {
+            "fr": "Ressources",
+            "en": "Resources",
+            "de": "Ressourcen"
+          },
+          "links": [
+            {
+              "label": {
+                "fr": "À propos",
+                "en": "About",
+                "de": "Über uns"
+              },
+              "description": {
+                "fr": "Découvrez Rainbow, ALE International et notre mission.",
+                "en": "Discover Rainbow, ALE International, and our mission.",
+                "de": "Entdecken Sie Rainbow, ALE International und unsere Mission."
+              },
+              "mobileDescription": {
+                "fr": "Découvrez Rainbow et ALE International.",
+                "en": "Discover Rainbow and ALE International.",
+                "de": "Entdecken Sie Rainbow und ALE International."
+              },
+              "href": "/a-propos-de-rainbow",
+              "icon": "information-circle",
+              "badge": {},
+              "column": 1,
+              "variant": "item"
+            },
+            {
+              "label": {
+                "fr": "Souveraineté",
+                "en": "Data sovereignty",
+                "de": "Datenhoheit"
+              },
+              "description": {
+                "fr": "Vos données hébergées et protégées en France.",
+                "en": "Your data hosted and protected in France.",
+                "de": "Ihre Daten werden in Frankreich gehostet und geschützt."
+              },
+              "mobileDescription": {
+                "fr": "Données hébergées et protégées en France.",
+                "en": "Data hosted and protected in France.",
+                "de": "Daten gehostet und geschützt in Frankreich."
+              },
+              "href": "/rainbow-donnees-hebergees-en-france",
+              "icon": "lock-closed",
+              "badge": {},
+              "column": 1,
+              "variant": "item"
+            },
+            {
+              "label": {
+                "fr": "FAQ",
+                "en": "FAQ",
+                "de": "FAQ"
+              },
+              "description": {
+                "fr": "Les réponses aux questions les plus fréquentes sur Rainbow.",
+                "en": "Answers to the most common questions about Rainbow.",
+                "de": "Antworten auf die häufigsten Fragen zu Rainbow."
+              },
+              "mobileDescription": {
+                "fr": "Questions fréquentes sur Rainbow.",
+                "en": "Frequently asked questions about Rainbow.",
+                "de": "Häufig gestellte Fragen zu Rainbow."
+              },
+              "href": "/faq",
+              "icon": "question-mark-circle",
+              "badge": {},
+              "column": 1,
+              "variant": "item"
+            },
+            {
+              "label": {
+                "fr": "Blog",
+                "en": "Blog",
+                "de": "Blog"
+              },
+              "description": {
+                "fr": "Actualités, conseils et mises à jour produit de l'équipe Rainbow.",
+                "en": "News, tips, and product updates from the Rainbow team.",
+                "de": "Neuigkeiten, Tipps und Produktupdates vom Rainbow-Team."
+              },
+              "mobileDescription": {
+                "fr": "Actualités et mises à jour.",
+                "en": "News and updates.",
+                "de": "Neuigkeiten und Updates."
+              },
+              "href": "/blog",
+              "icon": "newspaper",
+              "badge": {},
+              "column": 2,
+              "variant": "item"
+            },
+            {
+              "label": {
+                "fr": "Partenaires",
+                "en": "Partners",
+                "de": "Partner"
+              },
+              "description": {
+                "fr": "Rejoignez le réseau Rainbow et développez votre activité.",
+                "en": "Join the Rainbow network and grow your business.",
+                "de": "Werden Sie Teil des Rainbow-Netzwerks und wachsen Sie mit uns."
+              },
+              "mobileDescription": {
+                "fr": "Rejoignez le réseau Rainbow.",
+                "en": "Join the Rainbow network.",
+                "de": "Werden Sie Teil des Rainbow-Netzwerks."
+              },
+              "href": "/partenaires",
+              "icon": "users",
+              "badge": {},
+              "column": 2,
+              "variant": "item"
+            }
+          ],
+          "seeAll": {},
+          "seeAllHref": ""
+        },
+        "features": {
+          "title": {
+            "fr": "Guide populaire",
+            "en": "Popular guide",
+            "de": "Beliebter Leitfaden"
+          },
+          "links": [
+            {
+              "label": {
+                "fr": "Débuter avec Rainbow",
+                "en": "Getting started with Rainbow",
+                "de": "Erste Schritte mit Rainbow"
+              },
+              "description": {
+                "fr": "Tout ce qu'il faut savoir pour configurer et commencer à utiliser Rainbow en 10 minutes.",
+                "en": "Everything you need to set up and start using Rainbow in 10 minutes.",
+                "de": "Alles, was Sie wissen müssen, um Rainbow in 10 Minuten einzurichten und zu nutzen."
+              },
+              "mobileDescription": {},
+              "href": "/tutorials",
+              "icon": "academic-cap",
+              "badge": {
+                "fr": "Populaire",
+                "en": "Popular",
+                "de": "Beliebt"
+              },
+              "column": 1,
+              "variant": "showcase"
+            },
+            {
+              "label": {
+                "fr": "Accéder au centre d'aide",
+                "en": "Visit the help center",
+                "de": "Zum Hilfe-Center"
+              },
+              "description": {
+                "fr": "Disponible 24h/7j pour vous aider",
+                "en": "Available 24/7 to help you",
+                "de": "Rund um die Uhr für Sie da"
+              },
+              "mobileDescription": {},
+              "href": "/centre-aide-rainbow",
+              "icon": "lifebuoy",
+              "badge": {
+                "fr": "Besoin d'aide ?",
+                "en": "Need help?",
+                "de": "Brauchen Sie Hilfe?"
+              },
+              "column": 1,
+              "variant": "cta"
+            }
+          ]
+        },
+        "footer": {
+          "text": {
+            "fr": "Restez informé des dernières nouveautés Rainbow.",
+            "en": "Stay up to date with the latest Rainbow news.",
+            "de": "Bleiben Sie über die neuesten Rainbow-Neuigkeiten informiert."
+          },
+          "secondaryLabel": {
+            "fr": "Visiter notre blog",
+            "en": "Visit our blog",
+            "de": "Unseren Blog besuchen"
+          },
+          "secondaryHref": "/blog",
+          "primaryLabel": {
+            "fr": "Obtenir de l'aide",
+            "en": "Get help",
+            "de": "Hilfe erhalten"
+          },
+          "primaryHref": "/centre-aide-rainbow"
+        }
+      }
+    },
+    {
+      "key": "tarifs",
+      "label": {
+        "fr": "tarifs",
+        "en": "pricing",
+        "de": "preise"
+      },
+      "href": "/tarifs",
+      "visible": true,
+      "target": "_self",
+      "megamenu": {
+        "enabled": true,
+        "main": {
+          "title": {
+            "fr": "Nos tarifs",
+            "en": "Our pricing",
+            "de": "Unsere Preise"
+          },
+          "links": [
+            {
+              "label": {
+                "fr": "Rainbow Collaboration",
+                "en": "Rainbow Collaboration",
+                "de": "Rainbow Collaboration"
+              },
+              "description": {
+                "fr": "Tarifs adaptés à vos besoins de collaboration d'équipe.",
+                "en": "Pricing tailored to your team collaboration needs.",
+                "de": "Preise, die auf Ihre Team-Collaboration-Bedürfnisse zugeschnitten sind."
+              },
+              "mobileDescription": {
+                "fr": "Plans collaboration.",
+                "en": "Collaboration plans.",
+                "de": "Collaboration-Pläne."
+              },
+              "href": "/products/collaboration/pricing",
+              "icon": "chat",
+              "badge": {},
+              "column": 1,
+              "variant": "item"
+            },
+            {
+              "label": {
+                "fr": "Rainbow Webinar",
+                "en": "Rainbow Webinar",
+                "de": "Rainbow Webinar"
+              },
+              "description": {
+                "fr": "Plans et tarifs pour nos solutions de webinaires interactifs.",
+                "en": "Plans and pricing for our interactive webinar solutions.",
+                "de": "Pläne und Preise für unsere interaktiven Webinar-Lösungen."
+              },
+              "mobileDescription": {
+                "fr": "Plans webinaires.",
+                "en": "Webinar plans.",
+                "de": "Webinar-Pläne."
+              },
+              "href": "/products/webinar/pricing",
+              "icon": "video-camera",
+              "badge": {},
+              "column": 1,
+              "variant": "item"
+            }
+          ],
+          "seeAll": {
+            "fr": "Voir tous les plans",
+            "en": "See all plans",
+            "de": "Alle Pläne ansehen"
+          },
+          "seeAllHref": "/tarifs"
+        },
+        "features": {
+          "title": {},
+          "links": []
+        },
+        "footer": {
+          "text": {
+            "fr": "Des tarifs simples et transparents pour votre équipe.",
+            "en": "Simple, transparent pricing for your team.",
+            "de": "Einfache, transparente Preise für Ihr Team."
+          },
+          "secondaryLabel": {},
+          "secondaryHref": "",
+          "primaryLabel": {
+            "fr": "Nous contacter",
+            "en": "Contact us",
+            "de": "Kontaktieren Sie uns"
+          },
+          "primaryHref": "/form-al"
+        }
+      }
+    }
+  ]
+}

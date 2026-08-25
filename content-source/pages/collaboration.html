@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="collaboration.meta.title">Products - Rainbow by Alcatel-Lucent</title>
+    <meta name="description"
+        content="Explore the Rainbow product family: Collaboration, Webinar, and Smart Hotel solutions by Alcatel-Lucent." data-i18n-attr="content:collaboration.meta.description">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 300: '#c4b5fd', 400: '#a78bfa', 500: '#5e2d91', 600: '#4a2373', 700: '#3c1c5e' },
+                        navy: { 900: '#1e1b4b', 800: '#312e81', 700: '#3730a3' }
+                    },
+                    fontFamily: { sans: ["Google Sans", "system-ui", "sans-serif"] }, borderRadius: { btn: "10px" }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        .lang-switcher {
+            position: relative;
+        }
+
+        .lang-switcher button {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.8125rem;
+            color: #64748b;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: color 0.2s;
+        }
+
+        .lang-switcher button:hover {
+            color: #0f172a;
+        }
+
+        .lang-switcher .lang-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: #fff;
+            border: 1px solid #e9e5ff;
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(124, 58, 237, 0.08);
+            min-width: 140px;
+            z-index: 200;
+            padding: 4px 0;
+            margin-top: 4px;
+        }
+
+        .lang-switcher.open .lang-dropdown {
+            display: block;
+        }
+
+        .lang-dropdown button {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 8px 14px;
+            font-size: 0.8125rem;
+            color: #374151;
+            border: none;
+            background: none;
+            cursor: pointer;
+        }
+
+        .lang-dropdown button:hover {
+            background: #f5f3ff;
+        }
+
+        .lang-dropdown button.active {
+            color: #7c3aed;
+            font-weight: 600;
+        }
+
+        /* ===== Floating Section Nav (scroll-spy pill bar) ===== */
+        .section-anchor { scroll-margin-top: 130px; }
+        #section-nav { position: fixed; top: 74px; left: 50%; transform: translateX(-50%) translateY(-14px); z-index: 40; opacity: 0; pointer-events: none; transition: opacity 0.35s ease, transform 0.35s ease; }
+        #section-nav.visible { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+        .section-nav-inner { display: flex; align-items: center; gap: 6px; padding: 7px; background: #f3edfd; border: 1px solid rgba(124, 58, 237, 0.10); border-radius: 9999px; box-shadow: 0 6px 22px rgba(94, 45, 145, 0.15); max-width: calc(100vw - 24px); overflow-x: auto; scrollbar-width: none; }
+        .section-nav-inner::-webkit-scrollbar { display: none; }
+        .section-nav-link { flex: 0 0 auto; padding: 9px 22px; border-radius: 9999px; font-size: 0.9375rem; font-weight: 700; color: #4a2373; white-space: nowrap; text-decoration: none; transition: color 0.2s ease, background 0.2s ease; }
+        .section-nav-link:hover { background: rgba(124, 58, 237, 0.08); }
+        .section-nav-link.active { color: #4a2373; background: #e7d9fb; }
+        @media (max-width: 767px) { #section-nav { top: 66px; } .section-nav-link { padding: 7px 14px; font-size: 0.8125rem; } }
+    </style>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/mega-menu.css">
+    <!-- translated strings for this page's inline scripts; must precede them -->
+    <script data-i18n-js="collaboration.js"></script>
+</head>
+
+<body class="font-sans text-gray-700 antialiased">
+
+    <!-- ===== NAV ===== -->
+    <nav id="navbar" class="fixed top-0 w-full z-50 glass-nav">
+        <div class="max-w-6xl mx-auto px-6 flex items-center justify-between h-16">
+            <a href="/fr" class="flex items-center gap-2.5 shrink-0">
+                <img src="/images/Rainbow-AL-logo-banner.webp" alt="Rainbow" class="h-12 w-auto" data-i18n-attr="alt:common.nav.rainbow_alt">
+            </a>
+            <div class="hidden lg:flex items-center justify-center flex-1 gap-8">
+                <div class="nav-dropdown">
+                    <a href="#" class="text-sm text-gray-500 hover:text-navy-900 transition-colors font-medium">
+                        <span data-i18n="common.nav.produits">Produits</span>
+                        <svg class="chevron w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                    </a>
+
+                </div>
+                <a href="/fr/tarifs" class="text-sm text-gray-500 hover:text-navy-900 transition-colors font-medium" style="font-size:1rem" data-i18n="common.nav.tarifs">Tarifs</a>
+                <div class="nav-dropdown">
+                    <a href="#" class="text-sm text-gray-500 hover:text-navy-900 transition-colors font-medium" data-i18n-rich="common.nav.ressources-path-stroke-linecap_2">Ressources
+                        <svg class="chevron w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                    </a>
+
+                </div>
+            </div>
+            <div class="hidden lg:flex items-center gap-4 shrink-0">
+                <div class="lang-switcher" id="lang-switcher">
+                    <button onclick="document.getElementById('lang-switcher').classList.toggle('open')">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"/></svg>
+                        <span id="lang-current" data-i18n="common.nav.en">EN</span>
+                        <svg class="lang-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div class="lang-dropdown" id="lang-dropdown"></div>
+                </div>
+                <a href="https://web.openrainbow.net/rb/2.176.0/login" class="px-5 py-2.5 rounded-btn border-2 border-brand-500 text-purple-900 hover:bg-gray-50 text-sm font-semibold transition-all active:scale-95 inline-flex items-center justify-center" data-i18n="common.nav.se-connecter">Se connecter</a>
+                <a href="https://web.openrainbow.net/rb/2.177.4/trial" class="px-5 py-2.5 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold whitespace-nowrap shadow-md hover:shadow-lg transition-all" data-i18n="common.nav.essai-gratuit">Essai gratuit</a>
+            </div>
+            <button id="mobile-menu-btn" class="lg:hidden p-2" aria-label="Menu" data-i18n-attr="aria-label:common.nav.menu_aria-label">
+                <svg class="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+        </div>
+        <div id="mobile-menu" class="lg:hidden hidden border-t border-gray-100 bg-white px-5 pt-2 pb-6 shadow-lg space-y-1">
+            <a href="#" class="mob-section-hdr"><span data-i18n="common.nav.produits">Produits</span></a>
+            <div class="mobile-submenu space-y-1">
+                <a href="/fr/products/collaboration" class="block py-1" data-i18n="common.nav.rainbow-collaboration">Rainbow Collaboration</a>
+                <a href="/fr/products/webinar" class="block py-1" data-i18n="common.nav.rainbow-webinar">Rainbow Webinar</a>
+            </div>
+            <a href="/fr/tarifs" class="mob-section-hdr" data-i18n="common.nav.tarifs">Tarifs</a>
+            <a href="#" class="mob-section-hdr" data-i18n="common.nav.ressources">Ressources</a>
+            <div class="mobile-submenu space-y-1">
+                <a href="/fr/blog" class="block py-1" data-i18n="common.nav.blog">Blog</a>
+                <a href="/fr/reviews" class="block py-1" data-i18n="common.nav.avis">Avis</a>
+                <a href="/fr/support" class="block py-1" data-i18n="common.nav.support">Support</a>
+                <a href="/fr/tutorials" class="block py-1" data-i18n="common.nav.tutoriels">Tutoriels</a>
+            </div>
+            <div class="h-px bg-gray-100 mx-1 my-2"></div>
+            <div id="mobile-lang-switcher" class="flex flex-wrap gap-2 px-1 py-1"></div>
+            <div class="flex flex-col gap-2.5 pt-3">
+                <a href="https://web.openrainbow.net/rb/2.176.0/login" class="w-full text-center px-6 py-3 rounded-btn border-2 border-brand-500 text-purple-900 hover:bg-gray-50 text-base font-semibold transition-all active:scale-95" data-i18n="common.nav.se-connecter">Se connecter</a>
+                <a href="https://web.openrainbow.net/rb/2.177.4/trial" class="w-full text-center px-6 py-3 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-base font-semibold shadow-md hover:shadow-lg transition-all active:scale-95" data-i18n="common.nav.essai-gratuit">Essai gratuit</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== FLOATING SECTION NAV (scroll-spy pill bar) ===== -->
+    <nav id="section-nav" aria-label="Sections de la page" data-i18n-attr="aria-label:collaboration.body.sections-de-la-page_aria-label">
+        <div class="section-nav-inner">
+            <a href="#fonctionnalites" class="section-nav-link" data-i18n="common.nav.fonctionnalit-s">Fonctionnalit&eacute;s</a>
+            <a href="#usage" class="section-nav-link" data-i18n="common.nav.usage">Usage</a>
+            <a href="#tarifs" class="section-nav-link" data-i18n="common.nav.tarifs">Tarifs</a>
+            <a href="#questions-frequentes" class="section-nav-link" data-i18n="common.nav.faq">FAQ</a>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <header class="pt-36 lg:pt-40 pb-24 lg:pb-28 px-6 relative overflow-hidden bg-[#ffffff]">
+        <div class="max-w-6xl mx-auto grid lg:grid-cols-12 gap-12 lg:gap-16 items-center relative z-10">
+            <!-- Left Side (Text & CTA) -->
+            <div class="lg:col-span-5">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold mb-6 bg-brand-100 text-brand-500 uppercase tracking-widest" data-i18n="collaboration.body.communication-d-quipe-souveraine">
+                    Communication d'&eacute;quipe souveraine
+                </div>
+                <h1 class="text-3xl sm:text-4xl font-extrabold text-navy-900 leading-[1.2] tracking-tight" data-i18n-rich="collaboration.body.rainbow-collaboration-tous-vos">
+                    <span class="text-brand-500">Rainbow Collaboration</span>&nbsp;: tous vos &eacute;changes d'&eacute;quipe dans un seul outil, h&eacute;berg&eacute; en France
+                </h1>
+                <p class="mt-6 text-base sm:text-lg text-gray-600 leading-relaxed max-w-md" data-i18n="collaboration.body.messages-appels-audio-r-unions-vid">
+                    Messages, appels audio, r&eacute;unions vid&eacute;os et partage de fichiers, fini de jongler entre Teams, WhatsApp et votre bo&icirc;te mail.
+                </p>
+                <div class="mt-9 flex flex-col sm:flex-row gap-4">
+                    <a href="/fr/tarifs"
+                        class="inline-flex items-center justify-center px-8 py-3.5 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-base font-bold whitespace-nowrap shadow-xl shadow-purple-900/20 transition-all active:scale-95" data-i18n="collaboration.body.essai-gratuit">Essai gratuit</a>
+                    <a href="/fr/form-al"
+                        class="inline-flex items-center justify-center px-8 py-3.5 rounded-btn border-2 border-brand-500 text-purple-900 hover:bg-gray-50 text-base font-bold whitespace-nowrap transition-all active:scale-95" data-i18n="collaboration.body.contacter-un-expert">
+                        Contacter un expert
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right Side (Collaboration Video) -->
+            <div class="relative lg:col-span-7">
+                <video src="/images/collaboration-page/rainbow_collaboration_FR.mp4" autoplay loop muted playsinline class="w-full h-auto rounded-2xl shadow-xl"></video>
+            </div>
+        </div>
+    </header>
+
+    <!-- PADDING BOX START (Wraps all subsequent sections) -->
+    <div class="px-4 md:px-6 lg:px-8 pb-4 md:pb-6 lg:pb-8">
+        <div class="rounded-[32px] shadow-sm border overflow-hidden relative" style="border-color:#672fa287;"
+            style="background: linear-gradient(180deg, #f5f3ff 0%, #ffffff 600px);">
+
+            <!-- STATS BANNER -->
+            <section class="py-20 relative z-10 text-center"
+                style="background: linear-gradient(135deg, #2d0a4c 0%, #5e2d91 40%, #7c3aad 70%, #4a1a6e 100%);">
+                <div class="max-w-6xl mx-auto px-6">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
+                        <div class="flex flex-col items-center">
+                            <span class="text-4xl md:text-5xl font-bold text-white tracking-tight" data-i18n="collaboration.body.50m">50M+</span>
+                            <span class="text-sm md:text-base text-purple-200 mt-2 font-medium" data-i18n="collaboration.body.messages-chang-s">messages
+                                &eacute;chang&eacute;s</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <span class="text-4xl md:text-5xl font-bold text-white tracking-tight" data-i18n="collaboration.body.120k">120K+</span>
+                            <span class="text-sm md:text-base text-purple-200 mt-2 font-medium" data-i18n="collaboration.body.webinars-tenus">webinars tenus</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <span class="text-4xl md:text-5xl font-bold text-white tracking-tight">99.9%</span>
+                            <span class="text-sm md:text-base text-purple-200 mt-2 font-medium" data-i18n="collaboration.body.disponibilit-garantie">disponibilit&eacute;
+                                garantie</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <span class="text-4xl md:text-5xl font-bold text-white tracking-tight">4.5/5</span>
+                            <span class="text-sm md:text-base text-purple-200 mt-2 font-medium" data-i18n="collaboration.body.satisfaction-client">satisfaction
+                                client</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- BENTO GRID SECTION -->
+            <section id="fonctionnalites" class="section-anchor py-24 relative z-10 border-t border-gray-100"
+                style="background: linear-gradient(180deg, #f5f3ff 0%, #ffffff 30%, #ffffff 70%, #f5f3ff 100%);">
+                <div class="max-w-6xl mx-auto px-6">
+                    <h2
+                        class="text-4xl md:text-5xl font-extrabold text-navy-900 text-center mb-20 leading-[1.15] tracking-tight" data-i18n="collaboration.fonctionnalites.retrouvez-les-meilleures">
+                        Retrouvez les meilleures fonctionnalit&eacute;s en seul endroit, simplement
+                    </h2>
+
+                    <div class="flex flex-col gap-4">
+                        <!-- Row 1 -->
+                        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                            <!-- Big: Chat video -->
+                            <div class="md:col-span-3 p-8 md:p-12 flex flex-col rounded-[15px]" style="background: linear-gradient(135deg, rgba(94,45,145,0.08), rgba(94,45,145,0.03));">
+                                <p class="text-gray-500 text-[15px] leading-relaxed max-w-2xl mb-10" data-i18n-rich="collaboration.fonctionnalites.messagerie-d-quipe-vos">
+                                    <strong class="text-navy-900 font-semibold block mb-2">Messagerie d’&eacute;quipe</strong>
+                                    Vos conversations d’&eacute;quipe organis&eacute;es par projet, par client ou par sujet, plus de fils interminables dans votre bo&icirc;te mail. Chaque &eacute;change est archiv&eacute;, consultable, et accessible &agrave; toutes les personnes concern&eacute;es.
+                                </p>
+                                <div class="flex-1 flex items-end justify-center">
+                                    <div class="rounded-xl overflow-hidden w-full" style="aspect-ratio:768/576">
+                                        <video src="/images/collaboration-page/chat-rainbow-ui.mp4" width="768" height="576"
+                                            muted loop playsinline preload="metadata" class="w-full h-full object-cover"
+                                            onmouseenter="this.play()" onmouseleave="this.pause()"></video>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Small: Partage d'écran -->
+                            <div class="md:col-span-2 p-8 md:p-12 flex flex-col rounded-[15px]" style="background: linear-gradient(135deg, rgba(207,0,114,0.08), rgba(207,0,114,0.03));">
+                                <p class="text-gray-500 text-[15px] leading-relaxed max-w-md mb-10" data-i18n-rich="collaboration.fonctionnalites.partage-d-cran-montrez-exactement">
+                                    <strong class="text-navy-900 font-semibold block mb-2">Partage d'&eacute;cran</strong>
+                                    Montrez exactement ce que vous voulez, en un clic, pendant n'importe quel échange audio ou vidéo Rainbow. Plus besoin de d&eacute;crire ce que vous voyez, partagez-le. Id&eacute;al pour les revues de projet, les pr&eacute;sentations clients et le support &agrave; distance.
+                                </p>
+                                <div class="flex-1 flex items-end justify-center">
+                                    <img src="/images/collaboration-page/visio-collaboration.webp" alt="" class="w-full object-contain rounded-xl">
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Row 2 -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <!-- Mise en forme du texte -->
+                            <div class="p-8 md:p-10 flex flex-col rounded-[15px]" style="background: linear-gradient(135deg, rgba(0,133,202,0.08), rgba(0,133,202,0.03));">
+                                <div class="mb-8" style="min-height: 5.5rem;">
+                                    <strong class="text-navy-900 font-semibold block mb-2 text-[15px]" data-i18n="collaboration.fonctionnalites.mise-en-forme-du-texte">Mise en forme du texte</strong>
+                                    <p class="text-gray-500 text-[14px] leading-relaxed" data-i18n="collaboration.fonctionnalites.r-digez-des-messages-structur-s">R&eacute;digez des messages structur&eacute;s avec titres, listes, blocs de code et texte mis en forme, pour des briefings clairs, des comptes-rendus lisibles et des instructions qu'on comprend du premier coup.</p>
+                                </div>
+                                <div class="flex-1 flex items-end justify-center">
+                                    <img src="/images/collaboration-page/text-format.webp" alt="" class="w-full object-contain rounded-xl">
+                                </div>
+                            </div>
+                            <!-- Transcriptions de visioconférences -->
+                            <div class="p-8 md:p-10 flex flex-col rounded-[15px]" style="background: linear-gradient(135deg, rgba(94,45,145,0.08), rgba(0,133,202,0.05));">
+                                <div class="mb-8" style="min-height: 5.5rem;">
+                                    <strong class="text-navy-900 font-semibold block mb-2 text-[15px]" data-i18n="collaboration.fonctionnalites.transcriptions-de-visioconf-rences">Transcriptions de visioconf&eacute;rences</strong>
+                                    <p class="text-gray-500 text-[14px] leading-relaxed" data-i18n="collaboration.fonctionnalites.fini-les-prises-de-notes-pendant">Fini les prises de notes pendant vos appels. Rainbow transcrit automatiquement chaque conversation vid&eacute;o et la rattache directement au fil de discussion correspondant. Retrouvez n'importe quel &eacute;change en quelques secondes, m&ecirc;me plusieurs mois apr&egrave;s.</p>
+                                </div>
+                                <div class="flex-1 flex items-end justify-center">
+                                    <img src="/images/collaboration-page/documents-type.webp" alt="" class="w-full object-contain rounded-xl">
+                                </div>
+                            </div>
+                            <!-- Analytiques de réunion -->
+                            <div class="p-8 md:p-10 flex flex-col rounded-[15px]" style="background: linear-gradient(135deg, rgba(207,0,114,0.06), rgba(94,45,145,0.06));">
+                                <div class="mb-8" style="min-height: 5.5rem;">
+                                    <strong class="text-navy-900 font-semibold block mb-2 text-[15px]" data-i18n="collaboration.fonctionnalites.analytiques-de-r-unions">Analytiques de r&eacute;unions</strong>
+                                    <p class="text-gray-500 text-[14px] leading-relaxed" data-i18n="collaboration.fonctionnalites.mesurez-le-temps-de-parole-de">Mesurez le temps de parole de chaque participant, l'engagement de vos &eacute;quipes et la dur&eacute;e r&eacute;elle de vos r&eacute;unions. Des données concrètes pour mieux organiser vos prochains échanges.</p>
+                                </div>
+                                <div class="flex-1 flex items-end justify-center">
+                                    <img src="/images/collaboration-page/analytics.webp" alt="" class="w-full object-contain rounded-xl">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- USE CASE SECTION -->
+            <section id="usage" class="section-anchor py-24 relative z-10 border-t border-gray-100">
+                <div class="max-w-6xl mx-auto px-6">
+                    <div class="text-center max-w-3xl mx-auto mb-6">
+                        <h2 class="text-4xl md:text-5xl font-extrabold text-navy-900 tracking-tight" data-i18n="collaboration.usage.rainbow-collaboration-s-adapte">
+                            Rainbow Collaboration s'adapte &agrave; votre usage
+                        </h2>
+                        <p class="text-lg text-gray-600 leading-relaxed font-medium mt-4" data-i18n="collaboration.usage.de-la-relation-client-la-gestion">
+                            De la relation client &agrave; la gestion de projets, d&eacute;couvrez comment des &eacute;quipes comme la v&ocirc;tre l'utilisent chaque jour.
+                        </p>
+                    </div>
+
+                    <!-- Sliding Pill Tab Container -->
+                    <div class="hidden md:flex md:justify-center md:mb-10">
+                        <div class="usecase-tabs pill-tab-container relative inline-flex">
+                            <div class="pill-slider"></div>
+                            <button class="pill-tab-btn text-active" data-usecase-index="0" style="--pill-accent:#5e2d91">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+                                </svg>
+                                <span data-i18n="collaboration.usage.travail-hybride-distance">Travail hybride &amp; &agrave; distance</span>
+                            </button>
+                            <button class="pill-tab-btn text-inactive" data-usecase-index="1" style="--pill-accent:#7c3aed">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+                                </svg>
+                                <span data-i18n="collaboration.usage.r-unions-productives">R&eacute;unions productives</span>
+                            </button>
+                            <button class="pill-tab-btn text-inactive" data-usecase-index="2" style="--pill-accent:#43379e">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                                </svg>
+                                <span data-i18n="collaboration.usage.animation-d-quipes">Animation d'&eacute;quipes</span>
+                            </button>
+                            <button class="pill-tab-btn text-inactive" data-usecase-index="3" style="--pill-accent:#1e1b4b">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
+                                </svg>
+                                <span data-i18n="collaboration.usage.relation-client">Relation client</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tab Content -->
+                    <div class="grid lg:grid-cols-[2fr_3fr] gap-12 lg:gap-16 items-center">
+                        <!-- Left: Text -->
+                        <div>
+                            <!-- Panel 0: Travail hybride & à distance -->
+                            <div class="usecase-panel" data-usecase-panel="0">
+                                <img src="/images/collaboration-page/travail-hybride.png" alt="Travail hybride" class="lg:hidden w-full h-64 object-cover rounded-xl mb-4" / data-i18n-attr="alt:collaboration.usage.travail-hybride_alt">
+                                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-bold mb-4" style="background-color: rgba(94, 45, 145, 0.1); color: #5e2d91;" data-i18n-rich="collaboration.usage.path-stroke-linecap-round-stroke">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+                                    </svg>
+                                    Travail hybride &amp; &agrave; distance
+                                </div>
+                                <h3 class="text-xl md:text-2xl lg:text-3xl font-semibold mb-4 text-navy-900 leading-tight" data-i18n="collaboration.usage.restez-connect-o-que-vous-soyez">
+                                    Restez connect&eacute;, o&ugrave; que vous soyez
+                                </h3>
+                                <ul class="space-y-3 text-sm text-gray-600 mb-6">
+                                    <li class="flex items-start gap-3">
+                                        <svg class="w-5 h-5 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                                        <span data-i18n="collaboration.usage.messagerie-instantan-e-et-pr-sence">Messagerie instantan&eacute;e et pr&eacute;sence en temps r&eacute;el</span>
+                                    </li>
+                                    <li class="flex items-start gap-3">
+                                        <svg class="w-5 h-5 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                                        <span data-i18n="collaboration.usage.appels-audio-vid-o-depuis-tous-vos">Appels audio/vid&eacute;o depuis tous vos appareils</span>
+                                    </li>
+                                    <li class="flex items-start gap-3">
+                                        <svg class="w-5 h-5 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                                        <span data-i18n="collaboration.usage.partage-d-cran-et-de-fichiers-en">Partage d'&eacute;cran et de fichiers en un clic</span>
+                                    </li>
+                                </ul>
+                                <button type="button" onclick="openDemoModal()" class="inline-flex items-center justify-center px-6 py-3 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-lg font-bold transition-all shadow-md hover:shadow-lg" data-i18n="collaboration.usage.d-couvrir-les-fonctionnalit-s">
+                                    D&eacute;couvrir les fonctionnalit&eacute;s
+                                </button>
+                            </div>
+
+                            <!-- Panel 1: Réunions productives -->
+                            <div class="usecase-panel" data-usecase-panel="1" style="display: none;">
+                                <img src="/images/collaboration-page/reunions-productives.png" alt="R&eacute;unions productives" class="lg:hidden w-full h-64 object-cover rounded-xl mb-4" / data-i18n-attr="alt:collaboration.usage.r-unions-productives_alt">
+                                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-bold mb-4" style="background-color: rgba(124, 58, 237, 0.1); color: #7c3aed;" data-i18n-rich="collaboration.usage.path-stroke-linecap-round-stroke_2">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+                                    </svg>
+                                    R&eacute;unions productives
+                                </div>
+                                <h3 class="text-xl md:text-2xl lg:text-3xl font-semibold mb-4 text-navy-900 leading-tight" data-i18n="collaboration.usage.collaborez-efficacement-sans">
+                                    Collaborez efficacement, sans friction
+                                </h3>
+                                <ul class="space-y-3 text-sm text-gray-600 mb-6">
+                                    <li class="flex items-start gap-3">
+                                        <svg class="w-5 h-5 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                                        <span data-i18n="collaboration.usage.visioconf-rence-multi-participants">Visioconf&eacute;rence multi-participants</span>
+                                    </li>
+                                    <li class="flex items-start gap-3">
+                                        <svg class="w-5 h-5 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                                        <span data-i18n="collaboration.usage.partage-de-documents-et-co-dition">Partage de documents et co&eacute;dition</span>
+                                    </li>
+                                    <li class="flex items-start gap-3">
+                                        <svg class="w-5 h-5 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                                        <span data-i18n="collaboration.usage.enregistrement-et-compte-rendu">Enregistrement et compte-rendu automatique</span>
+                                    </li>
+                                </ul>
+                                <button type="button" onclick="openDemoModal()" class="inline-flex items-center justify-center px-6 py-3 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-lg font-bold transition-all shadow-md hover:shadow-lg" data-i18n="collaboration.usage.d-couvrir-les-fonctionnalit-s">
+                                    D&eacute;couvrir les fonctionnalit&eacute;s
+                                </button>
+                            </div>
+
+                            <!-- Panel 2: Animation d'équipes -->
+                            <div class="usecase-panel" data-usecase-panel="2" style="display: none;">
+                                <img src="/images/collaboration-page/animation-equipes.png" alt="Animation d'&eacute;quipes" class="lg:hidden w-full h-64 object-cover rounded-xl mb-4" / data-i18n-attr="alt:collaboration.usage.animation-d-quipes_alt">
+                                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-bold mb-4" style="background-color: rgba(67, 55, 158, 0.1); color: #43379e;" data-i18n-rich="collaboration.usage.path-stroke-linecap-round-stroke_3">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                                    </svg>
+                                    Animation d'&eacute;quipes
+                                </div>
+                                <h3 class="text-xl md:text-2xl lg:text-3xl font-semibold mb-4 text-navy-900 leading-tight" data-i18n="collaboration.usage.f-d-rez-vos-quipes">
+                                    F&eacute;d&eacute;rez vos &eacute;quipes
+                                </h3>
+                                <ul class="space-y-3 text-sm text-gray-600 mb-6">
+                                    <li class="flex items-start gap-3">
+                                        <svg class="w-5 h-5 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                                        <span data-i18n="collaboration.usage.canaux-et-groupes-de-discussion">Canaux et groupes de discussion par &eacute;quipe ou par sujet</span>
+                                    </li>
+                                    <li class="flex items-start gap-3">
+                                        <svg class="w-5 h-5 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                                        <span data-i18n="collaboration.usage.annonces-sondages-et-partage-d">Annonces, sondages et partage d'actualit&eacute;s internes</span>
+                                    </li>
+                                    <li class="flex items-start gap-3">
+                                        <svg class="w-5 h-5 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                                        <span data-i18n="collaboration.usage.statuts-de-pr-sence-pour-rester">Statuts de pr&eacute;sence pour rester connect&eacute; informellement</span>
+                                    </li>
+                                </ul>
+                                <button type="button" onclick="openDemoModal()" class="inline-flex items-center justify-center px-6 py-3 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-lg font-bold transition-all shadow-md hover:shadow-lg" data-i18n="collaboration.usage.d-couvrir-les-fonctionnalit-s">
+                                    D&eacute;couvrir les fonctionnalit&eacute;s
+                                </button>
+                            </div>
+
+                            <!-- Panel 3: Relation client -->
+                            <div class="usecase-panel" data-usecase-panel="3" style="display: none;">
+                                <img src="/images/collaboration-page/relation-client.png" alt="Relation client" class="lg:hidden w-full h-64 object-cover rounded-xl mb-4" / data-i18n-attr="alt:collaboration.usage.relation-client_alt">
+                                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-bold mb-4" style="background-color: rgba(30, 27, 75, 0.1); color: #1e1b4b;" data-i18n-rich="collaboration.usage.path-stroke-linecap-round-stroke_4">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
+                                    </svg>
+                                    Relation client
+                                </div>
+                                <h3 class="text-xl md:text-2xl lg:text-3xl font-semibold mb-4 text-navy-900 leading-tight" data-i18n="collaboration.usage.connectez-vous-facilement-vos">
+                                    Connectez-vous facilement &agrave; vos clients
+                                </h3>
+                                <ul class="space-y-3 text-sm text-gray-600 mb-6">
+                                    <li class="flex items-start gap-3">
+                                        <svg class="w-5 h-5 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                                        <span data-i18n="collaboration.usage.chat-et-visio-en-direct-avec-vos">Chat et visio en direct avec vos clients</span>
+                                    </li>
+                                    <li class="flex items-start gap-3">
+                                        <svg class="w-5 h-5 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                                        <span data-i18n="collaboration.usage.partage-d-cran-pour-de-l">Partage d'&eacute;cran pour de l'assistance ou une d&eacute;monstration &agrave; distance</span>
+                                    </li>
+                                    <li class="flex items-start gap-3">
+                                        <svg class="w-5 h-5 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                                        <span data-i18n="collaboration.usage.suivi-et-historique-des-changes">Suivi et historique des &eacute;changes</span>
+                                    </li>
+                                </ul>
+                                <button type="button" onclick="openDemoModal()" class="inline-flex items-center justify-center px-6 py-3 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-lg font-bold transition-all shadow-md hover:shadow-lg" data-i18n="collaboration.usage.d-couvrir-les-fonctionnalit-s">
+                                    D&eacute;couvrir les fonctionnalit&eacute;s
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Right: Images -->
+                        <div class="hidden lg:block relative aspect-video">
+                            <div class="rounded-xl overflow-hidden bg-white border border-gray-200 shadow-xl w-full h-full">
+                                <div class="w-full h-full relative">
+                                    <img src="/images/collaboration-page/travail-hybride.png" alt="Travail hybride" data-usecase-img="0" class="usecase-img absolute inset-0 w-full h-full object-cover transition-all duration-500" style="opacity: 1; z-index: 10;" / data-i18n-attr="alt:collaboration.usage.travail-hybride_alt">
+                                    <img src="/images/collaboration-page/reunions-productives.png" alt="R&eacute;unions productives" data-usecase-img="1" class="usecase-img absolute inset-0 w-full h-full object-cover transition-all duration-500" style="opacity: 0; z-index: 0;" / data-i18n-attr="alt:collaboration.usage.r-unions-productives_alt">
+                                    <img src="/images/collaboration-page/animation-equipes.png" alt="Animation d'&eacute;quipes" data-usecase-img="2" class="usecase-img absolute inset-0 w-full h-full object-cover transition-all duration-500" style="opacity: 0; z-index: 0;" / data-i18n-attr="alt:collaboration.usage.animation-d-quipes_alt">
+                                    <img src="/images/collaboration-page/relation-client.png" alt="Relation client" data-usecase-img="3" class="usecase-img absolute inset-0 w-full h-full object-cover transition-all duration-500" style="opacity: 0; z-index: 0;" / data-i18n-attr="alt:collaboration.usage.relation-client_alt">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <script>
+                    (function() {
+                        var container = document.querySelector('.usecase-tabs');
+                        if (!container) return;
+                        var slider = container.querySelector('.pill-slider');
+                        var tabs = container.querySelectorAll('.pill-tab-btn');
+                        var panels = document.querySelectorAll('.usecase-panel');
+                        var imgs = document.querySelectorAll('.usecase-img');
+                        if (!tabs.length) return;
+                        function update(index) {
+                            var activeTab = tabs[index];
+                            if (!activeTab) return;
+                            slider.style.left = activeTab.offsetLeft + 'px';
+                            slider.style.width = activeTab.offsetWidth + 'px';
+                            tabs.forEach(function(t, i) {
+                                t.classList.toggle('text-active', i === index);
+                                t.classList.toggle('text-inactive', i !== index);
+                            });
+                            panels.forEach(function(p) {
+                                var idx = parseInt(p.getAttribute('data-usecase-panel'), 10);
+                                p.style.display = idx === index ? 'block' : 'none';
+                            });
+                            imgs.forEach(function(img) {
+                                var idx = parseInt(img.getAttribute('data-usecase-img'), 10);
+                                img.style.opacity = idx === index ? '1' : '0';
+                                img.style.zIndex = idx === index ? '10' : '0';
+                            });
+                        }
+                        tabs.forEach(function(tab, i) {
+                            tab.addEventListener('click', function() { update(i); });
+                        });
+                        setTimeout(function() { update(0); }, 50);
+                        window.addEventListener('resize', function() {
+                            var activeIdx = 0;
+                            tabs.forEach(function(t, i) {
+                                if (t.classList.contains('text-active')) activeIdx = i;
+                            });
+                            update(activeIdx);
+                        });
+                    })();
+                </script>
+            </section>
+
+            <!-- PRICING SECTION -->
+            <section id="tarifs"
+                class="section-anchor py-32 bg-gray-50 relative overflow-hidden z-10 border-t border-b border-dashed border-gray-200">
+                <div class="max-w-6xl mx-auto px-6 relative z-10">
+                    <div class="text-center mb-16">
+                        <h2 class="text-4xl md:text-5xl font-extrabold text-navy-900 mb-6 tracking-tight" data-i18n="collaboration.tarifs.commencez-gratuitement-voluez-sans">Commencez gratuitement, &eacute;voluez sans contrainte</h2>
+                        <p class="text-gray-500 max-w-2xl mx-auto text-[17px]" data-i18n="collaboration.tarifs.decouvrez-toutes-les-possibilites">Découvrez toutes les possibilités offerte par Rainbow gratuitement pendant 30 jours. Optez pour le plan Enterprise pour des échanges sans limites ou optez pour le plan Premium et bénéficiez de fonctionalités d'intelligence articifielle pour fluidifier vos activités.</p>
+
+                        <!-- Monthly/Yearly Switch -->
+                        <div class="mt-10 flex flex-wrap items-center justify-center gap-x-4 gap-y-3">
+                            <div class="cur-switcher">
+                                <button type="button" class="cur-btn" aria-haspopup="listbox" aria-expanded="false">
+                                    <span class="cur-sym" data-cur-sym>€</span>
+                                    <span data-cur-code data-i18n="collaboration.tarifs.eur">EUR</span>
+                                    <svg class="cur-chev" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                                </button>
+                                <div class="cur-menu" role="listbox">
+                                                <button type="button" class="cur-opt active" data-set-cur="EUR" data-i18n-rich="collaboration.tarifs.eur_2"><span class="cur-opt-sym">€</span> EUR</button>
+                                                <button type="button" class="cur-opt" data-set-cur="USD" data-i18n-rich="collaboration.tarifs.usd"><span class="cur-opt-sym">$</span> USD</button>
+                                                <button type="button" class="cur-opt" data-set-cur="GBP" data-i18n-rich="collaboration.tarifs.gbp"><span class="cur-opt-sym">£</span> GBP</button>
+                                                <button type="button" class="cur-opt" data-set-cur="CHF" data-i18n-rich="collaboration.tarifs.chf-chf"><span class="cur-opt-sym">CHF</span> CHF</button>
+                                                <button type="button" class="cur-opt" data-set-cur="SEK" data-i18n-rich="collaboration.tarifs.kr-sek"><span class="cur-opt-sym">kr</span> SEK</button>
+                                                <button type="button" class="cur-opt" data-set-cur="DKK" data-i18n-rich="collaboration.tarifs.kr-dkk"><span class="cur-opt-sym">kr</span> DKK</button>
+                                                <button type="button" class="cur-opt" data-set-cur="NOK" data-i18n-rich="collaboration.tarifs.kr-nok"><span class="cur-opt-sym">kr</span> NOK</button>
+                                                <button type="button" class="cur-opt" data-set-cur="PLN" data-i18n-rich="collaboration.tarifs.z-pln"><span class="cur-opt-sym">zł</span> PLN</button>
+                                                <button type="button" class="cur-opt" data-set-cur="HUF" data-i18n-rich="collaboration.tarifs.ft-huf"><span class="cur-opt-sym">Ft</span> HUF</button>
+                                                <button type="button" class="cur-opt" data-set-cur="CZK" data-i18n-rich="collaboration.tarifs.kc-czk"><span class="cur-opt-sym">Kč</span> CZK</button>
+                                                <button type="button" class="cur-opt" data-set-cur="RON" data-i18n-rich="collaboration.tarifs.lei-ron"><span class="cur-opt-sym">lei</span> RON</button>
+                                                <button type="button" class="cur-opt" data-set-cur="BGN" data-i18n-rich="collaboration.tarifs.bgn"><span class="cur-opt-sym">лв</span> BGN</button>
+                                            </div>
+                            </div>
+                            <span id="label-monthly" class="text-sm font-bold text-navy-900" data-i18n="collaboration.tarifs.mensuel">Mensuel</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="billing-toggle" class="sr-only peer"
+                                    onchange="toggleBilling()">
+                                <div
+                                    class="w-12 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-500">
+                                </div>
+                            </label>
+                            <span id="label-yearly" class="text-sm font-medium text-gray-500" data-i18n-rich="collaboration.tarifs.annuel-20">Annuel <span
+                                    class="text-brand-500 font-bold ml-1">-20%</span></span>
+                        </div>
+                    </div>
+
+                    <!-- Bento-style Pricing Grid -->
+                    <div class="max-w-5xl mx-auto mb-6">
+                        <div class="bg-white shadow-[0_4px_20px_rgb(0,0,0,0.04)]">
+                            <div class="grid md:grid-cols-3 border-t border-b border-dashed border-gray-200">
+
+                                <!-- Plan 1: Enterprise -->
+                                <div
+                                    class="p-8 md:p-10 border-b md:border-b-0 md:border-r border-dashed border-gray-200 flex flex-col bg-gradient-to-b from-brand-50/70 to-white relative hover:from-brand-50/90 transition-all duration-300 group shadow-[inset_0_0_0_1.5px_rgba(94,45,145,0.18),0_4px_24px_-6px_rgba(94,45,145,0.14)]">
+                                    <div class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-brand-500 to-indigo-500"></div>
+                                    <div class="absolute -top-16 -right-16 w-56 h-56 bg-brand-500/10 rounded-full blur-3xl"></div>
+                                    <div class="absolute -bottom-16 -left-16 w-56 h-56 bg-indigo-500/10 rounded-full blur-3xl"></div>
+                                    <div class="flex flex-col h-full relative z-10">
+                                        <div class="flex-grow">
+                                            <div class="flex items-start gap-2 mb-5 flex-wrap">
+                                                <h3 class="text-2xl font-bold text-navy-900 tracking-tight" data-i18n="collaboration.tarifs.enterprise">Enterprise</h3>
+                                                <span class="inline-flex items-center bg-brand-500 text-white font-bold px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-wider shrink-0 mt-1" data-i18n="collaboration.tarifs.30-jours-gratuits">30 jours gratuits</span>
+                                            </div>
+
+                                            <div class="mb-4 flex items-end gap-1">
+                                                <span class="text-4xl md:text-5xl font-extrabold text-navy-900 price-monthly tracking-tight" data-price="6" data-cur="EUR">6€</span>
+                                                <span class="text-4xl md:text-5xl font-extrabold text-navy-900 price-yearly hidden tracking-tight" data-price="4.8" data-cur="EUR">4,80€</span>
+                                                <div class="flex flex-col mb-2 ml-1.5">
+                                                    <span class="text-gray-500 font-medium text-[11px] leading-tight" data-i18n="collaboration.tarifs.utilisateur">/ utilisateur</span>
+                                                    <span class="text-gray-500 font-medium text-[11px] leading-tight" data-i18n="collaboration.tarifs.mois">/ mois</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="w-full border-t border-dashed border-gray-200 my-6"></div>
+
+                                            <ul class="space-y-3.5 mb-8 text-[14px] text-gray-600">
+                                                <li class="flex items-start gap-3"><svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0 group-hover:scale-110 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="collaboration.tarifs.conferences-jusqu-a-120">Conférences jusqu'à 120 participants</span></li>
+                                                <li class="flex items-start gap-3"><svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0 group-hover:scale-110 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="collaboration.tarifs.transcription-vocale-ia">Transcription vocale IA</span></li>
+                                                <li class="flex items-start gap-3"><svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0 group-hover:scale-110 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="collaboration.tarifs.enregistrement-jusqu-a-5h">Enregistrement jusqu'à 5h</span></li>
+                                                <li class="flex items-start gap-3"><svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0 group-hover:scale-110 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="collaboration.tarifs.jusqu-a-500-espaces-de-travail-par">Jusqu'à 500 espaces de travail par utilisateur</span></li>
+                                                <li class="flex items-start gap-3"><svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0 group-hover:scale-110 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="collaboration.tarifs.sondages-votes-export-csv">Sondages, votes &amp; export CSV</span></li>
+                                                <li class="flex items-start gap-3"><svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0 group-hover:scale-110 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="collaboration.tarifs.prise-en-main-a-distance-partagee">Prise en main à distance partagée</span></li>
+                                            </ul>
+                                        </div>
+
+                                        <a href="https://web.openrainbow.net/rb/2.177.4/trial?offer=collaboration"
+                                            class="block w-full py-3.5 px-4 text-center rounded-[10px] bg-brand-500 text-white hover:bg-brand-600 font-bold transition-all shadow-md text-sm hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0" data-i18n="collaboration.tarifs.essai-gratuit">Essai gratuit</a>
+                                        <p class="text-center text-xs text-gray-400 mt-3" data-i18n="collaboration.tarifs.vous-pourrez-choisir-un-abonnement">Vous pourrez choisir un abonnement à tout moment</p>
+                                    </div>
+                                </div>
+
+                                <!-- Plan 2: Premium (Bientôt disponible) -->
+                                <div class="p-8 md:p-10 border-b md:border-b-0 md:border-r border-dashed border-gray-200 flex flex-col opacity-60">
+                                    <div class="flex flex-col h-full">
+                                        <div class="flex-grow">
+                                            <div class="flex items-start gap-2 mb-5 flex-wrap">
+                                                <h3 class="text-2xl font-bold text-navy-900 tracking-tight" data-i18n="collaboration.tarifs.premium">Premium</h3>
+                                                <span class="inline-flex items-center bg-gray-200 text-gray-500 font-bold px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-wider shrink-0 mt-1" data-i18n="collaboration.tarifs.bientot-disponible">Bientôt disponible</span>
+                                            </div>
+
+                                            <div class="mb-5 flex items-end gap-1">
+                                                <span class="text-4xl md:text-5xl font-extrabold text-gray-400 price-monthly tracking-tight" data-price="12" data-cur="EUR">12€</span>
+                                                <span class="text-4xl md:text-5xl font-extrabold text-gray-400 price-yearly hidden tracking-tight" data-price="9.6" data-cur="EUR">9,60€</span>
+                                                <div class="flex flex-col mb-2 ml-1.5">
+                                                    <span class="text-gray-400 font-medium text-[11px] leading-tight" data-i18n="collaboration.tarifs.utilisateur">/ utilisateur</span>
+                                                    <span class="text-gray-400 font-medium text-[11px] leading-tight" data-i18n="collaboration.tarifs.mois">/ mois</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="w-full border-t border-dashed border-gray-200 my-6"></div>
+
+                                            <ul class="space-y-3.5 mb-8 text-[14px] text-gray-400">
+                                                <li class="flex items-start gap-3"><svg class="w-4 h-4 text-gray-300 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="collaboration.tarifs.fonctionnalites-ia-avancees">Fonctionnalités IA avancées</span></li>
+                                                <li class="flex items-start gap-3"><svg class="w-4 h-4 text-gray-300 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="collaboration.tarifs.disponibilite-geographique-etendue">Disponibilité géographique étendue</span></li>
+                                                <li class="flex items-start gap-3"><svg class="w-4 h-4 text-gray-300 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="collaboration.tarifs.transcription-et-resume-de-reunion">Transcription et résumé de réunion</span></li>
+                                                <li class="flex items-start gap-3"><svg class="w-4 h-4 text-gray-300 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="collaboration.tarifs.sous-titres-et-traduction-en">Sous-titres et traduction en direct</span></li>
+                                                <li class="flex items-start gap-3"><svg class="w-4 h-4 text-gray-300 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="collaboration.tarifs.transcription-des-appels">Transcription des appels téléphoniques</span></li>
+                                            </ul>
+                                        </div>
+
+                                        <span class="block w-full py-3.5 px-4 text-center rounded-[10px] border border-gray-200 text-gray-400 font-semibold text-sm cursor-not-allowed select-none" data-i18n="collaboration.tarifs.disponible-prochainement">Disponible prochainement</span>
+                                    </div>
+                                </div>
+
+                                                                                                <!-- Plan 3: Sur mesure (dark, partenaire) -->
+                                <div class="p-8 md:p-10 flex flex-col relative overflow-hidden text-white" style="background: linear-gradient(160deg,#221a3d 0%,#15102b 100%);">
+                                    <div class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-brand-500 to-indigo-500 z-20"></div>
+                                    <div class="absolute -top-16 -right-16 w-56 h-56 bg-brand-500/20 rounded-full blur-3xl pointer-events-none"></div>
+                                    <div class="absolute -bottom-20 -left-16 w-56 h-56 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                                    <div class="flex flex-col h-full relative z-10">
+                                        <div class="flex-grow">
+                                            <div class="flex items-start gap-2 mb-5 flex-wrap">
+                                                <h3 class="text-2xl font-bold text-white tracking-tight" data-i18n="collaboration.tarifs.sur-mesure">Sur mesure</h3>
+                                                <span class="inline-flex items-center bg-brand-500 text-white font-bold px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-wider shrink-0 mt-1" data-i18n="collaboration.tarifs.partenaire">Partenaire</span>
+                                            </div>
+
+                                            <p class="text-sm text-gray-300 leading-relaxed mb-5" data-i18n="collaboration.tarifs.un-besoin-specifique-nos">Un besoin spécifique ? Nos partenaires Rainbow construisent avec vous une solution adaptée à votre organisation.</p>
+
+                                            <div class="w-full border-t border-dashed border-white/15 my-6"></div>
+
+                                            <ul class="space-y-3.5 mb-8 text-[14px] text-gray-300">
+                                                <li class="flex items-start gap-3"><svg class="w-4 h-4 text-brand-300 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="collaboration.tarifs.accompagnement-par-un-partenaire">Accompagnement par un partenaire certifié Rainbow</span></li>
+                                                <li class="flex items-start gap-3"><svg class="w-4 h-4 text-brand-300 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="collaboration.tarifs.configuration-telephonie-adaptee-a">Configuration téléphonie adaptée à votre infrastructure</span></li>
+                                                <li class="flex items-start gap-3"><svg class="w-4 h-4 text-brand-300 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="collaboration.tarifs.volumes-integrations-conditions">Volumes, intégrations &amp; conditions négociées</span></li>
+                                            </ul>
+                                        </div>
+
+                                        <a href="/fr/form-al" class="block w-full py-3.5 px-4 text-center rounded-[10px] bg-white text-navy-900 hover:bg-gray-100 font-bold transition-all shadow-md text-sm hover:shadow-lg" data-i18n="collaboration.tarifs.contactez-nous">Contactez-nous</a>
+                                        <p class="text-center text-xs text-gray-400 mt-3" data-i18n="collaboration.tarifs.vous-serez-mis-en-relation-avec-un">Vous serez mis en relation avec un partenaire Rainbow</p>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer Notes -->
+                    <div class="max-w-5xl mx-auto mb-20 grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="flex items-start gap-3 p-4 rounded-xl bg-gray-50/70 border border-gray-100">
+                            <svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <div>
+                                <p class="text-xs font-bold text-navy-900 mb-0.5" data-i18n="collaboration.tarifs.facturation-flexible">Facturation flexible</p>
+                                <p class="text-xs text-gray-500" data-i18n="collaboration.tarifs.mensuelle-ou-annuelle-economisez">Mensuelle ou annuelle · économisez ~20% avec l'abonnement annuel</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 p-4 rounded-xl bg-gray-50/70 border border-gray-100">
+                            <svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z"/></svg>
+                            <div>
+                                <p class="text-xs font-bold text-navy-900 mb-0.5" data-i18n="collaboration.tarifs.ht-tva">HT TVA</p>
+                                <p class="text-xs text-gray-500" data-i18n="collaboration.tarifs.prix-affiches-hors-taxes-tva">Prix affichés hors taxes · TVA applicable selon votre pays</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 p-4 rounded-xl bg-gray-50/70 border border-gray-100">
+                            <svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <div>
+                                <p class="text-xs font-bold text-navy-900 mb-0.5" data-i18n="collaboration.tarifs.europe-uniquement">Europe uniquement</p>
+                                <p class="text-xs text-gray-500" data-i18n="collaboration.tarifs.disponible-dans-31-pays-europeens">Disponible dans 31 pays européens · </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Comparison Section -->
+                    <div class="text-center">
+                        <button onclick="toggleComparisonTable()"
+                            class="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-[10px] border border-gray-200 text-sm font-semibold text-navy-900 bg-white hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm">
+                            <span id="comparison-toggle-text" data-i18n="collaboration.tarifs.comparer-toutes-les">Comparer toutes les fonctionnalités</span>
+                            <svg id="comparison-toggle-icon"
+                                class="w-4 h-4 transition-transform duration-300 text-gray-400" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Comparison Table Container -->
+                    <div id="comparison-table"
+                        class="hidden mt-12 max-w-5xl mx-auto bg-white border border-gray-200 rounded-[10px] shadow-[0_4px_25px_-5px_rgba(0,0,0,0.02)] overflow-hidden transition-all duration-300">
+                        <div class="overflow-x-auto">
+                                                        <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="border-b border-gray-200 bg-gray-50/50">
+                                        <th class="p-6 text-sm font-bold text-navy-900 w-[40%]" data-i18n="collaboration.tarifs.fonctionnalite">Fonctionnalité</th>
+                                        <th class="p-6 text-sm font-bold text-navy-900 w-[30%] text-center bg-brand-50/30" data-i18n="collaboration.tarifs.enterprise">Enterprise</th>
+                                        <th class="p-6 text-sm font-bold text-navy-900 w-[30%] text-center" data-i18n="collaboration.tarifs.premium">Premium</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100 text-sm text-gray-600">
+                                    <!-- Group 1: Collaboration & Messagerie -->
+                                    <tr class="bg-slate-50/50">
+                                        <td colspan="3" class="px-6 py-3.5 font-bold text-navy-900 text-[11px] uppercase tracking-wider" data-i18n="collaboration.tarifs.collaboration-messagerie">Collaboration & Messagerie</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-6 font-medium text-navy-900" data-i18n="collaboration.tarifs.chat-et-canaux-de-discussion">Chat et canaux de discussion</td>
+                                        <td class="p-6 text-center bg-brand-50/10 font-semibold text-navy-900" data-i18n="collaboration.tarifs.illimites">Illimités</td>
+                                        <td class="p-6 text-center" data-i18n="collaboration.tarifs.illimites">Illimités</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-6 font-medium text-navy-900" data-i18n="collaboration.tarifs.historique-des-messages-archives">Historique des messages archivés</td>
+                                        <td class="p-6 text-center bg-brand-50/10 font-semibold text-navy-900" data-i18n="collaboration.tarifs.illimite">Illimité</td>
+                                        <td class="p-6 text-center" data-i18n="collaboration.tarifs.illimite">Illimité</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-6 font-medium text-navy-900" data-i18n="collaboration.tarifs.stockage-de-fichiers-partages">Stockage de fichiers partagés</td>
+                                        <td class="p-6 text-center bg-brand-50/10 font-semibold text-navy-900" data-i18n="collaboration.tarifs.100-go-ut">100 Go / ut.</td>
+                                        <td class="p-6 text-center" data-i18n="collaboration.tarifs.illimite">Illimité</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-6 font-medium text-navy-900" data-i18n="collaboration.tarifs.appels-individuels-audio-video-hd">Appels individuels audio/vidéo HD</td>
+                                        <td class="p-6 text-center bg-brand-50/10 text-brand-500">
+                                            <svg class="w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                        </td>
+                                        <td class="p-6 text-center text-brand-500">
+                                            <svg class="w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Group 2: Visioconférences -->
+                                    <tr class="bg-slate-50/50">
+                                        <td colspan="3" class="px-6 py-3.5 font-bold text-navy-900 text-[11px] uppercase tracking-wider" data-i18n="collaboration.tarifs.visioconferences-reunions">Visioconférences & Réunions</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-6 font-medium text-navy-900" data-i18n="collaboration.tarifs.nombre-maximum-de-participants">Nombre maximum de participants</td>
+                                        <td class="p-6 text-center bg-brand-50/10 font-semibold text-navy-900" data-i18n="collaboration.tarifs.jusqu-a-250">Jusqu'à 250</td>
+                                        <td class="p-6 text-center" data-i18n="collaboration.tarifs.jusqu-a-1-000">Jusqu'à 1 000</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-6 font-medium text-navy-900" data-i18n="collaboration.tarifs.duree-maximale-des-reunions">Durée maximale des réunions</td>
+                                        <td class="p-6 text-center bg-brand-50/10 font-semibold text-navy-900" data-i18n="collaboration.tarifs.24-heures">24 heures</td>
+                                        <td class="p-6 text-center" data-i18n="collaboration.tarifs.illimitee">Illimitée</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-6 font-medium text-navy-900" data-i18n="collaboration.tarifs.enregistrement-cloud">Enregistrement cloud & transcriptions</td>
+                                        <td class="p-6 text-center bg-brand-50/10 text-brand-500">
+                                            <svg class="w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                        </td>
+                                        <td class="p-6 text-center text-brand-500">
+                                            <svg class="w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-6 font-medium text-navy-900" data-i18n="collaboration.tarifs.tableaux-blancs-collaboratifs">Tableaux blancs collaboratifs</td>
+                                        <td class="p-6 text-center bg-brand-50/10 text-brand-500">
+                                            <svg class="w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                        </td>
+                                        <td class="p-6 text-center text-brand-500">
+                                            <svg class="w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Group 3: Sécurité & Administration -->
+                                    <tr class="bg-slate-50/50">
+                                        <td colspan="3" class="px-6 py-3.5 font-bold text-navy-900 text-[11px] uppercase tracking-wider" data-i18n="collaboration.tarifs.securite-administration">Sécurité & Administration</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-6 font-medium text-navy-900" data-i18n="collaboration.tarifs.chiffrement-de-bout-en-bout">Chiffrement de bout en bout</td>
+                                        <td class="p-6 text-center bg-brand-50/10 text-brand-500"><svg class="w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td>
+                                        <td class="p-6 text-center text-brand-500"><svg class="w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-6 font-medium text-navy-900" data-i18n="collaboration.tarifs.authentification-unique-sso-saml">Authentification unique (SSO SAML)</td>
+                                        <td class="p-6 text-center bg-brand-50/10 text-gray-300"></td>
+                                        <td class="p-6 text-center text-brand-500"><svg class="w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-6 font-medium text-navy-900" data-i18n="collaboration.tarifs.integration-pbx-telephonie-ip">Intégration PBX / Téléphonie IP hybride</td>
+                                        <td class="p-6 text-center bg-brand-50/10 text-gray-300"></td>
+                                        <td class="p-6 text-center text-brand-500"><svg class="w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td>
+                                    </tr>
+
+                                    <!-- Group 4: Support Client -->
+                                    <tr class="bg-slate-50/50">
+                                        <td colspan="3" class="px-6 py-3.5 font-bold text-navy-900 text-[11px] uppercase tracking-wider" data-i18n="collaboration.tarifs.support-client">Support Client</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-6 font-medium text-navy-900" data-i18n="collaboration.tarifs.support-en-ligne-communaute">Support en ligne & communauté</td>
+                                        <td class="p-6 text-center bg-brand-50/10 text-brand-500"><svg class="w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td>
+                                        <td class="p-6 text-center text-brand-500"><svg class="w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-6 font-medium text-navy-900" data-i18n="collaboration.tarifs.support-prioritaire-email-chat">Support prioritaire email & chat (sous 24h)</td>
+                                        <td class="p-6 text-center bg-brand-50/10 text-brand-500"><svg class="w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td>
+                                        <td class="p-6 text-center text-brand-500"><svg class="w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-6 font-medium text-navy-900" data-i18n="collaboration.tarifs.engagements-de-service-sla-dedie">Engagements de service (SLA) & Dédié</td>
+                                        <td class="p-6 text-center bg-brand-50/10 text-gray-300"></td>
+                                        <td class="p-6 text-center text-brand-500"><svg class="w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== QUESTIONS FRÉQUENTES SECTION (Zendesk API) ===== -->
+            <section id="questions-frequentes" class="section-anchor py-20 lg:py-28 faq-section" style="background-color: #c5deff47;">
+                <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-16">
+                        <h2 class="text-2xl md:text-4xl lg:text-5xl font-semibold mb-6 tracking-tight text-gray-900" data-i18n="collaboration.questions-frequentes.questions-fr-quentes">
+                            Questions fr&eacute;quentes
+                        </h2>
+                        <p class="text-lg md:text-xl text-gray-600" data-i18n="collaboration.questions-frequentes.tout-ce-que-vous-devez-savoir-sur">
+                            Tout ce que vous devez savoir sur Rainbow Collaboration
+                        </p>
+                    </div>
+                    <div id="faq-loading" class="faq-loading">
+                        <div class="faq-loading-spinner"></div>
+                        <p data-i18n="collaboration.questions-frequentes.chargement-des-questions">Chargement des questions...</p>
+                    </div>
+                    <div id="faq-error" class="faq-error hidden">
+                        <p data-i18n="collaboration.questions-frequentes.impossible-de-charger-les">Impossible de charger les questions pour le moment.</p>
+                    </div>
+                    <div id="faq-items-container" class="faq-items hidden">
+                        <!-- Items will be injected here by JS -->
+                    </div>
+                    <div class="faq-contact">
+                        <a href="/fr/faq" data-i18n-rich="collaboration.questions-frequentes.trouvez-la-reponse-a-votre">
+                            Trouvez la réponse à votre question
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+
+
+        </div>
+    </div> <!-- End of Padding Box -->
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer-premium text-gray-400 relative z-10 overflow-hidden">
+        <!-- Top hairline glow -->
+        <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-300/60 to-transparent"></div>
+        <!-- Ambient purple wash -->
+        <div class="pointer-events-none absolute inset-0" style="background:
+            radial-gradient(ellipse 70% 55% at 50% -8%, rgba(124,58,237,0.32) 0%, rgba(124,58,237,0.10) 34%, transparent 68%),
+            radial-gradient(ellipse 55% 60% at 88% 108%, rgba(207,0,114,0.16) 0%, transparent 62%),
+            radial-gradient(ellipse 45% 50% at 6% 96%, rgba(94,45,145,0.20) 0%, transparent 60%);"></div>
+        <!-- Soft focal glow behind the CTA -->
+        <div class="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-[760px] h-[440px] bg-brand-500/25 rounded-full blur-[150px]"></div>
+
+        <div class="max-w-6xl mx-auto px-6 relative">
+            <!-- ===== CTA BAND ===== -->
+            <div class="text-center pt-24 pb-16 md:pt-28 md:pb-20 border-b border-white/10">
+                <div class="mb-9">
+                    <img src="/images/rainbow-logo.png" alt="Rainbow" class="w-[70px] h-[70px] object-contain mx-auto" data-i18n-attr="alt:common.footer.rainbow_alt">
+                </div>
+                <h2 class="text-2xl md:text-4xl lg:text-[2.6rem] font-semibold text-white tracking-[-0.025em] leading-[1.18] max-w-4xl mx-auto" style="text-wrap:balance" data-i18n="common.footer.la-prochaine-conversation-de-votre">
+                    La prochaine conversation de votre &eacute;quipe m&eacute;rite une infrastructure qui la prot&egrave;ge
+                </h2>
+                <p class="mt-5 text-base md:text-lg text-gray-300/90 max-w-xl mx-auto" style="text-wrap:balance" data-i18n="common.footer.essayez-nos-solutions-rainbow">
+                    Essayez nos solutions Rainbow gratuitement pendant 30 jours. Sans carte bancaire.
+                </p>
+                <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a href="/fr/tarifs" class="group inline-flex items-center justify-center gap-2.5 px-9 py-4 rounded-[14px] text-white text-base font-bold tracking-tight"
+                       style="background:#5e2d91;" data-i18n-rich="common.footer.commencez-l-essai-gratuit-path_2">
+                        Commencez l'essai gratuit
+                        <svg class="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                    </a>
+                    <a href="/fr/tarifs" class="inline-flex items-center justify-center px-9 py-4 rounded-[14px] text-white text-base font-bold tracking-tight border border-white/25 hover:bg-white/10 hover:border-white/40 transition-colors" data-i18n="common.footer.voir-les-tarifs">
+                        Voir les tarifs
+                    </a>
+                </div>
+            </div>
+
+            <!-- ===== LINK COLUMNS ===== -->
+            <div class="flex flex-col lg:flex-row lg:justify-between gap-12 lg:gap-16 py-16">
+                <!-- Brand -->
+                <div class="max-w-xs">
+                    <img src="/images/ale_white.png" alt="Alcatel-Lucent" class="h-11 w-auto opacity-90 mb-6" data-i18n-attr="alt:common.footer.alcatel-lucent_alt">
+                    <address class="not-italic text-sm text-gray-400 leading-relaxed" data-i18n-rich="common.footer.ale-international-32-avenue-kl-ber_2">
+                        ALE International<br>
+                        32 avenue Kl&eacute;ber<br>
+                        92700 Colombes, France
+                    </address>
+                </div>
+                <!-- Columns -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-8 sm:gap-14">
+                    <div>
+                        <h4 class="text-[11px] font-bold text-white uppercase tracking-[0.16em] mb-5" data-i18n="common.footer.solutions_2">Solutions</h4>
+                        <ul class="space-y-3.5 text-sm">
+                            <li><a href="/fr/products/collaboration" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.rainbow-collaboration">Rainbow Collaboration</a></li>
+                            <li><a href="/fr/products/webinar" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.rainbow-webinar">Rainbow Webinar</a></li>
+                            <li><a href="/fr/tarifs" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.tarifs">Tarifs</a></li>
+                            <li><a href="/fr/telecharger-application-rainbow" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.t-l-chargements">T&eacute;l&eacute;chargements</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.api">API</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-[11px] font-bold text-white uppercase tracking-[0.16em] mb-5" data-i18n="common.footer.developers">Developers</h4>
+                        <ul class="space-y-3.5 text-sm">
+                            <li><a href="/fr/centre-aide-rainbow" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.centre-d-aide">Centre d'aide</a></li>
+                            <li><a href="/fr/faq" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.faq">FAQ</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.guide-technique">Guide technique</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.code-samples">Code samples</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.int-grations">Int&eacute;grations</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.forum-dev_2">Forum dev</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-[11px] font-bold text-white uppercase tracking-[0.16em] mb-5" data-i18n="common.footer.company">Company</h4>
+                        <ul class="space-y-3.5 text-sm">
+                            <li><a href="/fr/a-propos-de-rainbow" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.a-propos">A propos</a></li>
+                            <li><a href="/fr/rainbow-donnees-hebergees-en-france" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.souverainet">Souverainet&eacute;</a></li>
+                            <li><a href="/fr/partenaires" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.devenir-partenaire">Devenir partenaire</a></li>
+                            <li><a href="/fr/trouver-un-partenaire" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.trouver-un-partenaire">Trouver un partenaire</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.carri-res">Carri&egrave;res</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.presse">Presse</a></li>
+                            <li><a href="/fr/form-al" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.contact_2">Contact</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== BOTTOM BAR ===== -->
+            <div class="border-t border-white/10 py-8 flex flex-col gap-6">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-5">
+                    <div class="flex items-center gap-3">
+                        <a href="#" aria-label="X" class="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 ring-1 ring-white/10 hover:ring-white/20 flex items-center justify-center transition-all">
+                            <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                        </a>
+                        <a href="#" aria-label="LinkedIn" class="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 ring-1 ring-white/10 hover:ring-white/20 flex items-center justify-center transition-all" data-i18n-attr="aria-label:common.footer.linkedin_aria-label">
+                            <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                        </a>
+                    </div>
+                    <div class="flex items-center gap-6 text-sm">
+                        <a href="/fr/privacy" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.privacy">Privacy</a>
+                        <a href="/fr/legal" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.terms_2">Terms</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.cookies">Cookies</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.gdpr">GDPR</a>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 leading-relaxed" data-i18n-rich="common.footer.ale-international-ale-usa-inc-all_2">&copy;ALE International, ALE USA Inc. All rights reserved in all countries. The Alcatel-Lucent name and logo are trademarks of Nokia used under license by ALE. To view a list of proprietary ALE trademarks, visit: <a href="https://www.al-enterprise.com/en/legal/trademarks-copyright" target="_blank" rel="noopener" class="hover:text-white transition-colors underline-offset-2 hover:underline">www.al-enterprise.com/en/legal/trademarks-copyright</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ===== DEMO REQUEST MODAL (lead capture) ===== -->
+    <div id="demo-modal" class="fixed inset-0 z-[100] hidden" role="dialog" aria-modal="true" aria-labelledby="demo-modal-title">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeDemoModal()"></div>
+        <div class="absolute inset-0 flex items-start sm:items-center justify-center p-4 overflow-y-auto">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full my-8 relative" onclick="event.stopPropagation()">
+                <button onclick="closeDemoModal()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 z-10" aria-label="Fermer" data-i18n-attr="aria-label:collaboration.body.fermer_aria-label">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+
+                <div class="p-7 sm:p-9">
+                    <!-- Form panel -->
+                    <div id="demo-panel-form">
+                        <h3 id="demo-modal-title" class="text-xl sm:text-2xl font-extrabold text-navy-900 tracking-tight mb-2" data-i18n-rich="collaboration.body.besoin-d-une-d-mo-rainbow-collaboration">Besoin d'une d&eacute;mo <span class="text-brand-500">Rainbow Collaboration</span>&nbsp;?</h3>
+                        <p id="demo-modal-subtitle" class="text-sm text-gray-500 leading-relaxed mb-6" data-i18n="collaboration.body.laissez-nous-vos-coordonn-es-pour">Laissez-nous vos coordonn&eacute;es pour planifier une d&eacute;mo avec notre &eacute;quipe commerciale. Nous passerons en revue les fonctionnalit&eacute;s Enterprise et r&eacute;pondrons &agrave; vos questions.</p>
+
+                        <form id="demo-form" novalidate>
+                            <div class="grid sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="demo-first-name" class="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-1.5" data-i18n-rich="collaboration.body.pr-nom">Pr&eacute;nom <span class="text-brand-500">*</span></label>
+                                    <input required type="text" id="demo-first-name" placeholder="Jean" class="w-full px-3.5 py-2.5 rounded-btn border border-gray-200 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none text-sm" data-i18n-attr="placeholder:collaboration.body.jean_placeholder">
+                                </div>
+                                <div>
+                                    <label for="demo-last-name" class="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-1.5" data-i18n-rich="collaboration.body.nom">Nom <span class="text-brand-500">*</span></label>
+                                    <input required type="text" id="demo-last-name" placeholder="Dupont" class="w-full px-3.5 py-2.5 rounded-btn border border-gray-200 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none text-sm" data-i18n-attr="placeholder:collaboration.body.dupont_placeholder">
+                                </div>
+                                <div>
+                                    <label for="demo-email" class="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-1.5" data-i18n-rich="collaboration.body.email-professionnel">Email professionnel <span class="text-brand-500">*</span></label>
+                                    <input required type="email" id="demo-email" placeholder="jean@entreprise.com" class="w-full px-3.5 py-2.5 rounded-btn border border-gray-200 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none text-sm" data-i18n-attr="placeholder:collaboration.body.jean-entreprise-com_placeholder">
+                                </div>
+                                <div>
+                                    <label for="demo-phone" class="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-1.5" data-i18n="collaboration.body.t-l-phone">T&eacute;l&eacute;phone</label>
+                                    <input type="tel" id="demo-phone" placeholder="+33 6 12 34 56 78" class="w-full px-3.5 py-2.5 rounded-btn border border-gray-200 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none text-sm">
+                                </div>
+                                <div>
+                                    <label for="demo-company" class="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-1.5" data-i18n-rich="collaboration.body.nom-de-l-entreprise">Nom de l'entreprise <span class="text-brand-500">*</span></label>
+                                    <input required type="text" id="demo-company" placeholder="Acme" class="w-full px-3.5 py-2.5 rounded-btn border border-gray-200 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none text-sm" data-i18n-attr="placeholder:collaboration.body.acme_placeholder">
+                                </div>
+                                <div>
+                                    <label for="demo-company-size" class="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-1.5" data-i18n-rich="collaboration.body.taille-de-l-entreprise">Taille de l'entreprise <span class="text-brand-500">*</span></label>
+                                    <select required id="demo-company-size" class="w-full px-3.5 py-2.5 rounded-btn border border-gray-200 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none text-sm bg-white text-gray-700">
+                                        <option value="" disabled selected data-i18n="collaboration.body.s-lectionner">S&eacute;lectionner</option>
+                                        <option data-i18n="collaboration.body.1-10-employ-s">1-10 employ&eacute;s</option>
+                                        <option data-i18n="collaboration.body.11-50-employ-s">11-50 employ&eacute;s</option>
+                                        <option data-i18n="collaboration.body.51-200-employ-s">51-200 employ&eacute;s</option>
+                                        <option data-i18n="collaboration.body.201-500-employ-s">201-500 employ&eacute;s</option>
+                                        <option data-i18n="collaboration.body.501-1000-employ-s">501-1000 employ&eacute;s</option>
+                                        <option data-i18n="collaboration.body.1000-employ-s">1000+ employ&eacute;s</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="demo-country" class="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-1.5" data-i18n-rich="collaboration.body.pays-r-gion">Pays / R&eacute;gion <span class="text-brand-500">*</span></label>
+                                    <select required id="demo-country" class="w-full px-3.5 py-2.5 rounded-btn border border-gray-200 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none text-sm bg-white text-gray-700">
+                                        <option value="" disabled selected data-i18n="collaboration.body.s-lectionner">S&eacute;lectionner</option>
+                                        <option data-i18n="collaboration.body.france">France</option>
+                                        <option data-i18n="collaboration.body.belgique">Belgique</option>
+                                        <option data-i18n="collaboration.body.suisse">Suisse</option>
+                                        <option data-i18n="collaboration.body.luxembourg">Luxembourg</option>
+                                        <option data-i18n="collaboration.body.allemagne">Allemagne</option>
+                                        <option data-i18n="collaboration.body.espagne">Espagne</option>
+                                        <option data-i18n="collaboration.body.italie">Italie</option>
+                                        <option data-i18n="collaboration.body.royaume-uni">Royaume-Uni</option>
+                                        <option data-i18n="collaboration.body.autre">Autre</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="demo-source" class="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-1.5" data-i18n="collaboration.body.comment-nous-avez-vous-connu">Comment nous avez-vous connu&nbsp;?</label>
+                                    <select id="demo-source" class="w-full px-3.5 py-2.5 rounded-btn border border-gray-200 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none text-sm bg-white text-gray-700">
+                                        <option value="" selected data-i18n="collaboration.body.s-lectionner">S&eacute;lectionner</option>
+                                        <option data-i18n="collaboration.body.recherche-google">Recherche Google</option>
+                                        <option data-i18n="collaboration.body.r-seaux-sociaux">R&eacute;seaux sociaux</option>
+                                        <option data-i18n="collaboration.body.recommandation">Recommandation</option>
+                                        <option data-i18n="collaboration.body.v-nement-salon">&Eacute;v&eacute;nement / Salon</option>
+                                        <option data-i18n="collaboration.body.partenaire-rainbow">Partenaire Rainbow</option>
+                                        <option data-i18n="collaboration.body.autre">Autre</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <label class="flex items-start gap-2.5 mt-5 cursor-pointer">
+                                <input required type="checkbox" id="demo-consent" class="mt-0.5 w-4 h-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500 shrink-0">
+                                <span class="text-xs text-gray-500 leading-relaxed" data-i18n-rich="collaboration.body.j-accepte-les-conditions-d">J'accepte les <a href="/fr/legal" class="text-brand-500 font-semibold hover:underline">conditions d'utilisation</a> de Rainbow et l'utilisation de mes donn&eacute;es personnelles telle que d&eacute;crite dans la <a href="/fr/privacy" class="text-brand-500 font-semibold hover:underline">politique de confidentialit&eacute;</a>. <span class="text-brand-500">*</span></span>
+                            </label>
+
+                            <p id="demo-error" class="hidden mt-4 text-xs text-red-700 bg-red-50 border border-red-200 rounded-btn px-3.5 py-2.5" data-i18n="collaboration.body.une-erreur-est-survenue-lors-de-l">Une erreur est survenue lors de l'envoi. Veuillez r&eacute;essayer.</p>
+
+                            <button type="submit" id="demo-submit-btn" class="w-full mt-6 py-3.5 rounded-btn bg-brand-500 hover:bg-brand-600 text-white font-bold text-sm transition-all active:scale-[.98] shadow-lg shadow-purple-900/15 disabled:opacity-60 disabled:cursor-not-allowed">
+                                <span id="demo-submit-label" data-i18n="collaboration.body.demander-une-d-mo">Demander une d&eacute;mo</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Success panel -->
+                    <div id="demo-panel-success" class="hidden text-center py-6">
+                        <div class="w-14 h-14 rounded-full bg-brand-50 flex items-center justify-center mx-auto mb-5">
+                            <svg class="w-7 h-7 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                        </div>
+                        <h3 class="text-xl font-extrabold text-navy-900 tracking-tight mb-2" data-i18n="collaboration.body.merci">Merci&nbsp;!</h3>
+                        <p id="demo-success-text" class="text-sm text-gray-500 leading-relaxed max-w-sm mx-auto" data-i18n="collaboration.body.votre-demande-a-bien-t-enregistr-e">Votre demande a bien &eacute;t&eacute; enregistr&eacute;e. Un membre de notre &eacute;quipe commerciale vous recontactera sous 24h ouvr&eacute;es.</p>
+                        <button type="button" onclick="closeDemoModal()" class="mt-6 px-8 py-3 rounded-btn bg-brand-500 hover:bg-brand-600 text-white font-bold text-sm transition-all" data-i18n="collaboration.body.fermer">Fermer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/mega-menu.js"></script>
+    <script src="/js/i18n.js"></script>
+    <script>
+
+
+        document.addEventListener('click', function (e) {
+            var sw = document.getElementById('lang-switcher');
+            if (sw && !sw.contains(e.target)) sw.classList.remove('open');
+        });
+
+
+        // Timeline Switcher Logic
+        function switchTimelineTab(index) {
+            var wrappers = document.querySelectorAll('.timeline-dot-wrapper');
+            var dots = document.querySelectorAll('.timeline-dot');
+            var labels = document.querySelectorAll('.timeline-label');
+            var panels = document.querySelectorAll('.timeline-panel');
+
+            for (var i = 0; i < 4; i++) {
+                if (i === index) {
+                    wrappers[i].className = 'timeline-dot-wrapper w-8 h-8 rounded-full flex items-center justify-center bg-white border-[2px] border-navy-900 shadow-sm transition-all duration-300 relative z-10';
+                    dots[i].className = 'timeline-dot w-2.5 h-2.5 rounded-full bg-navy-900 transition-all duration-300';
+                    labels[i].className = 'mt-4 font-semibold text-sm text-navy-900 transition-colors duration-300 timeline-label whitespace-nowrap';
+                    panels[i].classList.remove('hidden');
+                    panels[i].classList.add('block');
+                } else {
+                    wrappers[i].className = 'timeline-dot-wrapper w-5 h-5 rounded-full flex items-center justify-center bg-white border border-gray-300 transition-all duration-300 relative z-10 group-hover:border-navy-900/50';
+                    dots[i].className = 'timeline-dot w-1.5 h-1.5 rounded-full bg-gray-300 transition-all duration-300 group-hover:bg-navy-900/50';
+                    labels[i].className = 'mt-4 font-medium text-sm text-gray-400 transition-colors duration-300 timeline-label whitespace-nowrap group-hover:text-gray-600';
+                    panels[i].classList.remove('block');
+                    panels[i].classList.add('hidden');
+                }
+            }
+        }
+
+        // Toggle Pricing Comparison Table
+        function toggleComparisonTable() {
+            var table = document.getElementById('comparison-table');
+            var text = document.getElementById('comparison-toggle-text');
+            var icon = document.getElementById('comparison-toggle-icon');
+            if (table.classList.contains('hidden')) {
+                table.classList.remove('hidden');
+                text.textContent = t('hideTable');
+                icon.classList.add('rotate-180');
+            } else {
+                table.classList.add('hidden');
+                text.textContent = t('showTable');
+                icon.classList.remove('rotate-180');
+            }
+        }
+
+        // Toggle Billing Logic
+        function toggleBilling() {
+            var isYearly = document.getElementById('billing-toggle').checked;
+            var monthlyPrices = document.querySelectorAll('.price-monthly');
+            var yearlyPrices = document.querySelectorAll('.price-yearly');
+            var labelMonthly = document.getElementById('label-monthly');
+            var labelYearly = document.getElementById('label-yearly');
+
+            if (isYearly) {
+                monthlyPrices.forEach(function (el) { el.classList.add('hidden'); });
+                yearlyPrices.forEach(function (el) { el.classList.remove('hidden'); });
+                labelMonthly.classList.replace('text-navy-900', 'text-gray-500');
+                labelMonthly.classList.replace('font-bold', 'font-medium');
+                labelYearly.classList.replace('text-gray-500', 'text-navy-900');
+                labelYearly.classList.replace('font-medium', 'font-bold');
+            } else {
+                monthlyPrices.forEach(function (el) { el.classList.remove('hidden'); });
+                yearlyPrices.forEach(function (el) { el.classList.add('hidden'); });
+                labelYearly.classList.replace('text-navy-900', 'text-gray-500');
+                labelYearly.classList.replace('font-bold', 'font-medium');
+                labelMonthly.classList.replace('text-gray-500', 'text-navy-900');
+                labelMonthly.classList.replace('font-medium', 'font-bold');
+            }
+        }
+    </script>
+    <script>
+        (function () {
+            function stripHtml(str) {
+                if (!str) return '';
+                return str.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+            }
+            function initFaqCardListeners() {
+                document.querySelectorAll('.faq-card-button').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        var card = btn.closest('.faq-card');
+                        var wasOpen = card.classList.contains('open');
+                        document.querySelectorAll('.faq-card').forEach(function (c) {
+                            c.classList.remove('open');
+                            var b = c.querySelector('.faq-card-button');
+                            if (b) b.setAttribute('aria-expanded', 'false');
+                        });
+                        if (!wasOpen) {
+                            card.classList.add('open');
+                            btn.setAttribute('aria-expanded', 'true');
+                        }
+                    });
+                });
+            }
+            function renderFaq(items) {
+                var container = document.getElementById('faq-items-container');
+                if (!container) return;
+                container.innerHTML = '';
+                items.forEach(function (item) {
+                    var card = document.createElement('div');
+                    card.className = 'faq-card';
+                    var btn = document.createElement('button');
+                    btn.className = 'faq-card-button';
+                    btn.setAttribute('aria-expanded', 'false');
+                    var q = document.createElement('span');
+                    q.className = 'faq-card-question';
+                    q.textContent = item.question;
+                    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                    svg.setAttribute('class', 'faq-card-chevron');
+                    svg.setAttribute('fill', 'none');
+                    svg.setAttribute('viewBox', '0 0 24 24');
+                    svg.setAttribute('stroke', 'currentColor');
+                    svg.setAttribute('stroke-width', '2');
+                    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    path.setAttribute('stroke-linecap', 'round');
+                    path.setAttribute('stroke-linejoin', 'round');
+                    path.setAttribute('d', 'M19 9l-7 7-7-7');
+                    svg.appendChild(path);
+                    btn.appendChild(q);
+                    btn.appendChild(svg);
+                    var wrapper = document.createElement('div');
+                    wrapper.className = 'faq-card-answer-wrapper';
+                    var inner = document.createElement('div');
+                    inner.className = 'faq-card-answer-inner';
+                    var border = document.createElement('div');
+                    border.className = 'faq-card-answer-border';
+                    var p = document.createElement('p');
+                    p.className = 'faq-card-answer';
+                    p.textContent = item.answer;
+                    border.appendChild(p);
+                    inner.appendChild(border);
+                    wrapper.appendChild(inner);
+                    card.appendChild(btn);
+                    card.appendChild(wrapper);
+                    container.appendChild(card);
+                });
+                initFaqCardListeners();
+            }
+            function fetchFaq() {
+                var loadingEl = document.getElementById('faq-loading');
+                if (!loadingEl) return;
+                var errorEl = document.getElementById('faq-error');
+                var containerEl = document.getElementById('faq-items-container');
+                var url = 'https://rainbow-market.zendesk.com/api/v2/help_center/sections/33369381353746/articles.json?locale=fr&per_page=20&page=1&sort_by=position&sort_order=asc';
+                loadingEl.classList.remove('hidden');
+                if (errorEl) errorEl.classList.add('hidden');
+                if (containerEl) containerEl.classList.add('hidden');
+                fetch(url, { headers: { 'Accept': 'application/json' } })
+                    .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+                    .then(function (data) {
+                        var items = (data.articles || []).filter(function (a) { return !a.draft; }).map(function (a) {
+                            return { question: a.title || '', answer: stripHtml(a.body || a.snippet || '').slice(0, 500) };
+                        });
+                        if (!items.length) throw new Error('empty');
+                        renderFaq(items);
+                        loadingEl.classList.add('hidden');
+                        if (containerEl) containerEl.classList.remove('hidden');
+                    })
+                    .catch(function () {
+                        loadingEl.classList.add('hidden');
+                        if (errorEl) errorEl.classList.remove('hidden');
+                    });
+            }
+            document.addEventListener('DOMContentLoaded', fetchFaq);
+        })();
+    </script>
+    <script>
+    (function() {
+        var sectionNav = document.getElementById('section-nav');
+        if (!sectionNav) return;
+        var links = Array.prototype.slice.call(sectionNav.querySelectorAll('.section-nav-link'));
+        var anchorLinks = links.filter(function(l){ return l.getAttribute('href').charAt(0) === '#'; });
+        var sections = anchorLinks.map(function(link) { return document.getElementById(link.getAttribute('href').slice(1)); });
+        var footer = document.querySelector('footer');
+        var OFFSET = 150;
+        anchorLinks.forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                var target = document.getElementById(link.getAttribute('href').slice(1));
+                if (!target) return;
+                e.preventDefault();
+                var y = target.getBoundingClientRect().top + window.pageYOffset - (OFFSET - 20);
+                window.scrollTo({ top: y, behavior: 'smooth' });
+            });
+        });
+        // Document-relative top (offsetTop is unreliable here: sections live inside a
+        // position:relative wrapper, so offsetTop is measured against that box, not the page).
+        function docTop(el) { return el.getBoundingClientRect().top + window.pageYOffset; }
+        function update() {
+            var scrollY = window.pageYOffset;
+            var valid = sections.filter(Boolean);
+            var firstTop = valid.length ? Math.min.apply(null, valid.map(docTop)) : Infinity;
+            var footerTop = footer ? docTop(footer) : Infinity;
+            if (scrollY + OFFSET >= firstTop - 200 && scrollY + OFFSET < footerTop) { sectionNav.classList.add('visible'); }
+            else { sectionNav.classList.remove('visible'); }
+            // Order-independent scroll-spy: highlight the section with the greatest
+            // document-top that is still above the current scroll position.
+            var activeIndex = -1, activeTop = -Infinity;
+            for (var i = 0; i < sections.length; i++) {
+                if (sections[i]) { var t = docTop(sections[i]); if (t - OFFSET <= scrollY && t > activeTop) { activeTop = t; activeIndex = i; } }
+            }
+            if (activeIndex === -1) activeIndex = 0;
+            anchorLinks.forEach(function(link, i) { link.classList.toggle('active', i === activeIndex); });
+        }
+        window.addEventListener('scroll', update, { passive: true });
+        window.addEventListener('resize', update);
+        update();
+    })();
+    </script>
+    <script src="/js/currency.js"></script>
+    <script>
+        // ── Demo request modal (lead capture) ──
+        (function () {
+            var modal = document.getElementById('demo-modal');
+            if (!modal) return;
+            var panelSuccess = document.getElementById('demo-panel-success');
+            var form = document.getElementById('demo-form');
+            var submitLabel = document.getElementById('demo-submit-label');
+            var successText = document.getElementById('demo-success-text');
+            var lastFocused = null;
+            var DEMO_WEBHOOK_URL = 'https://n8n.openrainbow.org/webhook/demo-request-lead';
+            var demoSubmitBtn = document.getElementById('demo-submit-btn');
+            var demoError = document.getElementById('demo-error');
+            var demoSubmitting = false;
+
+            var COPY = {
+                submitLabel: t('demoSubmit'),
+                sendingLabel: t('sending'),
+                successText: t('demoSuccess')
+            };
+
+            window.openDemoModal = function () {
+                lastFocused = document.activeElement;
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+                panelSuccess.classList.add('hidden');
+                document.getElementById('demo-panel-form').classList.remove('hidden');
+                form.reset();
+                demoError.classList.add('hidden');
+                demoSubmitBtn.disabled = false;
+                submitLabel.textContent = COPY.submitLabel;
+                var firstInput = document.getElementById('demo-first-name');
+                if (firstInput) firstInput.focus();
+            };
+
+            window.closeDemoModal = function () {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+                if (lastFocused && lastFocused.focus) lastFocused.focus();
+            };
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeDemoModal();
+            });
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                if (!form.checkValidity()) { form.reportValidity(); return; }
+                if (demoSubmitting) return;
+
+                var byId = function (id) { return document.getElementById(id).value.trim(); };
+                var payload = {
+                    firstName: byId('demo-first-name'),
+                    lastName: byId('demo-last-name'),
+                    email: byId('demo-email'),
+                    phone: byId('demo-phone'),
+                    company: byId('demo-company'),
+                    companySize: byId('demo-company-size'),
+                    country: byId('demo-country'),
+                    source: byId('demo-source'),
+                    consent: document.getElementById('demo-consent').checked,
+                    requestType: 'book',
+                };
+
+                demoSubmitting = true;
+                demoError.classList.add('hidden');
+                demoSubmitBtn.disabled = true;
+                submitLabel.textContent = COPY.sendingLabel;
+
+                fetch(DEMO_WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                })
+                    .then(function (res) {
+                        if (!res.ok) throw new Error('request failed: ' + res.status);
+                        successText.textContent = COPY.successText;
+                        document.getElementById('demo-panel-form').classList.add('hidden');
+                        panelSuccess.classList.remove('hidden');
+                    })
+                    .catch(function (err) {
+                        console.error('[demo-form] submit failed:', err);
+                        demoError.classList.remove('hidden');
+                    })
+                    .finally(function () {
+                        demoSubmitting = false;
+                        demoSubmitBtn.disabled = false;
+                        submitLabel.textContent = COPY.submitLabel;
+                    });
+            });
+        })();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,78 @@
+/*
+ * render.js — turn a page payload into the parts Astro emits.
+ */
+import { composeParts } from '@rainbow/core/compose';
+import { getKey } from '@rainbow/core/html';
+import { catalogue as loadCatalogue, alternatesFor, baseUrlFrom, activeLocales } from './site.js';
+import { navRuntime } from './nav.js';
+import { config } from './config.js';
+
+/**
+ * Structured data authored inside the template stays translatable: the block
+ * carries the i18n key it was marked with, so the locale's version is used.
+ */
+function resolveJsonLd(page, catalogue) {
+  return (page.jsonLd || []).map((entry) => {
+    if (entry.i18nKey) {
+      const translated = getKey(catalogue, entry.i18nKey);
+      if (translated !== undefined) return String(translated);
+    }
+    return entry.value;
+  }).filter(Boolean);
+}
+
+/** The object the browser reads as window.__CMS__. */
+function runtimeFor({ locale, locales, page, settings, navigation, variants }) {
+  return {
+    locale,
+    locales,
+    page: { key: page.key, route: page.route, kind: page.pageKind },
+    variants,
+    // Reshaped into what the shipped megamenu script expects, so the menu is
+    // CMS-driven without its markup changing.
+    nav: navRuntime(navigation, locale),
+    analytics: {
+      matomoUrl: settings.analytics?.matomoUrl || '',
+      matomoSiteId: settings.analytics?.matomoSiteId || '',
+      hotjarId: settings.analytics?.hotjarId || '',
+      variantDimensionId: settings.analytics?.variantDimensionId || '1',
+    },
+  };
+}
+
+/**
+ * Build the document parts for one request.
+ * `astro` is the Astro global (locals, url); `page` is the API payload.
+ */
+export async function renderPage(astro, page, extra = {}) {
+  const { locals, url } = astro;
+  const locale = locals.locale;
+  const settings = locals.settings || {};
+  const locales = activeLocales(settings);
+  const baseUrl = baseUrlFrom(settings, url);
+  const catalogue = await loadCatalogue(locale);
+
+  const ctx = {
+    locale,
+    sourceLocale: settings.sourceLocale || config.sourceLocale,
+    baseUrl,
+    settings,
+    catalogue,
+    translations: alternatesFor(page, locales, baseUrl),
+    noindex: locals.noindex || page.noindex || locals.preview,
+    variants: locals.variants || {},
+    editMode: !!locals.preview,
+    runtime: runtimeFor({
+      locale,
+      locales,
+      page,
+      settings,
+      navigation: locals.navigation,
+      variants: locals.variants || {},
+    }),
+    ...extra,
+  };
+
+  const pageForCompose = { ...page, jsonLd: resolveJsonLd(page, catalogue) };
+  return composeParts(pageForCompose, ctx);
+}

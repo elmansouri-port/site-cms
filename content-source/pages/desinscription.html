@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Se désinscrire  Rainbow by Alcatel-Lucent</title>
+    <meta name="description" content="Gérez votre abonnement aux emails Rainbow.">
+    <meta name="robots" content="noindex,nofollow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand: #5e2d91;
+            --brand-600: #4a2373;
+            --brand-50: #f5f3ff;
+            --brand-300: #c4b5fd;
+            --navy: #1e1b4b;
+            --ink: #1e1b4b;
+            --muted: #6b6a85;
+            --line: #eceafc;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Google Sans', system-ui, sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(1100px 560px at 12% -8%, #ede9fe 0%, transparent 55%),
+                radial-gradient(900px 480px at 105% 108%, #e6edff 0%, transparent 52%),
+                #f4f2fb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 540px;
+            background: #fff;
+            border-radius: 24px;
+            padding: 44px 40px 38px;
+            text-align: center;
+            box-shadow: 0 30px 70px -28px rgba(30, 27, 75, .4), 0 6px 20px rgba(30, 27, 75, .07);
+            animation: fadeUp .35s ease;
+        }
+
+        @media (max-width:520px) {
+            .card {
+                padding: 32px 22px 28px;
+                border-radius: 18px;
+            }
+        }
+
+        .brand {
+            height: 46px;
+            width: auto;
+            margin-bottom: 26px;
+        }
+
+        .ic {
+            width: 74px;
+            height: 74px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 22px;
+            border: 2px solid var(--brand-300);
+            background: var(--brand-50);
+        }
+
+        .ic svg {
+            width: 34px;
+            height: 34px;
+            color: var(--brand);
+        }
+
+        .ic.is-ok {
+            background: radial-gradient(circle at 35% 35%, #d1fae5, #a7f3d0);
+            border-color: #6ee7b7;
+        }
+
+        .ic.is-ok svg {
+            color: #16a34a;
+        }
+
+        .ic.is-err {
+            background: #fef2f2;
+            border-color: #fecaca;
+        }
+
+        .ic.is-err svg {
+            color: #dc2626;
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 3px solid var(--brand-300);
+            border-top-color: var(--brand);
+            animation: spin .8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        h1 {
+            font-size: 1.42rem;
+            font-weight: 700;
+            letter-spacing: -.02em;
+            color: var(--navy);
+            margin-bottom: 10px;
+        }
+
+        p.sub {
+            color: var(--muted);
+            font-size: .94rem;
+            line-height: 1.6;
+        }
+
+        .email-box {
+            margin: 22px 0 4px;
+            padding: 15px 18px;
+            background: var(--brand-50);
+            border: 1.5px solid var(--line);
+            border-radius: 12px;
+            font-weight: 700;
+            color: var(--navy);
+            font-size: .98rem;
+            word-break: break-word;
+        }
+
+        .actions {
+            margin-top: 26px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            padding: 13px 26px;
+            border: none;
+            border-radius: 12px;
+            background: var(--brand);
+            color: #fff;
+            font-size: .95rem;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all .15s;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--brand-600);
+            transform: translateY(-1px);
+            box-shadow: 0 12px 24px -8px rgba(94, 45, 145, .55);
+        }
+
+        .btn-primary:disabled {
+            opacity: .45;
+            cursor: not-allowed;
+        }
+
+        .btn-link {
+            background: none;
+            border: none;
+            color: var(--muted);
+            font-size: .88rem;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .btn-link:hover {
+            color: var(--brand);
+        }
+
+        .lang-switch {
+            display: flex;
+            gap: 2px;
+            background: var(--brand-50);
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 3px;
+            width: fit-content;
+            margin: 0 auto 22px;
+        }
+
+        .lang-btn {
+            border: none;
+            background: none;
+            color: var(--brand-600);
+            font-size: .74rem;
+            font-weight: 700;
+            padding: 5px 11px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .lang-btn.active {
+            background: var(--brand);
+            color: #fff;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+    <a id="home-link" href="/" hidden aria-hidden="true"></a>
+    <div class="card">
+        <img class="brand" src="/images/Rainbow-AL-logo-banner.webp" alt="Rainbow by Alcatel-Lucent">
+
+        <div class="lang-switch" id="lang-switch">
+            <button class="lang-btn active" data-lang="fr">FR</button>
+            <button class="lang-btn" data-lang="en">EN</button>
+            <button class="lang-btn" data-lang="de">DE</button>
+        </div>
+
+        <!-- CHECKING: verifying the link, nothing is recorded at this stage -->
+        <section id="state-checking">
+            <div class="ic"><div class="spinner"></div></div>
+            <h1 data-i18n="checking_title">Vérification en cours…</h1>
+            <p class="sub" data-i18n="checking_sub">Un instant, nous vérifions votre demande.</p>
+        </section>
+
+        <!-- READY: link is genuine, ask for a deliberate confirmation -->
+        <section id="state-ready" hidden>
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="5" width="18" height="14" rx="2" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 7l9 6 9-6" />
+                </svg></div>
+            <h1 data-i18n="ready_title">Se désinscrire des emails Rainbow&nbsp;?</h1>
+            <p class="sub" data-i18n="ready_sub">Vous ne recevrez plus nos emails à cette adresse&nbsp;:</p>
+            <div class="email-box" id="ready-email"></div>
+            <div class="actions">
+                <button class="btn-primary" id="btn-confirm" data-i18n="ready_cta">Confirmer la désinscription</button>
+                <a class="btn-link" id="btn-cancel" href="/" data-i18n="ready_cancel">Ne rien changer</a>
+            </div>
+        </section>
+
+        <!-- WORKING: the confirm click has landed, recording the opt-out -->
+        <section id="state-working" hidden>
+            <div class="ic"><div class="spinner"></div></div>
+            <h1 data-i18n="working_title">Désinscription en cours…</h1>
+            <p class="sub" data-i18n="working_sub">Merci de patienter quelques secondes.</p>
+        </section>
+
+        <!-- DONE -->
+        <section id="state-done" hidden>
+            <div class="ic is-ok"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg></div>
+            <h1 data-i18n="done_title">Vous êtes désinscrit</h1>
+            <p class="sub" id="done-sub"></p>
+            <div class="actions">
+                <a class="btn-link" href="/" data-i18n="home">Retour à l'accueil</a>
+            </div>
+        </section>
+
+        <!-- ERROR -->
+        <section id="state-error" hidden>
+            <div class="ic is-err"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 9v3.75m0 3.75h.008M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg></div>
+            <h1 id="error-title" data-i18n="error_title">Lien invalide</h1>
+            <p class="sub" id="error-sub"></p>
+            <div class="actions">
+                <button class="btn-link" id="btn-retry" hidden data-i18n="error_retry">Réessayer</button>
+                <a class="btn-link" href="/" data-i18n="home">Retour à l'accueil</a>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        /* ================================================================
+           IP-BASED LANGUAGE DETECTION  (same behaviour as the other pages)
+           ================================================================ */
+        (function detectLangByIP() {
+            try {
+                if (sessionStorage.getItem('lang-manual')) return;
+                fetch('https://ipapi.co/json/')
+                    .then(function (r) { return r.json(); })
+                    .then(function (d) {
+                        var c = (d.country_code || '').toUpperCase();
+                        var FR = ['FR', 'BE', 'LU', 'MC', 'CH', 'SN', 'CI', 'MA', 'DZ', 'TN', 'CM', 'ML', 'BF'];
+                        var DE = ['DE', 'AT', 'LI'];
+                        window.__ipLang = FR.indexOf(c) > -1 ? 'fr' : DE.indexOf(c) > -1 ? 'de' : 'en';
+                        if (typeof window.__applyIpLang === 'function') window.__applyIpLang();
+                    })
+                    .catch(function () { });
+            } catch (e) { }
+        })();
+        /* ================================================================ */
+
+        (function () {
+            'use strict';
+
+            // Two endpoints, two very different guarantees:
+            //  - CHECK is a GET and records nothing. Mail scanners and corporate
+            //    security appliances pre-fetch every link in an email to check it's
+            //    safe; if that GET recorded the opt-out, those robots would
+            //    silently unsubscribe people who never clicked. It only tells us
+            //    the link is genuine and hands back the address, masked, so this
+            //    page can ask "unsubscribe this address?" instead of assuming yes.
+            //  - UNSUBSCRIBE is the POST fired from the confirm button below, i.e.
+            //    only after a human has actually clicked. Same reasoning as the
+            //    booking confirm page.
+            var CHECK_API_URL = 'https://n8n.openrainbow.org/webhook/unsubscribe-check';
+            var UNSUBSCRIBE_API_URL = 'https://n8n.openrainbow.org/webhook/unsubscribe';
+            // Read from a real href (not a hardcoded string) so the GitHub Pages
+            // build's path-prefixer (tools/build-pages.js) can rewrite it for the
+            // /store subpath the same way it rewrites every other on-site link.
+            var HOME_URL = document.getElementById('home-link').getAttribute('href');
+
+            var I18N = {
+                fr: {
+                    title: "Se désinscrire  Rainbow",
+                    checking_title: "Vérification en cours…",
+                    checking_sub: "Un instant, nous vérifions votre demande.",
+                    ready_title: "Se désinscrire des emails Rainbow ?",
+                    ready_sub: "Vous ne recevrez plus nos emails à cette adresse :",
+                    ready_cta: "Confirmer la désinscription",
+                    ready_cancel: "Ne rien changer",
+                    working_title: "Désinscription en cours…",
+                    working_sub: "Merci de patienter quelques secondes.",
+                    done_title: "Vous êtes désinscrit",
+                    done_sub_tpl: "{email} ne recevra plus d'emails de notre part.",
+                    done_already: "Cette adresse était déjà désinscrite. Rien d'autre à faire.",
+                    error_title: "Lien invalide",
+                    error_retry: "Réessayer",
+                    home: "Retour à l'accueil",
+                    err_missing_token: "Ce lien est incomplet. Utilisez le lien présent dans l'un de nos emails.",
+                    err_not_found: "Ce lien de désinscription n'est pas valide. Utilisez le lien présent dans l'un de nos emails.",
+                    err_generic: "Une erreur est survenue. Réessayez dans un instant.",
+                    langname: "Français"
+                },
+                en: {
+                    title: "Unsubscribe  Rainbow",
+                    checking_title: "Checking your link…",
+                    checking_sub: "One moment while we verify your request.",
+                    ready_title: "Unsubscribe from Rainbow emails?",
+                    ready_sub: "We'll stop sending emails to this address:",
+                    ready_cta: "Confirm unsubscribe",
+                    ready_cancel: "Don't change anything",
+                    working_title: "Unsubscribing…",
+                    working_sub: "This takes a few seconds.",
+                    done_title: "You're unsubscribed",
+                    done_sub_tpl: "{email} will no longer receive emails from us.",
+                    done_already: "This address was already unsubscribed. Nothing else to do.",
+                    error_title: "Invalid link",
+                    error_retry: "Try again",
+                    home: "Back to homepage",
+                    err_missing_token: "This link is incomplete. Please use the link from one of our emails.",
+                    err_not_found: "This unsubscribe link isn't valid. Please use the link from one of our emails.",
+                    err_generic: "Something went wrong. Please try again in a moment.",
+                    langname: "English"
+                },
+                de: {
+                    title: "Abmelden  Rainbow",
+                    checking_title: "Link wird geprüft…",
+                    checking_sub: "Einen Moment, wir überprüfen Ihre Anfrage.",
+                    ready_title: "Von Rainbow-E-Mails abmelden?",
+                    ready_sub: "Wir senden keine E-Mails mehr an diese Adresse:",
+                    ready_cta: "Abmeldung bestätigen",
+                    ready_cancel: "Nichts ändern",
+                    working_title: "Abmeldung läuft…",
+                    working_sub: "Das dauert nur wenige Sekunden.",
+                    done_title: "Sie sind abgemeldet",
+                    done_sub_tpl: "{email} erhält keine E-Mails mehr von uns.",
+                    done_already: "Diese Adresse war bereits abgemeldet. Es ist nichts weiter zu tun.",
+                    error_title: "Ungültiger Link",
+                    error_retry: "Erneut versuchen",
+                    home: "Zur Startseite",
+                    err_missing_token: "Dieser Link ist unvollständig. Bitte verwenden Sie den Link aus einer unserer E-Mails.",
+                    err_not_found: "Dieser Abmeldelink ist nicht gültig. Bitte verwenden Sie den Link aus einer unserer E-Mails.",
+                    err_generic: "Etwas ist schiefgelaufen. Bitte versuchen Sie es gleich erneut.",
+                    langname: "Deutsch"
+                }
+            };
+
+            var lang = 'fr';
+            var params = new URLSearchParams(window.location.search);
+            var TOKEN = params.get('u') || params.get('token') || '';
+
+            // The URL's /fr /en /de segment is authoritative — it's set by
+            // whatever email linked here, so it takes priority over IP-based
+            // guessing (which only kicks in as a fallback for a bare URL).
+            var URL_LANG = (window.location.pathname.match(/\/(fr|en|de)(\/|$)/) || [])[1];
+            if (URL_LANG) { lang = URL_LANG; window.__langManualSet = true; }
+            document.querySelectorAll('.lang-btn').forEach(function (b) {
+                b.classList.toggle('active', b.dataset.lang === lang);
+            });
+
+            function t(k) { return (I18N[lang] && I18N[lang][k]) || I18N.fr[k] || k; }
+
+            // Swap the /fr|en|de segment of the current path, preserving
+            // whatever precedes it (e.g. a GitHub Pages "/store" subpath)
+            // and the query string (the unsubscribe token).
+            function langSwitchUrl(newLang) {
+                var m = window.location.pathname.match(/^(.*?)\/(fr|en|de)(\/.*|$)/);
+                var base = m ? m[1] : '';
+                var rest = m ? m[3] : window.location.pathname;
+                return base + '/' + newLang + rest + window.location.search + window.location.hash;
+            }
+
+            window.__applyIpLang = function () {
+                if (!window.__ipLang || window.__langManualSet) return;
+                lang = window.__ipLang;
+                document.querySelectorAll('.lang-btn').forEach(function (b) {
+                    b.classList.toggle('active', b.dataset.lang === lang);
+                });
+                applyI18n();
+            };
+            if (!URL_LANG && window.__ipLang && !window.__langManualSet) lang = window.__ipLang;
+
+            function show(id) {
+                ['state-checking', 'state-ready', 'state-working', 'state-done', 'state-error']
+                    .forEach(function (s) { document.getElementById(s).hidden = (s !== id); });
+            }
+
+            function applyI18n() {
+                document.documentElement.lang = lang;
+                document.title = t('title');
+                document.querySelectorAll('[data-i18n]').forEach(function (el) {
+                    el.textContent = t(el.getAttribute('data-i18n'));
+                });
+                document.getElementById('btn-cancel').setAttribute('href', HOME_URL);
+                // Re-render whichever outcome is currently on screen.
+                if (lastResult) render(lastResult);
+            }
+
+            var lastResult = null;
+
+            function render(res) {
+                lastResult = res;
+                if (res.kind === 'ready') {
+                    document.getElementById('ready-email').textContent = res.emailMasked;
+                    show('state-ready');
+                    return;
+                }
+                if (res.kind === 'done') {
+                    document.getElementById('done-sub').textContent = res.already
+                        ? t('done_already')
+                        : t('done_sub_tpl').replace('{email}', res.emailMasked || '');
+                    show('state-done');
+                    return;
+                }
+                if (res.kind === 'error') {
+                    document.getElementById('error-sub').textContent = t(res.messageKey);
+                    document.getElementById('btn-retry').hidden = !res.canRetry;
+                    show('state-error');
+                    return;
+                }
+                show('state-checking');
+            }
+
+            function fail(code, canRetry) {
+                var key = code === 'missing_token' ? 'err_missing_token'
+                    : code === 'not_found' ? 'err_not_found'
+                    : 'err_generic';
+                render({ kind: 'error', messageKey: key, canRetry: !!canRetry });
+            }
+
+            // Step 1 — GET, checked not trusted. The signature embedded in the
+            // token is recomputed server-side and compared: editing the address
+            // inside the link invalidates it, so nobody can unsubscribe someone
+            // else by hand-editing a URL. Nothing is written by this call.
+            function checkToken() {
+                if (!TOKEN) { fail('missing_token', false); return; }
+                show('state-checking');
+                fetch(CHECK_API_URL + '?u=' + encodeURIComponent(TOKEN))
+                    .then(function (r) {
+                        // A bad or tampered token is a legitimate 404, not a
+                        // server error — no need to log it as one.
+                        if (r.status === 404) { fail('not_found', false); return null; }
+                        if (!r.ok) throw new Error('unsubscribe-check failed with status ' + r.status);
+                        return r.json();
+                    })
+                    .then(function (body) {
+                        if (!body) return;
+                        render({ kind: 'ready', emailMasked: body.email_masked || '' });
+                    })
+                    .catch(function (err) {
+                        console.error('[unsubscribe] check failed:', err);
+                        render({ kind: 'error', messageKey: 'err_generic', canRetry: true });
+                    });
+            }
+
+            // Step 2 — POST, fired only from the confirm button, i.e. only after
+            // a human has actually clicked. The backend matches on the canonical
+            // address (jean.dupont+news@gmail.com and jeandupont@gmail.com are
+            // the same person) and writes one row unless one already exists —
+            // clicking confirm twice reports success both times without ever
+            // writing a duplicate.
+            //
+            // Downstream CRM sync (Salesforce) is a NoOp placeholder today: the
+            // record is written here regardless, and Salesforce sync is not yet
+            // wired in, so it simply passes through without side effects.
+            function confirmUnsubscribe() {
+                show('state-working');
+                fetch(UNSUBSCRIBE_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: TOKEN })
+                })
+                    .then(function (r) {
+                        return r.json().catch(function () { return {}; }).then(function (body) {
+                            return { ok: r.ok, status: r.status, body: body };
+                        });
+                    })
+                    .then(function (res) {
+                        if (res.ok) {
+                            render({
+                                kind: 'done',
+                                already: !!res.body.already,
+                                emailMasked: res.body.email_masked || (lastResult && lastResult.emailMasked)
+                            });
+                            return;
+                        }
+                        fail(res.body.error_code, true);
+                    })
+                    .catch(function (err) {
+                        console.error('[unsubscribe] confirm failed:', err);
+                        render({ kind: 'error', messageKey: 'err_generic', canRetry: true });
+                    });
+            }
+
+            document.getElementById('btn-confirm').addEventListener('click', confirmUnsubscribe);
+            document.getElementById('btn-retry').addEventListener('click', checkToken);
+
+            document.getElementById('lang-switch').addEventListener('click', function (e) {
+                var b = e.target.closest('.lang-btn'); if (!b) return;
+                if (b.dataset.lang === lang) return;
+                sessionStorage.setItem('lang-manual', '1');
+                window.location.href = langSwitchUrl(b.dataset.lang);
+            });
+
+            applyI18n();
+            checkToken();
+        })();
+    </script>
+</body>
+
+</html>

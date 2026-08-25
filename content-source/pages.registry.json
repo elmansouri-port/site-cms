@@ -1,0 +1,194 @@
+{
+  "sourceLocale": "fr",
+  "locales": [
+    "fr",
+    "en",
+    "de"
+  ],
+  "routedLocales": [
+    "fr",
+    "en",
+    "de"
+  ],
+  "pages": [
+    {
+      "key": "index",
+      "file": "index.html",
+      "route": "",
+      "title": "Homepage",
+      "pageKind": "home",
+      "type": "static",
+      "priority": 1,
+      "changefreq": "weekly"
+    },
+    {
+      "key": "products",
+      "file": "products.html",
+      "route": "products",
+      "title": "Products overview",
+      "pageKind": "product",
+      "type": "static",
+      "priority": 0.9
+    },
+    {
+      "key": "collaboration",
+      "file": "collaboration.html",
+      "route": "products/collaboration",
+      "title": "Rainbow Collaboration",
+      "pageKind": "product",
+      "type": "static",
+      "priority": 0.9
+    },
+    {
+      "key": "webinar",
+      "file": "webinar.html",
+      "route": "products/webinar",
+      "title": "Rainbow Webinar",
+      "pageKind": "product",
+      "type": "static",
+      "priority": 0.9
+    },
+    {
+      "key": "tarifs",
+      "file": "tarifs.html",
+      "route": "tarifs",
+      "title": "Pricing",
+      "pageKind": "pricing",
+      "type": "static",
+      "priority": 0.9
+    },
+    {
+      "key": "blog",
+      "file": "blog.html",
+      "route": "blog",
+      "title": "Blog",
+      "pageKind": "blogIndex",
+      "type": "hybrid",
+      "priority": 0.8,
+      "changefreq": "daily"
+    },
+    {
+      "key": "faq",
+      "file": "faq.html",
+      "route": "faq",
+      "title": "FAQ",
+      "pageKind": "page",
+      "type": "hybrid",
+      "priority": 0.7
+    },
+    {
+      "key": "partenaires",
+      "file": "partenaires.html",
+      "route": "partenaires",
+      "title": "Become a partner",
+      "pageKind": "page",
+      "type": "static",
+      "priority": 0.7
+    },
+    {
+      "key": "trouver-un-partenaire",
+      "file": "trouver-un-partenaire.html",
+      "route": "trouver-un-partenaire",
+      "title": "Find a partner",
+      "pageKind": "page",
+      "type": "hybrid",
+      "priority": 0.7
+    },
+    {
+      "key": "a-propos-de-rainbow",
+      "file": "a-propos-de-rainbow.html",
+      "route": "a-propos-de-rainbow",
+      "title": "About Rainbow",
+      "pageKind": "page",
+      "type": "hybrid",
+      "priority": 0.7
+    },
+    {
+      "key": "rainbow-donnees-hebergees-en-france",
+      "file": "rainbow-donnees-hebergees-en-france.html",
+      "route": "rainbow-donnees-hebergees-en-france",
+      "title": "Data hosted in France",
+      "pageKind": "page",
+      "type": "static",
+      "priority": 0.7
+    },
+    {
+      "key": "centre-aide-rainbow",
+      "file": "centre-aide-rainbow.html",
+      "route": "centre-aide-rainbow",
+      "title": "Help center",
+      "pageKind": "page",
+      "type": "hybrid",
+      "priority": 0.6
+    },
+    {
+      "key": "telecharger-application-rainbow",
+      "file": "telecharger-application-rainbow.html",
+      "route": "telecharger-application-rainbow",
+      "title": "Download the app",
+      "pageKind": "page",
+      "type": "static",
+      "priority": 0.7
+    },
+    {
+      "key": "form-al",
+      "file": "form-ale.html",
+      "route": "form-al",
+      "title": "Book a call",
+      "pageKind": "form",
+      "type": "static",
+      "noindex": true,
+      "clientTranslated": true
+    },
+    {
+      "key": "confirmer-rendez-vous",
+      "file": "confirmer-rendez-vous.html",
+      "route": "confirmer-rendez-vous",
+      "title": "Confirm a booking",
+      "pageKind": "form",
+      "type": "static",
+      "noindex": true,
+      "clientTranslated": true
+    },
+    {
+      "key": "modifier-rendez-vous",
+      "file": "modifier-rendez-vous.html",
+      "route": "modifier-rendez-vous",
+      "title": "Reschedule a booking",
+      "pageKind": "form",
+      "type": "static",
+      "noindex": true,
+      "clientTranslated": true
+    },
+    {
+      "key": "desinscription",
+      "file": "desinscription.html",
+      "route": "desinscription",
+      "title": "Unsubscribe",
+      "pageKind": "form",
+      "type": "static",
+      "noindex": true,
+      "clientTranslated": true
+    },
+    {
+      "key": "not-found",
+      "file": "404.html",
+      "route": "404",
+      "title": "Page not found",
+      "pageKind": "error",
+      "type": "static",
+      "noindex": true,
+      "clientTranslated": true
+    },
+    {
+      "key": "blog-the-power-of-rainbow",
+      "file": "blog/the-power-of-rainbow.html",
+      "route": "blog/the-power-of-rainbow",
+      "title": "The power of Rainbow",
+      "pageKind": "blogPost",
+      "type": "dynamic",
+      "priority": 0.6,
+      "isArticleTemplate": true
+    }
+  ]
+}

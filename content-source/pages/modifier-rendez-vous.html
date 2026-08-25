@@ -1,0 +1,2192 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier votre rendez-vous  Rainbow by Alcatel-Lucent</title>
+    <meta name="description"
+        content="Modifiez la date et l'heure de votre rendez-vous Rainbow en quelques clics.">
+    <meta name="robots" content="noindex,follow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand: #5e2d91;
+            --brand-600: #4a2373;
+            --brand-50: #f5f3ff;
+            --brand-100: #ede9fe;
+            --brand-300: #c4b5fd;
+            --navy: #1e1b4b;
+            --ink: #1e1b4b;
+            --muted: #6b6a85;
+            --line: #eceafc;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Google Sans', system-ui, sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(1100px 560px at 12% -8%, #ede9fe 0%, transparent 55%),
+                radial-gradient(900px 480px at 105% 108%, #e6edff 0%, transparent 52%),
+                #f4f2fb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        /* ---- Shell ---- */
+        .shell {
+            width: 100%;
+            max-width: 1080px;
+            height: min(700px, calc(100vh - 40px));
+            min-height: 520px;
+            background: #fff;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 30px 70px -28px rgba(30, 27, 75, .4), 0 6px 20px rgba(30, 27, 75, .07);
+            display: grid;
+            grid-template-columns: 300px 1fr;
+        }
+
+        @media (max-width:860px) {
+            body {
+                overflow: auto;
+                align-items: flex-start;
+                padding: 16px;
+            }
+
+            .shell {
+                grid-template-columns: 1fr;
+                height: auto;
+                max-width: 660px;
+                min-height: 0;
+                border-radius: 20px;
+            }
+        }
+
+        @media (max-width:520px) {
+            body {
+                padding: 8px 0 0;
+            }
+
+            .shell {
+                border-radius: 0;
+                max-width: 100%;
+                box-shadow: none;
+            }
+        }
+
+        /* ---- Info panel (left) ---- */
+        .info-panel {
+            padding: 32px 30px;
+            background: linear-gradient(155deg, #fbfaff 0%, #ece6fa 60%, #e4dcf4 100%);
+            border-right: 1px solid var(--line);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .brand-row {
+            margin-bottom: 26px;
+        }
+
+        .brand-row img {
+            height: 54px;
+            width: auto;
+        }
+
+        .info-headline {
+            font-size: 1.38rem;
+            font-weight: 700;
+            line-height: 1.25;
+            letter-spacing: -.025em;
+            color: var(--navy);
+            margin-bottom: 10px;
+        }
+
+        .info-sub {
+            font-size: .9rem;
+            color: var(--muted);
+            line-height: 1.55;
+            margin-bottom: 20px;
+        }
+
+        .meta-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            color: var(--brand-600);
+            font-size: .86rem;
+            font-weight: 600;
+        }
+
+        .meta-ic {
+            width: 30px;
+            height: 30px;
+            flex-shrink: 0;
+            border-radius: 8px;
+            background: rgba(94, 45, 145, .12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--brand);
+        }
+
+        .meta-ic svg {
+            width: 17px;
+            height: 17px;
+        }
+
+        .prog-title {
+            font-size: .68rem;
+            font-weight: 700;
+            letter-spacing: .15em;
+            text-transform: uppercase;
+            color: #9a91ba;
+            margin: 22px 0 14px;
+        }
+
+        .prog-item {
+            display: flex;
+            gap: 11px;
+            margin-bottom: 13px;
+        }
+
+        .prog-check {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            background: var(--brand);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            margin-top: 1px;
+        }
+
+        .prog-check svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        .prog-item p {
+            font-size: .85rem;
+            color: #514c66;
+            line-height: 1.5;
+        }
+
+        /* ---- Summary cards (current booking / new slot) ---- */
+        .summary-card {
+            background: #fff;
+            border: 1.5px solid var(--line);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 14px;
+        }
+
+        .summary-card.is-new {
+            border-color: var(--brand-300);
+            background: var(--brand-50);
+            animation: fadeUp .3s ease;
+        }
+
+        .summary-title {
+            font-size: .66rem;
+            font-weight: 700;
+            letter-spacing: .13em;
+            text-transform: uppercase;
+            color: #9a91ba;
+            margin-bottom: 3px;
+        }
+
+        .summary-ref {
+            font-size: .72rem;
+            font-weight: 600;
+            color: #b3acce;
+            margin-bottom: 11px;
+        }
+
+        .summary-line {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: .92rem;
+            color: var(--navy);
+            font-weight: 700;
+        }
+
+        .summary-line svg {
+            width: 17px;
+            height: 17px;
+            flex-shrink: 0;
+            color: var(--brand);
+            margin-top: 1px;
+        }
+
+        /* ---- Main panel (right) ---- */
+        .main-panel {
+            position: relative;
+            padding: 34px 34px 30px 34px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        @media (max-width:860px) {
+            .info-panel {
+                border-right: none;
+                border-bottom: 1px solid var(--line);
+            }
+        }
+
+        @media (max-width:580px) {
+
+            .info-panel,
+            .main-panel {
+                padding: 22px 20px;
+            }
+        }
+
+        @media (max-width:520px) {
+
+            .info-panel,
+            .main-panel {
+                padding: 18px 16px;
+            }
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+            animation: fadeUp .3s ease;
+        }
+
+        .step-title {
+            font-size: 1.18rem;
+            font-weight: 700;
+            letter-spacing: -.02em;
+            color: var(--navy);
+            margin-bottom: 12px;
+            padding-right: 120px;
+        }
+
+        /* ---- Progress dots ---- */
+        .progress-dots {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .pdot {
+            height: 6px;
+            border-radius: 3px;
+            background: var(--line);
+            transition: all .35s cubic-bezier(.16, 1, .3, 1);
+            width: 20px;
+        }
+
+        .pdot.active {
+            background: var(--brand);
+            width: 36px;
+        }
+
+        .pdot.done {
+            background: var(--brand-300);
+            width: 20px;
+        }
+
+        .pdot-label {
+            font-size: .74rem;
+            color: var(--muted);
+            margin-left: 8px;
+            font-weight: 600;
+            transition: opacity .25s;
+        }
+
+        /* ---- Booking columns ---- */
+        .book-cols {
+            display: grid;
+            grid-template-columns: 1fr 196px;
+            gap: 24px;
+            align-items: stretch;
+            flex: 1;
+            min-height: 0;
+            margin-top: 40px;
+        }
+
+        @media (max-width:680px) {
+            .book-cols {
+                grid-template-columns: 1fr 160px;
+                gap: 14px;
+            }
+        }
+
+        @media (max-width:480px) {
+            .book-cols {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+        }
+
+        /* ---- Calendar ---- */
+        .cal-col {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cal-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .cal-month {
+            font-size: .98rem;
+            font-weight: 700;
+            color: var(--navy);
+            text-transform: capitalize;
+        }
+
+        .cal-nav {
+            width: 32px;
+            height: 32px;
+            border-radius: 9px;
+            border: 1.5px solid var(--line);
+            background: #fff;
+            color: var(--brand);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all .15s;
+        }
+
+        .cal-nav:hover:not(:disabled) {
+            background: var(--brand-50);
+            border-color: var(--brand-300);
+            box-shadow: 0 2px 6px -2px rgba(94, 45, 145, .2);
+        }
+
+        .cal-nav:disabled {
+            opacity: .3;
+            cursor: default;
+        }
+
+        .cal-nav svg {
+            width: 17px;
+            height: 17px;
+        }
+
+        .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            column-gap: 34px;
+            row-gap: 8px;
+        }
+
+        .cal-wd {
+            text-align: center;
+            font-size: .66rem;
+            font-weight: 700;
+            color: #a9a2c4;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            padding: 3px 0;
+        }
+
+        .cal-day {
+            aspect-ratio: 1;
+            border: none;
+            background: transparent;
+            color: #3a3652;
+            font-size: .86rem;
+            font-weight: 500;
+            border-radius: 9px;
+            cursor: pointer;
+            transition: all .12s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: inherit;
+        }
+
+        @media (min-width:861px) {
+            .book-cols {
+                grid-template-rows: 1fr;
+            }
+
+            .cal-col {
+                flex: 1;
+                min-height: 0;
+            }
+
+            #cal-days {
+                grid-auto-rows: 36px;
+                align-content: start;
+                flex: 1;
+                min-height: 0;
+                overflow-y: auto;
+                padding-right: 3px;
+            }
+
+            #cal-days::-webkit-scrollbar {
+                width: 4px;
+            }
+
+            #cal-days::-webkit-scrollbar-thumb {
+                background: #dcd7f0;
+                border-radius: 3px;
+            }
+
+            .cal-day {
+                aspect-ratio: auto;
+            }
+
+            .cal-empty {
+                aspect-ratio: auto;
+            }
+        }
+
+        /* ---- Short-height viewports (e.g. laptop screens with limited vertical space) ---- */
+        @media (max-height: 700px) and (min-width: 861px) {
+            .shell {
+                height: calc(100vh - 24px);
+                min-height: 420px;
+            }
+
+            .book-cols {
+                margin-top: 16px;
+            }
+
+            .step-title {
+                margin-bottom: 6px;
+            }
+
+            .progress-dots {
+                margin-bottom: 6px;
+            }
+
+            #cal-days {
+                grid-auto-rows: 30px;
+            }
+        }
+
+        .cal-day:hover:not(:disabled):not(.selected) {
+            background: var(--brand-50);
+            color: var(--brand-600);
+            transform: scale(1.07);
+        }
+
+        .cal-day:disabled {
+            color: #cfcbdd;
+            cursor: default;
+        }
+
+        .cal-day.today:not(.selected) {
+            box-shadow: inset 0 0 0 1.5px var(--brand-300);
+            font-weight: 700;
+            color: var(--brand);
+        }
+
+        .cal-day.selected {
+            background: var(--brand);
+            color: #fff;
+            font-weight: 700;
+            box-shadow: 0 6px 16px -4px rgba(94, 45, 145, .6);
+            transform: scale(1.05);
+        }
+
+        .cal-empty {
+            aspect-ratio: 1;
+        }
+
+        /* ---- Slots ---- */
+        .slots-col {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .slots-label {
+            font-size: .7rem;
+            font-weight: 700;
+            color: #7b71a3;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: .12em;
+            flex-shrink: 0;
+        }
+
+        #slots-area {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .slots-scroll {
+            flex: 1 1 0;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .slots-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .slots-scroll::-webkit-scrollbar-thumb {
+            background: #dcd7f0;
+            border-radius: 3px;
+        }
+
+        .slot {
+            position: relative;
+            padding: 9px 8px;
+            border: 1.5px solid #e3def4;
+            background: #fff;
+            color: var(--brand-600);
+            border-radius: 10px;
+            font-size: .86rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all .13s;
+            font-family: inherit;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .slot:hover:not(.selected):not(:disabled) {
+            border-color: var(--brand);
+            background: var(--brand-50);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px -3px rgba(94, 45, 145, .22);
+        }
+
+        /* ---- Cancel affordance ---- */
+        .cancel-row {
+            margin-top: 14px;
+            text-align: center;
+            font-size: .8rem;
+            color: var(--muted);
+        }
+
+        .cancel-link {
+            background: none;
+            border: none;
+            padding: 0 0 1px;
+            margin-left: 4px;
+            font: inherit;
+            font-weight: 700;
+            color: #b45309;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(180, 83, 9, .35);
+            transition: color .15s, border-color .15s;
+        }
+
+        .cancel-link:hover {
+            color: #dc2626;
+            border-bottom-color: #dc2626;
+        }
+
+        .success-ic.is-warn {
+            background: #fffbeb;
+            border-color: #fcd34d;
+        }
+
+        .success-ic.is-warn svg {
+            color: #d97706;
+        }
+
+        .btn-danger {
+            padding: 12px 22px;
+            border: none;
+            border-radius: 12px;
+            background: #dc2626;
+            color: #fff;
+            font-size: .92rem;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all .15s;
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: #b91c1c;
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px -8px rgba(220, 38, 38, .55);
+        }
+
+        .btn-danger:disabled {
+            opacity: .5;
+            cursor: not-allowed;
+        }
+
+        .hint {
+            font-size: .8rem;
+            color: var(--muted);
+            text-align: center;
+            margin-top: 12px;
+        }
+
+        .tz-note {
+            font-size: .68rem;
+            color: #a9a2c4;
+            text-align: center;
+            margin-top: 8px;
+            flex-shrink: 0;
+        }
+
+        .sol-group {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .sol-btn {
+            flex: 1 1 auto;
+            padding: 7px 10px;
+            border: 1.5px solid #e3def4;
+            background: #fff;
+            color: var(--brand-600);
+            border-radius: 9px;
+            font-size: .76rem;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all .13s;
+            white-space: nowrap;
+        }
+
+        .sol-btn:hover:not(.selected) {
+            border-color: var(--brand);
+            background: var(--brand-50);
+        }
+
+        .sol-btn.selected {
+            background: var(--brand);
+            border-color: var(--brand);
+            color: #fff;
+        }
+
+        .slot:disabled {
+            cursor: not-allowed;
+            background: #f7f6fb;
+            border-color: #eceafc;
+            color: #b9b3ce;
+            text-decoration: line-through;
+            font-weight: 500;
+        }
+
+        .slot:disabled:hover {
+            transform: none;
+            box-shadow: none;
+            border-color: #eceafc;
+            background: #f7f6fb;
+        }
+
+        .slot.selected {
+            background: var(--brand);
+            color: #fff;
+            border-color: var(--brand);
+            box-shadow: 0 4px 12px -3px rgba(94, 45, 145, .45);
+        }
+
+        .slot.is-current:not(.selected) {
+            border-style: dashed;
+            border-color: var(--brand-300);
+        }
+
+        .slot-current-tag {
+            position: absolute;
+            top: -8px;
+            right: 6px;
+            background: var(--brand-300);
+            color: #fff;
+            font-size: .58rem;
+            font-weight: 700;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            padding: 2px 6px;
+            border-radius: 999px;
+        }
+
+        .slots-awaiting {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-align: center;
+            background: var(--brand-50);
+            border: 1.5px dashed var(--brand-300);
+            border-radius: 12px;
+            padding: 20px 12px;
+            min-height: 100px;
+        }
+
+        .slots-awaiting svg {
+            width: 22px;
+            height: 22px;
+            color: var(--brand);
+            opacity: .4;
+        }
+
+        .slots-awaiting p {
+            font-size: .73rem;
+            line-height: 1.5;
+            color: #9b91c8;
+        }
+
+        /* ---- Time chip (selected slot) ---- */
+        @keyframes chipIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px) scale(.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .time-chip {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 11px 13px;
+            background: var(--brand-50);
+            border: 1.5px solid var(--brand);
+            color: var(--navy);
+            border-radius: 10px;
+            width: 100%;
+            font-family: inherit;
+            cursor: pointer;
+            flex-shrink: 0;
+            animation: chipIn .3s cubic-bezier(.16, 1, .3, 1) both;
+            transition: background .13s, border-color .13s;
+        }
+
+        .time-chip:hover {
+            background: var(--brand-100);
+        }
+
+        .chip-time {
+            font-size: .92rem;
+            font-weight: 700;
+            color: var(--brand);
+            letter-spacing: .01em;
+        }
+
+        .chip-edit {
+            display: flex;
+            align-items: center;
+            color: var(--brand);
+            opacity: .4;
+            transition: opacity .13s;
+        }
+
+        .time-chip:hover .chip-edit {
+            opacity: .9;
+        }
+
+        .chip-edit svg {
+            width: 13px;
+            height: 13px;
+        }
+
+        .section-label {
+            font-size: .68rem;
+            font-weight: 700;
+            color: #7b71a3;
+            text-transform: uppercase;
+            letter-spacing: .12em;
+            flex-shrink: 0;
+        }
+
+        /* ---- Old → new comparison card ---- */
+        .compare-card {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            padding: 16px 10px;
+            background: var(--brand-50);
+            border: 1.5px dashed var(--brand-300);
+            border-radius: 12px;
+            flex-shrink: 0;
+        }
+
+        .compare-side {
+            text-align: center;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .compare-label {
+            font-size: .62rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: #9a91ba;
+            margin-bottom: 5px;
+        }
+
+        .compare-time {
+            font-size: .98rem;
+            font-weight: 700;
+            color: #b3acce;
+            text-decoration: line-through;
+        }
+
+        .compare-side.is-new .compare-time {
+            color: var(--brand);
+            text-decoration: none;
+        }
+
+        .compare-arrow {
+            color: var(--brand-300);
+            flex-shrink: 0;
+        }
+
+        .compare-arrow svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* ---- Buttons ---- */
+        .btn-primary {
+            margin-top: 20px;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: var(--brand);
+            color: #fff;
+            font-size: .98rem;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--brand-600);
+            transform: translateY(-1px);
+            box-shadow: 0 12px 24px -8px rgba(94, 45, 145, .55);
+        }
+
+        .btn-primary:disabled {
+            opacity: .35;
+            cursor: not-allowed;
+        }
+
+        .btn-primary svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .btn-primary.ready {
+            box-shadow: 0 6px 20px -4px rgba(94, 45, 145, .42);
+        }
+
+        .submit-error {
+            font-size: .8rem;
+            color: #dc2626;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-top: 14px;
+            display: none;
+        }
+
+        .submit-error.visible {
+            display: block;
+        }
+
+        @media (max-width:860px) {
+            .step .btn-primary {
+                width: 100%;
+            }
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: none;
+            border: none;
+            color: var(--muted);
+            font-size: .86rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            padding: 2px 0;
+            transition: color .15s;
+            text-decoration: none;
+        }
+
+        .btn-back:hover {
+            color: var(--brand);
+        }
+
+        .btn-back svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* ---- Language switcher ---- */
+        .lang-switch {
+            position: absolute;
+            top: 26px;
+            right: 32px;
+            display: flex;
+            gap: 2px;
+            background: var(--brand-50);
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 3px;
+            z-index: 20;
+        }
+
+        @media (max-width:560px) {
+            .lang-switch {
+                top: 20px;
+                right: 18px;
+            }
+        }
+
+        .lang-btn {
+            border: none;
+            background: none;
+            color: var(--brand-600);
+            font-size: .76rem;
+            font-weight: 700;
+            padding: 5px 11px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all .14s;
+        }
+
+        .lang-btn:hover {
+            color: var(--brand);
+        }
+
+        .lang-btn.active {
+            background: var(--brand);
+            color: #fff;
+        }
+
+        /* ---- Success ---- */
+        .success-wrap {
+            text-align: center;
+            margin: auto 0;
+            padding: 20px 0;
+        }
+
+        .success-ic {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #d1fae5, #a7f3d0);
+            border: 2px solid #6ee7b7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 22px;
+            box-shadow: 0 8px 20px -6px rgba(22, 163, 74, .3);
+        }
+
+        .success-ic svg {
+            width: 34px;
+            height: 34px;
+            color: #16a34a;
+        }
+
+        .success-ic.is-loading {
+            background: var(--brand-50);
+            border-color: var(--brand-300);
+        }
+
+        .success-ic.is-error {
+            background: #fef2f2;
+            border-color: #fecaca;
+        }
+
+        .success-ic.is-error svg {
+            color: #dc2626;
+        }
+
+        .spinner {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 3px solid var(--brand-300);
+            border-top-color: var(--brand);
+            animation: spin .8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .success-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 9px;
+        }
+
+        .success-sub {
+            color: var(--muted);
+            font-size: .92rem;
+            line-height: 1.6;
+            max-width: 400px;
+            margin: 0 auto 24px;
+        }
+
+        .success-actions {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes revealSlot {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+
+        /* ---- Mobile collapse ---- */
+        @media (max-width:860px) {
+            .info-sub {
+                display: none;
+            }
+
+            .prog-title,
+            .prog-item {
+                display: none;
+            }
+
+            .info-panel {
+                padding-bottom: 18px;
+            }
+
+            .book-cols {
+                gap: 12px;
+                margin-top: 12px;
+            }
+
+            .cal-grid {
+                gap: 8px;
+            }
+
+            .slots-col {
+                min-height: 0;
+            }
+        }
+
+        @media (max-width:520px) {
+            .cal-grid {
+                gap: 6px;
+            }
+
+            .slots-col {
+                min-height: 160px;
+            }
+
+            .meta-row {
+                font-size: .82rem;
+                margin-bottom: 8px;
+            }
+
+            .slots-scroll {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+                overflow: visible;
+                flex: none;
+            }
+
+            .compare-card {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .compare-arrow svg {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="shell">
+
+        <!-- ============ INFO PANEL ============ -->
+        <aside class="info-panel">
+            <div class="brand-row">
+                <img src="/images/Rainbow-AL-logo-banner.webp" alt="Rainbow by Alcatel-Lucent">
+            </div>
+
+            <h1 class="info-headline" data-i18n="headline">Modifiez votre rendez-vous</h1>
+            <p class="info-sub" data-i18n="subhead">Choisissez une nouvelle date et un nouvel horaire qui vous
+                conviennent mieux.</p>
+
+            <div class="summary-card">
+                <p class="summary-title" data-i18n="current_label">Rendez-vous actuel</p>
+                <p class="summary-ref" id="current-ref"></p>
+                <div class="summary-line">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                    </svg>
+                    <span id="current-datetime"></span>
+                </div>
+            </div>
+
+            <div class="summary-card is-new" id="new-summary-card" hidden>
+                <p class="summary-title" data-i18n="new_summary_title">Nouveau créneau</p>
+                <div class="summary-line">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                    </svg>
+                    <span id="new-datetime"></span>
+                </div>
+            </div>
+
+            <div class="meta-row">
+                <span class="meta-ic"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="9" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2" />
+                    </svg></span>
+                <span data-i18n="duration">Durée : 30 minutes</span>
+            </div>
+            <div class="meta-row">
+                <span class="meta-ic"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+                    </svg></span>
+                <span data-i18n="via">Par visioconférence Rainbow</span>
+            </div>
+
+            <p class="prog-title" data-i18n="reassure_title">À savoir</p>
+            <div class="prog-item">
+                <span class="prog-check"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                        stroke-width="3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg></span>
+                <p data-i18n="reassure1">Le lien de visioconférence reste inchangé.</p>
+            </div>
+            <div class="prog-item">
+                <span class="prog-check"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                        stroke-width="3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg></span>
+                <p data-i18n="reassure2">Vous recevrez un e-mail de confirmation pour le nouveau créneau.</p>
+            </div>
+            <div class="prog-item">
+                <span class="prog-check"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                        stroke-width="3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg></span>
+                <p data-i18n="reassure3">Vous pouvez modifier votre créneau jusqu'à 24h avant le rendez-vous.</p>
+            </div>
+        </aside>
+
+        <!-- ============ MAIN PANEL ============ -->
+        <main class="main-panel">
+            <div class="lang-switch" id="lang-switch">
+                <button class="lang-btn active" data-lang="fr">FR</button>
+                <button class="lang-btn" data-lang="en">EN</button>
+                <button class="lang-btn" data-lang="de">DE</button>
+            </div>
+
+            <!-- STEP 0 : loading current booking -->
+            <section id="step-loading" class="step">
+                <div class="success-wrap">
+                    <div class="success-ic is-loading"><div class="spinner"></div></div>
+                    <h2 class="success-title" data-i18n="loading_title">Chargement de votre rendez-vous…</h2>
+                    <p class="success-sub" data-i18n="loading_sub">Un instant, nous récupérons les informations de
+                        votre réservation.</p>
+                </div>
+            </section>
+
+            <!-- STEP X : booking not found -->
+            <section id="step-notfound" class="step" hidden>
+                <div class="success-wrap">
+                    <div class="success-ic is-error"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            stroke-width="2.2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 9v3.75m0 3.75h.008M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg></div>
+                    <h2 class="success-title" data-i18n="notfound_title">Réservation introuvable</h2>
+                    <p class="success-sub" data-i18n="notfound_sub">Nous n'avons pas retrouvé de rendez-vous
+                        correspondant à ce lien. Vérifiez le lien reçu par e-mail ou contactez-nous.</p>
+                    <div class="success-actions">
+                        <a class="btn-back" href="/" data-i18n="home">Retour à l'accueil</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- STEP 1 : pick new date/time -->
+            <section id="step-1" class="step" hidden>
+                <h2 class="step-title" data-i18n="step1_title">Choisissez une nouvelle date et heure</h2>
+                <div class="progress-dots">
+                    <div class="pdot active" id="pdot-0"></div>
+                    <div class="pdot" id="pdot-1"></div>
+                    <span class="pdot-label" id="pdot-label"></span>
+                </div>
+
+                <div class="book-cols">
+                    <div class="cal-col">
+                        <div class="cal-head">
+                            <button class="cal-nav" id="cal-prev" aria-label="Précédent"><svg fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                                </svg></button>
+                            <span class="cal-month" id="cal-month"></span>
+                            <button class="cal-nav" id="cal-next" aria-label="Suivant"><svg fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                                </svg></button>
+                        </div>
+                        <div class="cal-grid" id="cal-weekdays"></div>
+                        <div class="cal-grid" id="cal-days" style="margin-top:5px;"></div>
+                    </div>
+
+                    <div class="slots-col">
+                        <p class="slots-label" id="slots-label" data-i18n="slots_title">Créneaux disponibles</p>
+                        <div id="slots-area">
+                            <div class="slots-awaiting">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                                </svg>
+                                <p data-i18n="pick_date_hint">Sélectionnez une date pour voir les créneaux
+                                    disponibles.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="hint" id="no-change-hint" data-i18n="no_change_hint" hidden>Modifiez la date, l'heure, la langue ou le sujet pour continuer.</p>
+
+                <p class="submit-error" id="submit-error" data-i18n="submit_error">Une erreur est survenue lors de l'envoi. Veuillez réessayer.</p>
+
+                <button class="btn-primary" id="btn-continue" disabled>
+                    <span data-i18n="continue">Confirmer le nouveau créneau</span>
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </button>
+
+                <!-- Deliberately quiet and last: rescheduling is the goal of this
+                     page, cancelling is the fallback. Hidden entirely when the
+                     meeting is too close to cancel online. -->
+                <p class="cancel-row" id="cancel-row" hidden>
+                    <span data-i18n="cancel_prompt">Vous ne pouvez plus venir ?</span>
+                    <button type="button" class="cancel-link" id="btn-cancel-start"
+                        data-i18n="cancel_cta">Annuler le rendez-vous</button>
+                </p>
+            </section>
+
+            <!-- STEP CANCEL : confirm before destroying anything -->
+            <section id="step-cancel" class="step" hidden>
+                <div class="success-wrap">
+                    <div class="success-ic is-warn"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            stroke-width="2.2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 9v3.75m0 3.75h.008M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg></div>
+                    <h2 class="success-title" data-i18n="cancel_confirm_title">Annuler ce rendez-vous ?</h2>
+                    <p class="success-sub" id="cancel-confirm-sub"></p>
+                    <p class="submit-error" id="cancel-error"></p>
+                    <div class="success-actions">
+                        <button class="btn-danger" id="btn-cancel-confirm"
+                            data-i18n="cancel_confirm_cta">Oui, annuler</button>
+                        <button class="btn-back" id="btn-cancel-back"><svg fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor" stroke-width="2.2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                            </svg><span data-i18n="cancel_keep">Non, garder mon rendez-vous</span></button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- STEP CANCELLED : done -->
+            <section id="step-cancelled" class="step" hidden>
+                <div class="success-wrap">
+                    <div class="success-ic"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            stroke-width="2.2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg></div>
+                    <h2 class="success-title" data-i18n="cancelled_title">Rendez-vous annulé</h2>
+                    <p class="success-sub" id="cancelled-sub"></p>
+                    <div class="success-actions">
+                        <a class="btn-back" href="/" data-i18n="home">Retour à l'accueil</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- STEP 2 : confirmation -->
+            <section id="step-2" class="step" hidden>
+                <div class="success-wrap">
+                    <div class="success-ic"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            stroke-width="2.2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg></div>
+                    <h2 class="success-title" data-i18n="success_title">Rendez-vous modifié !</h2>
+                    <p class="success-sub" id="success-sub"></p>
+                    <div class="success-actions">
+                        <button class="btn-back" id="btn-restart"><svg fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor" stroke-width="2.2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                            </svg><span data-i18n="restart">Modifier à nouveau</span></button>
+                        <a class="btn-back" href="/" data-i18n="home">Retour à l'accueil</a>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        /* ================================================================
+           IP-BASED LANGUAGE DETECTION
+           Detects the visitor's country via ipapi.co and sets the initial
+           language automatically. Skipped if the user already chose manually
+           (stored in sessionStorage under 'lang-manual').
+           FR/BE/LU/MC/CH/SN/CI/MA/DZ/TN/CM/ML/BF → fr
+           DE/AT/LI → de    |    all others → en
+           ================================================================ */
+        (function detectLangByIP() {
+            try {
+                if (sessionStorage.getItem('lang-manual')) return;
+                fetch('https://ipapi.co/json/')
+                    .then(function (r) { return r.json(); })
+                    .then(function (d) {
+                        var c = (d.country_code || '').toUpperCase();
+                        var FR = ['FR', 'BE', 'LU', 'MC', 'CH', 'SN', 'CI', 'MA', 'DZ', 'TN', 'CM', 'ML', 'BF'];
+                        var DE = ['DE', 'AT', 'LI'];
+                        window.__ipLang = FR.indexOf(c) > -1 ? 'fr' : DE.indexOf(c) > -1 ? 'de' : 'en';
+                        if (typeof window.__applyIpLang === 'function') window.__applyIpLang();
+                    })
+                    .catch(function () { });
+            } catch (e) { }
+        })();
+        /* ================================================================ */
+
+        (function () {
+            'use strict';
+
+            var I18N = {
+                fr: {
+                    title: "Modifier votre rendez-vous  Rainbow",
+                    headline: "Modifiez votre rendez-vous",
+                    subhead: "Choisissez une nouvelle date et un nouvel horaire qui vous conviennent mieux.",
+                    current_label: "Rendez-vous actuel", new_summary_title: "Nouveau créneau", ref_label: "Réf.",
+                    duration: "Durée : 30 minutes", via: "Par visioconférence Rainbow",
+                    reassure_title: "À savoir",
+                    reassure1: "Le lien de visioconférence reste inchangé.",
+                    reassure2: "Vous recevrez un e-mail de confirmation pour le nouveau créneau.",
+                    reassure3: "Vous pouvez modifier votre créneau jusqu'à 24h avant le rendez-vous.",
+                    loading_title: "Chargement de votre rendez-vous…",
+                    loading_sub: "Un instant, nous récupérons les informations de votre réservation.",
+                    notfound_title: "Réservation introuvable",
+                    notfound_sub: "Nous n'avons pas retrouvé de rendez-vous correspondant à ce lien. Vérifiez le lien reçu par e-mail ou contactez-nous.",
+                    step1_title: "Choisissez une nouvelle date et heure",
+                    guide0: "Choisissez une date", guide1: "Choisissez un horaire",
+                    slots_title: "Créneaux disponibles",
+                    pick_date_hint: "Sélectionnez une date pour voir les créneaux disponibles.",
+                    slot_taken: "Déjà réservé", slot_past: "Trop proche pour être réservé",
+                    no_slots: "Aucun créneau disponible ce jour. Choisissez une autre date.",
+                    slot_lost: "Ce créneau vient d’être réservé. Choisissez-en un autre.",
+                    tz_note: "Heures affichées : {tz}", solution_title: "Sujet de l’échange", sol_webinar: "Webinar", sol_collab: "Collaboration", sol_both: "Les deux", avail_error: "Impossible de charger les disponibilités. Réessayez dans un instant.",
+                    current_slot_tag: "Actuel", compare_old: "Actuel", compare_new: "Nouveau",
+                    continue: "Confirmer le nouveau créneau",
+                    sending: "Envoi en cours…",
+                    submit_error: "Une erreur est survenue lors de l'envoi. Veuillez réessayer.",
+                    success_title: "Rendez-vous modifié !",
+                    success_sub_tpl: "Votre rendez-vous a été déplacé du {old} au {new}. Un e-mail de confirmation vous a été envoyé.",
+                    too_many_changes: "Ce rendez-vous a déjà été modifié plusieurs fois. Merci de nous contacter pour tout changement supplémentaire.",
+                    no_change_hint: "Modifiez la date, l'heure, la langue ou le sujet pour continuer.",
+                    slot_gone_other_expert: "Ce créneau n'est pas disponible pour cette langue. Choisissez-en un autre.",
+                    cancel_prompt: "Vous ne pouvez plus venir ?",
+                    cancel_cta: "Annuler le rendez-vous",
+                    cancel_confirm_title: "Annuler ce rendez-vous ?",
+                    cancel_confirm_sub_tpl: "Votre rendez-vous du {slot} sera définitivement annulé et le créneau sera libéré. Cette action est irréversible.",
+                    cancel_confirm_cta: "Oui, annuler",
+                    cancel_keep: "Non, garder mon rendez-vous",
+                    cancelling: "Annulation en cours…",
+                    cancelled_title: "Rendez-vous annulé",
+                    cancelled_sub_tpl: "Votre rendez-vous du {slot} a bien été annulé. Un e-mail de confirmation vous a été envoyé. Vous pouvez reprendre rendez-vous quand vous le souhaitez.",
+                    cancel_too_late: "Ce rendez-vous commence dans moins de 2 heures et ne peut plus être annulé en ligne. Contactez-nous directement.",
+                    cancel_error: "L’annulation a échoué. Veuillez réessayer.",
+                    restart: "Modifier à nouveau", home: "Retour à l'accueil", langname: "Français"
+                },
+                en: {
+                    title: "Reschedule your meeting  Rainbow",
+                    headline: "Reschedule your meeting",
+                    subhead: "Pick a new date and time that works better for you.",
+                    current_label: "Current booking", new_summary_title: "New slot", ref_label: "Ref.",
+                    duration: "Duration: 30 minutes", via: "By Rainbow video call",
+                    reassure_title: "Good to know",
+                    reassure1: "Your video call link stays the same.",
+                    reassure2: "You'll get a confirmation email for the new slot.",
+                    reassure3: "You can reschedule up to 24h before the meeting.",
+                    loading_title: "Loading your booking…",
+                    loading_sub: "One moment, we're retrieving your booking details.",
+                    notfound_title: "Booking not found",
+                    notfound_sub: "We couldn't find a booking matching this link. Check the link from your email or contact us.",
+                    step1_title: "Pick a new date and time",
+                    guide0: "Pick a date", guide1: "Pick a time",
+                    slots_title: "Available slots",
+                    pick_date_hint: "Select a date to see available slots.",
+                    slot_taken: "Already booked", slot_past: "Too soon to book",
+                    no_slots: "No slots available on this day. Please pick another date.",
+                    slot_lost: "That slot has just been taken. Please choose another one.",
+                    tz_note: "Times shown in {tz}", solution_title: "Topic of the call", sol_webinar: "Webinar", sol_collab: "Collaboration", sol_both: "Both", avail_error: "Could not load availability. Please try again in a moment.",
+                    current_slot_tag: "Current", compare_old: "Current", compare_new: "New",
+                    continue: "Confirm new slot",
+                    sending: "Sending…",
+                    submit_error: "Something went wrong while sending your request. Please try again.",
+                    success_title: "Meeting rescheduled!",
+                    success_sub_tpl: "Your meeting has been moved from {old} to {new}. A confirmation email has been sent to you.",
+                    too_many_changes: "This booking has already been changed several times. Please contact us for any further change.",
+                    no_change_hint: "Change the date, time, language or topic to continue.",
+                    slot_gone_other_expert: "That slot is not available in this language. Please pick another one.",
+                    cancel_prompt: "Can no longer make it?",
+                    cancel_cta: "Cancel this meeting",
+                    cancel_confirm_title: "Cancel this meeting?",
+                    cancel_confirm_sub_tpl: "Your meeting on {slot} will be cancelled and the slot released. This cannot be undone.",
+                    cancel_confirm_cta: "Yes, cancel it",
+                    cancel_keep: "No, keep my meeting",
+                    cancelling: "Cancelling…",
+                    cancelled_title: "Meeting cancelled",
+                    cancelled_sub_tpl: "Your meeting on {slot} has been cancelled and a confirmation email sent. You are welcome to book again whenever suits you.",
+                    cancel_too_late: "This meeting starts in less than 2 hours and can no longer be cancelled online. Please contact us directly.",
+                    cancel_error: "The cancellation failed. Please try again.",
+                    restart: "Reschedule again", home: "Back to homepage", langname: "English"
+                },
+                de: {
+                    title: "Termin verschieben  Rainbow",
+                    headline: "Verschieben Sie Ihren Termin",
+                    subhead: "Wählen Sie ein neues Datum und eine neue Uhrzeit, die besser passen.",
+                    current_label: "Aktueller Termin", new_summary_title: "Neuer Termin", ref_label: "Ref.",
+                    duration: "Dauer: 30 Minuten", via: "Per Rainbow-Videokonferenz",
+                    reassure_title: "Gut zu wissen",
+                    reassure1: "Ihr Videokonferenz-Link bleibt unverändert.",
+                    reassure2: "Sie erhalten eine Bestätigungs-E-Mail für den neuen Termin.",
+                    reassure3: "Sie können den Termin bis 24 Stunden vorher verschieben.",
+                    loading_title: "Ihr Termin wird geladen…",
+                    loading_sub: "Einen Moment, wir rufen die Daten Ihres Termins ab.",
+                    notfound_title: "Termin nicht gefunden",
+                    notfound_sub: "Wir konnten keinen Termin zu diesem Link finden. Prüfen Sie den Link aus Ihrer E-Mail oder kontaktieren Sie uns.",
+                    step1_title: "Neues Datum und Uhrzeit wählen",
+                    guide0: "Datum wählen", guide1: "Uhrzeit wählen",
+                    slots_title: "Verfügbare Termine",
+                    pick_date_hint: "Datum wählen, um Termine zu sehen.",
+                    slot_taken: "Bereits gebucht", slot_past: "Zu kurzfristig",
+                    no_slots: "An diesem Tag sind keine Termine frei. Bitte wählen Sie ein anderes Datum.",
+                    slot_lost: "Dieser Termin wurde gerade vergeben. Bitte wählen Sie einen anderen.",
+                    tz_note: "Zeiten in {tz}", solution_title: "Thema des Gesprächs", sol_webinar: "Webinar", sol_collab: "Collaboration", sol_both: "Beide", avail_error: "Verfügbarkeiten konnten nicht geladen werden. Bitte versuchen Sie es gleich erneut.",
+                    current_slot_tag: "Aktuell", compare_old: "Aktuell", compare_new: "Neu",
+                    continue: "Neuen Termin bestätigen",
+                    sending: "Wird gesendet…",
+                    submit_error: "Beim Senden ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.",
+                    success_title: "Termin verschoben!",
+                    success_sub_tpl: "Ihr Termin wurde von {old} auf {new} verschoben. Eine Bestätigungs-E-Mail wurde Ihnen zugesendet.",
+                    too_many_changes: "Dieser Termin wurde bereits mehrfach geändert. Bitte kontaktieren Sie uns für weitere Änderungen.",
+                    no_change_hint: "Ändern Sie Datum, Uhrzeit, Sprache oder Thema, um fortzufahren.",
+                    slot_gone_other_expert: "Dieser Termin ist in dieser Sprache nicht verfügbar. Bitte wählen Sie einen anderen.",
+                    cancel_prompt: "Sie können doch nicht?",
+                    cancel_cta: "Termin stornieren",
+                    cancel_confirm_title: "Diesen Termin stornieren?",
+                    cancel_confirm_sub_tpl: "Ihr Termin am {slot} wird storniert und der Termin freigegeben. Das lässt sich nicht rückgängig machen.",
+                    cancel_confirm_cta: "Ja, stornieren",
+                    cancel_keep: "Nein, Termin behalten",
+                    cancelling: "Wird storniert…",
+                    cancelled_title: "Termin storniert",
+                    cancelled_sub_tpl: "Ihr Termin am {slot} wurde storniert und eine Bestätigung per E-Mail gesendet. Sie können jederzeit einen neuen Termin buchen.",
+                    cancel_too_late: "Dieser Termin beginnt in weniger als 2 Stunden und kann online nicht mehr storniert werden. Bitte kontaktieren Sie uns direkt.",
+                    cancel_error: "Die Stornierung ist fehlgeschlagen. Bitte versuchen Sie es erneut.",
+                    restart: "Erneut verschieben", home: "Zur Startseite", langname: "Deutsch"
+                }
+            };
+            var LOCALE = { fr: 'fr-FR', en: 'en-GB', de: 'de-DE' };
+            var CHANGE_BOOKING_API_URL = 'https://n8n.openrainbow.org/webhook/booking-change';
+            var LOOKUP_API_URL = 'https://n8n.openrainbow.org/webhook/booking-lookup';
+            var AVAILABILITY_API_URL = 'https://n8n.openrainbow.org/webhook/availability';
+            var CANCEL_API_URL = 'https://n8n.openrainbow.org/webhook/booking-cancel';
+            // Mirrors the cancel workflow: it refuses inside this window anyway.
+            var CANCEL_MIN_NOTICE_MINUTES = 120;
+            var SOLUTIONS = [{ key: 'webinar' }, { key: 'collab' }, { key: 'both' }];
+
+            /* ---- Availability comes from the server -------------------------
+               Every rule lives in the availability workflow: the experts' working
+               hours in Africa/Casablanca, lunch, buffer between calls, daily cap,
+               time off, public holidays, the 2h minimum notice, and which expert
+               each language routes to. This page renders what it is told and
+               nothing more, so the rules can change without touching the page.
+
+               The API answers in UTC. We display in the VISITOR's own timezone
+               and say so, rather than making anyone convert Morocco time. */
+            var VIEW_TZ = (function () {
+                try { return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; }
+                catch (e) { return 'UTC'; }
+            })();
+
+            var slotsByDay = {};          // 'YYYY-MM-DD' (visitor-local) -> [slot]
+            var availabilityFailed = false;
+
+            function pad2(n) { return String(n).padStart(2, '0'); }
+            // Plain Date getters are already in the visitor's zone, which is the
+            // zone we render in -- so no conversion is needed here.
+            function dayKeyOf(date) {
+                return date.getFullYear() + '-' + pad2(date.getMonth() + 1) + '-' + pad2(date.getDate());
+            }
+            function slotLabel(iso) {
+                return new Intl.DateTimeFormat(LOCALE[lang], {
+                    hour: '2-digit', minute: '2-digit', hour12: false
+                }).format(new Date(iso));
+            }
+
+            function loadAvailability() {
+                // lang matters: it decides WHICH expert's calendar is returned.
+                var url = AVAILABILITY_API_URL + '?lang=' + encodeURIComponent(lang);
+                if (CURRENT && CURRENT.token) url += '&exclude_token=' + encodeURIComponent(CURRENT.token);
+                else if (REF) url += '&exclude_ref=' + encodeURIComponent(REF);
+                return fetch(url)
+                    .then(function (r) {
+                        if (!r.ok) throw new Error('availability request failed with status ' + r.status);
+                        return r.json();
+                    })
+                    .then(function (data) {
+                        slotsByDay = {};
+                        availabilityFailed = false;
+                        // Regroup by the visitor's calendar day: a late Morocco slot
+                        // can fall on the next day for someone further east.
+                        (data.days || []).forEach(function (d) {
+                            (d.slots || []).forEach(function (s) {
+                                var k = dayKeyOf(new Date(s.start));
+                                (slotsByDay[k] = slotsByDay[k] || []).push(s);
+                            });
+                        });
+                        Object.keys(slotsByDay).forEach(function (k) {
+                            slotsByDay[k].sort(function (a, b) { return a.start < b.start ? -1 : 1; });
+                        });
+                    })
+                    .catch(function (err) {
+                        console.error('[modifier-rdv] availability unavailable:', err);
+                        slotsByDay = {};
+                        availabilityFailed = true;
+                    });
+            }
+
+            function daySlots(date) { return slotsByDay[dayKeyOf(date)] || []; }
+            function dayHasFreeSlot(date) {
+                return daySlots(date).some(function (s) { return s.available; });
+            }
+
+            var lang = 'fr';
+            // The URL's /fr /en /de segment is a real signal (whatever page
+            // linked here chose it) but not as strong as the booking's own
+            // stored language, fetched below in loadBooking() -- that one
+            // still wins once it's known, unless the visitor manually picks
+            // a language via the switcher (__langManualSet).
+            var URL_LANG = (window.location.pathname.match(/\/(fr|en|de)(\/|$)/) || [])[1];
+            if (URL_LANG) lang = URL_LANG;
+            document.querySelectorAll('.lang-btn').forEach(function (b) {
+                b.classList.toggle('active', b.dataset.lang === lang);
+            });
+            function langSwitchUrl(newLang) {
+                var m = window.location.pathname.match(/^(.*?)\/(fr|en|de)(\/.*|$)/);
+                var base = m ? m[1] : '';
+                var rest = m ? m[3] : window.location.pathname;
+                return base + '/' + newLang + rest + window.location.search + window.location.hash;
+            }
+            var today = (function () { var d = new Date(); d.setHours(0, 0, 0, 0); return d; })();
+
+            /* ---- Current booking -------------------------------------------
+               Identified by ?t=<token>, an unguessable 128-bit credential the
+               confirmation email carries. ?ref= still works for links sent before
+               tokens existed, but a ref is printed in emails and is not a secret.
+
+               /booking-lookup returns ONLY this booking, and only the fields this
+               page renders. CURRENT/viewDate stay null until it answers. ---- */
+            var params = new URLSearchParams(window.location.search);
+            var TOKEN = params.get('t') || params.get('token') || '';
+            var REF = params.get('ref') || '';
+            // The email's cancel link ends in #cancel so it opens straight onto
+            // the cancel confirmation instead of the reschedule picker.
+            var WANTS_CANCEL = (window.location.hash || '').toLowerCase().indexOf('cancel') >= 0;
+
+            var CURRENT = null;
+            var viewDate = null;
+            // sel.slot is the UTC instant returned by the API -- not a wall-clock
+            // string -- so there is nothing left to convert on submit.
+            var sel = { date: null, slot: null, solution: null };
+
+            // Stored UTC instant -> the visitor's calendar day + wall-clock time.
+            function splitLocalDateTime(iso) {
+                var d = new Date(iso);
+                return {
+                    date: new Date(d.getFullYear(), d.getMonth(), d.getDate()),
+                    time: pad2(d.getHours()) + ':' + pad2(d.getMinutes())
+                };
+            }
+
+            function loadBooking() {
+                if (!TOKEN && !REF) { show('step-notfound'); return; }
+                var url = LOOKUP_API_URL + (TOKEN
+                    ? '?t=' + encodeURIComponent(TOKEN)
+                    : '?ref=' + encodeURIComponent(REF));
+                fetch(url)
+                    .then(function (r) {
+                        // 404 is a legitimate answer: bad link, or already
+                        // cancelled. Not an error worth shouting about.
+                        if (r.status === 404) return null;
+                        if (!r.ok) throw new Error('booking-lookup failed with status ' + r.status);
+                        return r.json();
+                    })
+                    .then(function (record) {
+                        if (!record || !record.datetime) { show('step-notfound'); return; }
+                        var dt = splitLocalDateTime(record.datetime);
+                        CURRENT = {
+                            date: dt.date, time: dt.time,
+                            ref: record.ref, token: record.token || TOKEN || null,
+                            solution: record.solution || '',
+                            lang: (record.lang || '').toLowerCase().slice(0, 2),
+                            datetime: record.datetime,
+                            reschedule_count: record.reschedule_count || 0
+                        };
+                        // Show the page in the language the booking was made in.
+                        // IP detection would otherwise open a French booking in
+                        // English and make "change the language" the default
+                        // outcome of simply opening the link.
+                        if (!window.__langManualSet && I18N[CURRENT.lang]) {
+                            lang = CURRENT.lang;
+                            document.querySelectorAll('.lang-btn').forEach(function (b) {
+                                b.classList.toggle('active', b.dataset.lang === lang);
+                            });
+                        }
+                        // Open on the booking exactly as it stands: same slot, same
+                        // solution. Nothing is "changed" yet, so the confirm button
+                        // stays locked until something actually differs -- but the
+                        // slot no longer has to be re-picked to change anything else.
+                        sel.solution = CURRENT.solution || null;
+                        sel.slot = CURRENT.datetime;
+                        viewDate = new Date(CURRENT.date.getFullYear(), CURRENT.date.getMonth(), 1);
+                        // Land them on the day they already booked instead of making
+                        // them hunt for it in the calendar.
+                        if (CURRENT.date >= today) sel.date = CURRENT.date;
+                        return loadAvailability().then(function () {
+                            applyI18n();
+                            if (WANTS_CANCEL && cancelAllowed()) {
+                                document.getElementById('cancel-confirm-sub').textContent =
+                                    t('cancel_confirm_sub_tpl').replace('{slot}', currentSlotLabel());
+                                show('step-cancel');
+                            } else {
+                                show('step-1');
+                            }
+                        });
+                    })
+                    .catch(function (err) {
+                        console.error('[modifier-rdv] failed to load booking:', err);
+                        show('step-notfound');
+                    });
+            }
+
+            // Re-read availability after a 409, without disturbing CURRENT.
+            function refreshTakenSlots() { return loadAvailability(); }
+
+            function t(k) { return (I18N[lang] && I18N[lang][k]) || I18N.fr[k] || k; }
+
+            /* Bridge: called by IP detection snippet (may fire before or after this IIFE) */
+            window.__applyIpLang = function () {
+                if (!window.__ipLang || window.__langManualSet || URL_LANG) return;
+                lang = window.__ipLang;
+                document.querySelectorAll('.lang-btn').forEach(function (b) {
+                    b.classList.toggle('active', b.dataset.lang === lang);
+                });
+                applyI18n();
+            };
+            /* If IP detection already resolved before this script ran -- but the
+               URL's own lang segment, if present, is a stronger signal. */
+            if (!URL_LANG && window.__ipLang && !window.__langManualSet) lang = window.__ipLang;
+
+            /* ---- What is actually being changed? ----------------------------
+               The slot, the language and the subject can each be changed on
+               their own. The confirm button unlocks when any one of them
+               differs from the booking as it stands -- requiring a new slot
+               for a language change was the whole problem. */
+            function pendingChanges() {
+                if (!CURRENT) return { datetime: false, lang: false, solution: false, any: false };
+                var c = {
+                    datetime: Boolean(sel.slot) && sel.slot !== CURRENT.datetime,
+                    lang: Boolean(CURRENT.lang) && lang !== CURRENT.lang,
+                    solution: Boolean(sel.solution) && sel.solution !== CURRENT.solution
+                };
+                c.any = c.datetime || c.lang || c.solution;
+                return c;
+            }
+
+            /* ---- Guided flow state machine ---- */
+            function advanceGuide() {
+                var changes = pendingChanges();
+                var state = sel.date ? (sel.slot ? 2 : 1) : 0;
+
+                var d0 = document.getElementById('pdot-0');
+                var d1 = document.getElementById('pdot-1');
+                if (d0) d0.className = 'pdot' + (state >= 1 ? ' done' : ' active');
+                if (d1) d1.className = 'pdot' + (state >= 2 ? ' done' : (state === 1 ? ' active' : ''));
+
+                var lbl = document.getElementById('pdot-label');
+                if (lbl) lbl.textContent = t('guide' + Math.min(state, 1));
+
+                var btn = document.getElementById('btn-continue');
+                if (btn) {
+                    // A slot must be held AND something must differ. Submitting an
+                    // unchanged booking would only earn a 409 "nothing to update".
+                    var ready = Boolean(sel.slot) && changes.any;
+                    btn.disabled = !ready;
+                    btn.classList.toggle('ready', ready);
+                }
+                var hint = document.getElementById('no-change-hint');
+                if (hint) hint.hidden = !(sel.slot && !changes.any);
+            }
+
+            function applyI18n() {
+                document.documentElement.lang = lang;
+                document.title = t('title');
+                document.querySelectorAll('[data-i18n]').forEach(function (el) { el.textContent = t(el.getAttribute('data-i18n')); });
+                if (CURRENT) { renderCalendar(); renderSlots(); advanceGuide(); updateSummary(); refreshCancelAffordance(); }
+            }
+
+            function sameDay(a, b) { return a && b && a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); }
+            function weekdayLabels() {
+                var base = new Date(Date.UTC(2021, 10, 1));
+                var fmt = new Intl.DateTimeFormat(LOCALE[lang], { weekday: 'short' });
+                var out = []; for (var i = 0; i < 7; i++) { var d = new Date(base); d.setUTCDate(1 + i); out.push(fmt.format(d).replace('.', '')); } return out;
+            }
+            function fmtDateTime(date, time) {
+                return new Intl.DateTimeFormat(LOCALE[lang], { weekday: 'long', day: 'numeric', month: 'long' }).format(date) + ' · ' + time;
+            }
+
+            function buildChangePayload() {
+                return {
+                    ref: CURRENT.ref,
+                    token: CURRENT.token,
+                    // The API handed us the exact instant, so nothing is converted here.
+                    old_datetime: CURRENT.datetime,
+                    new_datetime: sel.slot,
+                    solution: sel.solution || CURRENT.solution,
+                    lang: lang,
+                    // They may have moved since booking; keep the stored zone current.
+                    timezone: VIEW_TZ
+                };
+            }
+
+            function renderCalendar() {
+                document.getElementById('cal-month').textContent =
+                    new Intl.DateTimeFormat(LOCALE[lang], { month: 'long', year: 'numeric' }).format(viewDate);
+                var wd = document.getElementById('cal-weekdays'); wd.innerHTML = '';
+                weekdayLabels().forEach(function (l) { var s = document.createElement('div'); s.className = 'cal-wd'; s.textContent = l; wd.appendChild(s); });
+                var y = viewDate.getFullYear(), m = viewDate.getMonth();
+                var first = new Date(y, m, 1); var offset = (first.getDay() + 6) % 7;
+                var dim = new Date(y, m + 1, 0).getDate();
+                var grid = document.getElementById('cal-days'); grid.innerHTML = '';
+                for (var i = 0; i < offset; i++) { var e = document.createElement('div'); e.className = 'cal-empty'; grid.appendChild(e); }
+                for (var d = 1; d <= dim; d++) {
+                    var date = new Date(y, m, d); var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'cal-day'; btn.textContent = d;
+                    // Selectable only if the API returned at least one free slot for
+                    // that day. Weekends, public holidays, expert time off and fully
+                    // booked days all arrive here as simply "no free slots".
+                    var disabled = date < today || !dayHasFreeSlot(date);
+                    if (disabled) { btn.disabled = true; }
+                    else {
+                        if (sameDay(date, today)) btn.classList.add('today');
+                        if (sameDay(date, sel.date)) btn.classList.add('selected');
+                        (function (dt) {
+                            btn.addEventListener('click', function () {
+                                sel.date = dt; sel.slot = null;
+                                renderCalendar(); renderSlots(); advanceGuide(); updateSummary();
+                            });
+                        })(date);
+                    }
+                    grid.appendChild(btn);
+                }
+                document.getElementById('cal-prev').disabled = (y === today.getFullYear() && m <= today.getMonth());
+            }
+
+            function renderSlots() {
+                var area = document.getElementById('slots-area'); area.innerHTML = '';
+                var label = document.getElementById('slots-label');
+                label.style.display = '';
+
+                /* State 0  no date: awaiting placeholder */
+                if (!sel.date) {
+                    label.textContent = t('slots_title');
+                    var aw = document.createElement('div'); aw.className = 'slots-awaiting';
+                    aw.innerHTML = '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>';
+                    var p = document.createElement('p'); p.textContent = t('pick_date_hint'); aw.appendChild(p);
+                    area.appendChild(aw);
+                    return;
+                }
+
+                /* State 1  date set, no slot: slot buttons straight from the API */
+                if (!sel.slot) {
+                    label.textContent = new Intl.DateTimeFormat(LOCALE[lang], { weekday: 'short', day: 'numeric', month: 'short' }).format(sel.date);
+                    var slots = daySlots(sel.date);
+                    if (!slots.length || !dayHasFreeSlot(sel.date)) {
+                        var none = document.createElement('div'); none.className = 'slots-awaiting';
+                        var np = document.createElement('p');
+                        np.textContent = availabilityFailed ? t('avail_error') : t('no_slots');
+                        none.appendChild(np); area.appendChild(none);
+                        return;
+                    }
+                    var wrap = document.createElement('div'); wrap.className = 'slots-scroll';
+                    slots.forEach(function (s, i) {
+                        var b = document.createElement('button'); b.type = 'button';
+                        var isCurrent = CURRENT.datetime === s.start;
+                        b.className = 'slot' + (isCurrent ? ' is-current' : '');
+                        b.textContent = slotLabel(s.start);
+                        if (isCurrent) {
+                            var tag = document.createElement('span'); tag.className = 'slot-current-tag'; tag.textContent = t('current_slot_tag');
+                            b.appendChild(tag);
+                        }
+                        b.style.cssText = 'opacity:0;animation:revealSlot .26s ease ' + (i * .038) + 's forwards;';
+                        if (s.available) {
+                            b.addEventListener('click', function () { sel.slot = s.start; renderSlots(); advanceGuide(); updateSummary(); });
+                        } else {
+                            b.disabled = true;
+                            b.title = t(s.reason === 'lead_time' ? 'slot_past' : 'slot_taken');
+                        }
+                        wrap.appendChild(b);
+                    });
+                    area.appendChild(wrap);
+                    // Say which clock these times are on -- they are rendered in the
+                    // visitor's zone, which may not be the expert's.
+                    var tzNote = document.createElement('p');
+                    tzNote.className = 'tz-note';
+                    tzNote.textContent = t('tz_note').replace('{tz}', VIEW_TZ);
+                    area.appendChild(tzNote);
+                    return;
+                }
+
+                /* State 2  time set: editable chip + old→new comparison */
+                label.style.display = 'none';
+
+                var chipSec = document.createElement('div'); chipSec.style.cssText = 'display:flex;flex-direction:column;gap:6px;flex-shrink:0;';
+                var chipLbl = document.createElement('p'); chipLbl.className = 'section-label'; chipLbl.textContent = t('new_summary_title');
+                chipSec.appendChild(chipLbl);
+
+                var chip = document.createElement('button'); chip.type = 'button'; chip.className = 'time-chip';
+                chip.innerHTML = '<span class="chip-time">' + slotLabel(sel.slot) + '</span>'
+                    + '<span class="chip-edit"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">'
+                    + '<path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/>'
+                    + '</svg></span>';
+                chip.addEventListener('click', function () { sel.slot = null; renderSlots(); advanceGuide(); updateSummary(); });
+                chipSec.appendChild(chip);
+                area.appendChild(chipSec);
+
+                var slotMoved = CURRENT && sel.slot !== CURRENT.datetime;
+                var compare = document.createElement('div'); compare.className = 'compare-card';
+                compare.style.cssText = 'opacity:0;animation:revealSlot .3s cubic-bezier(.16,1,.3,1) .08s both;';
+                compare.innerHTML =
+                    '<div class="compare-side"><p class="compare-label">' + t('compare_old') + '</p><p class="compare-time">' + CURRENT.time + '</p></div>'
+                    + '<div class="compare-arrow"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg></div>'
+                    + '<div class="compare-side is-new"><p class="compare-label">' + t('compare_new') + '</p><p class="compare-time">' + slotLabel(sel.slot) + '</p></div>';
+                // Comparing a slot with itself is noise: only show it if it moved.
+                if (slotMoved) area.appendChild(compare);
+
+                /* ---- solution picker ---------------------------------------
+                   The subject of the call can be changed here too, not just the
+                   date -- previously it was fixed at whatever was booked. */
+                var solSec = document.createElement('div');
+                solSec.style.cssText = 'display:flex;flex-direction:column;gap:6px;flex-shrink:0;margin-top:4px;';
+                var solLbl = document.createElement('p');
+                solLbl.className = 'section-label'; solLbl.textContent = t('solution_title');
+                solSec.appendChild(solLbl);
+                var solWrap = document.createElement('div'); solWrap.className = 'sol-group';
+                SOLUTIONS.forEach(function (opt) {
+                    var b = document.createElement('button'); b.type = 'button';
+                    var active = (sel.solution || CURRENT.solution) === opt.key;
+                    b.className = 'sol-btn' + (active ? ' selected' : '');
+                    b.textContent = t('sol_' + opt.key);
+                    b.addEventListener('click', function () {
+                        sel.solution = opt.key; renderSlots(); advanceGuide(); updateSummary();
+                    });
+                    solWrap.appendChild(b);
+                });
+                solSec.appendChild(solWrap);
+                area.appendChild(solSec);
+            }
+
+            function updateSummary() {
+                document.getElementById('current-datetime').textContent = fmtDateTime(CURRENT.date, CURRENT.time);
+                document.getElementById('current-ref').textContent = t('ref_label') + ' ' + CURRENT.ref;
+                var newCard = document.getElementById('new-summary-card');
+                if (sel.date && sel.slot) {
+                    newCard.hidden = false;
+                    document.getElementById('new-datetime').textContent = fmtDateTime(sel.date, slotLabel(sel.slot));
+                } else {
+                    newCard.hidden = true;
+                }
+            }
+
+            function show(step) {
+                ['step-loading', 'step-notfound', 'step-1', 'step-2', 'step-cancel', 'step-cancelled'].forEach(function (id) { document.getElementById(id).hidden = (id !== step); });
+            }
+
+            document.getElementById('cal-prev').addEventListener('click', function () { viewDate.setMonth(viewDate.getMonth() - 1); renderCalendar(); });
+            document.getElementById('cal-next').addEventListener('click', function () { viewDate.setMonth(viewDate.getMonth() + 1); renderCalendar(); });
+            /* ---- Cancellation ------------------------------------------------
+               Same page, same link: rescheduling and cancelling are the two
+               things someone arrives here to do, so there is no reason to send
+               them elsewhere. The button is quiet, and confirmation is a real
+               step -- this destroys a booking and cannot be undone. */
+
+            // The workflow refuses inside the notice window; hide the entry point
+            // rather than let someone click through to a guaranteed error.
+            function cancelAllowed() {
+                if (!CURRENT || !CURRENT.datetime) return false;
+                var slotMs = Date.parse(CURRENT.datetime);
+                if (isNaN(slotMs)) return false;
+                return slotMs > Date.now() + CANCEL_MIN_NOTICE_MINUTES * 60000;
+            }
+
+            function refreshCancelAffordance() {
+                var row = document.getElementById('cancel-row');
+                if (row) row.hidden = !cancelAllowed();
+            }
+
+            function currentSlotLabel() {
+                return fmtDateTime(CURRENT.date, CURRENT.time);
+            }
+
+            function submitCancel() {
+                var btn = document.getElementById('btn-cancel-confirm');
+                var back = document.getElementById('btn-cancel-back');
+                var err = document.getElementById('cancel-error');
+                err.classList.remove('visible');
+                btn.disabled = true; back.disabled = true;
+                var originalText = btn.textContent;
+                btn.textContent = t('cancelling');
+
+                fetch(CANCEL_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ref: CURRENT.ref, token: CURRENT.token, lang: lang, timezone: VIEW_TZ })
+                })
+                    .then(function (r) {
+                        return r.json().catch(function () { return {}; }).then(function (b) {
+                            // 200 also covers "already cancelled", which is the
+                            // outcome the visitor wanted anyway.
+                            if (r.ok) return b;
+                            var e = new Error(b.error_code || 'cancel_failed');
+                            e.code = b.error_code; e.body = b;
+                            throw e;
+                        });
+                    })
+                    .then(function () {
+                        document.getElementById('cancelled-sub').textContent =
+                            t('cancelled_sub_tpl').replace('{slot}', currentSlotLabel());
+                        show('step-cancelled');
+                    })
+                    .catch(function (e) {
+                        console.error('[cancel] failed:', e);
+                        err.textContent = (e.code === 'too_late' || e.code === 'already_passed')
+                            ? t('cancel_too_late')
+                            : t('cancel_error');
+                        err.classList.add('visible');
+                    })
+                    .finally(function () {
+                        btn.disabled = false; back.disabled = false;
+                        btn.textContent = originalText;
+                    });
+            }
+
+            document.getElementById('btn-cancel-start').addEventListener('click', function () {
+                document.getElementById('cancel-error').classList.remove('visible');
+                document.getElementById('cancel-confirm-sub').textContent =
+                    t('cancel_confirm_sub_tpl').replace('{slot}', currentSlotLabel());
+                show('step-cancel');
+            });
+            document.getElementById('btn-cancel-back').addEventListener('click', function () {
+                show('step-1');
+            });
+            document.getElementById('btn-cancel-confirm').addEventListener('click', submitCancel);
+
+            function submitChange() {
+                var btn = document.getElementById('btn-continue');
+                var errBanner = document.getElementById('submit-error');
+                errBanner.classList.remove('visible');
+                btn.disabled = true;
+                var originalHTML = btn.innerHTML;
+                btn.innerHTML = '<span>' + t('sending') + '</span>';
+
+                fetch(CHANGE_BOOKING_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(buildChangePayload())
+                })
+                    .then(function (r) {
+                        // 409 = the slot went while this page was open. Recoverable:
+                        // refresh availability and send them back to the picker.
+                        if (r.status === 409) {
+                            return r.json().catch(function () { return {}; }).then(function (body) {
+                                var e = new Error(body.error_code || 'slot_unavailable');
+                                e.code = body.error_code;
+                                // A reschedule-limit refusal is not a slot clash:
+                                // re-picking a time will not help, so do not send
+                                // them back to the picker.
+                                if (body.error_code !== 'too_many_reschedules') e.conflict = body;
+                                throw e;
+                            });
+                        }
+                        if (!r.ok) throw new Error('Change booking request failed with status ' + r.status);
+                        return r.text();
+                    })
+                    .then(function () {
+                        document.getElementById('success-sub').textContent =
+                            t('success_sub_tpl').replace('{old}', fmtDateTime(CURRENT.date, CURRENT.time)).replace('{new}', fmtDateTime(sel.date, slotLabel(sel.slot)));
+                        show('step-2');
+                    })
+                    .catch(function (err) {
+                        if (err && err.code === 'too_many_reschedules') {
+                            errBanner.textContent = t('too_many_changes');
+                            errBanner.classList.add('visible');
+                            return;
+                        }
+                        if (err && err.conflict) {
+                            errBanner.textContent = err.conflict.message || t('slot_lost');
+                            errBanner.classList.add('visible');
+                            sel.slot = null;
+                            refreshTakenSlots().then(function () {
+                                renderCalendar(); renderSlots(); advanceGuide(); updateSummary();
+                            });
+                            return;
+                        }
+                        console.error('[change-booking] submission failed:', err);
+                        errBanner.textContent = t('submit_error');
+                        errBanner.classList.add('visible');
+                    })
+                    .finally(function () {
+                        btn.disabled = false;
+                        btn.innerHTML = originalHTML;
+                    });
+            }
+
+            document.getElementById('btn-continue').addEventListener('click', function () {
+                if (!sel.date || !sel.slot) return;
+                submitChange();
+            });
+            document.getElementById('btn-restart').addEventListener('click', function () {
+                sel = { date: null, slot: null, solution: CURRENT ? CURRENT.solution : null };
+                viewDate = new Date(CURRENT.date.getFullYear(), CURRENT.date.getMonth(), 1);
+                document.getElementById('submit-error').classList.remove('visible');
+                renderCalendar(); renderSlots(); advanceGuide(); updateSummary(); show('step-1');
+            });
+
+            document.getElementById('lang-switch').addEventListener('click', function (e) {
+                var b = e.target.closest('.lang-btn'); if (!b) return;
+                lang = b.dataset.lang;
+                window.__langManualSet = true;
+                sessionStorage.setItem('lang-manual', '1');
+                // Keep the address bar in sync without reloading -- this page
+                // holds in-progress calendar/slot state that a real navigation
+                // would throw away.
+                if (window.history && window.history.replaceState) {
+                    window.history.replaceState(null, '', langSwitchUrl(lang));
+                }
+                document.querySelectorAll('.lang-btn').forEach(function (x) { x.classList.toggle('active', x === b); });
+                // The language decides WHICH expert is booked, so their calendar
+                // must be re-read. The chosen slot is KEPT if it is still free on
+                // the other expert's calendar -- clearing it outright meant you
+                // could not change the language without also moving the meeting.
+                var wanted = sel.slot;
+                applyI18n();
+                if (CURRENT) loadAvailability().then(function () {
+                    if (wanted) {
+                        var still = (slotsByDay[dayKeyOf(new Date(wanted))] || [])
+                            .filter(function (s) { return s.start === wanted; })[0];
+                        sel.slot = (still && still.available) ? wanted : null;
+                        if (!sel.slot) {
+                            // Say why it vanished instead of silently emptying it.
+                            var b = document.getElementById('submit-error');
+                            b.textContent = t('slot_gone_other_expert');
+                            b.classList.add('visible');
+                        }
+                    }
+                    renderCalendar(); renderSlots(); advanceGuide(); updateSummary();
+                });
+            });
+
+            applyI18n();
+            loadBooking();
+        })();
+    </script>
+</body>
+
+</html>

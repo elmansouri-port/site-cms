@@ -1,0 +1,50 @@
+---
+/*
+ * SectionRenderer — the registry dispatch (reco.md 8.3).
+ *
+ * A block names a component with a string key; this maps that key to a real
+ * component. An unknown key logs a warning and renders nothing, so a bad
+ * reference in the database can never take a page down.
+ */
+import BlockWrapper from './BlockWrapper.astro';
+import Hero from './blocks/Hero.astro';
+import CtaBanner from './blocks/CtaBanner.astro';
+import FaqAccordion from './blocks/FaqAccordion.astro';
+import FeatureGrid from './blocks/FeatureGrid.astro';
+import StatsBand from './blocks/StatsBand.astro';
+import LogoMarquee from './blocks/LogoMarquee.astro';
+import RichText from './blocks/RichText.astro';
+import ImageText from './blocks/ImageText.astro';
+import PricingCards from './blocks/PricingCards.astro';
+import VideoBlock from './blocks/VideoBlock.astro';
+import ArticleList from './blocks/ArticleList.astro';
+import RawHtml from './blocks/RawHtml.astro';
+
+const REGISTRY = {
+  hero: Hero,
+  cta_banner: CtaBanner,
+  faq_accordion: FaqAccordion,
+  feature_grid: FeatureGrid,
+  stats_band: StatsBand,
+  logo_marquee: LogoMarquee,
+  rich_text: RichText,
+  image_text: ImageText,
+  pricing_cards: PricingCards,
+  video: VideoBlock,
+  article_list: ArticleList,
+  raw_html: RawHtml,
+};
+
+const { block, locale, context } = Astro.props;
+const Component = REGISTRY[block?.componentKey];
+
+if (!Component) {
+  console.warn(`[sections] no component registered for "${block?.componentKey}" — block skipped`);
+}
+---
+
+{Component && (
+  <BlockWrapper layout={block.layout} anchorId={block.anchorId}>
+    <Component data={block.data || {}} locale={locale} context={context} />
+  </BlockWrapper>
+)}

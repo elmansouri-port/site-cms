@@ -1,0 +1,30 @@
+---
+/*
+ * StatsBand — the dark metrics strip.
+ *
+ * The counter animation on the authored pages is driven by data-counter /
+ * data-duration attributes, so those are emitted as attributes rather than
+ * baked into the text: the existing script picks them up unchanged.
+ */
+const { data = {} } = Astro.props;
+const { title = '', items = [], animate = true } = data;
+---
+
+<div class="stats-dark-bg bg-brand-500 rounded-3xl mx-auto max-w-6xl px-6 py-14 text-white">
+  {title && <h2 class="text-2xl md:text-3xl font-bold text-center mb-10">{title}</h2>}
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+    {items.map((item) => (
+      <div>
+        <p class="text-4xl md:text-5xl font-bold">
+          {animate && item.value !== undefined ? (
+            <span class="counter-number" data-counter={String(item.value)} data-duration={String(item.duration || 2000)}>0</span>
+          ) : (
+            <span>{item.value}</span>
+          )}
+          {item.suffix && <span>{item.suffix}</span>}
+        </p>
+        {item.label && <p class="mt-2 text-white/80">{item.label}</p>}
+      </div>
+    ))}
+  </div>
+</div>

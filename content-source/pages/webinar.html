@@ -1,0 +1,1465 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="webinar.meta.title">Products - Rainbow by Alcatel-Lucent</title>
+    <meta name="description"
+        content="Explore the Rainbow product family: Collaboration, Webinar, and Smart Hotel solutions by Alcatel-Lucent." data-i18n-attr="content:webinar.meta.description">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 300: '#c4b5fd', 400: '#a78bfa', 500: '#5e2d91', 600: '#4a2373', 700: '#3c1c5e' },
+                        navy: { 900: '#1e1b4b', 800: '#312e81', 700: '#3730a3' }
+                    },
+                    fontFamily: { sans: ["Google Sans", "system-ui", "sans-serif"] }, borderRadius: { btn: "10px" }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        .lang-switcher {
+            position: relative;
+        }
+
+        .lang-switcher button {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.8125rem;
+            color: #64748b;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: color 0.2s;
+        }
+
+        .lang-switcher button:hover {
+            color: #0f172a;
+        }
+
+        .lang-switcher .lang-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: #fff;
+            border: 1px solid #e9e5ff;
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(124, 58, 237, 0.08);
+            min-width: 140px;
+            z-index: 200;
+            padding: 4px 0;
+            margin-top: 4px;
+        }
+
+        .lang-switcher.open .lang-dropdown {
+            display: block;
+        }
+
+        .lang-dropdown button {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 8px 14px;
+            font-size: 0.8125rem;
+            color: #374151;
+            border: none;
+            background: none;
+            cursor: pointer;
+        }
+
+        .lang-dropdown button:hover {
+            background: #f5f3ff;
+        }
+
+        .lang-dropdown button.active {
+            color: #7c3aed;
+            font-weight: 600;
+        }
+
+        /* ===== Floating Section Nav (scroll-spy pill bar) ===== */
+        .section-anchor { scroll-margin-top: 130px; }
+        #section-nav { position: fixed; top: 74px; left: 50%; transform: translateX(-50%) translateY(-14px); z-index: 40; opacity: 0; pointer-events: none; transition: opacity 0.35s ease, transform 0.35s ease; }
+        #section-nav.visible { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+        .section-nav-inner { display: flex; align-items: center; gap: 6px; padding: 7px; background: #f3edfd; border: 1px solid rgba(124, 58, 237, 0.10); border-radius: 9999px; box-shadow: 0 6px 22px rgba(94, 45, 145, 0.15); max-width: calc(100vw - 24px); overflow-x: auto; scrollbar-width: none; }
+        .section-nav-inner::-webkit-scrollbar { display: none; }
+        .section-nav-link { flex: 0 0 auto; padding: 9px 22px; border-radius: 9999px; font-size: 0.9375rem; font-weight: 700; color: #4a2373; white-space: nowrap; text-decoration: none; transition: color 0.2s ease, background 0.2s ease; }
+        .section-nav-link:hover { background: rgba(124, 58, 237, 0.08); }
+        .section-nav-link.active { color: #4a2373; background: #e7d9fb; }
+        @media (max-width: 767px) { #section-nav { top: 66px; } .section-nav-link { padding: 7px 14px; font-size: 0.8125rem; } }
+    </style>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/mega-menu.css">
+    <!-- translated strings for this page's inline scripts; must precede them -->
+    <script data-i18n-js="webinar.js"></script>
+</head>
+
+<body class="font-sans text-gray-700 antialiased">
+
+    <!-- ===== NAV ===== -->
+    <nav id="navbar" class="fixed top-0 w-full z-50 glass-nav">
+        <div class="max-w-6xl mx-auto px-6 flex items-center justify-between h-16">
+            <a href="/fr" class="flex items-center gap-2.5 shrink-0">
+                <img src="/images/Rainbow-AL-logo-banner.webp" alt="Rainbow" class="h-12 w-auto" data-i18n-attr="alt:common.nav.rainbow_alt">
+            </a>
+            <div class="hidden lg:flex items-center justify-center flex-1 gap-8">
+                <div class="nav-dropdown">
+                    <a href="#" class="text-sm text-gray-500 hover:text-navy-900 transition-colors font-medium">
+                        <span data-i18n="common.nav.produits">Produits</span>
+                        <svg class="chevron w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                    </a>
+
+                </div>
+                <a href="/fr/tarifs" class="text-sm text-gray-500 hover:text-navy-900 transition-colors font-medium" style="font-size:1rem" data-i18n="common.nav.tarifs">Tarifs</a>
+                <div class="nav-dropdown">
+                    <a href="#" class="text-sm text-gray-500 hover:text-navy-900 transition-colors font-medium" data-i18n-rich="common.nav.ressources-path-stroke-linecap_3">Ressources
+                        <svg class="chevron w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                    </a>
+
+                </div>
+            </div>
+            <div class="hidden lg:flex items-center gap-4 shrink-0">
+                <div class="lang-switcher" id="lang-switcher">
+                    <button onclick="document.getElementById('lang-switcher').classList.toggle('open')">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"/></svg>
+                        <span id="lang-current" data-i18n="common.nav.en">EN</span>
+                        <svg class="lang-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div class="lang-dropdown" id="lang-dropdown"></div>
+                </div>
+                <a href="https://web.openrainbow.net/rb/2.176.0/login" class="px-5 py-2.5 rounded-btn border-2 border-brand-500 text-purple-900 hover:bg-gray-50 text-sm font-semibold transition-all active:scale-95 inline-flex items-center justify-center" data-i18n="common.nav.se-connecter">Se connecter</a>
+                <a href="https://web.openrainbow.net/rb/2.177.4/trial" class="px-5 py-2.5 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold whitespace-nowrap shadow-md hover:shadow-lg transition-all" data-i18n="common.nav.essai-gratuit">Essai gratuit</a>
+            </div>
+            <button id="mobile-menu-btn" class="lg:hidden p-2" aria-label="Menu" data-i18n-attr="aria-label:common.nav.menu_aria-label_2">
+                <svg class="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+        </div>
+        <div id="mobile-menu" class="lg:hidden hidden border-t border-gray-100 bg-white px-5 pt-2 pb-6 shadow-lg space-y-1">
+            <a href="#" class="mob-section-hdr"><span data-i18n="common.nav.produits">Produits</span></a>
+            <div class="mobile-submenu space-y-1">
+                <a href="/fr/products/collaboration" class="block py-1" data-i18n="common.nav.rainbow-collaboration">Rainbow Collaboration</a>
+                <a href="/fr/products/webinar" class="block py-1" data-i18n="common.nav.rainbow-webinar">Rainbow Webinar</a>
+            </div>
+            <a href="/fr/tarifs" class="mob-section-hdr" data-i18n="common.nav.tarifs">Tarifs</a>
+            <a href="#" class="mob-section-hdr" data-i18n="common.nav.ressources">Ressources</a>
+            <div class="mobile-submenu space-y-1">
+                <a href="/fr/blog" class="block py-1" data-i18n="common.nav.blog">Blog</a>
+                <a href="/fr/reviews" class="block py-1" data-i18n="common.nav.avis">Avis</a>
+                <a href="/fr/support" class="block py-1" data-i18n="common.nav.support">Support</a>
+                <a href="/fr/tutorials" class="block py-1" data-i18n="common.nav.tutoriels">Tutoriels</a>
+            </div>
+            <div class="h-px bg-gray-100 mx-1 my-2"></div>
+            <div id="mobile-lang-switcher" class="flex flex-wrap gap-2 px-1 py-1"></div>
+            <div class="flex flex-col gap-2.5 pt-3">
+                <a href="https://web.openrainbow.net/rb/2.176.0/login" class="w-full text-center px-6 py-3 rounded-btn border-2 border-brand-500 text-purple-900 hover:bg-gray-50 text-base font-semibold transition-all active:scale-95" data-i18n="common.nav.se-connecter">Se connecter</a>
+                <a href="https://web.openrainbow.net/rb/2.177.4/trial" class="w-full text-center px-6 py-3 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-base font-semibold shadow-md hover:shadow-lg transition-all active:scale-95" data-i18n="common.nav.essai-gratuit">Essai gratuit</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== FLOATING SECTION NAV (scroll-spy pill bar) ===== -->
+    <nav id="section-nav" aria-label="Sections de la page" data-i18n-attr="aria-label:webinar.body.sections-de-la-page_aria-label">
+        <div class="section-nav-inner">
+            <a href="#fonctionnalites" class="section-nav-link" data-i18n="common.nav.fonctionnalit-s">Fonctionnalit&eacute;s</a>
+            <a href="#usage" class="section-nav-link" data-i18n="common.nav.usage_2">Usage</a>
+            <a href="#tarifs" class="section-nav-link" data-i18n="common.nav.tarifs">Tarifs</a>
+            <a href="#questions-frequentes" class="section-nav-link" data-i18n="common.nav.faq">FAQ</a>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <header class="pt-36 lg:pt-40 pb-24 lg:pb-28 px-6 relative overflow-hidden bg-[#ffffff]">
+        <div class="max-w-6xl mx-auto grid lg:grid-cols-12 gap-12 lg:gap-16 items-center relative z-10">
+            <!-- Left Side (Text & CTA) -->
+            <div class="lg:col-span-5">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold mb-6 bg-brand-100 text-brand-500 uppercase tracking-widest" data-i18n="webinar.body.plateforme-webinaire">
+                    Plateforme webinaire
+                </div>
+                <h1 class="text-3xl sm:text-4xl font-extrabold text-navy-900 leading-[1.2] tracking-tight" data-i18n-rich="webinar.body.rainbow-webinar-cr-ez-animez-et">
+                    <span class="text-brand-500">Rainbow Webinar</span> : cr&eacute;ez, animez et analysez vos webinaires en ligne, simplement
+                </h1>
+                <p class="mt-6 text-base sm:text-lg text-gray-600 leading-relaxed max-w-md" data-i18n="webinar.body.la-solution-webinar-souveraine">
+                    La solution webinar souveraine pour les entreprises qui veulent engager, convaincre et mesurer leur impact. Donn&eacute;es h&eacute;berg&eacute;es en France.
+                </p>
+                <div class="mt-9 flex flex-col sm:flex-row gap-4">
+                    <a href="/fr/tarifs"
+                        class="inline-flex items-center justify-center px-8 py-3.5 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-base font-bold whitespace-nowrap shadow-xl shadow-purple-900/20 transition-all active:scale-95" data-i18n="webinar.body.essai-gratuit">Essai gratuit</a>
+                    <button type="button" onclick="openDemoModal()"
+                        class="inline-flex items-center justify-center px-8 py-3.5 rounded-btn border-2 border-brand-500 text-purple-900 hover:bg-gray-50 text-base font-bold whitespace-nowrap transition-all active:scale-95" data-i18n="webinar.body.demander-une-d-mo">
+                        Demander une d&eacute;mo
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Side (Webinar Image) -->
+            <div class="relative lg:col-span-7">
+                <video src="/images/webinar-page/interface_rainbow_webinar_EN.mp4" autoplay loop muted playsinline class="w-full h-auto rounded-2xl shadow-xl"></video>
+            </div>
+        </div>
+    </header>
+
+    <!-- PADDING BOX START (Wraps all subsequent sections) -->
+    <div class="px-4 md:px-6 lg:px-8 pb-4 md:pb-6 lg:pb-8">
+        <div class="rounded-[32px] shadow-sm border overflow-hidden relative" style="border-color:#672fa287;"
+            style="background: linear-gradient(180deg, #f5f3ff 0%, #ffffff 600px);">
+
+            <!-- STATS BANNER -->
+            <section class="py-20 relative z-10 text-center" style="background: linear-gradient(135deg, #2d0a4c 0%, #5e2d91 40%, #7c3aad 70%, #4a1a6e 100%);">
+                <div class="max-w-6xl mx-auto px-6">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
+                        <div class="flex flex-col items-center">
+                            <span class="text-4xl md:text-5xl font-bold text-white tracking-tight" data-i18n="webinar.body.50m">50M+</span>
+                            <span class="text-sm md:text-base text-purple-200 mt-2 font-medium" data-i18n="webinar.body.vos-participants-restent-engag-s">vos participants restent engag&eacute;s de bout en bout</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <span class="text-4xl md:text-5xl font-bold text-white tracking-tight" data-i18n="webinar.body.120k">120K+</span>
+                            <span class="text-sm md:text-base text-purple-200 mt-2 font-medium" data-i18n="webinar.body.webinaires-organises-chaque-annee">webinaires organisés chaque année</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <span class="text-4xl md:text-5xl font-bold text-white tracking-tight">99.9%</span>
+                            <span class="text-sm md:text-base text-purple-200 mt-2 font-medium" data-i18n="webinar.body.de-disponibilit-garantie">de disponibilit&eacute; garantie contractuellement</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <span class="text-4xl md:text-5xl font-bold text-white tracking-tight">4.5/5</span>
+                            <span class="text-sm md:text-base text-purple-200 mt-2 font-medium" data-i18n="webinar.body.not-par-les-organisateurs-apr-s">not&eacute; par les organisateurs apr&egrave;s leur premier webinar</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TIMELINE FEATURES SECTION -->
+            <section id="features" class="py-24 relative z-10 bg-transparent">
+                <div class="max-w-5xl mx-auto px-6 text-center">
+                    <h2 class="text-4xl md:text-6xl font-bold text-navy-900 mb-20 tracking-tight" data-i18n="webinar.features.le-cycle-de-vie-de-votre-v-nement">Le cycle de vie de votre &eacute;v&egrave;nement</h2>
+
+                    <!-- Timeline Navigation -->
+                    <div class="relative mb-16 max-w-xl mx-auto">
+                        <!-- Progress Track -->
+                        <div class="absolute top-[28px] left-[56px] right-[56px] h-[2px] z-0">
+                            <div class="absolute inset-0 bg-gray-200 rounded-full"></div>
+                            <div id="timeline-progress" class="absolute inset-y-0 left-0 rounded-full transition-all duration-700 ease-out" style="width: 0%; background: linear-gradient(90deg, #CF0072, #5e2d91);"></div>
+                        </div>
+
+                        <!-- Steps -->
+                        <div class="relative z-10 flex justify-between items-start">
+                            <!-- Step 0: Création -->
+                            <div class="flex flex-col items-center cursor-pointer group w-28" onclick="switchTimelineTab(0)">
+                                <div class="h-14 flex items-center justify-center">
+                                    <div id="step-circle-0" class="timeline-dot-wrapper w-14 h-14 rounded-full flex items-center justify-center transition-all duration-500 relative z-10" style="background: #5e2d91; box-shadow: 0 4px 14px rgba(94,45,145,0.35);">
+                                        <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <span id="step-label-0" class="mt-3 font-semibold text-sm text-navy-900 transition-colors duration-300 timeline-label whitespace-nowrap" data-i18n="webinar.features.creation">Création</span>
+                            </div>
+                            <!-- Step 1: Animation -->
+                            <div class="flex flex-col items-center cursor-pointer group w-28" onclick="switchTimelineTab(1)">
+                                <div class="h-14 flex items-center justify-center">
+                                    <div id="step-circle-1" class="timeline-dot-wrapper w-14 h-14 rounded-full flex items-center justify-center transition-all duration-500 relative z-10" style="background: white; border: 2px solid #d1d5db; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                                        <svg class="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <span id="step-label-1" class="mt-3 font-medium text-sm text-gray-400 transition-colors duration-300 timeline-label whitespace-nowrap group-hover:text-gray-600" data-i18n="webinar.features.animation">Animation</span>
+                            </div>
+                            <!-- Step 2: Rapport -->
+                            <div class="flex flex-col items-center cursor-pointer group w-28" onclick="switchTimelineTab(2)">
+                                <div class="h-14 flex items-center justify-center">
+                                    <div id="step-circle-2" class="timeline-dot-wrapper w-14 h-14 rounded-full flex items-center justify-center transition-all duration-500 relative z-10" style="background: white; border: 2px solid #d1d5db; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                                        <svg class="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <span id="step-label-2" class="mt-3 font-medium text-sm text-gray-400 transition-colors duration-300 timeline-label whitespace-nowrap group-hover:text-gray-600" data-i18n="webinar.features.rapport">Rapport</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-panel-wrapper text-left max-w-4xl mx-auto">
+                        <!-- Panel 0: Création -->
+                        <div class="timeline-panel transition-opacity duration-500 block" id="timeline-tab-0">
+                            <div class="aspect-[16/9] w-full rounded-[1rem] border border-gray-100 bg-white/60 backdrop-blur-md flex items-center justify-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden">
+                                <video src="/images/webinar-page/webinar-creation.mp4" id="timeline-video-0" class="w-full h-full object-cover cursor-pointer" muted playsinline></video>
+                            </div>
+                        </div>
+                        <!-- Panel 1: Animation -->
+                        <div class="timeline-panel transition-opacity duration-500 hidden" id="timeline-tab-1">
+                            <div class="aspect-[16/9] w-full rounded-[2rem] border border-gray-100 bg-white/60 backdrop-blur-md flex items-center justify-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden">
+                                <video src="/images/webinar-page/webinar-live.mp4" id="timeline-video-1" class="w-full h-full object-cover cursor-pointer" muted playsinline></video>
+                            </div>
+                        </div>
+                        <!-- Panel 2: Rapport -->
+                        <div class="timeline-panel transition-opacity duration-500 hidden" id="timeline-tab-2">
+                            <div class="aspect-[16/9] w-full rounded-[2rem] border border-gray-100 bg-white/60 backdrop-blur-md flex items-center justify-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden">
+                                <video src="/images/webinar-page/webinar-rapport.mp4" id="timeline-video-2" class="w-full h-full object-cover cursor-pointer" muted playsinline loop></video>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- BENTO GRID SECTION -->
+            <section id="fonctionnalites" class="section-anchor py-24 relative z-10 border-t border-gray-100"
+                style="background: linear-gradient(180deg, #f5f3ff 0%, #ffffff 30%, #ffffff 70%, #f5f3ff 100%);">
+                <div class="max-w-6xl mx-auto px-6">
+                    <h2
+                        class="text-4xl md:text-5xl font-extrabold text-navy-900 text-center mb-4 leading-[1.15] tracking-tight" data-i18n="webinar.fonctionnalites.tout-ce-qu-il-faut-pour-un-webinar">
+                        Tout ce qu'il faut pour un webinar r&eacute;ussi, sans avoir &agrave; chercher ailleurs
+                    </h2>
+                    <p class="text-lg text-gray-500 text-center max-w-2xl mx-auto mb-16" data-i18n="webinar.fonctionnalites.de-l-invitation-l-analyse-chaque">
+                        De l'invitation &agrave; l'analyse, chaque outil pour engager votre audience en direct et mesurer l'impact de vos &eacute;v&eacute;nements.
+                    </p>
+
+                    <div class="w-full">
+                        <!-- Bento Grid: 4 parts - 2 rows, 1 big image per row -->
+                        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                            <!-- Row 1 Big: Sondages -->
+                            <div class="md:col-span-2 p-8 md:p-12 flex flex-col rounded-[15px]" style="background: linear-gradient(135deg, rgba(94,45,145,0.08), rgba(94,45,145,0.03));">
+                                <p class="text-gray-500 text-[15px] leading-relaxed max-w-2xl mb-10" data-i18n-rich="webinar.fonctionnalites.sondages-en-direct-lancez-un">
+                                    <strong class="text-navy-900 font-bold block mb-2 text-lg">Sondages en direct</strong>
+                                    Lancez un sondage en un clic pendant votre session. Vos participants r&eacute;pondent en temps r&eacute;el, vous voyez les r&eacute;sultats s'afficher instantan&eacute;ment. Id&eacute;al pour valider une hypoth&egrave;se, orienter un atelier ou mesurer l'adh&eacute;sion avant un vote.
+                                </p>
+                                <div class="flex-1 flex items-center justify-center">
+                                    <img src="/images/webinar-page/features_sondage.webp" alt="" class="w-full h-full max-h-[400px] object-contain rounded-xl">
+                                </div>
+                            </div>
+                            <!-- Row 1 Small: Rapports & Analyses -->
+                            <div class="md:col-span-3 p-8 md:p-12 flex flex-col rounded-[15px]" style="background: linear-gradient(135deg, rgba(207,0,114,0.08), rgba(207,0,114,0.03));">
+                                <p class="text-gray-500 text-[15px] leading-relaxed max-w-md mb-10" data-i18n-rich="webinar.fonctionnalites.rapports-analyses-apr-s-chaque">
+                                    <strong class="text-navy-900 font-bold block mb-2 text-lg">Rapports &amp; Analyses</strong>
+                                    Apr&egrave;s chaque session, Rainbow Webinar g&eacute;n&egrave;re automatiquement votre rapport de performance&nbsp;: taux d'engagement, dur&eacute;e de pr&eacute;sence, questions pos&eacute;es, r&eacute;sultats des sondages. Tout ce qu'il faut pour am&eacute;liorer le prochain, sans tableur &agrave; remplir.
+                                </p>
+                                <div class="flex-1 flex items-center justify-center">
+                                    <div class="aspect-[4/3] rounded-xl w-full flex items-center justify-center">
+                                        <img src="/images/webinar-page/features-analytics.webp" alt="">
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Row 2 Small: Salle d'attente -->
+                            <div class="md:col-span-3 p-8 md:p-12 flex flex-col rounded-[15px]" style="background: linear-gradient(135deg, rgba(0,133,202,0.08), rgba(0,133,202,0.03));">
+                                <p class="text-gray-500 text-[15px] leading-relaxed max-w-md mb-10" data-i18n-rich="webinar.fonctionnalites.salle-d-attente-vos-invites">
+                                    <strong class="text-navy-900 font-bold block mb-2 text-lg">Salle d'attente</strong>
+                                    Vos invités patientent sans décrocher grâce à une vidéo d'attente personnalisée pendant que vous validez les accès en coulisses. Filtrez les indésirables, gérez les entrées en temps réel et lancez votre session quand tout le monde est prêt, sans perdre l'attention de votre audience dès les premières secondes.​
+                                </p>
+                                <div class="flex-1 flex items-center justify-center">
+                                    <div class="aspect-[4/3] rounded-xl w-full flex items-center justify-center">
+                                        <img src="/images/webinar-page/salle_d_attente.webp" alt="">
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Row 2 Big: Invitations personnalisées -->
+                            <div class="md:col-span-2 p-8 md:p-12 flex flex-col rounded-[15px]" style="background: linear-gradient(135deg, rgba(94,45,145,0.08), rgba(0,133,202,0.05));">
+                                <p class="text-gray-500 text-[15px] leading-relaxed max-w-2xl mb-10" data-i18n-rich="webinar.fonctionnalites.invitations-personnalis-es-cr-ez">
+                                    <strong class="text-navy-900 font-bold block mb-2 text-lg">Invitations personnalis&eacute;es</strong>
+                                    Cr&eacute;ez des pages d'inscription et des emails d'invitation &agrave; votre image en quelques minutes, sans designer, sans d&eacute;veloppeur. Vos participants arrivent dans un environnement qui refl&egrave;te votre marque, pas celle d'un outil tiers.
+                                </p>
+                                <div class="flex-1 flex items-center justify-center">
+                                    <img src="/images/webinar-page/inscription.webp" alt="" class="w-full h-full max-h-[400px] object-contain rounded-xl">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- USE CASE SECTION -->
+            <section id="usage" class="section-anchor py-24 relative z-10 border-t border-gray-100">
+                <div class="max-w-6xl mx-auto px-6">
+                    <div class="text-center max-w-3xl mx-auto mb-6">
+                        <h2 class="text-4xl md:text-5xl font-extrabold text-navy-900 tracking-tight" data-i18n="webinar.usage.rainbow-webinar-s-adapte-votre">
+                            Rainbow Webinar s'adapte &agrave; votre usage
+                        </h2>
+                        <p class="text-lg text-gray-600 leading-relaxed font-medium mt-4" data-i18n="webinar.usage.de-la-formation-interne-au-webinar">
+                            De la formation interne au webinar grand public, d&eacute;couvrez comment des &eacute;quipes comme la v&ocirc;tre l'utilisent chaque semaine.
+                        </p>
+                    </div>
+
+                    <!-- Sliding Pill Tab Container -->
+                    <div class="hidden md:flex md:justify-center md:mb-10">
+                        <div class="usecase-tabs pill-tab-container relative inline-flex">
+                            <div class="pill-slider"></div>
+                            <button class="pill-tab-btn text-active" data-usecase-index="0" style="--pill-accent:#7c3aed">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                                </svg>
+                                <span data-i18n="webinar.usage.v-nements">&Eacute;v&egrave;nements</span>
+                            </button>
+                            <button class="pill-tab-btn text-inactive" data-usecase-index="1" style="--pill-accent:#43379e">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span data-i18n="webinar.usage.formation-e-learning">Formation &amp; e-learning</span>
+                            </button>
+                            <button class="pill-tab-btn text-inactive" data-usecase-index="2" style="--pill-accent:#7c3aed">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                                <span data-i18n="webinar.usage.d-monstration-produit">D&eacute;monstration Produit</span>
+                            </button>
+                            <button class="pill-tab-btn text-inactive" data-usecase-index="3" style="--pill-accent:#1e1b4b">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
+                                </svg>
+                                <span data-i18n="webinar.usage.r-unions-institutionnelles">R&eacute;unions institutionnelles</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tab Content -->
+                    <div class="grid lg:grid-cols-[2fr_3fr] gap-12 lg:gap-16 items-center">
+                        <!-- Left: Text -->
+                        <div>
+                            <!-- Panel 0: Event -->
+                            <div class="usecase-panel" data-usecase-panel="0">
+                                <img src="/images/webinar-page/evenements_direct.png" alt="Event" class="lg:hidden w-full h-64 object-cover rounded-xl mb-4" / data-i18n-attr="alt:webinar.usage.event_alt">
+                                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-bold mb-4" style="background-color: rgba(124, 58, 237, 0.1); color: #7c3aed;" data-i18n-rich="webinar.usage.path-stroke-linecap-round-stroke">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                                    </svg>
+                                    &Eacute;v&egrave;nements
+                                </div>
+                                <h3 class="text-xl md:text-2xl lg:text-3xl font-semibold mb-4 text-navy-900 leading-tight" data-i18n="webinar.usage.organisez-des-v-nements-en-ligne">
+                                    Organisez des &eacute;v&eacute;nements en ligne engageants
+                                </h3>
+                                <ul class="space-y-3 text-sm text-gray-600 mb-6">
+                                    <li class="flex items-start gap-3">
+                                        <svg class="w-5 h-5 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                                        <span data-i18n="webinar.usage.inscriptions-et-rappels">Inscriptions et rappels automatisés</span>
+                                    </li>
+                                    <li class="flex items-start gap-3">
+                                        <svg class="w-5 h-5 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                                        <span data-i18n="webinar.usage.sondages-en-direct-et-sessions-q-a">Sondages en direct et sessions Q&A</span>
+                                    </li>
+                                    <li class="flex items-start gap-3">
+                                        <svg class="w-5 h-5 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                                        <span data-i18n="webinar.usage.replay-disponible-apres-l">Replay disponible après l'événement</span>
+                                    </li>
+                                </ul>
+                                <button type="button" onclick="openDemoModal()" class="inline-flex items-center justify-center px-6 py-3 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-lg font-bold transition-all shadow-md hover:shadow-lg" data-i18n="webinar.usage.decouvrir-les-fonctionnalites">
+                                    Découvrir les fonctionnalités
+                                </button>
+                            </div>
+
+                            <!-- Panel 1: Formation clients -->
+                            <div class="usecase-panel" data-usecase-panel="1" style="display: none;">
+                                <img src="/images/webinar-page/formation_clients.png" alt="Formation clients" class="lg:hidden w-full h-64 object-cover rounded-xl mb-4" / data-i18n-attr="alt:webinar.usage.formation-clients_alt">
+                                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-bold mb-4" style="background-color: rgba(67, 55, 158, 0.1); color: #43379e;" data-i18n-rich="webinar.usage.path-stroke-linecap-round-stroke_2">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Formation &amp; e-learning
+                                </div>
+                                <h3 class="text-xl md:text-2xl lg:text-3xl font-semibold mb-4 text-navy-900 leading-tight" data-i18n="webinar.usage.formez-et-valuez-distance-sans">
+                                    Formez et &eacute;valuez &agrave; distance, sans friction
+                                </h3>
+                                <ul class="space-y-3 text-sm text-gray-600 mb-6">
+                                    <li class="flex items-start gap-3">
+                                        <svg class="w-5 h-5 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                                        <span data-i18n="webinar.usage.sondages-et-q-r-en-direct">Sondages et Q&amp;R en direct</span>
+                                    </li>
+                                    <li class="flex items-start gap-3">
+                                        <svg class="w-5 h-5 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                                        <span data-i18n="webinar.usage.replay-automatique-disponible">Replay automatique disponible</span>
+                                    </li>
+                                    <li class="flex items-start gap-3">
+                                        <svg class="w-5 h-5 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                                        <span data-i18n="webinar.usage.rapport-de-presence-par">Rapport de présence par participant</span>
+                                    </li>
+                                </ul>
+                                <button type="button" onclick="openDemoModal()" class="inline-flex items-center justify-center px-6 py-3 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-lg font-bold transition-all shadow-md hover:shadow-lg" data-i18n="webinar.usage.decouvrir-les-fonctionnalites">
+                                    Découvrir les fonctionnalités
+                                </button>
+                            </div>
+
+                            <!-- Panel 2: Demo produit -->
+                            <div class="usecase-panel" data-usecase-panel="2" style="display: none;">
+                                <img src="/images/webinar-page/demo_produit.png" alt="Demo produit" class="lg:hidden w-full h-64 object-cover rounded-xl mb-4" / data-i18n-attr="alt:webinar.usage.demo-produit_alt">
+                                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-bold mb-4" style="background-color: rgba(124, 58, 237, 0.1); color: #7c3aed;" data-i18n-rich="webinar.usage.path-stroke-linecap-round-stroke_3">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    </svg>
+                                    D&eacute;monstration Produit
+                                </div>
+                                <h3 class="text-xl md:text-2xl lg:text-3xl font-semibold mb-4 text-navy-900 leading-tight" data-i18n="webinar.usage.pr-sentez-vos-produits-avec-impact">
+                                    Pr&eacute;sentez vos produits avec impact
+                                </h3>
+                                <ul class="space-y-3 text-sm text-gray-600 mb-6">
+                                    <li class="flex items-start gap-3">
+                                        <svg class="w-5 h-5 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                                        <span data-i18n="webinar.usage.partage-d-cran-et-d-monstration">Partage d'&eacute;cran et d&eacute;monstration produit en direct</span>
+                                    </li>
+                                    <li class="flex items-start gap-3">
+                                        <svg class="w-5 h-5 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                                        <span data-i18n="webinar.usage.capture-de-leads-int-gr-e">Capture de leads int&eacute;gr&eacute;e</span>
+                                    </li>
+                                    <li class="flex items-start gap-3">
+                                        <svg class="w-5 h-5 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                                        <span data-i18n="webinar.usage.analytics-et-suivi-des-engagements">Analytics et suivi des engagements post-session</span>
+                                    </li>
+                                </ul>
+                                <button type="button" onclick="openDemoModal()" class="inline-flex items-center justify-center px-6 py-3 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-lg font-bold transition-all shadow-md hover:shadow-lg" data-i18n="webinar.usage.d-couvrir-les-fonctionnalit-s">
+                                    D&eacute;couvrir les fonctionnalit&eacute;s
+                                </button>
+                            </div>
+
+                            <!-- Panel 3: Réunions institutionnelles & Secteur Public -->
+                            <div class="usecase-panel" data-usecase-panel="3" style="display: none;">
+                                <img src="/images/reunions-institutionnelles.jpg" alt="Réunions institutionnelles" class="lg:hidden w-full h-64 object-cover rounded-xl mb-4" / data-i18n-attr="alt:webinar.usage.reunions-institutionnelles_alt">
+                                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-bold mb-4" style="background-color: rgba(30, 27, 75, 0.1); color: #1e1b4b;" data-i18n-rich="webinar.usage.path-stroke-linecap-round-stroke_4">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
+                                    </svg>
+                                    Secteur Public
+                                </div>
+                                <h3 class="text-xl md:text-2xl lg:text-3xl font-semibold mb-4 text-navy-900 leading-tight" data-i18n="webinar.usage.s-curisez-vos-r-unions">
+                                    S&eacute;curisez vos r&eacute;unions institutionnelles
+                                </h3>
+                                <ul class="space-y-3 text-sm text-gray-600 mb-6">
+                                    <li class="flex items-start gap-3">
+                                        <svg class="w-5 h-5 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                                        <span data-i18n="webinar.usage.h-bergement-souverain-z-ro-cloud">H&eacute;bergement souverain, z&eacute;ro Cloud Act</span>
+                                    </li>
+                                    <li class="flex items-start gap-3">
+                                        <svg class="w-5 h-5 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                                        <span data-i18n="webinar.usage.contr-le-des-participants-et-acc-s">Contr&ocirc;le des participants et acc&egrave;s s&eacute;curis&eacute;</span>
+                                    </li>
+                                    <li class="flex items-start gap-3">
+                                        <svg class="w-5 h-5 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                                        <span data-i18n="webinar.usage.compte-rendu-et-rapport-de-pr">Compte-rendu et rapport de pr&eacute;sence automatis&eacute;s</span>
+                                    </li>
+                                </ul>
+                                <button type="button" onclick="openDemoModal()" class="inline-flex items-center justify-center px-6 py-3 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-lg font-bold transition-all shadow-md hover:shadow-lg" data-i18n="webinar.usage.d-couvrir-les-fonctionnalit-s">
+                                    D&eacute;couvrir les fonctionnalit&eacute;s
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Right: Images -->
+                        <div class="hidden lg:block relative aspect-video">
+                            <div class="rounded-xl overflow-hidden bg-white border border-gray-200 shadow-xl w-full h-full">
+                                <div class="w-full h-full relative">
+                                    <img src="/images/webinar-page/evenements_direct.png" alt="Event" data-usecase-img="0" class="usecase-img absolute inset-0 w-full h-full object-cover transition-all duration-500" style="opacity: 1; z-index: 10;" / data-i18n-attr="alt:webinar.usage.event_alt">
+                                    <img src="/images/webinar-page/formation_clients.png" alt="Formation e-learning" data-usecase-img="1" class="usecase-img absolute inset-0 w-full h-full object-cover transition-all duration-500" style="opacity: 0; z-index: 0;" / data-i18n-attr="alt:webinar.usage.formation-e-learning_alt">
+                                    <img src="/images/webinar-page/demo_produit.png" alt="Demo produit" data-usecase-img="2" class="usecase-img absolute inset-0 w-full h-full object-cover transition-all duration-500" style="opacity: 0; z-index: 0;" / data-i18n-attr="alt:webinar.usage.demo-produit_alt">
+                                    <img src="/images/reunions-institutionnelles.jpg" alt="Réunions institutionnelles" data-usecase-img="3" class="usecase-img absolute inset-0 w-full h-full object-cover transition-all duration-500" style="opacity: 0; z-index: 0;" / data-i18n-attr="alt:webinar.usage.reunions-institutionnelles_alt">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <script>
+                    (function() {
+                        var container = document.querySelector('.usecase-tabs');
+                        if (!container) return;
+                        var slider = container.querySelector('.pill-slider');
+                        var tabs = container.querySelectorAll('.pill-tab-btn');
+                        var panels = document.querySelectorAll('.usecase-panel');
+                        var imgs = document.querySelectorAll('.usecase-img');
+                        if (!tabs.length) return;
+                        function update(index) {
+                            var activeTab = tabs[index];
+                            if (!activeTab) return;
+                            slider.style.left = activeTab.offsetLeft + 'px';
+                            slider.style.width = activeTab.offsetWidth + 'px';
+                            tabs.forEach(function(t, i) {
+                                t.classList.toggle('text-active', i === index);
+                                t.classList.toggle('text-inactive', i !== index);
+                            });
+                            panels.forEach(function(p) {
+                                var idx = parseInt(p.getAttribute('data-usecase-panel'), 10);
+                                p.style.display = idx === index ? 'block' : 'none';
+                            });
+                            imgs.forEach(function(img) {
+                                var idx = parseInt(img.getAttribute('data-usecase-img'), 10);
+                                img.style.opacity = idx === index ? '1' : '0';
+                                img.style.zIndex = idx === index ? '10' : '0';
+                            });
+                        }
+                        tabs.forEach(function(tab, i) {
+                            tab.addEventListener('click', function() { update(i); });
+                        });
+                        setTimeout(function() { update(0); }, 50);
+                        window.addEventListener('resize', function() {
+                            var activeIdx = 0;
+                            tabs.forEach(function(t, i) {
+                                if (t.classList.contains('text-active')) activeIdx = i;
+                            });
+                            update(activeIdx);
+                        });
+                    })();
+                </script>
+            </section>
+
+            <!-- PRICING SECTION -->
+            <section id="tarifs"
+                class="section-anchor py-32 bg-gray-50 relative overflow-hidden z-10 border-t border-b border-dashed border-gray-200">
+                <div class="max-w-6xl mx-auto px-6 relative z-10">
+                    <div class="text-center mb-16">
+                        <h2 class="text-4xl md:text-5xl font-extrabold text-navy-900 mb-6 tracking-tight" data-i18n="webinar.tarifs.choisissez-le-plan-qui-correspond">Choisissez le plan qui correspond &agrave; vos besoins, changez-en quand vous le souhaitez</h2>
+                        <p class="text-gray-500 max-w-2xl mx-auto text-[17px]" data-i18n="webinar.tarifs.sans-engagement-annuel-obligatoire">Sans engagement annuel obligatoire. Sans frais cach&eacute;s. Sans mauvaise surprise.</p>
+
+                        <!-- Monthly/Yearly Switch -->
+                        <div class="mt-10 flex flex-wrap items-center justify-center gap-x-4 gap-y-3">
+                            <div class="cur-switcher">
+                                <button type="button" class="cur-btn" aria-haspopup="listbox" aria-expanded="false">
+                                    <span class="cur-sym" data-cur-sym>€</span>
+                                    <span data-cur-code data-i18n="webinar.tarifs.eur">EUR</span>
+                                    <svg class="cur-chev" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                                </button>
+                                <div class="cur-menu" role="listbox">
+                                                <button type="button" class="cur-opt active" data-set-cur="EUR" data-i18n-rich="webinar.tarifs.eur_2"><span class="cur-opt-sym">€</span> EUR</button>
+                                                <button type="button" class="cur-opt" data-set-cur="USD" data-i18n-rich="webinar.tarifs.usd"><span class="cur-opt-sym">$</span> USD</button>
+                                                <button type="button" class="cur-opt" data-set-cur="GBP" data-i18n-rich="webinar.tarifs.gbp"><span class="cur-opt-sym">£</span> GBP</button>
+                                                <button type="button" class="cur-opt" data-set-cur="CHF" data-i18n-rich="webinar.tarifs.chf-chf"><span class="cur-opt-sym">CHF</span> CHF</button>
+                                                <button type="button" class="cur-opt" data-set-cur="SEK" data-i18n-rich="webinar.tarifs.kr-sek"><span class="cur-opt-sym">kr</span> SEK</button>
+                                                <button type="button" class="cur-opt" data-set-cur="DKK" data-i18n-rich="webinar.tarifs.kr-dkk"><span class="cur-opt-sym">kr</span> DKK</button>
+                                                <button type="button" class="cur-opt" data-set-cur="NOK" data-i18n-rich="webinar.tarifs.kr-nok"><span class="cur-opt-sym">kr</span> NOK</button>
+                                                <button type="button" class="cur-opt" data-set-cur="PLN" data-i18n-rich="webinar.tarifs.z-pln"><span class="cur-opt-sym">zł</span> PLN</button>
+                                                <button type="button" class="cur-opt" data-set-cur="HUF" data-i18n-rich="webinar.tarifs.ft-huf"><span class="cur-opt-sym">Ft</span> HUF</button>
+                                                <button type="button" class="cur-opt" data-set-cur="CZK" data-i18n-rich="webinar.tarifs.kc-czk"><span class="cur-opt-sym">Kč</span> CZK</button>
+                                                <button type="button" class="cur-opt" data-set-cur="RON" data-i18n-rich="webinar.tarifs.lei-ron"><span class="cur-opt-sym">lei</span> RON</button>
+                                                <button type="button" class="cur-opt" data-set-cur="BGN" data-i18n-rich="webinar.tarifs.bgn"><span class="cur-opt-sym">лв</span> BGN</button>
+                                            </div>
+                            </div>
+                            <span id="label-monthly" class="text-sm font-bold text-navy-900" data-i18n="webinar.tarifs.mensuel">Mensuel</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="billing-toggle" class="sr-only peer"
+                                    onchange="toggleBilling()">
+                                <div
+                                    class="w-12 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-500">
+                                </div>
+                            </label>
+                            <span id="label-yearly" class="text-sm font-medium text-gray-500" data-i18n="webinar.tarifs.annuel-20">Annuel</span>
+                        </div>
+                    </div>
+
+                    <!-- Bento-style Pricing Grid -->
+                    <div class="max-w-5xl mx-auto mb-6">
+                        <div class="bg-white shadow-[0_4px_20px_rgb(0,0,0,0.04)]">
+                            <div class="grid md:grid-cols-3 border-t border-b border-dashed border-gray-200">
+
+                                <!-- Plan 1: Webinar Starter -->
+                                <div class="p-8 md:p-10 border-b md:border-b-0 md:border-r border-dashed border-gray-200 flex flex-col hover:bg-gray-50/50 hover:shadow-[inset_0_0_0_1px_rgba(124,58,237,0.06)] transition-all duration-300 group">
+                                    <div class="flex flex-col h-full">
+                                        <div class="flex-grow">
+                                            <h3 class="text-lg font-bold text-navy-900 mb-5 tracking-tight" data-i18n="webinar.tarifs.webinar-starter">Webinar Starter</h3>
+                                            <div class="mb-5 flex items-end gap-1">
+                                                <span class="text-4xl md:text-5xl font-extrabold text-navy-900 price-monthly tracking-tight" data-price="59" data-cur="EUR">59€</span>
+                                                <span class="text-4xl md:text-5xl font-extrabold text-navy-900 price-yearly hidden tracking-tight" data-price="49" data-cur="EUR">49€</span>
+                                                <span class="text-gray-500 font-medium text-sm mb-1.5 ml-1" data-i18n="webinar.tarifs.mois">/mois</span>
+                                            <span class="price-yearly hidden inline-flex items-center bg-brand-500/10 text-brand-600 font-bold px-2 py-0.5 rounded-full text-xs mb-1.5 ml-1">-17%</span></div>
+                                            <div class="w-full border-t border-dashed border-gray-200 my-6"></div>
+                                            <ul class="space-y-3.5 mb-8 text-[14px] text-gray-600 flex-grow">
+                                                <li class="flex items-start gap-3"><svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0 group-hover:scale-110 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="webinar.tarifs.jusqu-a-120-participants">Jusqu'à 120 participants</span></li>
+                                                <li class="flex items-start gap-3"><svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0 group-hover:scale-110 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="webinar.tarifs.10-speakers-en-backstage">10 speakers en backstage simultanés</span></li>
+                                                <li class="flex items-start gap-3"><svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0 group-hover:scale-110 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="webinar.tarifs.sondages-et-q-r-en-direct">Sondages et Q&amp;R en direct</span></li>
+                                                <li class="flex items-start gap-3"><svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0 group-hover:scale-110 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="webinar.tarifs.branding-personnalise-logo">Branding personnalisé (logo, bannière)</span></li>
+                                                <li class="flex items-start gap-3"><svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0 group-hover:scale-110 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="webinar.tarifs.analyses-personnalisees">Rapports d&eacute;taill&eacute;s des sessions</span></li>
+                                                <li class="flex items-start gap-3"><svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0 group-hover:scale-110 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="webinar.tarifs.enregistrez-vos-evenements">Enregistrement des &eacute;v&eacute;nements</span></li>
+                                            </ul>
+                                        </div>
+                                        <a href="https://web.openrainbow.net/rb/2.177.4/trial?offer=webinar" class="block w-full py-3.5 px-4 text-center rounded-[10px] border-2 border-brand-500 text-brand-500 font-bold hover:bg-brand-500 hover:text-white hover:shadow-lg transition-all duration-200 text-sm" data-i18n="webinar.tarifs.essai-gratuit-30-jours">Essai gratuit 30 jours</a>
+                                    </div>
+                                </div>
+
+                                <!-- Plan 2: Webinar Pro (Center - highlighted) -->
+                                <div class="p-8 md:p-10 border-b md:border-b-0 md:border-r border-dashed border-gray-200 flex flex-col bg-gradient-to-b from-brand-50/70 to-white relative hover:from-brand-50/90 transition-all duration-300 group shadow-[inset_0_0_0_1.5px_rgba(94,45,145,0.18),0_4px_24px_-6px_rgba(94,45,145,0.14)]">
+                                    <div class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-brand-500 to-indigo-500"></div>
+                                    <div class="absolute -top-16 -right-16 w-56 h-56 bg-brand-500/10 rounded-full blur-3xl"></div>
+                                    <div class="absolute -bottom-16 -left-16 w-56 h-56 bg-indigo-500/10 rounded-full blur-3xl"></div>
+                                    <div class="flex flex-col h-full relative z-10">
+                                        <div class="flex-grow">
+                                            <div class="flex items-start gap-2 mb-5 flex-wrap">
+                                                <h3 class="text-2xl font-bold text-navy-900 tracking-tight" data-i18n="webinar.tarifs.webinar-pro">Webinar Pro</h3>
+                                                <span class="inline-flex items-center bg-brand-500 text-white font-bold px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-wider shrink-0 mt-1" data-i18n="webinar.tarifs.le-plus-populaire">Le plus populaire</span>
+                                            </div>
+                                            <div class="mb-5 flex items-end gap-1">
+                                                <span class="text-4xl md:text-5xl font-extrabold text-navy-900 price-monthly tracking-tight" data-price="139" data-cur="EUR">139€</span>
+                                                <span class="text-4xl md:text-5xl font-extrabold text-navy-900 price-yearly hidden tracking-tight" data-price="119" data-cur="EUR">119€</span>
+                                                <span class="text-gray-500 font-medium text-sm mb-1.5 ml-1" data-i18n="webinar.tarifs.mois">/mois</span>
+                                            <span class="price-yearly hidden inline-flex items-center bg-brand-500/10 text-brand-600 font-bold px-2 py-0.5 rounded-full text-xs mb-1.5 ml-1">-14%</span></div>
+                                            <div class="w-full border-t border-dashed border-gray-200 my-6"></div>
+                                            <ul class="space-y-3.5 mb-8 text-[14px] text-gray-600">
+                                                <li class="flex items-start gap-3"><svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0 group-hover:scale-110 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="webinar.tarifs.jusqu-a-500-participants">Jusqu'à 500 participants</span></li>
+                                                <li class="flex items-start gap-3"><svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0 group-hover:scale-110 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="webinar.tarifs.30-speakers-en-backstage">30 speakers en backstage simultanés</span></li>
+                                                <li class="flex items-start gap-3"><svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0 group-hover:scale-110 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="webinar.tarifs.live-streaming-youtube">Live streaming Youtube</span></li>
+                                                <li class="flex items-start gap-3"><svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0 group-hover:scale-110 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="webinar.tarifs.jusqu-a-6h-de-session">Jusqu'à 6h de session</span></li>
+                                                <li class="flex items-start gap-3"><svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0 group-hover:scale-110 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="webinar.tarifs.customer-success-dedie">Customer Success dédié</span></li>
+                                                <li class="flex items-start gap-3"><svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0 group-hover:scale-110 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="webinar.tarifs.analyses-personnalisees">Rapports d&eacute;taill&eacute;s des sessions</span></li>
+                                                <li class="flex items-start gap-3"><svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0 group-hover:scale-110 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="webinar.tarifs.enregistrez-vos-evenements">Enregistrement des &eacute;v&eacute;nements</span></li>
+                                            </ul>
+                                        </div>
+                                        <a href="https://web.openrainbow.net/rb/2.177.4/trial?offer=webinar" class="block w-full py-3.5 px-4 text-center rounded-[10px] bg-brand-500 text-white hover:bg-brand-600 font-bold transition-all shadow-md text-sm hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0" data-i18n="webinar.tarifs.commencer">Commencer</a>
+                                    </div>
+                                </div>
+
+                                <!-- Plan 3: Webinar Elite (Bientôt disponible) -->
+                                <div class="p-8 md:p-10 flex flex-col opacity-60">
+                                    <div class="flex flex-col h-full">
+                                        <div class="flex-grow">
+                                            <div class="flex items-start gap-2 mb-5 flex-wrap">
+                                                <h3 class="text-2xl font-bold text-navy-900 tracking-tight" data-i18n="webinar.tarifs.webinar-elite">Webinar Elite</h3>
+                                                <span class="inline-flex items-center bg-gray-200 text-gray-500 font-bold px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-wider shrink-0 mt-1" data-i18n="webinar.tarifs.bientot-disponible">Bientôt disponible</span>
+                                            </div>
+                                            <div class="mb-5 flex items-end gap-1">
+                                                <span class="text-4xl md:text-5xl font-extrabold text-gray-400 price-monthly tracking-tight" data-price="269" data-cur="EUR">269€</span>
+                                                <span class="text-4xl md:text-5xl font-extrabold text-gray-400 price-yearly hidden tracking-tight" data-price="249" data-cur="EUR">249€</span>
+                                                <span class="text-gray-400 font-medium text-sm mb-1.5 ml-1" data-i18n="webinar.tarifs.mois">/mois</span>
+                                            <span class="price-yearly hidden inline-flex items-center bg-brand-500/10 text-brand-600 font-bold px-2 py-0.5 rounded-full text-xs mb-1.5 ml-1">-7%</span></div>
+                                            <div class="w-full border-t border-dashed border-gray-200 my-6"></div>
+                                            <ul class="space-y-3.5 mb-8 text-[14px] text-gray-400">
+                                                <li class="flex items-start gap-3"><svg class="w-4 h-4 text-gray-300 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="webinar.tarifs.jusqu-a-1-000-participants">Jusqu'à 1 000 participants</span></li>
+                                                <li class="flex items-start gap-3"><svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0 group-hover:scale-110 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="webinar.tarifs.live-streaming-youtube">Live streaming Youtube</span></li>
+                                                <li class="flex items-start gap-3"><svg class="w-4 h-4 text-gray-300 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="webinar.tarifs.customer-success-dedie">Customer Success dédié</span></li>
+                                                <li class="flex items-start gap-3"><svg class="w-4 h-4 text-gray-300 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="webinar.tarifs.resumes-et-transcriptions-ia">Transcriptions et r&eacute;sum&eacute;s IA</span></li>
+                                                <li class="flex items-start gap-3"><svg class="w-4 h-4 text-gray-300 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="webinar.tarifs.analyses-personnalisees">Rapports d&eacute;taill&eacute;s des sessions</span></li>
+                                                <li class="flex items-start gap-3"><svg class="w-4 h-4 text-gray-300 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="webinar.tarifs.jusqu-a-6h-de-session">Jusqu'à 6h de session</span></li>
+                                                
+                                            </ul>
+                                        </div>
+                                        <span class="block w-full py-3.5 px-4 text-center rounded-[10px] border border-gray-200 text-gray-400 font-semibold text-sm cursor-not-allowed select-none" data-i18n="webinar.tarifs.disponible-prochainement">Disponible prochainement</span>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer Notes -->
+                    <div class="max-w-5xl mx-auto mb-20 grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="flex items-start gap-3 p-4 rounded-xl bg-gray-50/70 border border-gray-100">
+                            <svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <div>
+                                <p class="text-xs font-bold text-navy-900 mb-0.5" data-i18n="webinar.tarifs.facturation-flexible">Facturation flexible</p>
+                                <p class="text-xs text-gray-500" data-i18n="webinar.tarifs.mensuelle-ou-annuelle-economisez">Mensuel ou annuel &middot; &eacute;conomisez jusqu'&agrave; 240 &euro; avec l'abonnement annuel</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 p-4 rounded-xl bg-gray-50/70 border border-gray-100">
+                            <svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z"/></svg>
+                            <div>
+                                <p class="text-xs font-bold text-navy-900 mb-0.5" data-i18n="webinar.tarifs.ht-tva">HT TVA</p>
+                                <p class="text-xs text-gray-500" data-i18n="webinar.tarifs.prix-affiches-hors-taxes-tva">Prix affichés hors taxes · TVA applicable selon votre pays</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 p-4 rounded-xl bg-gray-50/70 border border-gray-100">
+                            <svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <div>
+                                <p class="text-xs font-bold text-navy-900 mb-0.5" data-i18n="webinar.tarifs.europe-uniquement">Europe uniquement</p>
+                                <p class="text-xs text-gray-500" data-i18n="webinar.tarifs.disponible-dans-31-pays-europeens">Disponible dans 31 pays européens · </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Comparison Section -->
+                    <div class="text-center">
+                        <button onclick="toggleComparisonTable()"
+                            class="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-[10px] border border-gray-200 text-sm font-semibold text-navy-900 bg-white hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm">
+                            <span id="comparison-toggle-text" data-i18n="webinar.tarifs.comparer-toutes-les">Comparer toutes les fonctionnalités</span>
+                            <svg id="comparison-toggle-icon"
+                                class="w-4 h-4 transition-transform duration-300 text-gray-400" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Comparison Table Container -->
+                    <div id="comparison-table"
+                        class="hidden mt-12 max-w-5xl mx-auto bg-white border border-gray-200 rounded-[10px] shadow-[0_4px_25px_-5px_rgba(0,0,0,0.02)] overflow-hidden transition-all duration-300">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="border-b border-gray-200 bg-gray-50/50">
+                                        <th class="p-6 text-sm font-bold text-navy-900 w-[28%]" data-i18n="webinar.tarifs.fonctionnalite">Fonctionnalité</th>
+                                        <th class="p-6 text-sm font-bold text-navy-900 w-[24%] text-center" data-i18n="webinar.tarifs.webinar-starter">Webinar Starter</th>
+                                        <th class="p-6 text-sm font-bold text-navy-900 w-[24%] text-center bg-brand-50/30" data-i18n="webinar.tarifs.webinar-pro">Webinar Pro</th>
+                                        <th class="p-4 w-[24%] text-center bg-gray-50/60">
+                                            <div class="flex flex-col items-center gap-1.5 opacity-60">
+                                                <span class="text-sm font-bold text-navy-900" data-i18n="webinar.tarifs.webinar-elite">Webinar Elite</span>
+                                                <span class="inline-block bg-gray-200 text-gray-500 font-bold px-2 py-0.5 rounded-full text-[9px] uppercase tracking-wider" data-i18n="webinar.tarifs.bient-t-disponible">Bient&ocirc;t disponible</span>
+                                            </div>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100 text-sm text-gray-600">
+                                    <tr class="bg-slate-50/50"><td colspan="4" class="px-6 py-3.5 font-bold text-navy-900 text-[11px] uppercase tracking-wider" data-i18n="webinar.tarifs.capacit-diffusion">Capacit&eacute; &amp; Diffusion</td></tr>
+                                    <tr><td class="p-6 font-medium text-navy-900" data-i18n="webinar.tarifs.nombre-max-de-participants">Nombre max. de participants</td><td class="p-6 text-center">120</td><td class="p-6 text-center bg-brand-50/10 font-semibold text-navy-900">500</td><td class="p-6 text-center bg-gray-50/40 text-gray-300">&mdash;</td></tr>
+                                    <tr><td class="p-6 font-medium text-navy-900" data-i18n="webinar.tarifs.speakers-en-backstage-simultan-s">Speakers en backstage simultan&eacute;s</td><td class="p-6 text-center">10</td><td class="p-6 text-center bg-brand-50/10 font-semibold text-navy-900">30</td><td class="p-6 text-center bg-gray-50/40 text-gray-300">&mdash;</td></tr>
+                                    <tr class="bg-slate-50/50"><td colspan="4" class="px-6 py-3.5 font-bold text-navy-900 text-[11px] uppercase tracking-wider" data-i18n="webinar.tarifs.engagement-accompagnement">Engagement &amp; Accompagnement</td></tr>
+                                    <tr><td class="p-6 font-medium text-navy-900" data-i18n="webinar.tarifs.sondages-q-r-en-direct">Sondages &amp; Q&amp;R en direct</td><td class="p-6 text-center text-brand-500"><svg class="w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td><td class="p-6 text-center bg-brand-50/10 text-brand-500"><svg class="w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td><td class="p-6 text-center bg-gray-50/40 text-gray-300">&mdash;</td></tr>
+                                    <tr><td class="p-6 font-medium text-navy-900" data-i18n="webinar.tarifs.branding-personnalis-logo-banni-re">Branding personnalis&eacute; (logo, banni&egrave;re)</td><td class="p-6 text-center text-brand-500"><svg class="w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td><td class="p-6 text-center bg-brand-50/10 text-brand-500"><svg class="w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td><td class="p-6 text-center bg-gray-50/40 text-gray-300">&mdash;</td></tr>
+                                    <tr><td class="p-6 font-medium text-navy-900" data-i18n="webinar.tarifs.analyses-personnalis-es">Rapports d&eacute;taill&eacute;s des sessions</td><td class="p-6 text-center text-brand-500"><svg class="w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td><td class="p-6 text-center bg-brand-50/10 text-brand-500"><svg class="w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td><td class="p-6 text-center bg-gray-50/40 text-gray-300">&mdash;</td></tr>
+                                    <tr><td class="p-6 font-medium text-navy-900" data-i18n="webinar.tarifs.enregistrement-des-v-nements">Enregistrement des &eacute;v&eacute;nements</td><td class="p-6 text-center text-brand-500"><svg class="w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td><td class="p-6 text-center bg-brand-50/10 text-brand-500"><svg class="w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td><td class="p-6 text-center bg-gray-50/40 text-gray-300">&mdash;</td></tr>
+                                    <tr><td class="p-6 font-medium text-navy-900" data-i18n="webinar.tarifs.customer-success-d-di">Customer Success d&eacute;di&eacute;</td><td class="p-6 text-center text-gray-300">&mdash;</td><td class="p-6 text-center bg-brand-50/10 text-brand-500"><svg class="w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td><td class="p-6 text-center bg-gray-50/40 text-gray-300">&mdash;</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== QUESTIONS FRÉQUENTES SECTION (Zendesk API) ===== -->
+            <section id="questions-frequentes" class="section-anchor py-20 lg:py-28 faq-section" style="background-color: #c5deff47;">
+                <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-16">
+                        <h2 class="text-2xl md:text-4xl lg:text-5xl font-semibold mb-6 tracking-tight text-gray-900" data-i18n="webinar.questions-frequentes.questions-fr-quentes">
+                            Questions fr&eacute;quentes
+                        </h2>
+                        <p class="text-lg md:text-xl text-gray-600" data-i18n="webinar.questions-frequentes.tout-ce-que-vous-devez-savoir-sur">
+                            Tout ce que vous devez savoir sur Rainbow Webinar
+                        </p>
+                    </div>
+                    <div id="faq-loading" class="faq-loading">
+                        <div class="faq-loading-spinner"></div>
+                        <p data-i18n="webinar.questions-frequentes.chargement-des-questions">Chargement des questions...</p>
+                    </div>
+                    <div id="faq-error" class="faq-error hidden">
+                        <p data-i18n="webinar.questions-frequentes.impossible-de-charger-les">Impossible de charger les questions pour le moment.</p>
+                    </div>
+                    <div id="faq-items-container" class="faq-items hidden">
+                        <!-- Items will be injected here by JS -->
+                    </div>
+                    <div class="faq-contact">
+                        <a href="/fr/faq" data-i18n-rich="webinar.questions-frequentes.trouvez-la-reponse-a-votre">
+                            Trouvez la réponse à votre question
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+
+
+        </div>
+    </div> <!-- End of Padding Box -->
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer-premium text-gray-400 relative z-10 overflow-hidden">
+        <!-- Top hairline glow -->
+        <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-300/60 to-transparent"></div>
+        <!-- Ambient purple wash -->
+        <div class="pointer-events-none absolute inset-0" style="background:
+            radial-gradient(ellipse 70% 55% at 50% -8%, rgba(124,58,237,0.32) 0%, rgba(124,58,237,0.10) 34%, transparent 68%),
+            radial-gradient(ellipse 55% 60% at 88% 108%, rgba(207,0,114,0.16) 0%, transparent 62%),
+            radial-gradient(ellipse 45% 50% at 6% 96%, rgba(94,45,145,0.20) 0%, transparent 60%);"></div>
+        <!-- Soft focal glow behind the CTA -->
+        <div class="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-[760px] h-[440px] bg-brand-500/25 rounded-full blur-[150px]"></div>
+
+        <div class="max-w-6xl mx-auto px-6 relative">
+            <!-- ===== CTA BAND ===== -->
+            <div class="text-center pt-24 pb-16 md:pt-28 md:pb-20 border-b border-white/10">
+                <div class="mb-9">
+                    <img src="/images/rainbow-logo.png" alt="Rainbow" class="w-[70px] h-[70px] object-contain mx-auto" data-i18n-attr="alt:common.footer.rainbow_alt">
+                </div>
+                <h2 class="text-2xl md:text-4xl lg:text-[2.6rem] font-semibold text-white tracking-[-0.025em] leading-[1.18] max-w-4xl mx-auto" style="text-wrap:balance" data-i18n="common.footer.lancez-votre-premier-webinaire-en">
+                    Lancez votre premier webinaire en moins de 2 minutes
+                </h2>
+                <p class="mt-5 text-base md:text-lg text-gray-300/90 max-w-xl mx-auto" style="text-wrap:balance" data-i18n="common.footer.essayez-nos-solutions-rainbow">
+                    Essayez nos solutions Rainbow gratuitement pendant 30 jours. Sans carte bancaire.
+                </p>
+                <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a href="/fr/tarifs" class="group inline-flex items-center justify-center gap-2.5 px-9 py-4 rounded-[14px] text-white text-base font-bold tracking-tight"
+                       style="background:#5e2d91;" data-i18n-rich="common.footer.commencez-l-essai-gratuit-path_3">
+                        Commencez l'essai gratuit
+                        <svg class="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                    </a>
+                    <a href="/fr/tarifs" class="inline-flex items-center justify-center px-9 py-4 rounded-[14px] text-white text-base font-bold tracking-tight border border-white/25 hover:bg-white/10 hover:border-white/40 transition-colors" data-i18n="common.footer.voir-les-tarifs_2">
+                        Voir les tarifs
+                    </a>
+                </div>
+            </div>
+
+            <!-- ===== LINK COLUMNS ===== -->
+            <div class="flex flex-col lg:flex-row lg:justify-between gap-12 lg:gap-16 py-16">
+                <!-- Brand -->
+                <div class="max-w-xs">
+                    <img src="/images/ale_white.png" alt="Alcatel-Lucent" class="h-11 w-auto opacity-90 mb-6" data-i18n-attr="alt:common.footer.alcatel-lucent_alt">
+                    <address class="not-italic text-sm text-gray-400 leading-relaxed" data-i18n-rich="common.footer.ale-international-32-avenue-kl-ber_3">
+                        ALE International<br>
+                        32 avenue Kl&eacute;ber<br>
+                        92700 Colombes, France
+                    </address>
+                </div>
+                <!-- Columns -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-8 sm:gap-14">
+                    <div>
+                        <h4 class="text-[11px] font-bold text-white uppercase tracking-[0.16em] mb-5" data-i18n="common.footer.solutions_3">Solutions</h4>
+                        <ul class="space-y-3.5 text-sm">
+                            <li><a href="/fr/products/collaboration" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.rainbow-collaboration">Rainbow Collaboration</a></li>
+                            <li><a href="/fr/products/webinar" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.rainbow-webinar">Rainbow Webinar</a></li>
+                            <li><a href="/fr/tarifs" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.tarifs">Tarifs</a></li>
+                            <li><a href="/fr/telecharger-application-rainbow" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.t-l-chargements">T&eacute;l&eacute;chargements</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.api">API</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-[11px] font-bold text-white uppercase tracking-[0.16em] mb-5" data-i18n="common.footer.developers">Developers</h4>
+                        <ul class="space-y-3.5 text-sm">
+                            <li><a href="/fr/centre-aide-rainbow" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.centre-d-aide">Centre d'aide</a></li>
+                            <li><a href="/fr/faq" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.faq">FAQ</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.guide-technique">Guide technique</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.code-samples_2">Code samples</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.int-grations">Int&eacute;grations</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.forum-dev_2">Forum dev</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-[11px] font-bold text-white uppercase tracking-[0.16em] mb-5" data-i18n="common.footer.company">Company</h4>
+                        <ul class="space-y-3.5 text-sm">
+                            <li><a href="/fr/a-propos-de-rainbow" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.a-propos_2">A propos</a></li>
+                            <li><a href="/fr/rainbow-donnees-hebergees-en-france" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.souverainet_2">Souverainet&eacute;</a></li>
+                            <li><a href="/fr/partenaires" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.devenir-partenaire">Devenir partenaire</a></li>
+                            <li><a href="/fr/trouver-un-partenaire" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.trouver-un-partenaire">Trouver un partenaire</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.carri-res">Carri&egrave;res</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.presse">Presse</a></li>
+                            <li><a href="/fr/form-al" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.contact_2">Contact</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== BOTTOM BAR ===== -->
+            <div class="border-t border-white/10 py-8 flex flex-col gap-6">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-5">
+                    <div class="flex items-center gap-3">
+                        <a href="#" aria-label="X" class="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 ring-1 ring-white/10 hover:ring-white/20 flex items-center justify-center transition-all">
+                            <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                        </a>
+                        <a href="#" aria-label="LinkedIn" class="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 ring-1 ring-white/10 hover:ring-white/20 flex items-center justify-center transition-all" data-i18n-attr="aria-label:common.footer.linkedin_aria-label">
+                            <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                        </a>
+                    </div>
+                    <div class="flex items-center gap-6 text-sm">
+                        <a href="/fr/privacy" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.privacy">Privacy</a>
+                        <a href="/fr/legal" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.terms_3">Terms</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.cookies">Cookies</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.gdpr">GDPR</a>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 leading-relaxed" data-i18n-rich="common.footer.ale-international-ale-usa-inc-all_3">&copy;ALE International, ALE USA Inc. All rights reserved in all countries. The Alcatel-Lucent name and logo are trademarks of Nokia used under license by ALE. To view a list of proprietary ALE trademarks, visit: <a href="https://www.al-enterprise.com/en/legal/trademarks-copyright" target="_blank" rel="noopener" class="hover:text-white transition-colors underline-offset-2 hover:underline">www.al-enterprise.com/en/legal/trademarks-copyright</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ===== DEMO REQUEST MODAL (lead capture) ===== -->
+    <div id="demo-modal" class="fixed inset-0 z-[100] hidden" role="dialog" aria-modal="true" aria-labelledby="demo-modal-title">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeDemoModal()"></div>
+        <div class="absolute inset-0 flex items-start sm:items-center justify-center p-3 sm:p-4 overflow-y-auto">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full my-4 sm:my-8 relative" onclick="event.stopPropagation()">
+                <!-- 40px hit area on touch, back to the tighter 32px on pointer devices. -->
+                <button onclick="closeDemoModal()" class="absolute top-3 right-3 sm:top-4 sm:right-4 w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center rounded-full hover:bg-gray-100 z-10" aria-label="Fermer" data-i18n-attr="aria-label:webinar.body.fermer_aria-label">
+                    <svg class="w-5 h-5 sm:w-4 sm:h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+
+                <div class="p-5 sm:p-9">
+                    <!-- Form panel -->
+                    <div id="demo-panel-form">
+                        <!-- pr-10 keeps the heading clear of the close button, which sits
+                             in the same band once it grows to a 40px touch target. -->
+                        <h3 id="demo-modal-title" class="text-xl sm:text-2xl font-extrabold text-navy-900 tracking-tight mb-2 pr-10 sm:pr-0" data-i18n-rich="webinar.body.demo-video-title">Recevez une <span class="text-brand-500">d&eacute;monstration vid&eacute;o</span></h3>
+                        <p id="demo-modal-subtitle" class="text-sm text-gray-500 leading-relaxed mb-6" data-i18n="webinar.body.demo-video-subtitle">Laissez-nous vos coordonn&eacute;es et nous vous envoyons une vid&eacute;o de d&eacute;monstration du produit par e-mail, sans rendez-vous n&eacute;cessaire.</p>
+
+                        <!-- Two ways to see the product. "Demander une démo" hands the
+                             visitor to /form-al, which books a real slot with an expert,
+                             so it is a plain <a>: the renderer localises /fr/… per
+                             language and middle-click / keyboard behave normally. The
+                             video option is this modal's own form, right below. -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5 sm:mb-7">
+                            <a href="/fr/form-al" id="demo-choice-agent" class="group text-left p-4 rounded-xl border-2 border-gray-200 bg-white hover:border-brand-500 hover:bg-brand-50/50 hover:shadow-md focus-visible:border-brand-500 focus-visible:outline-none transition-all">
+                                <!-- The corner arrow leaves at an angle: this card navigates
+                                     away to the booking page rather than switching the view.
+                                     It sits OUTSIDE the rich unit below, whose catalogue value
+                                     only numbers one inline child (<0>, the person icon). -->
+                                <span class="flex items-start justify-between gap-2">
+                                    <span class="flex items-center gap-2 font-bold text-navy-900 text-sm" data-i18n-rich="webinar.body.path-stroke-linecap-round-stroke">
+                                        <svg class="w-4 h-4 text-brand-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+                                        Demander une d&eacute;mo
+                                    </span>
+                                    <svg class="w-4 h-4 text-gray-400 shrink-0 mt-0.5 transition-all group-hover:text-brand-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/></svg>
+                                </span>
+                                <span class="block text-xs text-gray-500 mt-1" data-i18n="webinar.body.d-couvrez-nos-plans-enterprise">D&eacute;couvrez nos plans Enterprise avec notre &eacute;quipe commerciale</span>
+                                <span class="sr-only" data-i18n="webinar.body.demo-ouvre-une-autre-page">Ouvre une autre page</span>
+                            </a>
+                            <div id="demo-choice-video" aria-current="true" class="text-left p-4 rounded-xl border-2 border-brand-500 bg-brand-50">
+                                <span class="flex items-center gap-2 font-bold text-navy-900 text-sm" data-i18n-rich="webinar.body.path-stroke-linecap-round-stroke_2">
+                                    <svg class="w-4 h-4 text-brand-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"/></svg>
+                                    Recevoir une d&eacute;mo vid&eacute;o
+                                </span>
+                                <span class="block text-xs text-gray-500 mt-1" data-i18n="webinar.body.recevez-une-d-monstration-vid-o-du">Recevez une d&eacute;monstration vid&eacute;o du produit par e-mail</span>
+                            </div>
+                        </div>
+
+                        <form id="demo-form" novalidate>
+                            <div class="grid sm:grid-cols-2 gap-3.5 sm:gap-4">
+                                <div>
+                                    <label for="demo-first-name" class="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-1.5" data-i18n-rich="webinar.body.pr-nom">Pr&eacute;nom <span class="text-brand-500">*</span></label>
+                                    <input required type="text" id="demo-first-name" placeholder="Jean" class="w-full px-3.5 py-2.5 rounded-btn border border-gray-200 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none text-base sm:text-sm" data-i18n-attr="placeholder:webinar.body.jean_placeholder">
+                                </div>
+                                <div>
+                                    <label for="demo-last-name" class="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-1.5" data-i18n-rich="webinar.body.nom">Nom <span class="text-brand-500">*</span></label>
+                                    <input required type="text" id="demo-last-name" placeholder="Dupont" class="w-full px-3.5 py-2.5 rounded-btn border border-gray-200 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none text-base sm:text-sm" data-i18n-attr="placeholder:webinar.body.dupont_placeholder">
+                                </div>
+                                <div>
+                                    <label for="demo-email" class="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-1.5" data-i18n-rich="webinar.body.email-professionnel">Email professionnel <span class="text-brand-500">*</span></label>
+                                    <input required type="email" id="demo-email" placeholder="jean@entreprise.com" class="w-full px-3.5 py-2.5 rounded-btn border border-gray-200 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none text-base sm:text-sm" data-i18n-attr="placeholder:webinar.body.jean-entreprise-com_placeholder">
+                                </div>
+                                <div>
+                                    <label for="demo-phone" class="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-1.5" data-i18n="webinar.body.t-l-phone">T&eacute;l&eacute;phone</label>
+                                    <input type="tel" id="demo-phone" placeholder="+33 6 12 34 56 78" class="w-full px-3.5 py-2.5 rounded-btn border border-gray-200 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none text-base sm:text-sm">
+                                </div>
+                                <div>
+                                    <label for="demo-company" class="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-1.5" data-i18n-rich="webinar.body.nom-de-l-entreprise">Nom de l'entreprise <span class="text-brand-500">*</span></label>
+                                    <input required type="text" id="demo-company" placeholder="Acme" class="w-full px-3.5 py-2.5 rounded-btn border border-gray-200 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none text-base sm:text-sm" data-i18n-attr="placeholder:webinar.body.acme_placeholder">
+                                </div>
+                                <div>
+                                    <label for="demo-company-size" class="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-1.5" data-i18n-rich="webinar.body.taille-de-l-entreprise">Taille de l'entreprise <span class="text-brand-500">*</span></label>
+                                    <select required id="demo-company-size" class="w-full px-3.5 py-2.5 rounded-btn border border-gray-200 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none text-base sm:text-sm bg-white text-gray-700">
+                                        <option value="" disabled selected data-i18n="webinar.body.s-lectionner">S&eacute;lectionner</option>
+                                        <option data-i18n="webinar.body.1-10-employ-s">1-10 employ&eacute;s</option>
+                                        <option data-i18n="webinar.body.11-50-employ-s">11-50 employ&eacute;s</option>
+                                        <option data-i18n="webinar.body.51-200-employ-s">51-200 employ&eacute;s</option>
+                                        <option data-i18n="webinar.body.201-500-employ-s">201-500 employ&eacute;s</option>
+                                        <option data-i18n="webinar.body.501-1000-employ-s">501-1000 employ&eacute;s</option>
+                                        <option data-i18n="webinar.body.1000-employ-s">1000+ employ&eacute;s</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="demo-country" class="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-1.5" data-i18n-rich="webinar.body.pays-r-gion">Pays / R&eacute;gion <span class="text-brand-500">*</span></label>
+                                    <select required id="demo-country" class="w-full px-3.5 py-2.5 rounded-btn border border-gray-200 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none text-base sm:text-sm bg-white text-gray-700">
+                                        <option value="" disabled selected data-i18n="webinar.body.s-lectionner">S&eacute;lectionner</option>
+                                        <option data-i18n="webinar.body.france">France</option>
+                                        <option data-i18n="webinar.body.belgique">Belgique</option>
+                                        <option data-i18n="webinar.body.suisse">Suisse</option>
+                                        <option data-i18n="webinar.body.luxembourg">Luxembourg</option>
+                                        <option data-i18n="webinar.body.allemagne">Allemagne</option>
+                                        <option data-i18n="webinar.body.espagne">Espagne</option>
+                                        <option data-i18n="webinar.body.italie">Italie</option>
+                                        <option data-i18n="webinar.body.royaume-uni">Royaume-Uni</option>
+                                        <option data-i18n="webinar.body.autre">Autre</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="demo-source" class="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-1.5" data-i18n="webinar.body.comment-nous-avez-vous-connu">Comment nous avez-vous connu&nbsp;?</label>
+                                    <select id="demo-source" class="w-full px-3.5 py-2.5 rounded-btn border border-gray-200 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none text-base sm:text-sm bg-white text-gray-700">
+                                        <option value="" selected data-i18n="webinar.body.s-lectionner">S&eacute;lectionner</option>
+                                        <option data-i18n="webinar.body.recherche-google">Recherche Google</option>
+                                        <option data-i18n="webinar.body.r-seaux-sociaux">R&eacute;seaux sociaux</option>
+                                        <option data-i18n="webinar.body.recommandation">Recommandation</option>
+                                        <option data-i18n="webinar.body.v-nement-salon">&Eacute;v&eacute;nement / Salon</option>
+                                        <option data-i18n="webinar.body.partenaire-rainbow">Partenaire Rainbow</option>
+                                        <option data-i18n="webinar.body.autre">Autre</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <label class="flex items-start gap-2.5 mt-5 cursor-pointer">
+                                <input required type="checkbox" id="demo-consent" class="mt-0.5 w-5 h-5 sm:w-4 sm:h-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500 shrink-0">
+                                <span class="text-xs text-gray-500 leading-relaxed" data-i18n-rich="webinar.body.j-accepte-les-conditions-d">J'accepte les <a href="/fr/legal" class="text-brand-500 font-semibold hover:underline">conditions d'utilisation</a> de Rainbow et l'utilisation de mes donn&eacute;es personnelles telle que d&eacute;crite dans la <a href="/fr/privacy" class="text-brand-500 font-semibold hover:underline">politique de confidentialit&eacute;</a>. <span class="text-brand-500">*</span></span>
+                            </label>
+
+                            <p id="demo-error" class="hidden mt-4 text-xs text-red-700 bg-red-50 border border-red-200 rounded-btn px-3.5 py-2.5" data-i18n="webinar.body.une-erreur-est-survenue-lors-de-l">Une erreur est survenue lors de l'envoi. Veuillez r&eacute;essayer.</p>
+
+                            <button type="submit" id="demo-submit-btn" class="w-full mt-5 sm:mt-6 py-3.5 rounded-btn bg-brand-500 hover:bg-brand-600 text-white font-bold text-base sm:text-sm transition-all active:scale-[.98] shadow-lg shadow-purple-900/15 disabled:opacity-60 disabled:cursor-not-allowed">
+                                <span id="demo-submit-label" data-i18n="webinar.body.demo-video-submit">Recevoir la d&eacute;mo vid&eacute;o</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Success panel -->
+                    <div id="demo-panel-success" class="hidden text-center py-6">
+                        <div class="w-14 h-14 rounded-full bg-brand-50 flex items-center justify-center mx-auto mb-5">
+                            <svg class="w-7 h-7 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                        </div>
+                        <h3 class="text-xl font-extrabold text-navy-900 tracking-tight mb-2" data-i18n="webinar.body.merci">Merci&nbsp;!</h3>
+                        <p id="demo-success-text" class="text-sm text-gray-500 leading-relaxed max-w-sm mx-auto" data-i18n="webinar.body.demo-video-success">Votre demande a bien &eacute;t&eacute; enregistr&eacute;e. Vous recevrez la vid&eacute;o de d&eacute;monstration par e-mail sous quelques minutes.</p>
+                        <button type="button" onclick="closeDemoModal()" class="mt-6 w-full sm:w-auto px-8 py-3 rounded-btn bg-brand-500 hover:bg-brand-600 text-white font-bold text-base sm:text-sm transition-all" data-i18n="webinar.body.fermer">Fermer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/mega-menu.js"></script>
+    <script src="/js/i18n.js"></script>
+    <script>
+
+
+        document.addEventListener('click', function (e) {
+            var sw = document.getElementById('lang-switcher');
+            if (sw && !sw.contains(e.target)) sw.classList.remove('open');
+        });
+
+
+        // Timeline Switcher Logic
+        function switchTimelineTab(index) {
+            var panels = document.querySelectorAll('.timeline-panel');
+            var progress = document.getElementById('timeline-progress');
+            var colors = ['#5e2d91', '#7c3aad', '#CF0072'];
+
+            for (var i = 0; i < 3; i++) {
+                var circle = document.getElementById('step-circle-' + i);
+                var label = document.getElementById('step-label-' + i);
+
+                if (i === index) {
+                    circle.style.background = colors[i];
+                    circle.style.border = 'none';
+                    circle.style.boxShadow = '0 4px 14px rgba(94,45,145,0.35)';
+                    label.className = 'mt-3 font-semibold text-sm text-navy-900 transition-colors duration-300 timeline-label whitespace-nowrap';
+                    panels[i].classList.remove('hidden');
+                    panels[i].classList.add('block');
+                } else if (i < index) {
+                    circle.style.background = colors[i];
+                    circle.style.border = 'none';
+                    circle.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+                    label.className = 'mt-3 font-medium text-sm text-gray-500 transition-colors duration-300 timeline-label whitespace-nowrap';
+                    panels[i].classList.remove('block');
+                    panels[i].classList.add('hidden');
+                } else {
+                    circle.style.background = 'white';
+                    circle.style.border = '2px solid #d1d5db';
+                    circle.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)';
+                    label.className = 'mt-3 font-medium text-sm text-gray-400 transition-colors duration-300 timeline-label whitespace-nowrap group-hover:text-gray-600';
+                    panels[i].classList.remove('block');
+                    panels[i].classList.add('hidden');
+                }
+            }
+
+            // Animate progress line
+            var pct = (index / 2) * 100;
+            progress.style.width = pct + '%';
+
+            // Play the video for the active panel, pause others
+            var videos = document.querySelectorAll('.timeline-panel video');
+            for (var j = 0; j < videos.length; j++) {
+                if (j === index) {
+                    videos[j].currentTime = 0;
+                    videos[j].play();
+                } else {
+                    videos[j].pause();
+                }
+            }
+        }
+
+        function setupTimelineAutoAdvance() {
+            for (var i = 0; i < 2; i++) {
+                var video = document.getElementById('timeline-video-' + i);
+                if (video) {
+                    video.addEventListener('ended', function(nextIndex) {
+                        return function() { switchTimelineTab(nextIndex); };
+                    }(i + 1));
+                }
+            }
+            // Auto-play first video
+            var firstVideo = document.getElementById('timeline-video-0');
+            if (firstVideo) firstVideo.play();
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', setupTimelineAutoAdvance);
+        } else {
+            setupTimelineAutoAdvance();
+        }
+
+        // Toggle Pricing Comparison Table
+        function toggleComparisonTable() {
+            var table = document.getElementById('comparison-table');
+            var text = document.getElementById('comparison-toggle-text');
+            var icon = document.getElementById('comparison-toggle-icon');
+            if (table.classList.contains('hidden')) {
+                table.classList.remove('hidden');
+                text.textContent = t('hideTable');
+                icon.classList.add('rotate-180');
+            } else {
+                table.classList.add('hidden');
+                text.textContent = t('showTable');
+                icon.classList.remove('rotate-180');
+            }
+        }
+
+        // Toggle Billing Logic
+        function toggleBilling() {
+            var isYearly = document.getElementById('billing-toggle').checked;
+            var monthlyPrices = document.querySelectorAll('.price-monthly');
+            var yearlyPrices = document.querySelectorAll('.price-yearly');
+            var labelMonthly = document.getElementById('label-monthly');
+            var labelYearly = document.getElementById('label-yearly');
+
+            if (isYearly) {
+                monthlyPrices.forEach(function (el) { el.classList.add('hidden'); });
+                yearlyPrices.forEach(function (el) { el.classList.remove('hidden'); });
+                labelMonthly.classList.replace('text-navy-900', 'text-gray-500');
+                labelMonthly.classList.replace('font-bold', 'font-medium');
+                labelYearly.classList.replace('text-gray-500', 'text-navy-900');
+                labelYearly.classList.replace('font-medium', 'font-bold');
+            } else {
+                monthlyPrices.forEach(function (el) { el.classList.remove('hidden'); });
+                yearlyPrices.forEach(function (el) { el.classList.add('hidden'); });
+                labelYearly.classList.replace('text-navy-900', 'text-gray-500');
+                labelYearly.classList.replace('font-bold', 'font-medium');
+                labelMonthly.classList.replace('text-gray-500', 'text-navy-900');
+                labelMonthly.classList.replace('font-medium', 'font-bold');
+            }
+        }
+    </script>
+    <script>
+        (function () {
+            function stripHtml(str) {
+                if (!str) return '';
+                return str.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+            }
+            function initFaqCardListeners() {
+                document.querySelectorAll('.faq-card-button').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        var card = btn.closest('.faq-card');
+                        var wasOpen = card.classList.contains('open');
+                        document.querySelectorAll('.faq-card').forEach(function (c) {
+                            c.classList.remove('open');
+                            var b = c.querySelector('.faq-card-button');
+                            if (b) b.setAttribute('aria-expanded', 'false');
+                        });
+                        if (!wasOpen) {
+                            card.classList.add('open');
+                            btn.setAttribute('aria-expanded', 'true');
+                        }
+                    });
+                });
+            }
+            function renderFaq(items) {
+                var container = document.getElementById('faq-items-container');
+                if (!container) return;
+                container.innerHTML = '';
+                items.forEach(function (item) {
+                    var card = document.createElement('div');
+                    card.className = 'faq-card';
+                    var btn = document.createElement('button');
+                    btn.className = 'faq-card-button';
+                    btn.setAttribute('aria-expanded', 'false');
+                    var q = document.createElement('span');
+                    q.className = 'faq-card-question';
+                    q.textContent = item.question;
+                    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                    svg.setAttribute('class', 'faq-card-chevron');
+                    svg.setAttribute('fill', 'none');
+                    svg.setAttribute('viewBox', '0 0 24 24');
+                    svg.setAttribute('stroke', 'currentColor');
+                    svg.setAttribute('stroke-width', '2');
+                    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    path.setAttribute('stroke-linecap', 'round');
+                    path.setAttribute('stroke-linejoin', 'round');
+                    path.setAttribute('d', 'M19 9l-7 7-7-7');
+                    svg.appendChild(path);
+                    btn.appendChild(q);
+                    btn.appendChild(svg);
+                    var wrapper = document.createElement('div');
+                    wrapper.className = 'faq-card-answer-wrapper';
+                    var inner = document.createElement('div');
+                    inner.className = 'faq-card-answer-inner';
+                    var border = document.createElement('div');
+                    border.className = 'faq-card-answer-border';
+                    var p = document.createElement('p');
+                    p.className = 'faq-card-answer';
+                    p.textContent = item.answer;
+                    border.appendChild(p);
+                    inner.appendChild(border);
+                    wrapper.appendChild(inner);
+                    card.appendChild(btn);
+                    card.appendChild(wrapper);
+                    container.appendChild(card);
+                });
+                initFaqCardListeners();
+            }
+            function fetchFaq() {
+                var loadingEl = document.getElementById('faq-loading');
+                if (!loadingEl) return;
+                var errorEl = document.getElementById('faq-error');
+                var containerEl = document.getElementById('faq-items-container');
+                var url = 'https://rainbow-market.zendesk.com/api/v2/help_center/sections/33369381353746/articles.json?locale=fr&per_page=20&page=1&sort_by=position&sort_order=asc';
+                loadingEl.classList.remove('hidden');
+                if (errorEl) errorEl.classList.add('hidden');
+                if (containerEl) containerEl.classList.add('hidden');
+                fetch(url, { headers: { 'Accept': 'application/json' } })
+                    .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+                    .then(function (data) {
+                        var items = (data.articles || []).filter(function (a) { return !a.draft; }).map(function (a) {
+                            return { question: a.title || '', answer: stripHtml(a.body || a.snippet || '').slice(0, 500) };
+                        });
+                        if (!items.length) throw new Error('empty');
+                        renderFaq(items);
+                        loadingEl.classList.add('hidden');
+                        if (containerEl) containerEl.classList.remove('hidden');
+                    })
+                    .catch(function () {
+                        loadingEl.classList.add('hidden');
+                        if (errorEl) errorEl.classList.remove('hidden');
+                    });
+            }
+            document.addEventListener('DOMContentLoaded', fetchFaq);
+        })();
+    </script>
+    <script>
+    (function() {
+        var sectionNav = document.getElementById('section-nav');
+        if (!sectionNav) return;
+        var links = Array.prototype.slice.call(sectionNav.querySelectorAll('.section-nav-link'));
+        var anchorLinks = links.filter(function(l){ return l.getAttribute('href').charAt(0) === '#'; });
+        var sections = anchorLinks.map(function(link) { return document.getElementById(link.getAttribute('href').slice(1)); });
+        var footer = document.querySelector('footer');
+        var OFFSET = 150;
+        anchorLinks.forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                var target = document.getElementById(link.getAttribute('href').slice(1));
+                if (!target) return;
+                e.preventDefault();
+                var y = target.getBoundingClientRect().top + window.pageYOffset - (OFFSET - 20);
+                window.scrollTo({ top: y, behavior: 'smooth' });
+            });
+        });
+        // Document-relative top (offsetTop is unreliable here: sections live inside a
+        // position:relative wrapper, so offsetTop is measured against that box, not the page).
+        function docTop(el) { return el.getBoundingClientRect().top + window.pageYOffset; }
+        function update() {
+            var scrollY = window.pageYOffset;
+            var valid = sections.filter(Boolean);
+            var firstTop = valid.length ? Math.min.apply(null, valid.map(docTop)) : Infinity;
+            var footerTop = footer ? docTop(footer) : Infinity;
+            if (scrollY + OFFSET >= firstTop - 200 && scrollY + OFFSET < footerTop) { sectionNav.classList.add('visible'); }
+            else { sectionNav.classList.remove('visible'); }
+            // Order-independent scroll-spy: highlight the section with the greatest
+            // document-top that is still above the current scroll position.
+            var activeIndex = -1, activeTop = -Infinity;
+            for (var i = 0; i < sections.length; i++) {
+                if (sections[i]) { var t = docTop(sections[i]); if (t - OFFSET <= scrollY && t > activeTop) { activeTop = t; activeIndex = i; } }
+            }
+            if (activeIndex === -1) activeIndex = 0;
+            anchorLinks.forEach(function(link, i) { link.classList.toggle('active', i === activeIndex); });
+        }
+        window.addEventListener('scroll', update, { passive: true });
+        window.addEventListener('resize', update);
+        update();
+    })();
+    </script>
+    <script src="/js/currency.js"></script>
+    <script>
+        // ── Demo request modal (video demonstration) ──
+        // The modal offers two routes and only one of them is a form. Booking a
+        // live demo with an expert needs a calendar and a slot, which is what
+        // /form-al already does, so that choice is a link out of here (see the
+        // markup) and this form only ever sends the video request.
+        (function () {
+            var modal = document.getElementById('demo-modal');
+            if (!modal) return;
+            var panelSuccess = document.getElementById('demo-panel-success');
+            var form = document.getElementById('demo-form');
+            var modalTitle = document.getElementById('demo-modal-title');
+            var modalSubtitle = document.getElementById('demo-modal-subtitle');
+            var submitLabel = document.getElementById('demo-submit-label');
+            var successText = document.getElementById('demo-success-text');
+            var lastFocused = null;
+            var DEMO_WEBHOOK_URL = 'https://n8n.openrainbow.org/webhook/demo-request-lead';
+            var demoSubmitBtn = document.getElementById('demo-submit-btn');
+            var demoError = document.getElementById('demo-error');
+            var demoSubmitting = false;
+
+            var COPY = {
+                title: t('videoTitle'),
+                subtitle: t('videoSubtitle'),
+                submitLabel: t('videoSubmit'),
+                sendingLabel: t('sending'),
+                successText: t('videoSuccess')
+            };
+
+            window.openDemoModal = function () {
+                lastFocused = document.activeElement;
+                // Set the copy before revealing, so no stale frame is ever painted.
+                modalTitle.innerHTML = COPY.title;
+                modalSubtitle.textContent = COPY.subtitle;
+                submitLabel.textContent = COPY.submitLabel;
+                demoError.classList.add('hidden');
+                demoSubmitBtn.disabled = false;
+                panelSuccess.classList.add('hidden');
+                document.getElementById('demo-panel-form').classList.remove('hidden');
+                form.reset();
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+                var firstInput = document.getElementById('demo-first-name');
+                if (firstInput) firstInput.focus();
+            };
+
+            window.closeDemoModal = function () {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+                if (lastFocused && lastFocused.focus) lastFocused.focus();
+            };
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeDemoModal();
+            });
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                if (!form.checkValidity()) { form.reportValidity(); return; }
+                if (demoSubmitting) return;
+
+                var byId = function (id) { return document.getElementById(id).value.trim(); };
+                var payload = {
+                    firstName: byId('demo-first-name'),
+                    lastName: byId('demo-last-name'),
+                    email: byId('demo-email'),
+                    phone: byId('demo-phone'),
+                    company: byId('demo-company'),
+                    companySize: byId('demo-company-size'),
+                    country: byId('demo-country'),
+                    source: byId('demo-source'),
+                    consent: document.getElementById('demo-consent').checked,
+                    requestType: 'video',
+                };
+
+                demoSubmitting = true;
+                demoError.classList.add('hidden');
+                demoSubmitBtn.disabled = true;
+                submitLabel.textContent = COPY.sendingLabel;
+
+                fetch(DEMO_WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                })
+                    .then(function (res) {
+                        if (!res.ok) throw new Error('request failed: ' + res.status);
+                        successText.textContent = COPY.successText;
+                        document.getElementById('demo-panel-form').classList.add('hidden');
+                        panelSuccess.classList.remove('hidden');
+                    })
+                    .catch(function (err) {
+                        console.error('[demo-form] submit failed:', err);
+                        demoError.classList.remove('hidden');
+                    })
+                    .finally(function () {
+                        demoSubmitting = false;
+                        demoSubmitBtn.disabled = false;
+                        submitLabel.textContent = COPY.submitLabel;
+                    });
+            });
+        })();
+    </script>
+<!-- impeccable-live-start -->
+<script src="http://localhost:8400/live.js?token=7e1a9f72-559f-41b5-9268-cc7ffe4bf926"></script>
+<!-- impeccable-live-end -->
+</body>
+
+</html>

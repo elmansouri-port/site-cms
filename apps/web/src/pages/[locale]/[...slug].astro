@@ -1,0 +1,57 @@
+---
+/*
+ * The public page route.
+ *
+ * Every URL carries its locale, so this one file serves every page in every
+ * language: look the route up in the CMS, compose the document, send it. A
+ * blog URL with no matching page falls through to the article template, which
+ * is what makes a post published in the CMS appear without a deploy.
+ */
+export const prerender = false;
+
+import PageDocument from '../../components/PageDocument.astro';
+import { pagePayload, blogPost } from '../../lib/site.js';
+import { renderPage } from '../../lib/render.js';
+import { renderArticle } from '../../lib/article.js';
+
+const { locale } = Astro.locals;
+const slug = Astro.params.slug || '';
+const route = String(slug).replace(/^\/+|\/+$/g, '');
+
+let page = await pagePayload(route, locale, Astro.locals.preview);
+let extra = {};
+let status = 200;
+
+// A blog URL that is not an authored page is a database article.
+if (!page && /^blog\/[^/]+$/.test(route)) {
+  const article = await blogPost(route.split('/')[1], locale, Astro.locals.preview);
+  if (article?.post) {
+    const built = await renderArticle(article, locale);
+    page = built.page;
+    extra = built.extra;
+  }
+}
+
+if (!page) {
+  status = 404;
+  const notFound = await pagePayload('404', locale, false);
+  page = notFound ? { ...notFound, noindex: true } : null;
+}
+
+const document = page ? await renderPage(Astro, page, extra) : null;
+
+Astro.response.status = status;
+if (page) Astro.response.headers.set('content-type', 'text/html; charset=utf-8');
+if (status === 404 || Astro.locals.preview) {
+  Astro.response.headers.set('cache-control', 'no-store');
+} else {
+  Astro.response.headers.set('cache-control', 'public, max-age=0, s-maxage=60, stale-while-revalidate=300');
+}
+if (page && (Astro.locals.noindex || page.noindex)) {
+  Astro.response.headers.set('x-robots-tag', 'noindex, nofollow');
+}
+---
+
+{document
+  ? <PageDocument document={document} locale={locale} />
+  : <Fragment set:html={'<!DOCTYPE html><html lang="' + locale + '"><head><meta charset="utf-8"><title>Page not found</title></head><body><h1>Page not found</h1></body></html>'} />}

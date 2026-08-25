@@ -1,0 +1,11 @@
+---
+/*
+ * RawHtml — an escape hatch for markup an editor pastes in (an embed, a
+ * campaign widget). Injected as HTML on purpose; the CMS restricts this block
+ * to editors and admins.
+ */
+const { data = {} } = Astro.props;
+const { html = '' } = data;
+---
+
+<div set:html={html} />

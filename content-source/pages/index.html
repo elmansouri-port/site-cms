@@ -1,0 +1,1849 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="index.meta.title">Rainbow by ALE  Cloud Communication & Collaboration Platform</title>
+    <meta name="description" content="Rainbow by Alcatel-Lucent: Secure cloud communication and collaboration. Messaging, video conferencing, file sharing for teams of all sizes." data-i18n-attr="content:index.meta.description">
+    <meta name="keywords" content="Rainbow, ALE, Alcatel-Lucent, UCaaS, cloud communication, collaboration, video conferencing, team messaging" data-i18n-attr="content:index.meta.keywords">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://rainbow-portal.example.com/">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Rainbow by ALE  Your Cloud, Your Way" data-i18n-attr="content:index.meta.title_2">
+    <meta property="og:description" content="Connect your teams with secure messaging, HD video conferencing, and enterprise telephony. Start free." data-i18n-attr="content:index.meta.description_2">
+    <meta property="og:url" content="https://rainbow-portal.example.com/">
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json" data-i18n-raw="index.meta.schema">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Rainbow by Alcatel-Lucent",
+        "applicationCategory": "CommunicationApplication",
+        "operatingSystem": "Web, Windows, macOS, iOS, Android",
+        "offers": [
+            { "@type": "Offer", "name": "Essential", "price": "0", "priceCurrency": "EUR" },
+            { "@type": "Offer", "name": "Business", "price": "9.99", "priceCurrency": "EUR" },
+            { "@type": "Offer", "name": "Enterprise", "price": "19.99", "priceCurrency": "EUR" }
+        ]
+    }
+    </script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 300: '#c4b5fd', 400: '#a78bfa', 500: '#5e2d91', 600: '#4a2373', 700: '#3c1c5e' },
+                        navy: { 900: '#1e1b4b', 800: '#312e81', 700: '#3730a3' },
+                        laurenn: { 
+                            purple: '#5e2d91',
+                            purpleLight: '#7c3aad',
+                            purpleDark: '#4a2373',
+                            orange: '#FF4500',
+                            pink: '#CF0072',
+                            blue: '#0085CA',
+                            green: '#34B233'
+                        }
+                    },
+                    fontFamily: { sans: ['Google Sans', 'system-ui', 'sans-serif'] },
+                    borderRadius: { 'btn': '10px' }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/mega-menu.css">
+<style>
+.compliance-card {
+    perspective: 1000px;
+    min-height: 300px;
+    cursor: pointer;
+}
+.compliance-card-inner {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    transition: transform 0.65s cubic-bezier(.4,0,.2,1);
+    transform-style: preserve-3d;
+    border-radius: 20px;
+    box-shadow: 0 2px 12px rgba(80,70,160,0.06);
+}
+.compliance-card:hover .compliance-card-inner,
+.compliance-card.flipped .compliance-card-inner { transform: rotateY(180deg); }
+.compliance-card-front,
+.compliance-card-back {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 20px;
+    overflow: hidden;
+}
+.compliance-card-front {
+    background: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+}
+.compliance-card-back {
+    transform: rotateY(180deg);
+    background: white;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem 1.75rem;
+}
+.compliance-card-back p {
+    font-size: 0.9375rem;
+    color: #374151;
+    line-height: 1.7;
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+/* ===== Floating Section Nav (scroll-spy pill bar) ===== */
+.section-anchor { scroll-margin-top: 130px; }
+
+#section-nav {
+    position: fixed;
+    top: 74px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-14px);
+    z-index: 40;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+}
+#section-nav.visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+}
+.section-nav-inner {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px;
+    background: #f3edfd;
+    border: 1px solid rgba(124, 58, 237, 0.10);
+    border-radius: 9999px;
+    box-shadow: 0 6px 22px rgba(94, 45, 145, 0.15);
+    max-width: calc(100vw - 24px);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.section-nav-inner::-webkit-scrollbar { display: none; }
+.section-nav-link {
+    flex: 0 0 auto;
+    padding: 9px 22px;
+    border-radius: 9999px;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: #4a2373;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: color 0.2s ease, background 0.2s ease;
+}
+.section-nav-link:hover { background: rgba(124, 58, 237, 0.08); }
+.section-nav-link.active {
+    color: #4a2373;
+    background: #e7d9fb;
+}
+@media (max-width: 767px) {
+    #section-nav { top: 66px; }
+    .section-nav-link { padding: 7px 14px; font-size: 0.8125rem; }
+}
+
+/* ===== Certifications carousel (one sliding row) ===== */
+.cert-carousel { position: relative; display: flex; align-items: center; gap: 10px; }
+.cert-carousel-track {
+    flex: 1 1 auto;
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    padding: 10px 4px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    /* Fade the horizontal edges to hint the row is scrollable */
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 56px, #000 calc(100% - 56px), transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, #000 56px, #000 calc(100% - 56px), transparent 100%);
+}
+.cert-carousel-track::-webkit-scrollbar { display: none; }
+/* Programmatic flip (one-time hint on first appearance) */
+.compliance-card.flip-demo .compliance-card-inner { transform: rotateY(180deg); }
+.cert-slide {
+    flex: 0 0 auto;
+    width: 280px;
+    scroll-snap-align: start;
+}
+@media (max-width: 640px) {
+    .cert-slide { width: 82%; }
+    .cert-carousel-arrow { display: none; }
+    .compliance-card { min-height: 260px; }
+    .compliance-card-front { padding: 1.5rem; }
+    .compliance-card-back { padding: 1.5rem 1.25rem; }
+}
+.cert-carousel-arrow {
+    flex: 0 0 auto;
+    width: 44px; height: 44px;
+    border-radius: 9999px;
+    border: 1px solid #e5e1f3;
+    background: #ffffff;
+    color: #5e2d91;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(80,55,145,0.12);
+    transition: background 0.2s, color 0.2s, opacity 0.2s;
+    z-index: 2;
+}
+.cert-carousel-arrow:hover { background: #5e2d91; color: #ffffff; }
+.cert-carousel-arrow svg { width: 20px; height: 20px; }
+.cert-carousel-arrow[disabled] { opacity: 0.3; cursor: default; box-shadow: none; }
+.cert-carousel-arrow[disabled]:hover { background: #ffffff; color: #5e2d91; }
+</style>
+</head>
+<body class="font-sans text-gray-600 antialiased bg-white">
+
+    <!-- ===== NAV ===== -->
+    <nav id="navbar" class="fixed top-0 w-full z-50 glass-nav">
+        <div class="max-w-6xl mx-auto px-6 flex items-center justify-between h-16">
+            <a href="/fr" class="flex items-center gap-2.5 shrink-0">
+                <img src="/images/Rainbow-AL-logo-banner.webp" alt="Rainbow" class="h-12 w-auto" data-i18n-attr="alt:common.nav.rainbow_alt">
+            </a>
+            <div class="hidden lg:flex items-center justify-center flex-1 gap-8">
+                <div class="nav-dropdown">
+                    <a href="#" class="text-sm text-gray-500 hover:text-navy-900 transition-colors font-medium">
+                        <span data-i18n="common.nav.produits">Produits</span>
+                        <svg class="chevron w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                    </a>
+
+                </div>
+                <a href="/fr/tarifs" class="text-sm text-gray-500 hover:text-navy-900 transition-colors font-medium" style="font-size:1rem" data-i18n="common.nav.tarifs">Tarifs</a>
+                <div class="nav-dropdown">
+                    <a href="#" class="text-sm text-gray-500 hover:text-navy-900 transition-colors font-medium" data-i18n-rich="common.nav.ressources-path-stroke-linecap">Ressources
+                        <svg class="chevron w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                    </a>
+
+                </div>
+            </div>
+            <div class="hidden lg:flex items-center gap-4 shrink-0">
+                <div class="lang-switcher" id="lang-switcher">
+                    <button onclick="document.getElementById('lang-switcher').classList.toggle('open')">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"/></svg>
+                        <span id="lang-current" data-i18n="common.nav.en">EN</span>
+                        <svg class="lang-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div class="lang-dropdown" id="lang-dropdown"></div>
+                </div>
+                <a href="https://web.openrainbow.net/rb/2.176.0/login" class="px-5 py-2.5 rounded-btn border-2 border-brand-500 text-purple-900 hover:bg-gray-50 text-sm font-semibold transition-all active:scale-95 inline-flex items-center justify-center" data-i18n="common.nav.se-connecter">Se connecter</a>
+                <a href="https://web.openrainbow.net/rb/2.177.4/trial" class="px-5 py-2.5 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold whitespace-nowrap shadow-md hover:shadow-lg transition-all" data-i18n="common.nav.essai-gratuit">Essai gratuit</a>
+            </div>
+            <button id="mobile-menu-btn" class="lg:hidden p-2" aria-label="Menu" data-i18n-attr="aria-label:common.nav.menu_aria-label">
+                <svg class="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+        </div>
+        <div id="mobile-menu" class="lg:hidden hidden border-t border-gray-100 bg-white px-5 pt-2 pb-6 shadow-lg space-y-1">
+            <a href="#" class="mob-section-hdr"><span data-i18n="common.nav.produits">Produits</span></a>
+            <div class="mobile-submenu space-y-1">
+                <a href="/fr/products/collaboration" class="block py-1" data-i18n="common.nav.rainbow-collaboration">Rainbow Collaboration</a>
+                <a href="/fr/products/webinar" class="block py-1" data-i18n="common.nav.rainbow-webinar">Rainbow Webinar</a>
+            </div>
+            <a href="/fr/tarifs" class="mob-section-hdr" data-i18n="common.nav.tarifs">Tarifs</a>
+            <a href="#" class="mob-section-hdr" data-i18n="common.nav.ressources">Ressources</a>
+            <div class="mobile-submenu space-y-1">
+                <a href="/fr/blog" class="block py-1" data-i18n="common.nav.blog">Blog</a>
+                <a href="/fr/reviews" class="block py-1" data-i18n="common.nav.avis">Avis</a>
+                <a href="/fr/support" class="block py-1" data-i18n="common.nav.support">Support</a>
+                <a href="/fr/tutorials" class="block py-1" data-i18n="common.nav.tutoriels">Tutoriels</a>
+            </div>
+            <div class="h-px bg-gray-100 mx-1 my-2"></div>
+            <div id="mobile-lang-switcher" class="flex flex-wrap gap-2 px-1 py-1"></div>
+            <div class="flex flex-col gap-2.5 pt-3">
+                <a href="https://web.openrainbow.net/rb/2.176.0/login" class="w-full text-center px-6 py-3 rounded-btn border-2 border-brand-500 text-purple-900 hover:bg-gray-50 text-base font-semibold transition-all active:scale-95" data-i18n="common.nav.se-connecter">Se connecter</a>
+                <a href="https://web.openrainbow.net/rb/2.177.4/trial" class="w-full text-center px-6 py-3 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-base font-semibold shadow-md hover:shadow-lg transition-all active:scale-95" data-i18n="common.nav.essai-gratuit">Essai gratuit</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== FLOATING SECTION NAV (scroll-spy pill bar) ===== -->
+    <nav id="section-nav" aria-label="Sections de la page" data-i18n-attr="aria-label:index.body.sections-de-la-page_aria-label">
+        <div class="section-nav-inner">
+            <a href="#fonctionnalites" class="section-nav-link" data-i18n="common.nav.fonctionnalit-s">Fonctionnalit&eacute;s</a>
+            <a href="#cibles" class="section-nav-link" data-i18n="common.nav.cibles">Cibles</a>
+            <a href="#certifications" class="section-nav-link" data-i18n="common.nav.certifications">Certifications</a>
+            <a href="#solutions" class="section-nav-link" data-i18n="common.nav.solutions">Solutions</a>
+        </div>
+    </nav>
+
+    <!-- ===== HERO SECTION (Laurenn style - pixel perfect) ===== -->
+    <section class="relative flex flex-col items-center justify-center overflow-hidden pt-40">
+
+        <!-- Background glows -->
+<div class="absolute top-0 left-0 w-[300px] h-[700px] bg-purple-500 rounded-full blur-[200px] opacity-40 pointer-events-none"></div>
+
+<div class="absolute bottom-0 right-0 w-[300px] h-[700px] bg-pink-500 rounded-full blur-[220px] opacity-40 pointer-events-none"></div>
+
+        <!-- Text Content -->
+        <div class="max-w-6xl mx-auto text-center px-6 z-10 relative animate-on-scroll">
+            <!-- Hero Badge with gradient text -->
+            <p class="text-sm md:text-base font-bold uppercase tracking-[0.15em] mb-4 hero-badge-gradient inline-flex items-center" data-i18n="index.body.simple-moderne-europ-enne">
+                Simple. Moderne. Europ&eacute;enne
+                </p>
+
+            <!-- Hero Title with CSS word shuffler -->
+            <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold tracking-[-0.04em] leading-[1.2] mb-6 text-gray-900" data-i18n-rich="index.body.rainbow-la-plateforme-souveraine">
+                Rainbow, la plateforme souveraine pour <br/>réussir vos
+                <span class="hero-word-loader">
+                    <span class="hero-words">
+                        <span class="hero-word" data-i18n="index.body.r-unions">r&eacute;unions</span>
+                        <span class="hero-word" data-i18n="index.body.webinaires">webinaires</span>
+                        <span class="hero-word" data-i18n="index.body.pr-sentations">pr&eacute;sentations</span>
+                        <span class="hero-word" data-i18n="index.body.formations">formations</span>
+                    </span>
+                </span>
+            </h1>
+<p class="text-base md:text-lg text-gray-500 max-w-xl mx-auto text-center leading-relaxed pb-10" data-i18n="index.body.collaboration-d-equipe-webinaires">Collaboration d'&eacute;quipe, webinaires en ligne, r&eacute;unions vid&eacute;o propuls&eacute;e par l'IA, dans un seul outil.</p>
+            <!-- CTAs -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+                <a href="/fr/tarifs" class="px-8 py-3 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-base font-bold whitespace-nowrap shadow-2xl shadow-purple-900/20 transition-all active:scale-95 inline-flex items-center justify-center" data-i18n="index.body.d-couvrez-nos-plans">
+                    D&eacute;couvrez nos plans
+                </a>
+                <a href="/fr/form-al" class="px-8 py-3 rounded-btn border-2 border-brand-500 text-purple-900 hover:bg-gray-50 text-lg font-bold transition-all group active:scale-95 inline-flex items-center justify-center" data-i18n="index.body.contacter-un-expert">
+                    Contacter un expert
+                </a>
+            </div>
+            
+
+        </div>
+
+        <!-- Product Showcase with Scroll-Morphing Arch -->
+        <div class="relative w-full mt-6">
+            <!-- Product Video Frame -->
+            <div class="relative z-10 max-w-5xl mx-auto px-6 pb-16 md:pb-20">
+                <div class="relative rounded-2xl overflow-hidden product-frame-shadow">
+                    <video id="Démo-video" class="w-full h-auto object-cover block" autoplay muted loop playsinline>
+                        <source src="/images/rainbow_homepage_05_FR.mp4" type="video/mp4">
+                    </video>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== TRUST LOGOS BAND (separate white band) ===== -->
+    <section class="relative w-full overflow-hidden" style="background-color: #ffffff47;">
+        <div class="max-w-6xl mx-auto px-6 py-10">
+            <p class="text-sm text-gray-400 font-bold uppercase tracking-widest text-center mb-6" data-i18n="index.body.ils-nous-font-confiance">
+                Ils nous font confiance
+            </p>
+            <div class="marquee-container relative flex overflow-x-hidden">
+                <div class="flex animate-marquee whitespace-nowrap gap-10 md:gap-[7rem] items-center py-4">
+                    <div class="flex-shrink-0 flex items-center justify-center">
+                        <img src="/images/clients/bestford-insurance.png" alt="Bestford Insurance" class="h-12 md:h-14 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.bestford-insurance_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center">
+                        <img src="/images/clients/herrenberg.png" alt="Herrenberg" class="h-9 md:h-11 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.herrenberg_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center">
+                        <img src="/images/clients/loughborough-university-london.png" alt="Loughborough University London" class="h-8 md:h-9 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.loughborough-university-london_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center">
+                        <img src="/images/clients/eydap.webp" alt="EYDAP" class="h-12 md:h-14 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.eydap_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center">
+                        <img src="/images/clients/hellweg.png" alt="Hellweg" class="h-9 md:h-11 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.hellweg_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center">
+                        <img src="/images/clients/taketa-city.png" alt="Taketa City" class="h-8 md:h-9 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.taketa-city_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center">
+                        <img src="/images/clients/kingsway-hospitals.jpg" alt="Kingsway Hospitals" class="h-12 md:h-14 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.kingsway-hospitals_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center">
+                        <img src="/images/clients/mayfair-hotels-resorts.jpg" alt="Mayfair Hotels & Resorts" class="h-10 md:h-12 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.mayfair-hotels-resorts_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center">
+                        <img src="/images/clients/csf-inox.png" alt="CSF Inox" class="h-8 md:h-9 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.csf-inox_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center">
+                        <img src="/images/clients/careoutlook.webp" alt="CareOutlook" class="h-12 md:h-14 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.careoutlook_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center">
+                        <img src="/images/clients/region-occitanie.png" alt="Region Occitanie" class="h-10 md:h-12 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.region-occitanie_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center">
+                        <img src="/images/clients/montpellier-mediterranee-metropole.png" alt="Montpellier Mediterranee Metropole" class="h-8 md:h-9 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.montpellier-mediterranee-metropole_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center">
+                        <img src="/images/clients/perpignan-mediterranee-metropole.png" alt="Perpignan Mediterranee Metropole" class="h-12 md:h-14 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.perpignan-mediterranee-metropole_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center">
+                        <img src="/images/clients/doma-hotels.jpg" alt="DOMA Hotels" class="h-9 md:h-11 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.doma-hotels_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center">
+                        <img src="/images/clients/morbihan.jpg" alt="Morbihan" class="h-10 md:h-12 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.morbihan_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center">
+                        <img src="/images/clients/hokkaido.png" alt="Hokkaido" class="h-12 md:h-14 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.hokkaido_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center">
+                        <img src="/images/clients/chu-rennes.webp" alt="CHU Rennes" class="h-9 md:h-11 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.chu-rennes_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center">
+                        <img src="/images/clients/nexon.webp" alt="Nexon" class="h-10 md:h-12 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.nexon_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center">
+                        <img src="/images/clients/obrien-winter-partners.jpg" alt="O'Brien Winter Partners" class="h-12 md:h-14 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.o-brien-winter-partners_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center">
+                        <img src="/images/clients/ludwigshafen.png" alt="Ludwigshafen" class="h-9 md:h-11 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.ludwigshafen_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center">
+                        <img src="/images/clients/paytren.webp" alt="Paytren" class="h-10 md:h-12 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.paytren_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center">
+                        <img src="/images/clients/centre-hospitalier-mayotte.png" alt="Centre Hospitalier de Mayotte" class="h-9 md:h-11 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.centre-hospitalier-de-mayotte_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center">
+                        <img src="/images/clients/region-bourgogne-franche-comte.jpg" alt="Region Bourgogne-Franche-Comte" class="h-11 md:h-14 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.region-bourgogne-franche-comte_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center">
+                        <img src="/images/clients/ajuntament-cunit.png" alt="Ajuntament Cunit" class="h-9 md:h-11 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.ajuntament-cunit_alt">
+                    </div>
+                    <!-- Duplicate for seamless loop -->
+                    <div class="flex-shrink-0 flex items-center justify-center" aria-hidden="true">
+                        <img src="/images/clients/bestford-insurance.png" alt="Bestford Insurance" class="h-12 md:h-14 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.bestford-insurance_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center" aria-hidden="true">
+                        <img src="/images/clients/herrenberg.png" alt="Herrenberg" class="h-9 md:h-11 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.herrenberg_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center" aria-hidden="true">
+                        <img src="/images/clients/loughborough-university-london.png" alt="Loughborough University London" class="h-8 md:h-9 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.loughborough-university-london_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center" aria-hidden="true">
+                        <img src="/images/clients/eydap.webp" alt="EYDAP" class="h-12 md:h-14 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.eydap_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center" aria-hidden="true">
+                        <img src="/images/clients/hellweg.png" alt="Hellweg" class="h-9 md:h-11 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.hellweg_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center" aria-hidden="true">
+                        <img src="/images/clients/taketa-city.png" alt="Taketa City" class="h-8 md:h-9 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.taketa-city_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center" aria-hidden="true">
+                        <img src="/images/clients/kingsway-hospitals.jpg" alt="Kingsway Hospitals" class="h-12 md:h-14 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.kingsway-hospitals_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center" aria-hidden="true">
+                        <img src="/images/clients/mayfair-hotels-resorts.jpg" alt="Mayfair Hotels & Resorts" class="h-10 md:h-12 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.mayfair-hotels-resorts_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center" aria-hidden="true">
+                        <img src="/images/clients/csf-inox.png" alt="CSF Inox" class="h-8 md:h-9 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.csf-inox_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center" aria-hidden="true">
+                        <img src="/images/clients/careoutlook.webp" alt="CareOutlook" class="h-12 md:h-14 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.careoutlook_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center" aria-hidden="true">
+                        <img src="/images/clients/region-occitanie.png" alt="Region Occitanie" class="h-10 md:h-12 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.region-occitanie_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center" aria-hidden="true">
+                        <img src="/images/clients/montpellier-mediterranee-metropole.png" alt="Montpellier Mediterranee Metropole" class="h-8 md:h-9 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.montpellier-mediterranee-metropole_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center" aria-hidden="true">
+                        <img src="/images/clients/perpignan-mediterranee-metropole.png" alt="Perpignan Mediterranee Metropole" class="h-12 md:h-14 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.perpignan-mediterranee-metropole_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center" aria-hidden="true">
+                        <img src="/images/clients/doma-hotels.jpg" alt="DOMA Hotels" class="h-9 md:h-11 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.doma-hotels_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center" aria-hidden="true">
+                        <img src="/images/clients/morbihan.jpg" alt="Morbihan" class="h-10 md:h-12 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.morbihan_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center" aria-hidden="true">
+                        <img src="/images/clients/hokkaido.png" alt="Hokkaido" class="h-12 md:h-14 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.hokkaido_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center" aria-hidden="true">
+                        <img src="/images/clients/chu-rennes.webp" alt="CHU Rennes" class="h-9 md:h-11 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.chu-rennes_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center" aria-hidden="true">
+                        <img src="/images/clients/nexon.webp" alt="Nexon" class="h-10 md:h-12 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.nexon_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center" aria-hidden="true">
+                        <img src="/images/clients/obrien-winter-partners.jpg" alt="O'Brien Winter Partners" class="h-12 md:h-14 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.o-brien-winter-partners_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center" aria-hidden="true">
+                        <img src="/images/clients/ludwigshafen.png" alt="Ludwigshafen" class="h-9 md:h-11 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.ludwigshafen_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center" aria-hidden="true">
+                        <img src="/images/clients/paytren.webp" alt="Paytren" class="h-10 md:h-12 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.paytren_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center" aria-hidden="true">
+                        <img src="/images/clients/centre-hospitalier-mayotte.png" alt="Centre Hospitalier de Mayotte" class="h-9 md:h-11 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.centre-hospitalier-de-mayotte_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center" aria-hidden="true">
+                        <img src="/images/clients/region-bourgogne-franche-comte.jpg" alt="Region Bourgogne-Franche-Comte" class="h-11 md:h-14 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.region-bourgogne-franche-comte_alt">
+                    </div>
+                    <div class="flex-shrink-0 flex items-center justify-center" aria-hidden="true">
+                        <img src="/images/clients/ajuntament-cunit.png" alt="Ajuntament Cunit" class="h-9 md:h-11 w-auto object-contain max-w-[200px]" / data-i18n-attr="alt:index.body.ajuntament-cunit_alt">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== UNIFIED PLATFORM SECTION (Laurenn style - gray-50 bg) ===== -->
+    <section id="fonctionnalites" class="section-anchor pt-16 lg:pt-20 pb-20 lg:pb-28 relative overflow-hidden" style="background-color: #c5deff47;">
+        <div class="max-w-6xl mx-auto px-6 relative z-10 animate-on-scroll">
+            <div class="text-center max-w-4xl mx-auto mb-16">
+                <h2 class="text-2xl md:text-4xl lg:text-5xl font-semibold mb-6 text-gray-900 tracking-tight" data-i18n="index.fonctionnalites.tout-ce-dont-vos-equipes-ont">
+                    Tout ce dont vos équipes ont besoin se trouve dans Rainbow
+                </h2>
+                <p class="text-lg text-gray-600 leading-relaxed font-medium" data-i18n="index.fonctionnalites.messages-appels-audio-r-unions-vid">
+                    Messages, appels audio, r&eacute;unions vid&eacute;o, webinaires, partage de fichiers&nbsp;: tous les outils dont vous avez besoin, dans un seul environnement. Fini les 4 apps ouvertes en permanence.
+                </p>
+            </div>
+
+            <!-- Mobile: Image carousel with dots -->
+            <div class="lg:hidden">
+                <div id="platform-mobile-image-wrapper" class="relative w-full rounded-xl overflow-hidden bg-gray-900 shadow-xl ring-1 ring-black/5 mb-6" style="aspect-ratio: 800 / 650;">
+                    <img src="/images/echanger.png" alt="" class="platform-mobile-image block absolute inset-0 w-full h-full object-cover" data-platform-index="0" />
+                    <img src="/images/dicuter.webp" alt="" class="platform-mobile-image hidden absolute inset-0 w-full h-full object-cover" data-platform-index="1" />
+                    <img src="/images/organiser.jpg" alt="" class="platform-mobile-image hidden absolute inset-0 w-full h-full object-cover" data-platform-index="2" />
+                </div>
+                <div class="text-center">
+                    <div class="platform-mobile-text" data-platform-index="0">
+                        <h3 class="text-xl font-bold" style="color: #5e2d91;" data-i18n="index.fonctionnalites.changer-avec-vos-quipes">&Eacute;changer avec vos &eacute;quipes</h3>
+                        <p class="text-gray-600 text-lg mt-2 leading-relaxed" data-i18n="index.fonctionnalites.travailler-ensemble-en-temps-r-el">Travailler ensemble en temps r&eacute;el gr&acirc;ce aux espaces partag&eacute;s, cha&icirc;nes d'information, chat, et fichiers centralis&eacute;s.</p>
+                    </div>
+                    <div class="platform-mobile-text hidden" data-platform-index="1">
+                        <h3 class="text-xl font-bold" style="color: #0085CA;" data-i18n="index.fonctionnalites.discuter-en-temps-r-el">Discuter en temps r&eacute;el</h3>
+                        <p class="text-gray-600 text-lg mt-2 leading-relaxed" data-i18n="index.fonctionnalites.voix-visio-messages-instantan-s">Voix, visio, messages instantan&eacute;s : tout est r&eacute;uni pour fluidifier les &eacute;changes.</p>
+                    </div>
+                    <div class="platform-mobile-text hidden" data-platform-index="2">
+                        <h3 class="text-xl font-bold" style="color: #ea5800;" data-i18n="index.fonctionnalites.organiser-des-r-unions-et-v">Organiser des r&eacute;unions et &eacute;v&eacute;nements</h3>
+                        <p class="text-gray-600 text-lg mt-2 leading-relaxed" data-i18n="index.fonctionnalites.organisez-facilement-webinaires">Organisez facilement webinaires, conf&eacute;rences et d&eacute;monstrations pour engager vos audiences.</p>
+                    </div>
+                </div>
+                <div class="flex justify-center gap-3 mt-6">
+                    <button class="w-2.5 h-2.5 rounded-full bg-[#5e2d91] platform-dot transition-all duration-300" data-platform-index="0"></button>
+                    <button class="w-2.5 h-2.5 rounded-full bg-gray-300 platform-dot transition-all duration-300" data-platform-index="1"></button>
+                    <button class="w-2.5 h-2.5 rounded-full bg-gray-300 platform-dot transition-all duration-300" data-platform-index="2"></button>
+                </div>
+            </div>
+
+            <!-- Desktop layout -->
+            <div class="hidden lg:grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+                <!-- Left: Tabs with progress -->
+                <div class="order-2 lg:order-1 lg:col-span-5 flex flex-col justify-center">
+                    <div class="space-y-3 mb-8">
+                        
+                        <!-- Tab 1 -->
+                        <div class="platform-tab-item active cursor-pointer" data-color="#5e2d91">
+                            <div class="platform-tab-track"></div>
+                            <div class="platform-tab-progress animating" style="background-color: #5e2d91;"></div>
+                            <h3 class="platform-tab-title text-lg md:text-xl font-bold" style="color: #5e2d91;" data-i18n="index.fonctionnalites.changer-avec-vos-quipes">
+                                &Eacute;changer avec vos &eacute;quipes
+                            </h3>
+                            <div class="platform-tab-content overflow-hidden transition-all duration-400 ease-out" style="max-height: 500px; opacity: 1;">
+                                <p class="text-gray-600 leading-relaxed text-lg pt-3 pb-4" data-i18n="index.fonctionnalites.travailler-ensemble-en-temps-r-el">
+                                    Travailler ensemble en temps r&eacute;el gr&acirc;ce aux espaces partag&eacute;s, cha&icirc;nes d'information, chat, et fichiers centralis&eacute;s.
+                                </p>
+                                <div class="flex items-center text-sm font-bold" style="color: #5e2d91;">
+                                    <a href="/fr/products/collaboration"><span class="hover:underline cursor-pointer" data-i18n="index.fonctionnalites.en-savoir-plus"> En savoir plus </span>
+                                    <span class="ml-1 opacity-70">&rarr;</span></a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 2 -->
+                        <div class="platform-tab-item cursor-pointer" data-color="#0085CA">
+                            <div class="platform-tab-track"></div>
+                            <div class="platform-tab-progress done" style="background-color: #0085CA;"></div>
+                            <h3 class="platform-tab-title text-lg text-gray-400 font-bold" data-i18n="index.fonctionnalites.discuter-en-temps-r-el">
+                                Discuter en temps r&eacute;el
+                            </h3>
+                            <div class="platform-tab-content overflow-hidden transition-all duration-400 ease-out" style="max-height: 0; opacity: 0; padding-top: 0;">
+                                <p class="text-gray-600 leading-relaxed text-lg pt-3 pb-4" data-i18n="index.fonctionnalites.voix-visio-messages-instantan-s">
+                                    Voix, visio, messages instantan&eacute;s : tout est r&eacute;uni pour fluidifier les &eacute;changes.
+                                </p>
+                                <div class="flex items-center text-sm font-bold" style="color: #0085CA;">
+                                    <a href="/fr/products/collaboration"><span class="hover:underline cursor-pointer" data-i18n="index.fonctionnalites.en-savoir-plus">En savoir plus</span>
+                                    <span class="ml-1 opacity-70">&rarr;</span></a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 3 -->
+                        <div class="platform-tab-item cursor-pointer" data-color="#ea5800">
+                            <div class="platform-tab-track"></div>
+                            <div class="platform-tab-progress done" style="background-color: #ea5800;"></div>
+                            <h3 class="platform-tab-title text-lg text-gray-400 font-bold" data-i18n="index.fonctionnalites.organiser-des-r-unions-et-v">
+                                Organiser des r&eacute;unions et &eacute;v&eacute;nements
+                            </h3>
+                            <div class="platform-tab-content overflow-hidden transition-all duration-400 ease-out" style="max-height: 0; opacity: 0; padding-top: 0;">
+                                <p class="text-gray-600 leading-relaxed text-lg pt-3 pb-4" data-i18n="index.fonctionnalites.organisez-facilement-webinaires">
+                                    Organisez facilement webinaires, conf&eacute;rences et d&eacute;monstrations pour engager vos audiences.
+                                </p>
+                                <div class="flex items-center text-sm font-bold" style="color: #ea5800;">
+                                    <a href="/fr/products/webinar"><span class="hover:underline cursor-pointer" data-i18n="index.fonctionnalites.en-savoir-plus">En savoir plus</span>
+                                    <span class="ml-1 opacity-70">&rarr;</span></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quote Section -->
+                    <div class="pt-8 border-t border-gray-200 relative">
+                        <div id="platform-quote" class="relative text-center">
+                            <!-- Quote 0: Échanger avec vos équipes -->
+                            <div class="quote-item" data-quote-index="0">
+                                <p class="text-gray-600 italic text-lg mb-2 leading-relaxed" data-i18n="index.fonctionnalites.nos-quipes-collaborent-enfin-au-m">
+                                    &laquo;&nbsp;Nos &eacute;quipes collaborent enfin au m&ecirc;me endroit. Espaces partag&eacute;s, fichiers, discussions&nbsp;: tout est centralis&eacute; et accessible en un instant.&nbsp;&raquo;
+                                </p>
+                                <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3" data-i18n="index.fonctionnalites.responsable-collaboration-ville-de">
+                                    Responsable collaboration, Ville de Herrenberg
+                                </p>
+                                <a href="https://www.al-enterprise.com/en/company/customers/stadt-herrenberg" target="_blank" rel="noopener noreferrer" class="text-xs font-semibold text-brand-500 hover:underline inline-flex items-center gap-1" data-i18n-rich="index.fonctionnalites.lire-le-t-moignage-complet">
+                                    Lire le t&eacute;moignage complet <span>&rarr;</span>
+                                </a>
+                            </div>
+
+                            <!-- Quote 1: Discuter en temps réel -->
+                            <div class="quote-item" data-quote-index="1" style="opacity: 0; pointer-events: none; position: absolute; top: 0; left: 0; width: 100%;">
+                                <p class="text-gray-600 italic text-lg mb-2 leading-relaxed" data-i18n="index.fonctionnalites.passer-d-un-message-un-appel-visio">
+                                    &laquo;&nbsp;Passer d'un message &agrave; un appel visio en un clic a transform&eacute; notre r&eacute;activit&eacute;. Nous &eacute;changeons en temps r&eacute;el, sans jamais quitter Rainbow.&nbsp;&raquo;
+                                </p>
+                                <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3" data-i18n="index.fonctionnalites.directrice-des-op-rations-r-gion">
+                                    Directrice des op&eacute;rations, R&eacute;gion Bourgogne-Franche-Comt&eacute;
+                                </p>
+                                <a href="https://www.al-enterprise.com/fr-fr/entreprise/clients/bourgogne-franche-comte" target="_blank" rel="noopener noreferrer" class="text-xs font-semibold text-brand-500 hover:underline inline-flex items-center gap-1" data-i18n-rich="index.fonctionnalites.lire-le-t-moignage-complet">
+                                    Lire le t&eacute;moignage complet <span>&rarr;</span>
+                                </a>
+                            </div>
+
+                            <!-- Quote 2: Organiser des réunions et événements -->
+                            <div class="quote-item" data-quote-index="2" style="opacity: 0; pointer-events: none; position: absolute; top: 0; left: 0; width: 100%;">
+                                <p class="text-gray-600 italic text-lg mb-2 leading-relaxed" data-i18n="index.fonctionnalites.la-facilit-d-usage-tait-un-crit-re">
+                                    &laquo;&nbsp;La facilit&eacute; d'usage &eacute;tait un crit&egrave;re cl&eacute; pour nous. La biblioth&egrave;que de m&eacute;dias, notamment vid&eacute;o, nous permet d'assurer un accompagnement de qualit&eacute; aupr&egrave;s de nos utilisateurs.&nbsp;&raquo;
+                                </p>
+                                <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3" data-i18n="index.fonctionnalites.responsable-si-eurom-tropole-de">
+                                    Responsable SI, Eurom&eacute;tropole de Strasbourg
+                                </p>
+                                <a href="https://www.al-enterprise.com/-/media/assets/internet/documents/ale-strasbourg-eurometropolis-long-case-study-fr.pdf" target="_blank" rel="noopener" class="text-xs font-semibold text-brand-500 hover:underline inline-flex items-center gap-1" data-i18n-rich="index.fonctionnalites.lire-le-t-moignage-complet">
+                                    Lire le t&eacute;moignage complet <span>&rarr;</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Image Display with blur transitions -->
+                <div class="order-1 lg:order-2 lg:col-span-7 flex items-center">
+                    <div id="platform-image-wrapper" class="relative w-full rounded-xl overflow-hidden bg-gray-900 shadow-xl ring-1 ring-black/5" style="aspect-ratio: 800 / 650;">
+                        <img src="/images/echanger.png" alt="" class="platform-image absolute inset-0 w-full h-full object-cover transition-all duration-500 ease-in-out" style="opacity: 1; filter: blur(0); z-index: 10;" />
+                        <img src="/images/dicuter.webp" alt="" class="platform-image absolute inset-0 w-full h-full object-cover transition-all duration-500 ease-in-out" style="opacity: 0; filter: blur(4px); z-index: 0;" />
+                        <img src="/images/organiser.jpg" alt="" class="platform-image absolute inset-0 w-full h-full object-cover transition-all duration-500 ease-in-out" style="opacity: 0; filter: blur(4px); z-index: 0;" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== TARGET AUDIENCE SECTION (sliding pill tabs) ===== -->
+    <section id="cibles" class="section-anchor py-20 lg:py-28" style="background-color: #f9f8fe;">
+        <div class="max-w-6xl mx-auto px-6 animate-on-scroll">
+            <div class="text-center max-w-3xl mx-auto mb-6">
+                <h2 class="text-2xl md:text-4xl lg:text-5xl font-semibold mb-6 text-gray-900 tracking-tight" data-i18n="index.cibles.rainbow-s-adapte-vous-pas-l">
+                    Rainbow s'adapte &agrave; vous, pas l'inverse
+                </h2>
+                <p class="text-lg text-gray-600 leading-relaxed font-medium" data-i18n="index.cibles.pme-qui-veulent-une-alternative">
+                    PME qui veulent une alternative &agrave; WhatsApp. Grands comptes qui ont besoin de souverainet&eacute; et d'évolutivité. Secteur public qui ne peut pas se permettre le Cloud Act. Les trois ont en commun d'avoir choisi Rainbow.
+                </p>
+            </div>
+
+            <!-- Sliding Pill Tab Container -->
+            <div class="hidden md:flex md:justify-center md:mb-4">
+                <div class="pill-tab-container relative inline-flex">
+                    <div class="pill-slider"></div>
+                    
+                    <button class="pill-tab-btn text-active" data-tab-panel="audience" data-tab-index="0" style="--pill-accent:#ea5800">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                        </svg>
+                        <span class="hidden sm:inline whitespace-nowrap" data-i18n="index.cibles.secteur-prive">Secteur privé</span>
+                        <span class="sm:hidden" data-i18n="index.cibles.marketeurs">Marketeurs</span>
+                    </button>
+
+                    <button class="pill-tab-btn text-inactive" data-tab-panel="audience" data-tab-index="1" style="--pill-accent:#0085CA">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        <span class="hidden sm:inline whitespace-nowrap" data-i18n="index.cibles.secteur-public">Secteur public</span>
+                        <span class="sm:hidden" data-i18n="index.cibles.public">Public</span>
+                    </button>
+
+                    <button class="pill-tab-btn text-inactive" data-tab-panel="audience" data-tab-index="2" style="--pill-accent:#5e2d91">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5" />
+                        </svg>
+                        <span class="hidden sm:inline whitespace-nowrap" data-i18n="index.cibles.enseignants-formateurs">Enseignants &amp; formateurs</span>
+                        <span class="sm:hidden" data-i18n="index.cibles.education">Education</span>
+                    </button>
+
+                    <button class="pill-tab-btn text-inactive" data-tab-panel="audience" data-tab-index="3" style="--pill-accent:#16a96e">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                        </svg>
+                        <span class="hidden sm:inline whitespace-nowrap" data-i18n="index.cibles.managers-consultants">Managers &amp; consultants</span>
+                        <span class="sm:hidden" data-i18n="index.cibles.managers">Managers</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tab Content Panels -->
+            <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+                <!-- Left: Content -->
+                <div class="order-2 lg:order-1">
+                    <!-- Panel Wrapper for proper positioning -->
+                    <div class="tab-panel-wrapper relative">
+                        
+                        <!-- Panel 0: Marketeurs -->
+                        <div class="tab-panel-content" data-panel-id="audience" data-panel-index="0" style="opacity: 1; visibility: visible; position: relative;">
+                            <img src="/images/Marketeurs_commerciaux.jpg" alt="Marketeurs" class="lg:hidden w-full h-48 object-cover rounded-xl mb-4" / data-i18n-attr="alt:index.cibles.marketeurs_alt">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-bold mb-4" style="background-color: rgba(234, 88, 0, 0.1); color: #ea5800;" data-i18n-rich="index.cibles.path-stroke-linecap-round-stroke">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                </svg>
+                                Secteur privé
+                            </div>
+                            <h3 class="text-xl md:text-2xl lg:text-3xl font-semibold mb-4 text-gray-900 leading-tight" data-i18n="index.cibles.acc-l-rez-vos-changes-et-gagnez-en">
+                                Acc&eacute;l&eacute;rez vos &eacute;changes et gagnez en r&eacute;activit&eacute;
+                            </h3>
+                            <p class="hidden lg:block text-lg text-gray-600 leading-relaxed mb-6" data-i18n="index.cibles.fluidifiez-vos-echanges-partagez">
+                                Fluidifiez vos échanges, partagez vos documents et collaborez en temps réel avec vos fournisseurs clients et prospects pour accélérer vos projets et développer votre activité.
+                            </p>
+                            <!-- CTA Buttons -->
+                            <div class="flex flex-col sm:flex-row gap-4">
+                                <a href="/fr/tarifs" class="inline-flex items-center justify-center px-6 py-3 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-base font-bold whitespace-nowrap transition-all shadow-md hover:shadow-lg" data-i18n="index.cibles.decouvrez-nos-plans">
+                                    Découvrez nos plans
+                                </a>
+                                <a href="/fr/tarifs" class="inline-flex items-center justify-center px-6 py-3 rounded-btn border-2 border-gray-200 text-gray-900 hover:bg-gray-50 text-lg font-bold" data-i18n="index.cibles.essai-gratuit">
+                                    Essai gratuit
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Panel 1: Public -->
+                        <div class="tab-panel-content" data-panel-id="audience" data-panel-index="1" style="opacity: 0; visibility: hidden; position: absolute; top: 0; left: 0; width: 100%; pointer-events: none;">
+                            <img src="/images/ONG_secteur-public.png" alt="Public" class="lg:hidden w-full h-48 object-cover rounded-xl mb-4" / data-i18n-attr="alt:index.cibles.public_alt">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-bold mb-4" style="background-color: rgba(0, 133, 202, 0.1); color: #0085CA;" data-i18n-rich="index.cibles.path-stroke-linecap-round-stroke_2">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                                Secteur public
+                            </div>
+                            <h3 class="text-xl md:text-2xl lg:text-3xl font-semibold mb-4 text-gray-900 leading-tight" data-i18n="index.cibles.une-collaboration-souveraine-et-s">
+                                Une collaboration souveraine et s&eacute;curis&eacute;e
+                            </h3>
+                            <p class="hidden lg:block text-lg text-gray-600 leading-relaxed mb-6" data-i18n="index.cibles.echangez-en-toute-confiance-grace">
+                                Échangez en toute confiance grâce à une plateforme souveraine Européenne, hébergée en France et conforme aux exigences de sécurité les plus strictes.
+                            </p>
+
+                            <!-- CTA Buttons -->
+                            <div class="flex flex-col sm:flex-row gap-4">
+                                <a href="/fr/tarifs" class="inline-flex items-center justify-center px-6 py-3 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-base font-bold whitespace-nowrap transition-all shadow-md hover:shadow-lg" data-i18n="index.cibles.decouvrez-nos-plans">
+                                    Découvrez nos plans
+                                </a>
+                                <a href="/fr/tarifs" class="inline-flex items-center justify-center px-6 py-3 rounded-btn border-2 border-gray-200 text-gray-900 hover:bg-gray-50 text-lg font-bold" data-i18n="index.cibles.essai-gratuit">
+                                    Essai gratuit
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Panel 2: Education -->
+                        <div class="tab-panel-content" data-panel-id="audience" data-panel-index="2" style="opacity: 0; visibility: hidden; position: absolute; top: 0; left: 0; width: 100%; pointer-events: none;">
+                            <img src="/images/Enseignants_formateurs.jpg" alt="Education" class="lg:hidden w-full h-48 object-cover rounded-xl mb-4" / data-i18n-attr="alt:index.cibles.education_alt">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-bold mb-4" style="background-color: rgba(94, 45, 145, 0.1); color: #5e2d91;" data-i18n-rich="index.cibles.path-stroke-linecap-round-stroke_3">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 59.905 0 006.75 15.75v-1.5" />
+                                </svg>
+                                Enseignants &amp; formateurs
+                            </div>
+                            <h3 class="text-xl md:text-2xl lg:text-3xl font-semibold mb-4 text-gray-900 leading-tight" data-i18n="index.cibles.transmettez-votre-savoir-sans">
+                                Transmettez votre savoir sans fronti&egrave;res
+                            </h3>
+                            <p class="hidden lg:block text-lg text-gray-600 leading-relaxed mb-6" data-i18n="index.cibles.animez-vos-cours-et-formations">
+                                Animez vos cours et formations &agrave; distance avec des outils de vidéo conférence, de partage et d'interaction pens&eacute;s pour l'apprentissage.
+                            </p>
+                            <!-- CTA Buttons -->
+                            <div class="flex flex-col sm:flex-row gap-4">
+                                <a href="/fr/tarifs" class="inline-flex items-center justify-center px-6 py-3 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-base font-bold whitespace-nowrap transition-all shadow-md hover:shadow-lg" data-i18n="index.cibles.decouvrez-nos-plans">
+                                    Découvrez nos plans
+                                </a>
+                                <a href="/fr/tarifs" class="inline-flex items-center justify-center px-6 py-3 rounded-btn border-2 border-gray-200 text-gray-900 hover:bg-gray-50 text-lg font-bold" data-i18n="index.cibles.essai-gratuit">
+                                    Essai gratuit
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Panel 3: Managers -->
+                        <div class="tab-panel-content" data-panel-id="audience" data-panel-index="3" style="opacity: 0; visibility: hidden; position: absolute; top: 0; left: 0; width: 100%; pointer-events: none;">
+                            <img src="/images/Managers_consultants.jpg" alt="Managers" class="lg:hidden w-full h-48 object-cover rounded-xl mb-4" / data-i18n-attr="alt:index.cibles.managers_alt">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-bold mb-4" style="background-color: rgba(22, 169, 110, 0.1); color: #16a96e;" data-i18n-rich="index.cibles.path-stroke-linecap-round-stroke_4">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                                </svg>
+                                Managers &amp; consultants
+                            </div>
+                            <h3 class="text-xl md:text-2xl lg:text-3xl font-semibold mb-4 text-gray-900 leading-tight" data-i18n="index.cibles.optimisez-la-coordination-de-vos">
+                                Optimisez la coordination de vos &eacute;quipes
+                            </h3>
+                            <p class="hidden lg:block text-lg text-gray-600 leading-relaxed mb-6" data-i18n="index.cibles.pilotez-vos-projets-alignez-vos">
+                                Pilotez vos projets, alignez vos équipes et fluidifiez la prise de décision au sein d'un espace de travail unifié, accessible en un clic, depuis n'importe quel appareil connecté.
+                            </p>
+                            <!-- CTA Buttons -->
+                            <div class="flex flex-col sm:flex-row gap-4">
+                                <a href="/fr/tarifs" class="inline-flex items-center justify-center px-6 py-3 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-base font-bold whitespace-nowrap transition-all shadow-md hover:shadow-lg" data-i18n="index.cibles.decouvrez-nos-plans">
+                                    Découvrez nos plans
+                                </a>
+                                <a href="/fr/tarifs" class="inline-flex items-center justify-center px-6 py-3 rounded-btn border-2 border-gray-200 text-gray-900 hover:bg-gray-50 text-lg font-bold" data-i18n="index.cibles.essai-gratuit">
+                                    Essai gratuit
+                                </a>
+                            </div>
+                         </div>
+                     </div>
+                 </div>
+
+                 <!-- Right: Images -->
+                <div class="hidden lg:block order-1 lg:order-2 relative aspect-[4/3]">
+                    <div class="rounded-3xl overflow-hidden bg-white border border-gray-200 shadow-xl w-full h-full">
+                        <div class="tab-panel-images w-full h-full relative">
+                            <img src="/images/Marketeurs_commerciaux.jpg" alt="Marketeurs" data-img-index="0" class="tab-img absolute inset-0 w-full h-full object-cover transition-all duration-500" / data-i18n-attr="alt:index.cibles.marketeurs_alt">
+                            <img src="/images/ONG_secteur-public.png" alt="Public" data-img-index="1" class="tab-img absolute inset-0 w-full h-full object-cover transition-all duration-500" / data-i18n-attr="alt:index.cibles.public_alt">
+                            <img src="/images/Enseignants_formateurs.jpg" alt="Education" data-img-index="2" class="tab-img absolute inset-0 w-full h-full object-cover transition-all duration-500" / data-i18n-attr="alt:index.cibles.education_alt">
+                            <img src="/images/Managers_consultants.jpg" alt="Managers" data-img-index="3" class="tab-img absolute inset-0 w-full h-full object-cover transition-all duration-500" / data-i18n-attr="alt:index.cibles.managers_alt">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+<!-- ===== STATS BADGES SECTION ===== -->
+    <section class="relative py-20 lg:py-28 bg-brand-500 overflow-hidden" style="background: linear-gradient(90deg, #5f0fcc, #1c1940);">
+        
+        <div class="max-w-6xl mx-auto px-6 relative z-20">
+            <!-- Title -->
+            <h2 class="text-2xl md:text-4xl lg:text-5xl font-semibold text-white text-center mb-16 tracking-tight max-w-5xl mx-auto leading-[1.1] animate-on-scroll" data-i18n="index.body.des-millions-de-personnes-aiment">
+                Des millions de personnes aiment travailler dans Rainbow
+            </h2>
+
+            <!-- Large Stats Horizontal -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 animate-on-scroll">
+                <div class="text-center">
+                    <div class="text-4xl md:text-6xl font-semibold text-white tracking-tighter mb-2"><span class="counter-number" data-counter="700" data-duration="2000">0</span> M</div>
+                    <div class="text-sm md:text-base text-purple-100 font-medium leading-tight opacity-90" data-i18n="index.body.de-messages-chaque-jour">de messages chaque jour</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl md:text-6xl font-semibold text-white tracking-tighter mb-2"><span class="counter-number" data-counter="4" data-duration="2000">0</span> M</div>
+                    <div class="text-sm md:text-base text-purple-100 font-medium leading-tight opacity-90" data-i18n="index.body.d-utilisateurs-chaque-semaine">d'utilisateurs chaque semaine</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl md:text-6xl font-semibold text-white tracking-tighter mb-2"><span class="counter-number" data-counter="900" data-duration="2000">0</span> M</div>
+                    <div class="text-sm md:text-base text-purple-100 font-medium leading-tight opacity-90" data-i18n="index.body.d-interactions-quotidiennes">d'interactions quotidiennes</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl md:text-6xl font-semibold text-white tracking-tighter mb-2"><span class="counter-number" data-counter="1.7" data-duration="2000">0</span> M</div>
+                    <div class="text-sm md:text-base text-purple-100 font-medium leading-tight opacity-90" data-i18n="index.body.d-utilisations-chaque-semaine">d'utilisations chaque semaine</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Background glows -->
+        <div class="absolute top-1/2 left-0 -translate-y-1/2 w-[400px] h-[400px] bg-purple-400 rounded-full blur-[120px] opacity-10 pointer-events-none"></div>
+        <div class="absolute bottom-0 right-0 w-[500px] h-[500px] bg-pink-500 rounded-full blur-[140px] opacity-10 pointer-events-none"></div>
+    </section>
+
+    <!-- ===== STRAIGHT DIVIDER: dark #151936 → gray-50 ===== -->
+    <div style="height: 0; background-color: #5e2d91;"></div>
+
+    <!-- ===== SECURITY CERTIFICATIONS SECTION (Laurenn style) ===== -->
+    <section id="certifications" class="section-anchor py-20 lg:py-28 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Header -->
+            <div class="text-center mb-16">
+                <h2 class="text-2xl md:text-4xl lg:text-5xl font-semibold mb-6 text-gray-900 tracking-tight" data-i18n="index.certifications.vos-donn-es-prot-g-es-h-berg-es-en">Vos donn&eacute;es, prot&eacute;g&eacute;es &amp; h&eacute;berg&eacute;es en France</h2>
+                
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed" data-i18n="index.certifications.rainbow-est-h-berg-en-france-op-r">
+                    Rainbow est h&eacute;berg&eacute; en France, op&eacute;r&eacute; sous droit fran&ccedil;ais, certifi&eacute; par l'ANSSI et compatible HDS pour les donn&eacute;es de sant&eacute;. Aucun Cloud Act. Aucun acc&egrave;s possible par des autorit&eacute;s &eacute;trang&egrave;res. C'est la seule garantie qui vaille quand vos &eacute;changes sont confidentiels.
+                </p>
+            </div>
+
+            <!-- Certifications carousel (one sliding row) -->
+            <div class="cert-carousel max-w-6xl mx-auto">
+                <button type="button" class="cert-carousel-arrow cert-prev" aria-label="Certification pr&eacute;c&eacute;dente" data-i18n-attr="aria-label:index.certifications.certification-pr-c-dente_aria-label">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                </button>
+                <div class="cert-carousel-track" id="cert-track">
+                <!-- ANSSI CSPN -->
+                <div class="cert-slide">
+                        <div class="compliance-card group">
+                            <div class="compliance-card-inner">
+                                <div class="compliance-card-front">
+                                    <div class="compliance-card-logo-area">
+                                        <img src="/images/certs/anssi-cspn.png" alt="ANSSI CSPN" / data-i18n-attr="alt:index.certifications.anssi-cspn_alt">
+                                    </div>
+                                    <h3 class="compliance-card-title" data-i18n="index.certifications.anssi-cspn">ANSSI CSPN</h3>
+                                    <!-- Decorations: Blob + Dots -->
+                                    <div class="card-deco-blob"></div>
+                                    <div class="card-deco-dots">
+                                        <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                        <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                        <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                        <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                    </div>
+                                </div>
+                                <div class="compliance-card-back">
+                                    <p data-i18n="index.certifications.rainbow-a-obtenu-la-certification">Rainbow&trade; a obtenu la Certification de S&eacute;curit&eacute; de Premier Niveau (CSPN), d&eacute;livr&eacute;e par l'ANSSI le plus haut standard fran&ccedil;ais en s&eacute;curit&eacute;. Seules trois solutions de communications l'ont obtenue, et Rainbow est la plus importante des trois.</p>
+                                </div>
+                            </div>
+                        </div>
+                </div>
+
+                <!-- HDS -->
+                <div class="cert-slide">
+                    <div class="compliance-card group">
+                        <div class="compliance-card-inner">
+                            <div class="compliance-card-front">
+                                <div class="compliance-card-logo-area">
+                                    <img src="/images/hds.webp" alt="HDS" / data-i18n-attr="alt:index.certifications.hds_alt">
+                                </div>
+                                <h3 class="compliance-card-title" data-i18n="index.certifications.hds">HDS</h3>
+                                <!-- Decoration: Waves -->
+                                <div class="card-deco-waves">
+                                    <svg viewBox="0 0 100 100">
+                                        <path d="M-20,120 C 20,80 60,80 120,-20" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                        <path d="M-10,120 C 30,90 70,90 120,-10" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                        <path d="M0,120 C 40,100 80,100 120,0" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                        <path d="M10,120 C 50,110 90,110 120,10" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                        <path d="M20,120 C 60,120 100,120 120,20" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                    </svg>
+                                    <div class="card-wave-dot-1"></div>
+                                    <div class="card-wave-dot-2"></div>
+                                </div>
+                            </div>
+                            <div class="compliance-card-back">
+                                <p data-i18n="index.certifications.la-certification-hds-h-bergement">La certification HDS (H&eacute;bergement de Donn&eacute;es de Sant&eacute;) est une certification fran&ccedil;aise obligatoire qui garantit qu'un prestataire h&eacute;bergeant des donn&eacute;es de sant&eacute; respecte des exigences strictes en mati&egrave;re de s&eacute;curit&eacute;, de confidentialit&eacute; et de protection des donn&eacute;es m&eacute;dicales.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BSI C5 -->
+                <div class="cert-slide">
+                    <div class="compliance-card group">
+                        <div class="compliance-card-inner">
+                            <div class="compliance-card-front">
+                                <div class="compliance-card-logo-area">
+                                    <img src="/images/certs/c5.png" alt="BSI C5" / data-i18n-attr="alt:index.certifications.bsi-c5_alt">
+                                </div>
+                                <h3 class="compliance-card-title" data-i18n="index.certifications.bsi-c5">BSI C5</h3>
+                                <!-- Decorations: Blob + Dots -->
+                                <div class="card-deco-blob"></div>
+                                <div class="card-deco-dots">
+                                    <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                    <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                    <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                    <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                </div>
+                            </div>
+                            <div class="compliance-card-back">
+                                <p data-i18n="index.certifications.la-norme-bsi-c5-publi-e-par-l">La norme BSI C5, publi&eacute;e par l'Office f&eacute;d&eacute;ral allemand pour la s&eacute;curit&eacute; informatique (BSI), &eacute;tablit une norme de s&eacute;curit&eacute; fondamentale pour les services cloud et aide les clients &agrave; &eacute;valuer, g&eacute;rer et superviser leurs fournisseurs de services cloud.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GDPR -->
+                <div class="cert-slide">
+                    <div class="compliance-card group">
+                        <div class="compliance-card-inner">
+                            <div class="compliance-card-front">
+                                <div class="compliance-card-logo-area">
+                                    <img src="/images/rgpd.jpg" alt="GDPR" / data-i18n-attr="alt:index.certifications.gdpr_alt">
+                                </div>
+                                <h3 class="compliance-card-title" data-i18n="index.certifications.rgpd">RGPD</h3>
+                                <!-- Decoration: Waves -->
+                                <div class="card-deco-waves">
+                                    <svg viewBox="0 0 100 100">
+                                        <path d="M-20,120 C 20,80 60,80 120,-20" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                        <path d="M-10,120 C 30,90 70,90 120,-10" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                        <path d="M0,120 C 40,100 80,100 120,0" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                        <path d="M10,120 C 50,110 90,110 120,10" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                        <path d="M20,120 C 60,120 100,120 120,20" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                    </svg>
+                                    <div class="card-wave-dot-1"></div>
+                                    <div class="card-wave-dot-2"></div>
+                                </div>
+                            </div>
+                            <div class="compliance-card-back">
+                                <p data-i18n="index.certifications.les-services-rainbow-sont-con-us">Les services Rainbow sont con&ccedil;us pour &ecirc;tre conformes &agrave; la directive europ&eacute;enne sur la protection des donn&eacute;es, qui renforce la protection de la vie priv&eacute;e et des donn&eacute;es.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ISO-27001 & SOC -->
+                <div class="cert-slide">
+                    <div class="compliance-card group">
+                        <div class="compliance-card-inner">
+                            <div class="compliance-card-front">
+                                <div class="compliance-card-logo-area">
+                                    <img src="/images/iso9001.png" alt="ISO-27001 &amp; SOC" / data-i18n-attr="alt:index.certifications.iso-27001-soc_alt">
+                                </div>
+                                <h3 class="compliance-card-title" data-i18n="index.certifications.iso-27001-soc">ISO-27001 &amp; SOC</h3>
+                                <!-- Decoration: Waves -->
+                                <div class="card-deco-waves">
+                                    <svg viewBox="0 0 100 100">
+                                        <path d="M-20,120 C 20,80 60,80 120,-20" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                        <path d="M-10,120 C 30,90 70,90 120,-10" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                        <path d="M0,120 C 40,100 80,100 120,0" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                        <path d="M10,120 C 50,110 90,110 120,10" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                        <path d="M20,120 C 60,120 100,120 120,20" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                    </svg>
+                                    <div class="card-wave-dot-1"></div>
+                                    <div class="card-wave-dot-2"></div>
+                                </div>
+                            </div>
+                            <div class="compliance-card-back">
+                                <p data-i18n="index.certifications.les-centres-de-donn-es-s-appuient">Les centres de donn&eacute;es s'appuient sur des technologies modernes certifi&eacute;es ISO-27001 et SOC. Ils sont isol&eacute;s par des cl&ocirc;tures en fil de fer barbel&eacute; et l'acc&egrave;s physique est strictement surveill&eacute; 24&times;7.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- HIPAA -->
+                <div class="cert-slide">
+                    <div class="compliance-card group">
+                        <div class="compliance-card-inner">
+                            <div class="compliance-card-front">
+                                <div class="compliance-card-logo-area">
+                                    <img src="/images/hipaa.png" alt="HIPAA" / data-i18n-attr="alt:index.certifications.hipaa_alt">
+                                </div>
+                                <h3 class="compliance-card-title" data-i18n="index.certifications.hipaa">HIPAA</h3>
+                                <div class="card-deco-blob"></div>
+                                <div class="card-deco-dots">
+                                    <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                    <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                    <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                    <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                </div>
+                            </div>
+                            <div class="compliance-card-back">
+                                <p data-i18n="index.certifications.la-loi-sur-la-portabilit-et-la">La loi sur la portabilit&eacute; et la responsabilit&eacute; en mati&egrave;re d'assurance maladie (HIPAA) est une certification am&eacute;ricaine qui garantit la s&eacute;curit&eacute; des donn&eacute;es relatives aux soins de sant&eacute;.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FERPA -->
+                <div class="cert-slide">
+                    <div class="compliance-card group">
+                        <div class="compliance-card-inner">
+                            <div class="compliance-card-front">
+                                <div class="compliance-card-logo-area">
+                                    <img src="/images/certs/ferpa.png" alt="FERPA" / data-i18n-attr="alt:index.certifications.ferpa_alt">
+                                </div>
+                                <h3 class="compliance-card-title" data-i18n="index.certifications.ferpa">FERPA</h3>
+                                <!-- Decoration: Waves -->
+                                <div class="card-deco-waves">
+                                    <svg viewBox="0 0 100 100">
+                                        <path d="M-20,120 C 20,80 60,80 120,-20" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                        <path d="M-10,120 C 30,90 70,90 120,-10" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                        <path d="M0,120 C 40,100 80,100 120,0" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                        <path d="M10,120 C 50,110 90,110 120,10" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                        <path d="M20,120 C 60,120 100,120 120,20" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                    </svg>
+                                    <div class="card-wave-dot-1"></div>
+                                    <div class="card-wave-dot-2"></div>
+                                </div>
+                            </div>
+                            <div class="compliance-card-back">
+                                <p data-i18n="index.certifications.la-ferpa-family-educational-rights">La FERPA (Family Educational Rights and Privacy Act) est une loi am&eacute;ricaine qui prot&egrave;ge la confidentialit&eacute; des donn&eacute;es scolaires des &eacute;tudiants et leur donne le droit d'acc&eacute;der, de corriger et de contr&ocirc;ler la diffusion de leurs informations &eacute;ducatives.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ACN -->
+                <div class="cert-slide">
+                    <div class="compliance-card group">
+                        <div class="compliance-card-inner">
+                            <div class="compliance-card-front">
+                                <div class="compliance-card-logo-area">
+                                    <img src="/images/acn.png" alt="ACN" / data-i18n-attr="alt:index.certifications.acn_alt">
+                                </div>
+                                <h3 class="compliance-card-title" data-i18n="index.certifications.acn">ACN</h3>
+                                <!-- Decorations: Blob + Dots + Waves -->
+                                <div class="card-deco-blob"></div>
+                                <div class="card-deco-dots">
+                                    <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                    <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                    <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                    <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                </div>
+                            </div>
+                            <div class="compliance-card-back">
+                                <p data-i18n="index.certifications.une-certification-nationale-de">Une certification nationale de cybers&eacute;curit&eacute; d&eacute;livr&eacute;e par l'Agence nationale de cybers&eacute;curit&eacute; d'Italie (ACN) afin d'attester que les produits et services TIC sont conformes aux exigences de s&eacute;curit&eacute; pr&eacute;vues par la l&eacute;gislation italienne.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ENS -->
+                <div class="cert-slide">
+                    <div class="compliance-card group">
+                        <div class="compliance-card-inner">
+                            <div class="compliance-card-front">
+                                <div class="compliance-card-logo-area">
+                                    <img src="/images/certs/ens.webp" alt="ENS" / data-i18n-attr="alt:index.certifications.ens_alt">
+                                </div>
+                                <h3 class="compliance-card-title" data-i18n="index.certifications.ens">ENS</h3>
+                                <!-- Decorations: Blob + Dots -->
+                                <div class="card-deco-blob"></div>
+                                <div class="card-deco-dots">
+                                    <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                    <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                    <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                    <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                </div>
+                            </div>
+                            <div class="compliance-card-back">
+                                <p data-i18n="index.certifications.une-certification-d-livr-e-par-le">Une certification d&eacute;livr&eacute;e par le syst&egrave;me national de s&eacute;curit&eacute; espagnol visant &agrave; assurer la protection des syst&egrave;mes d'information contre les cybermenaces et incidents internes et externes.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                </div>
+                <button type="button" class="cert-carousel-arrow cert-next" aria-label="Certification suivante" data-i18n-attr="aria-label:index.certifications.certification-suivante_aria-label">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                </button>
+            </div>
+
+            <div class="text-center mt-16">
+                <a href="/fr/rainbow-donnees-hebergees-en-france" class="text-brand-500 font-bold hover:text-pink-600 transition-all group inline-flex items-center" data-i18n-rich="index.certifications.en-savoir-plus-sur-notre">
+                    En savoir plus sur notre engagement s&eacute;curit&eacute; &amp; souverainet&eacute;
+                    <span class="ml-2 transition-transform group-hover:translate-x-1">&rarr;</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== PRODUCT RANGE SECTION (Laurenn style) ===== -->
+    <section id="solutions" class="section-anchor py-20 lg:py-28 bg-white product-range-section">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Header -->
+            <div class="text-center mb-16 lg:mb-16">
+                <h2 class="text-2xl md:text-4xl lg:text-5xl font-semibold mb-6 text-gray-900" data-i18n="index.solutions.deux-solutions-un-seul-cosyst-me-z">
+                    Deux solutions. Un seul &eacute;cosyst&egrave;me. Z&eacute;ro doublon
+                </h2>
+                <p class="text-lg md:text-xl text-gray-500 max-w-2xl mx-auto" data-i18n="index.solutions.rainbow-collaboration-pour-vos">
+                    Rainbow Collaboration pour vos &eacute;changes quotidiens. Rainbow Webinar pour vos &eacute;v&eacute;nements en ligne. D&eacute;ployez l'une, l'autre, ou les deux, sur la m&ecirc;me plateforme souveraine. Les deux solutions sont disponibles dans 22 langues.
+                </p>
+            </div>
+
+            <!-- Product Cards -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 max-w-5xl mx-auto">
+                
+                <!-- Rainbow Collaboration -->
+                <div class="product-range-card group">
+                    <div class="product-range-card-image" style="position: relative;">
+                        <img src="/images/rainbow_chat.png" alt="Rainbow Collaboration" / data-i18n-attr="alt:index.solutions.rainbow-collaboration_alt">
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 50%; background: linear-gradient(to top, #6e264a, transparent); pointer-events: none;"></div>
+                    </div>
+                    <div class="product-range-card-content">
+                        <h3 class="product-range-card-title" data-i18n-rich="index.solutions.rainbow-collaboration">
+                            Rainbow <span style="color: #6e264a;">Collaboration</span>
+                        </h3>
+                        <p class="product-range-card-subtitle" data-i18n="index.solutions.communications-unifi-es-pour-les">
+                            Communications unifi&eacute;es pour les entreprises modernes
+                        </p>
+                        <a href="/fr/products/collaboration" class="product-range-cta-primary" style="background-color: #6e264a;" data-i18n="index.solutions.d-couvrir-rainbow-collaboration">
+                            D&eacute;couvrir Rainbow Collaboration
+                        </a>
+                        <a href="/fr/products/collaboration/pricing" class="product-range-cta-secondary" style="color: #6e264a;" data-i18n="index.solutions.voir-les-tarifs">
+                            Voir les tarifs &rarr;
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Rainbow Webinar -->
+                <div class="product-range-card group">
+                    <div class="product-range-card-image" style="position: relative;">
+                        <img src="/images/webinar_live.png" alt="Rainbow Webinar" / data-i18n-attr="alt:index.solutions.rainbow-webinar_alt">
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 50%; background: linear-gradient(to top, #43379e, transparent); pointer-events: none;"></div>
+                    </div>
+                    <div class="product-range-card-content">
+                        <h3 class="product-range-card-title" data-i18n-rich="index.solutions.rainbow-webinar">
+                            Rainbow <span style="color: #43379e;">Webinar</span>
+                        </h3>
+                        <p class="product-range-card-subtitle" data-i18n="index.solutions.la-solution-souveraine-pour-vos-v">
+                            La solution souveraine pour vos &eacute;v&eacute;nements digitaux
+                        </p>
+                        <a href="/fr/products/webinar" class="product-range-cta-primary" style="background-color: #43379e;" data-i18n="index.solutions.d-couvrir-rainbow-webinar">
+                            D&eacute;couvrir Rainbow Webinar
+                        </a>
+                        <a href="/fr/products/webinar/pricing" class="product-range-cta-secondary" style="color: #43379e;" data-i18n="index.solutions.voir-les-tarifs">
+                            Voir les tarifs &rarr;
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== STATS SECTION (animated counters, dark bg) ===== -->
+    <section class="relative stats-dark-bg text-white py-20 lg:py-28">
+        <div class="max-w-6xl mx-auto px-6 relative z-10">
+            <div class="text-center mb-16 md:mb-16 animate-on-scroll">
+                <h2 class="text-2xl md:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight max-w-4xl mx-auto text-white" data-i18n="index.body.nous-sommes-l-pour-faire-grandir">
+                    Nous sommes l&agrave; pour faire grandir votre entreprise
+                </h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 lg:gap-12 animate-stagger">
+                <!-- Stat 1 -->
+                <div class="text-center group">
+                    <div class="text-4xl lg:text-6xl font-semibold stats-number-1 mb-4 transition-transform group-hover:scale-105 duration-300">
+                        <span class="counter-number" data-counter="90" data-duration="2000">0</span><span>%</span>
+                    </div>
+                    <p class="text-base md:text-lg font-medium text-white/90 max-w-[280px] mx-auto leading-relaxed" data-i18n="index.body.des-utilisateurs-rainbow-d-clarent">
+                        des utilisateurs Rainbow d&eacute;clarent gagner au moins 2h par semaine sur leur communication
+                    </p>
+                </div>
+
+                <!-- Stat 2 -->
+                <div class="text-center group">
+                    <div class="text-4xl lg:text-6xl font-semibold stats-number-2 mb-4 transition-transform group-hover:scale-105 duration-300">
+                        <span class="counter-number" data-counter="87" data-duration="2000">0</span><span>%</span>
+                    </div>
+                    <p class="text-base md:text-lg font-medium text-white/90 max-w-[280px] mx-auto leading-relaxed" data-i18n="index.body.des-utilisateurs-recommandent">
+                        des utilisateurs recommandent Rainbow &agrave; leurs pairs
+                    </p>
+                </div>
+
+                <!-- Stat 3 -->
+                <div class="text-center group">
+                    <div class="text-4xl lg:text-6xl font-semibold stats-number-3 mb-4 transition-transform group-hover:scale-105 duration-300">
+                        <span class="counter-number" data-counter="94" data-duration="2000">0</span><span>%</span>
+                    </div>
+                    <p class="text-base md:text-lg font-medium text-white/90 max-w-[280px] mx-auto leading-relaxed" data-i18n="index.body.de-taux-de-satisfaction-client">
+                        de taux de satisfaction client mesur&eacute; chaque mois
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- ===== TESTIMONIALS SECTION (Laurenn style - Expand on Hover) ===== -->
+    <section id="actualites" aria-labelledby="testimonials-heading" class="section-anchor bg-gray-50 py-20 lg:py-28 relative overflow-hidden">
+        <div class="max-w-7xl px-4 sm:px-6 lg:px-8 z-10 mx-auto">
+            <div class="flex flex-col items-center justify-center max-w-4xl mx-auto mb-6">
+                <div class="flex justify-center">
+                </div>
+
+                <h2 id="testimonials-heading" class="text-2xl md:text-4xl lg:text-5xl font-semibold tracking-tight text-center text-gray-900" data-i18n-rich="index.actualites.retrouvez-toutes-les-actualit-s-de">
+                    Retrouvez toutes les actualit&eacute;s de <br/>
+                    <span class="text-brand-500">Rainbow</span>
+                </h2>
+                <p class="text-center mt-6 text-gray-600 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto" data-i18n="index.actualites.articles-guides-livres-blancs">
+                    Articles, guides, livres blancs&hellip; restez connect&eacute;s sur les informations utiles.
+                </p>
+            </div>
+
+            <!-- Expand on Hover Cards -->
+            <div class="mt-4">
+                <div class="expand-cards-container" id="expand-cards-container">
+                    <div class="expand-cards-row">
+                        
+                        <!-- Card 1: Souveraineté -->
+                        <div class="expand-card" data-card-id="1">
+                            <img src="/images/SOUVERAINETE.avif" alt="Souverainet&eacute;" class="expand-card-bg" / data-i18n-attr="alt:index.actualites.souverainet_alt">
+                            <div class="expand-card-overlay"></div>
+                            <div class="expand-card-content">
+                                <!-- Expanded Content -->
+                                <div class="expand-card-expanded-content">
+                                    <h3 class="expand-card-title" data-i18n="index.actualites.souverainet">Souverainet&eacute;</h3>
+                                    <p class="expand-card-description" data-i18n="index.actualites.h-bergement-en-france-conformit">H&eacute;bergement en France, conformit&eacute; RGPD et ind&eacute;pendance totale&nbsp;: tout sur la ma&icirc;trise de vos donn&eacute;es.</p>
+                                    <div class="expand-card-arrow-btn">
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <!-- Collapsed Content -->
+                                <div class="expand-card-collapsed-content">
+                                    <span class="expand-card-vertical-text" data-i18n="index.actualites.souverainet">Souverainet&eacute;</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 2: Actualités -->
+                        <div class="expand-card expanded" data-card-id="2">
+                            <img src="/images/Actualités.jpg" alt="Actualit&eacute;s" class="expand-card-bg" / data-i18n-attr="alt:index.actualites.actualit-s_alt">
+                            <div class="expand-card-overlay"></div>
+                            <div class="expand-card-content">
+                                <div class="expand-card-expanded-content">
+                                    <h3 class="expand-card-title" data-i18n="index.actualites.actualit-s">Actualit&eacute;s</h3>
+                                    <p class="expand-card-description" data-i18n="index.actualites.nouveaut-s-produit-annonces-et">Nouveaut&eacute;s produit, annonces et &eacute;volutions de la plateforme Rainbow, en continu.</p>
+                                    <div class="expand-card-arrow-btn">
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="expand-card-collapsed-content">
+                                    <span class="expand-card-vertical-text" data-i18n="index.actualites.actualit-s">Actualit&eacute;s</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 3: Guides -->
+                        <div class="expand-card" data-card-id="3">
+                            <img src="/images/GUIDES.jpg" alt="Guides" class="expand-card-bg" / data-i18n-attr="alt:index.actualites.guides_alt">
+                            <div class="expand-card-overlay"></div>
+                            <div class="expand-card-content">
+                                <div class="expand-card-expanded-content">
+                                    <h3 class="expand-card-title" data-i18n="index.actualites.guides">Guides</h3>
+                                    <p class="expand-card-description" data-i18n="index.actualites.tutoriels-livres-blancs-et-bonnes">Tutoriels, livres blancs et bonnes pratiques pour exploiter tout le potentiel de Rainbow.</p>
+                                    <div class="expand-card-arrow-btn">
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="expand-card-collapsed-content">
+                                    <span class="expand-card-vertical-text" data-i18n="index.actualites.guides">Guides</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 4: Solutions -->
+                        <div class="expand-card" data-card-id="4">
+                            <img src="/images/SOLUTIONS.jpg" alt="Solutions" class="expand-card-bg" / data-i18n-attr="alt:index.actualites.solutions_alt">
+                            <div class="expand-card-overlay"></div>
+                            <div class="expand-card-content">
+                                <div class="expand-card-expanded-content">
+                                    <h3 class="expand-card-title" data-i18n="index.actualites.solutions">Solutions</h3>
+                                    <p class="expand-card-description" data-i18n="index.actualites.des-r-ponses-concr-tes-vos-enjeux">Des r&eacute;ponses concr&egrave;tes &agrave; vos enjeux, m&eacute;tier par m&eacute;tier et secteur par secteur.</p>
+                                    <div class="expand-card-arrow-btn">
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="expand-card-collapsed-content">
+                                    <span class="expand-card-vertical-text" data-i18n="index.actualites.solutions">Solutions</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 5: Rainbow IA -->
+                        <div class="expand-card" data-card-id="5">
+                            <img src="/images/AI.jpg" alt="Rainbow IA" class="expand-card-bg" / data-i18n-attr="alt:index.actualites.rainbow-ia_alt">
+                            <div class="expand-card-overlay"></div>
+                            <div class="expand-card-content">
+                                <div class="expand-card-expanded-content">
+                                    <h3 class="expand-card-title" data-i18n="index.actualites.rainbow-ia">Rainbow IA</h3>
+                                    <p class="expand-card-description" data-i18n="index.actualites.comment-l-intelligence">Comment l'intelligence artificielle r&eacute;invente vos communications au quotidien.</p>
+                                    <div class="expand-card-arrow-btn">
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="expand-card-collapsed-content">
+                                    <span class="expand-card-vertical-text" data-i18n="index.actualites.rainbow-ia">Rainbow IA</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 6: Cas d'usage -->
+                        <div class="expand-card" data-card-id="6">
+                            <img src="/images/CAS USAGE.jpg" alt="Cas d'usage" class="expand-card-bg" / data-i18n-attr="alt:index.actualites.cas-d-usage_alt">
+                            <div class="expand-card-overlay"></div>
+                            <div class="expand-card-content">
+                                <div class="expand-card-expanded-content">
+                                    <h3 class="expand-card-title" data-i18n="index.actualites.cas-d-usage">Cas d'usage</h3>
+                                    <p class="expand-card-description" data-i18n="index.actualites.retours-d-exp-rience-clients-et-sc">Retours d'exp&eacute;rience clients et sc&eacute;narios inspirants pour vous projeter.</p>
+                                    <div class="expand-card-arrow-btn">
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="expand-card-collapsed-content">
+                                    <span class="expand-card-vertical-text" data-i18n="index.actualites.cas-d-usage">Cas d'usage</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Bottom Link -->
+                    <div class="expand-cards-footer">
+                        <a href="/fr/blog" data-i18n-rich="index.actualites.voir-toutes-les-actualit-s-path">
+                            Voir toutes les actualit&eacute;s
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== QUESTIONS FRÉQUENTES SECTION (Laurenn style - Zendesk API) ===== -->
+    <section id="questions-frequentes" class="section-anchor py-20 lg:py-28 faq-section" style="background-color: #c5deff47;">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Section Header -->
+            <div class="text-center mb-16">
+                <h2 class="text-2xl md:text-4xl lg:text-5xl font-semibold mb-6 tracking-tight text-gray-900" data-i18n="index.questions-frequentes.questions-fr-quentes">
+                    Questions fr&eacute;quentes
+                </h2>
+                <p class="text-lg md:text-xl text-gray-600" data-i18n="index.questions-frequentes.tout-ce-que-vous-devez-savoir-sur">
+                    Tout ce que vous devez savoir sur Rainbow Webinar
+                </p>
+            </div>
+
+            <!-- Loading State -->
+            <div id="faq-loading" class="faq-loading">
+                <div class="faq-loading-spinner"></div>
+                <p data-i18n="index.questions-frequentes.chargement-des-questions">Chargement des questions...</p>
+            </div>
+
+            <!-- Error State -->
+            <div id="faq-error" class="faq-error hidden">
+                <p data-i18n="index.questions-frequentes.impossible-de-charger-les">Impossible de charger les questions pour le moment.</p>
+            </div>
+
+            <!-- FAQ List -->
+            <div id="faq-items-container" class="faq-items hidden">
+                <!-- Items will be injected here by JS -->
+            </div>
+
+            <!-- Contact CTA -->
+            <div class="faq-contact">
+                <p data-i18n="index.questions-frequentes.vous-avez-d-autres-questions">Vous avez d'autres questions ?</p>
+                <a href="mailto:support@rainbow-webinar.com" data-i18n-rich="index.questions-frequentes.poser-une-question-a-rainbow-bot">
+                    Poser une question à Rainbow Bot
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER (Mega footer with CTA) ===== -->
+    <footer class="footer-premium text-gray-400 relative z-10 overflow-hidden">
+        <!-- Top hairline glow -->
+        <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-300/60 to-transparent"></div>
+        <!-- Ambient purple wash -->
+        <div class="pointer-events-none absolute inset-0" style="background:
+            radial-gradient(ellipse 70% 55% at 50% -8%, rgba(124,58,237,0.32) 0%, rgba(124,58,237,0.10) 34%, transparent 68%),
+            radial-gradient(ellipse 55% 60% at 88% 108%, rgba(207,0,114,0.16) 0%, transparent 62%),
+            radial-gradient(ellipse 45% 50% at 6% 96%, rgba(94,45,145,0.20) 0%, transparent 60%);"></div>
+        <!-- Soft focal glow behind the CTA -->
+        <div class="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-[760px] h-[440px] bg-brand-500/25 rounded-full blur-[150px]"></div>
+
+        <div class="max-w-6xl mx-auto px-6 relative">
+            <!-- ===== CTA BAND ===== -->
+            <div class="text-center pt-24 pb-16 md:pt-28 md:pb-20 border-b border-white/10">
+                <div class="mb-9">
+                    <img src="/images/rainbow-logo.png" alt="Rainbow" class="w-[70px] h-[70px] object-contain mx-auto" data-i18n-attr="alt:common.footer.rainbow_alt">
+                </div>
+                <h2 class="text-2xl md:text-4xl lg:text-[2.6rem] font-semibold text-white tracking-[-0.025em] leading-[1.18] max-w-4xl mx-auto" style="text-wrap:balance" data-i18n="common.footer.la-prochaine-conversation-de-votre">
+                    La prochaine conversation de votre &eacute;quipe m&eacute;rite une infrastructure qui la prot&egrave;ge
+                </h2>
+                <p class="mt-5 text-base md:text-lg text-gray-300/90 max-w-xl mx-auto" style="text-wrap:balance" data-i18n="common.footer.essayez-nos-solutions-rainbow">
+                    Essayez nos solutions Rainbow gratuitement pendant 30 jours. Sans carte bancaire.
+                </p>
+                <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a href="https://web.openrainbow.net/rb/2.176.0/login" class="group inline-flex items-center justify-center gap-2.5 px-9 py-4 rounded-[14px] text-white text-base font-bold tracking-tight"
+                       style="background:#5e2d91;" data-i18n-rich="common.footer.commencez-l-essai-gratuit-path">
+                        Commencez l'essai gratuit
+                        <svg class="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                    </a>
+                    <a href="/fr/tarifs" class="inline-flex items-center justify-center px-9 py-4 rounded-[14px] text-white text-base font-bold tracking-tight border border-white/25 hover:bg-white/10 hover:border-white/40 transition-colors" data-i18n="common.footer.voir-les-tarifs">
+                        Voir les tarifs
+                    </a>
+                </div>
+            </div>
+
+            <!-- ===== LINK COLUMNS ===== -->
+            <div class="flex flex-col lg:flex-row lg:justify-between gap-12 lg:gap-16 py-16">
+                <!-- Brand -->
+                <div class="max-w-xs">
+                    <img src="/images/ale_white.png" alt="Alcatel-Lucent" class="h-11 w-auto opacity-90 mb-6" data-i18n-attr="alt:common.footer.alcatel-lucent_alt">
+                    <address class="not-italic text-sm text-gray-400 leading-relaxed" data-i18n-rich="common.footer.ale-international-32-avenue-kl-ber">
+                        ALE International<br>
+                        32 avenue Kl&eacute;ber<br>
+                        92700 Colombes, France
+                    </address>
+                </div>
+                <!-- Columns -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-8 sm:gap-14">
+                    <div>
+                        <h4 class="text-[11px] font-bold text-white uppercase tracking-[0.16em] mb-5" data-i18n="common.footer.solutions">Solutions</h4>
+                        <ul class="space-y-3.5 text-sm">
+                            <li><a href="/fr/products/collaboration" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.rainbow-collaboration">Rainbow Collaboration</a></li>
+                            <li><a href="/fr/products/webinar" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.rainbow-webinar">Rainbow Webinar</a></li>
+                            <li><a href="/fr/tarifs" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.tarifs">Tarifs</a></li>
+                            <li><a href="/fr/telecharger-application-rainbow" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.t-l-chargements">T&eacute;l&eacute;chargements</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.api">API</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-[11px] font-bold text-white uppercase tracking-[0.16em] mb-5" data-i18n="common.footer.developers">Developers</h4>
+                        <ul class="space-y-3.5 text-sm">
+                            <li><a href="/fr/centre-aide-rainbow" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.centre-d-aide">Centre d'aide</a></li>
+                            <li><a href="/fr/faq" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.faq">FAQ</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.guide-technique">Guide technique</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.code-samples">Code samples</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.int-grations">Int&eacute;grations</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.forum-dev">Forum dev</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-[11px] font-bold text-white uppercase tracking-[0.16em] mb-5" data-i18n="common.footer.company">Company</h4>
+                        <ul class="space-y-3.5 text-sm">
+                            <li><a href="/fr/a-propos-de-rainbow" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.a-propos">A propos</a></li>
+                            <li><a href="/fr/rainbow-donnees-hebergees-en-france" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.souverainet">Souverainet&eacute;</a></li>
+                            <li><a href="/fr/partenaires" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.devenir-partenaire">Devenir partenaire</a></li>
+                            <li><a href="/fr/trouver-un-partenaire" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.trouver-un-partenaire">Trouver un partenaire</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.carri-res">Carri&egrave;res</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.presse">Presse</a></li>
+                            <li><a href="/fr/form-al" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.contact">Contact</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== BOTTOM BAR ===== -->
+            <div class="border-t border-white/10 py-8 flex flex-col gap-6">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-5">
+                    <div class="flex items-center gap-3">
+                        <a href="#" aria-label="X" class="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 ring-1 ring-white/10 hover:ring-white/20 flex items-center justify-center transition-all">
+                            <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                        </a>
+                        <a href="#" aria-label="LinkedIn" class="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 ring-1 ring-white/10 hover:ring-white/20 flex items-center justify-center transition-all" data-i18n-attr="aria-label:common.footer.linkedin_aria-label">
+                            <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                        </a>
+                    </div>
+                    <div class="flex items-center gap-6 text-sm">
+                        <a href="/fr/privacy" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.privacy">Privacy</a>
+                        <a href="/fr/legal" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.terms">Terms</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.cookies">Cookies</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.gdpr">GDPR</a>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 leading-relaxed" data-i18n-rich="common.footer.ale-international-ale-usa-inc-all">&copy;ALE International, ALE USA Inc. All rights reserved in all countries. The Alcatel-Lucent name and logo are trademarks of Nokia used under license by ALE. To view a list of proprietary ALE trademarks, visit: <a href="https://www.al-enterprise.com/en/legal/trademarks-copyright" target="_blank" rel="noopener" class="hover:text-white transition-colors underline-offset-2 hover:underline">www.al-enterprise.com/en/legal/trademarks-copyright</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ONBOARDING MODAL -->
+    <div id="onboarding-modal" class="fixed inset-0 z-[100] hidden">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeOnboarding()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div id="ob-card" class="onboarding-card bg-white rounded-2xl shadow-xl max-w-sm w-full p-7 relative step-visible" onclick="event.stopPropagation()">
+                <button onclick="closeOnboarding()" class="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-100 z-10" aria-label="Close" data-i18n-attr="aria-label:index.body.close_aria-label">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHECKOUT MODAL -->
+    <div id="checkout-modal" class="fixed inset-0 z-[100] hidden">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeCheckout()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-7 relative" onclick="event.stopPropagation()">
+                <button onclick="closeCheckout()" class="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-100" aria-label="Close" data-i18n-attr="aria-label:index.body.close_aria-label">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+                <h3 class="text-lg font-bold text-navy-900 mb-1" data-i18n="index.body.subscribe">Subscribe</h3>
+                <p class="text-xs text-gray-500 mb-5" id="checkout-summary"></p>
+                <div class="bg-gray-50 rounded-xl p-4 mb-5 space-y-2 text-sm">
+                    <div class="flex justify-between"><span class="text-gray-400" data-i18n="index.body.plan">Plan</span><span class="font-medium text-navy-900" id="checkout-plan-name"></span></div>
+                    <div class="flex justify-between"><span class="text-gray-400" data-i18n="index.body.licenses">Licenses</span><span class="font-medium text-navy-900" id="checkout-licenses"></span></div>
+                    <div class="flex justify-between"><span class="text-gray-400" data-i18n="index.body.per-user">Per user</span><span class="font-medium text-navy-900" id="checkout-unit-price"></span></div>
+                    <div class="border-t border-gray-200 pt-2 flex justify-between"><span class="font-semibold text-navy-900" data-i18n="index.body.monthly-total">Monthly total</span><span class="font-bold text-brand-600" id="checkout-total"></span></div>
+                </div>
+                <div class="mb-3">
+                    <label for="checkout-email" class="block text-xs font-medium text-gray-600 mb-1" data-i18n="index.body.email">Email</label>
+                    <input type="email" id="checkout-email" placeholder="you@company.com" data-i18n-placeholder="checkout.emailPlaceholder" class="w-full px-3 py-2.5 rounded-btn border border-gray-200 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none text-sm" data-i18n-attr="placeholder:index.body.you-company-com_placeholder">
+                </div>
+                <div class="mb-3">
+                    <label class="block text-xs font-medium text-gray-600 mb-1" data-i18n="index.body.card-number">Card number</label>
+                    <div id="card-number-element" class="px-3 py-2.5 rounded-btn border border-gray-200 text-sm" style="min-height:40px"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1" data-i18n="index.body.expiry">Expiry</label>
+                        <div id="card-expiry-element" class="px-3 py-2.5 rounded-btn border border-gray-200 text-sm" style="min-height:40px"></div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1" data-i18n="index.body.cvc">CVC</label>
+                        <div id="card-cvc-element" class="px-3 py-2.5 rounded-btn border border-gray-200 text-sm" style="min-height:40px"></div>
+                    </div>
+                </div>
+                <div class="mb-5">
+                    <p id="card-errors" class="text-red-500 text-xs hidden"></p>
+                </div>
+                <button id="checkout-submit" onclick="handlePayment()" class="w-full py-3 rounded-btn bg-brand-500 text-white font-medium text-sm hover:bg-brand-600 transition-colors" data-i18n="index.body.subscribe-pay">
+                    Subscribe & Pay
+                </button>
+                <p class="text-[11px] text-gray-400 text-center mt-3" data-i18n="index.body.secured-by-stripe-card-data-never">Secured by Stripe. Card data never touches our servers.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Scroll-triggered animations
+        (function() {
+            var observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+            document.querySelectorAll('.animate-on-scroll, .animate-stagger').forEach(function(el) {
+                observer.observe(el);
+            });
+        })();
+
+        // Nav scroll effect
+        window.addEventListener('scroll', function() {
+            var nav = document.getElementById('navbar');
+            if (window.scrollY > 20) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+
+        // Floating section nav: show/hide + scroll-spy
+        (function() {
+            var sectionNav = document.getElementById('section-nav');
+            if (!sectionNav) return;
+            var links = Array.prototype.slice.call(sectionNav.querySelectorAll('.section-nav-link'));
+            var sections = links.map(function(link) {
+                return document.getElementById(link.getAttribute('href').slice(1));
+            });
+            var footer = document.querySelector('footer');
+            var OFFSET = 150; // main nav + floating pill height
+
+            // Smooth scroll on click (with fixed-nav offset)
+            links.forEach(function(link) {
+                link.addEventListener('click', function(e) {
+                    var target = document.getElementById(link.getAttribute('href').slice(1));
+                    if (!target) return;
+                    e.preventDefault();
+                    var y = target.getBoundingClientRect().top + window.pageYOffset - (OFFSET - 20);
+                    window.scrollTo({ top: y, behavior: 'smooth' });
+                });
+            });
+
+            function update() {
+                var scrollY = window.pageYOffset;
+                var firstTop = sections[0] ? sections[0].offsetTop : Infinity;
+                var footerTop = footer ? footer.offsetTop : Infinity;
+
+                // Visible once the first section is reached, hidden inside the footer
+                if (scrollY + OFFSET >= firstTop - 200 && scrollY + OFFSET < footerTop) {
+                    sectionNav.classList.add('visible');
+                } else {
+                    sectionNav.classList.remove('visible');
+                }
+
+                // Scroll-spy: highlight the section currently under the nav offset
+                var activeIndex = 0;
+                for (var i = 0; i < sections.length; i++) {
+                    if (sections[i] && sections[i].offsetTop - OFFSET <= scrollY) {
+                        activeIndex = i;
+                    }
+                }
+                links.forEach(function(link, i) {
+                    link.classList.toggle('active', i === activeIndex);
+                });
+            }
+
+            window.addEventListener('scroll', update, { passive: true });
+            window.addEventListener('resize', update);
+            update();
+        })();
+
+        // Certifications carousel arrows
+        (function() {
+            var track = document.getElementById('cert-track');
+            if (!track) return;
+            var prev = document.querySelector('.cert-prev');
+            var next = document.querySelector('.cert-next');
+            function step() {
+                var slide = track.querySelector('.cert-slide');
+                return slide ? slide.getBoundingClientRect().width + 16 : 296;
+            }
+            function updateArrows() {
+                var maxScroll = track.scrollWidth - track.clientWidth - 2;
+                if (prev) prev.disabled = track.scrollLeft <= 2;
+                if (next) next.disabled = track.scrollLeft >= maxScroll;
+            }
+            if (prev) prev.addEventListener('click', function(){ track.scrollBy({ left: -step(), behavior: 'smooth' }); });
+            if (next) next.addEventListener('click', function(){ track.scrollBy({ left: step(), behavior: 'smooth' }); });
+            track.addEventListener('scroll', updateArrows, { passive: true });
+            window.addEventListener('resize', updateArrows);
+            updateArrows();
+
+            // Tap-to-flip: :hover never fires on touch devices, so without this,
+            // mobile users could never see the certification descriptions on the card backs.
+            track.querySelectorAll('.compliance-card').forEach(function (card) {
+                card.addEventListener('click', function () {
+                    card.classList.toggle('flipped');
+                });
+            });
+
+            // One-time hint: flip the 2nd card for 2s when the carousel first enters view,
+            // so users notice the cards are flippable.
+            var slides = track.querySelectorAll('.cert-slide');
+            var demoCard = slides[1] ? slides[1].querySelector('.compliance-card') : null;
+            if (demoCard && 'IntersectionObserver' in window) {
+                var io = new IntersectionObserver(function(entries) {
+                    entries.forEach(function(entry) {
+                        if (entry.isIntersecting) {
+                            io.disconnect();
+                            demoCard.classList.add('flip-demo');
+                            setTimeout(function(){ demoCard.classList.remove('flip-demo'); }, 2000);
+                        }
+                    });
+                }, { threshold: 0.4 });
+                io.observe(track);
+            }
+        })();
+    </script>
+    <!-- Root-absolute, like every other page: this file is served at /fr/, /en/
+         and /de/, so a relative "js/..." resolves against the language segment
+         (/store/fr/js/...) and 404s. -->
+    <script src="/js/mega-menu.js"></script>
+    <script src="/js/i18n.js"></script>
+    <script src="/js/homepage-animations.js"></script>
+    <script>
+        (function () {
+            function stripHtml(str) {
+                if (!str) return '';
+                return str.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+            }
+            function initFaqCardListeners() {
+                document.querySelectorAll('.faq-card-button').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        var card = btn.closest('.faq-card');
+                        var wasOpen = card.classList.contains('open');
+                        document.querySelectorAll('.faq-card').forEach(function (c) {
+                            c.classList.remove('open');
+                            var b = c.querySelector('.faq-card-button');
+                            if (b) b.setAttribute('aria-expanded', 'false');
+                        });
+                        if (!wasOpen) {
+                            card.classList.add('open');
+                            btn.setAttribute('aria-expanded', 'true');
+                        }
+                    });
+                });
+            }
+            function renderFaq(items) {
+                var container = document.getElementById('faq-items-container');
+                if (!container) return;
+                container.innerHTML = '';
+                items.forEach(function (item) {
+                    var card = document.createElement('div');
+                    card.className = 'faq-card';
+                    var btn = document.createElement('button');
+                    btn.className = 'faq-card-button';
+                    btn.setAttribute('aria-expanded', 'false');
+                    var q = document.createElement('span');
+                    q.className = 'faq-card-question';
+                    q.textContent = item.question;
+                    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                    svg.setAttribute('class', 'faq-card-chevron');
+                    svg.setAttribute('fill', 'none');
+                    svg.setAttribute('viewBox', '0 0 24 24');
+                    svg.setAttribute('stroke', 'currentColor');
+                    svg.setAttribute('stroke-width', '2');
+                    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    path.setAttribute('stroke-linecap', 'round');
+                    path.setAttribute('stroke-linejoin', 'round');
+                    path.setAttribute('d', 'M19 9l-7 7-7-7');
+                    svg.appendChild(path);
+                    btn.appendChild(q);
+                    btn.appendChild(svg);
+                    var wrapper = document.createElement('div');
+                    wrapper.className = 'faq-card-answer-wrapper';
+                    var inner = document.createElement('div');
+                    inner.className = 'faq-card-answer-inner';
+                    var border = document.createElement('div');
+                    border.className = 'faq-card-answer-border';
+                    var p = document.createElement('p');
+                    p.className = 'faq-card-answer';
+                    p.textContent = item.answer;
+                    border.appendChild(p);
+                    inner.appendChild(border);
+                    wrapper.appendChild(inner);
+                    card.appendChild(btn);
+                    card.appendChild(wrapper);
+                    container.appendChild(card);
+                });
+                initFaqCardListeners();
+            }
+            function fetchFaq() {
+                var loadingEl = document.getElementById('faq-loading');
+                if (!loadingEl) return;
+                var errorEl = document.getElementById('faq-error');
+                var containerEl = document.getElementById('faq-items-container');
+                var url = 'https://rainbow-market.zendesk.com/api/v2/help_center/sections/33369381353746/articles.json?locale=fr&per_page=20&page=1&sort_by=position&sort_order=asc';
+                loadingEl.classList.remove('hidden');
+                if (errorEl) errorEl.classList.add('hidden');
+                if (containerEl) containerEl.classList.add('hidden');
+                fetch(url, { headers: { 'Accept': 'application/json' } })
+                    .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+                    .then(function (data) {
+                        var items = (data.articles || []).filter(function (a) { return !a.draft; }).map(function (a) {
+                            return { question: a.title || '', answer: stripHtml(a.body || a.snippet || '').slice(0, 500) };
+                        });
+                        if (!items.length) throw new Error('empty');
+                        renderFaq(items);
+                        loadingEl.classList.add('hidden');
+                        if (containerEl) containerEl.classList.remove('hidden');
+                    })
+                    .catch(function () {
+                        loadingEl.classList.add('hidden');
+                        if (errorEl) errorEl.classList.remove('hidden');
+                    });
+            }
+            document.addEventListener('DOMContentLoaded', fetchFaq);
+        })();
+    </script>
+</body>
+</html>

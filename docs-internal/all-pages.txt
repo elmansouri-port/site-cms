@@ -1,0 +1,91 @@
+==================================
+Live site base : https://elmansouri-port.github.io/store/
+
+1) PUBLIC PAGES (working, indexed, listed in sitemap.xml)
+-----------------------------------------------------------------------------
+Homepage
+  URL      : https://elmansouri-port.github.io/store/
+  Source   : index.html
+
+Products overview
+  URL      : https://elmansouri-port.github.io/store/products/
+  Source   : pages/products.html
+
+Rainbow Collaboration (product)
+  URL      : https://elmansouri-port.github.io/store/products/collaboration/
+  Source   : pages/collaboration.html
+
+Rainbow Webinar (product)
+  URL      : https://elmansouri-port.github.io/store/products/webinar/
+  Source   : pages/webinar.html
+
+Pricing (Tarifs)
+  URL      : https://elmansouri-port.github.io/store/tarifs/
+  Source   : pages/tarifs.html
+
+Blog
+  URL      : https://elmansouri-port.github.io/store/blog/
+  Source   : pages/blog.html
+
+Blog article — The Power of Rainbow
+  URL      : https://elmansouri-port.github.io/store/blog/the-power-of-rainbow/
+  Source   : pages/blog/the-power-of-rainbow.html
+
+FAQ
+  URL      : https://elmansouri-port.github.io/store/faq/
+  Source   : pages/faq.html
+
+Help Center (Centre d'aide)
+  URL      : https://elmansouri-port.github.io/store/centre-aide-rainbow/
+  Source   : pages/centre-aide-rainbow.html
+
+About Rainbow (À propos)
+  URL      : https://elmansouri-port.github.io/store/a-propos-de-rainbow/
+  Source   : pages/a-propos-de-rainbow.html
+
+Data sovereignty — hosted in France
+  URL      : https://elmansouri-port.github.io/store/rainbow-donnees-hebergees-en-france/
+  Source   : pages/rainbow-donnees-hebergees-en-france.html
+
+Download the app
+  URL      : https://elmansouri-port.github.io/store/telecharger-application-rainbow/
+  Source   : pages/telecharger-application-rainbow.html
+
+Partners (Devenir partenaire)
+  URL      : https://elmansouri-port.github.io/store/partenaires/
+  Source   : pages/partenaires.html
+
+Find a partner (Trouver un partenaire)
+  URL      : https://elmansouri-port.github.io/store/trouver-un-partenaire/
+  Source   : pages/trouver-un-partenaire.html
+
+
+2) PERSONALIZED / LEAD-GEN PAGES (reachable, but marked noindex — excluded from search & sitemap.xml on purpose)
+-----------------------------------------------------------------------------
+Book a call (lead-gen booking form)
+  URL      : https://elmansouri-port.github.io/store/form-al/
+  Source   : pages/form-ale.html
+
+Reschedule a booking
+  URL      : https://elmansouri-port.github.io/store/modifier-rendez-vous/
+  Source   : pages/modifier-rendez-vous.html
+  Accepts  : ?date=YYYY-MM-DD&time=HH:MM&ref=... (falls back to a demo booking if omitted)
+
+
+3) BROKEN ROUTES (registered in server.js, but the page file doesn't exist in the repo — 404/error right now)
+-----------------------------------------------------------------------------
+Webinar pricing
+  URL      : /products/webinar/pricing
+  Source   : pages/tarif-webinar.html   <-- MISSING
+
+Collaboration pricing
+  URL      : /products/collaboration/pricing
+  Source   : pages/tarif-collaboration.html   <-- MISSING
+
+
+4) INTERNAL / REFERENCE FILES (no route in server.js, not part of the GitHub Pages build — only reachable by opening the file directly)
+-----------------------------------------------------------------------------
+404.html                — custom "page not found" page, served automatically by server.js (dev) and GitHub Pages (docs/404.html)
+admin.html              — no route wired up anywhere
+design.html             — design-system / component reference
+design_pattern.html     — architecture & data-flow audit (routes, APIs, analytics, form wiring)

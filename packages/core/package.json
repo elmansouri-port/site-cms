@@ -1,0 +1,19 @@
+{
+  "name": "@rainbow/core",
+  "version": "1.0.0",
+  "description": "Shared HTML scanning, i18n splice rendering and section slicing for the Rainbow CMS",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./html": "./src/html.js",
+    "./units": "./src/units.js",
+    "./render": "./src/render.js",
+    "./slice": "./src/slice.js",
+    "./seo": "./src/seo.js",
+    "./compose": "./src/compose.js",
+    "./ingest": "./src/ingest.js",
+    "./locales": "./src/locales.js"
+  },
+  "license": "UNLICENSED"
+}

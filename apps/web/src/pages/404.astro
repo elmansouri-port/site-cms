@@ -1,0 +1,24 @@
+---
+/*
+ * The catch-all 404. The page itself is content: it lives in the CMS like any
+ * other, so its copy is editable and translated.
+ */
+export const prerender = false;
+
+import PageDocument from '../components/PageDocument.astro';
+import { pagePayload } from '../lib/site.js';
+import { renderPage } from '../lib/render.js';
+import { config } from '../lib/config.js';
+
+const locale = Astro.locals.locale || config.defaultLocale;
+const page = await pagePayload('404', locale, false);
+const document = page ? await renderPage(Astro, { ...page, noindex: true }) : null;
+
+Astro.response.status = 404;
+Astro.response.headers.set('cache-control', 'no-store');
+Astro.response.headers.set('x-robots-tag', 'noindex, nofollow');
+---
+
+{document
+  ? <PageDocument document={document} locale={locale} />
+  : <Fragment set:html={`<!DOCTYPE html><html lang="${locale}"><head><meta charset="utf-8"><title>Page not found</title></head><body><h1>Page not found</h1></body></html>`} />}

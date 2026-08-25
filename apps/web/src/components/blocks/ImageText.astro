@@ -1,0 +1,41 @@
+---
+/*
+ * ImageText — the alternating two-column feature row.
+ */
+const { data = {} } = Astro.props;
+const {
+  eyebrow = '',
+  title = '',
+  html = '',
+  image = '',
+  imageAlt = '',
+  imageWidth = 900,
+  imageHeight = 640,
+  reverse = false,
+  linkLabel = '',
+  linkHref = '',
+} = data;
+---
+
+<div class="max-w-6xl mx-auto px-6">
+  <div class={`grid grid-cols-1 md:grid-cols-2 gap-12 items-center ${reverse ? 'md:[direction:rtl]' : ''}`}>
+    <div class={reverse ? 'md:[direction:ltr]' : ''}>
+      {eyebrow && <p class="text-sm font-medium uppercase tracking-wide text-brand-500">{eyebrow}</p>}
+      {title && <h2 class="mt-3 text-3xl md:text-4xl font-bold text-gray-900">{title}</h2>}
+      {html && <div class="mt-5 text-gray-600 leading-relaxed" set:html={html} />}
+      {linkLabel && (
+        <a href={linkHref} class="inline-flex items-center gap-1 mt-6 text-brand-500 font-medium hover:underline">
+          {linkLabel}
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      )}
+    </div>
+    {image && (
+      <div class={reverse ? 'md:[direction:ltr]' : ''}>
+        <img src={image} alt={imageAlt} width={imageWidth} height={imageHeight} loading="lazy" decoding="async" class="w-full h-auto rounded-2xl shadow-lg" />
+      </div>
+    )}
+  </div>
+</div>

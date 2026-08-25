@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="a-propos-de-rainbow.meta.title">À propos de Rainbow  L'éditeur français des communications d'entreprise | Rainbow by ALE</title>
+    <meta name="description" content="Rainbow est la plateforme cloud de communication et collaboration d'Alcatel-Lucent, éditeur français et héritier de plus de 100 ans d'innovation dans les télécoms." data-i18n-attr="content:a-propos-de-rainbow.meta.description">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://rainbow-portal.example.com/a-propos-de-rainbow">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="À propos de Rainbow  L'éditeur français des communications d'entreprise" data-i18n-attr="content:a-propos-de-rainbow.meta.title_2">
+    <meta property="og:description" content="Rainbow est la plateforme cloud de communication et collaboration d'Alcatel-Lucent, éditeur français et héritier de plus de 100 ans d'innovation dans les télécoms." data-i18n-attr="content:a-propos-de-rainbow.meta.description">
+    <meta property="og:url" content="https://rainbow-portal.example.com/a-propos-de-rainbow">
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json" data-i18n-raw="a-propos-de-rainbow.meta.schema">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Rainbow by Alcatel-Lucent",
+        "url": "https://rainbow-portal.example.com/a-propos-de-rainbow",
+        "foundingDate": "2014",
+        "founder": { "@type": "Organization", "name": "Alcatel-Lucent" },
+        "parentOrganization": { "@type": "Organization", "name": "ALE International" },
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "32 avenue Kléber",
+            "postalCode": "92700",
+            "addressLocality": "Colombes",
+            "addressCountry": "FR"
+        },
+        "description": "Rainbow est la plateforme cloud de communication et collaboration d'entreprise d'Alcatel-Lucent, éditeur français héritier de plus de 100 ans d'innovation dans les télécoms."
+    }
+    </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 300: '#c4b5fd', 400: '#a78bfa', 500: '#5e2d91', 600: '#4a2373', 700: '#3c1c5e' },
+                        navy: { 900: '#1e1b4b', 800: '#312e81', 700: '#3730a3' }
+                    },
+                    fontFamily: { sans: ['Google Sans', 'system-ui', 'sans-serif'] },
+                    borderRadius: { btn: '10px' }
+                }
+            }
+        }
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/mega-menu.css">
+    <style>
+        .section-anchor { scroll-margin-top: 110px; }
+
+        /* ── Logo carousel: left-to-right wave swap ── */
+        .logo-wave-row {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 14px;
+            max-width: 980px;
+            margin: 0 auto;
+        }
+        .logo-wave-card {
+            position: relative;
+            width: 100%;
+            max-width: 260px;
+            height: 130px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+        .logo-wave-reel {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            transform: translateY(0);
+            will-change: transform;
+        }
+        .logo-wave-reel img {
+            width: 100%;
+            height: 130px;
+            flex: 0 0 130px;
+            object-fit: contain;
+            padding: 4px 6px;
+            display: block;
+        }
+        @media (max-width: 768px) {
+            .logo-wave-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+            .logo-wave-card { height: 100px; }
+            .logo-wave-reel img { height: 100px; flex-basis: 100px; padding: 3px 5px; }
+        }
+        @media (max-width: 480px) {
+            .logo-wave-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+            .logo-wave-card { height: 84px; }
+            .logo-wave-reel img { height: 84px; flex-basis: 84px; padding: 2px 6px; }
+            /* 5 cards don't divide evenly into 2 columns, leaving the last one
+               orphaned on its own row  show only 4 for a clean 2x2 grid. */
+            .logo-wave-card:nth-child(5) { display: none; }
+        }
+
+        /* ── Timeline ── */
+        .timeline-rail {
+            position: absolute; left: 21px; top: 4px; bottom: 4px; width: 2px;
+            background: linear-gradient(180deg, rgba(94,45,145,.35), rgba(94,45,145,.08));
+            transform-origin: top;
+            transform: scaleY(0);
+            transition: transform 1.2s cubic-bezier(.65,0,.35,1);
+        }
+        @media (min-width: 768px) { .timeline-rail { left: 27px; } }
+        .timeline-wrap.visible .timeline-rail { transform: scaleY(1); }
+
+        .timeline-dot { width: 44px; height: 44px; }
+        @media (min-width: 768px) { .timeline-dot { width: 56px; height: 56px; } }
+        .timeline-step .timeline-dot {
+            transform: scale(.4);
+            opacity: 0;
+            transition: transform .6s cubic-bezier(.16,1,.3,1) .15s, opacity .5s ease .15s;
+        }
+        .timeline-step.visible .timeline-dot { transform: scale(1); opacity: 1; }
+    </style>
+</head>
+<body class="font-sans text-gray-700 antialiased bg-white">
+
+    <!-- ===== NAV ===== -->
+    <nav id="navbar" class="fixed top-0 w-full z-50 glass-nav">
+        <div class="max-w-6xl mx-auto px-6 flex items-center justify-between h-16">
+            <a href="/fr" class="flex items-center gap-2.5 shrink-0">
+                <img src="/images/Rainbow-AL-logo-banner.webp" alt="Rainbow" class="h-12 w-auto" data-i18n-attr="alt:common.nav.rainbow_alt">
+            </a>
+            <div class="hidden lg:flex items-center justify-center flex-1 gap-8">
+                <div class="nav-dropdown">
+                    <a href="#" class="text-sm text-gray-500 hover:text-navy-900 transition-colors font-medium">
+                        <span data-i18n="common.nav.produits">Produits</span>
+                        <svg class="chevron w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                    </a>
+
+                </div>
+                <a href="/fr/tarifs" class="text-sm text-gray-500 hover:text-navy-900 transition-colors font-medium" style="font-size:1rem" data-i18n="common.nav.tarifs">Tarifs</a>
+                <div class="nav-dropdown">
+                    <a href="#" class="text-sm text-gray-500 hover:text-navy-900 transition-colors font-medium" data-i18n-rich="common.nav.ressources-path-stroke-linecap_5">Ressources
+                        <svg class="chevron w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                    </a>
+
+                </div>
+            </div>
+            <div class="hidden lg:flex items-center gap-4 shrink-0">
+                <div class="lang-switcher" id="lang-switcher">
+                    <button onclick="document.getElementById('lang-switcher').classList.toggle('open')">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"/></svg>
+                        <span id="lang-current" data-i18n="common.nav.en_3">EN</span>
+                        <svg class="lang-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div class="lang-dropdown" id="lang-dropdown"></div>
+                </div>
+                <a href="https://web.openrainbow.net/rb/2.176.0/login" class="px-5 py-2.5 rounded-btn border-2 border-brand-500 text-purple-900 hover:bg-gray-50 text-sm font-semibold transition-all active:scale-95 inline-flex items-center justify-center" data-i18n="common.nav.se-connecter_3">Se connecter</a>
+                <a href="https://web.openrainbow.net/rb/2.177.4/trial" class="px-5 py-2.5 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold whitespace-nowrap shadow-md hover:shadow-lg transition-all" data-i18n="common.nav.essai-gratuit_3">Essai gratuit</a>
+            </div>
+            <button id="mobile-menu-btn" class="lg:hidden p-2" aria-label="Menu" data-i18n-attr="aria-label:common.nav.menu_aria-label_5">
+                <svg class="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+        </div>
+        <div id="mobile-menu" class="lg:hidden hidden border-t border-gray-100 bg-white px-5 pt-2 pb-6 shadow-lg space-y-1">
+            <a href="#" class="mob-section-hdr"><span data-i18n="common.nav.produits">Produits</span></a>
+            <div class="mobile-submenu space-y-1">
+                <a href="/fr/products/collaboration" class="block py-1" data-i18n="common.nav.rainbow-collaboration">Rainbow Collaboration</a>
+                <a href="/fr/products/webinar" class="block py-1" data-i18n="common.nav.rainbow-webinar">Rainbow Webinar</a>
+            </div>
+            <a href="/fr/tarifs" class="mob-section-hdr" data-i18n="common.nav.tarifs">Tarifs</a>
+            <a href="#" class="mob-section-hdr" data-i18n="common.nav.ressources">Ressources</a>
+            <div class="mobile-submenu space-y-1">
+                <a href="/fr/blog" class="block py-1" data-i18n="common.nav.blog">Blog</a>
+                <a href="/fr/reviews" class="block py-1" data-i18n="common.nav.avis">Avis</a>
+                <a href="/fr/support" class="block py-1" data-i18n="common.nav.support">Support</a>
+                <a href="/fr/tutorials" class="block py-1" data-i18n="common.nav.tutoriels">Tutoriels</a>
+            </div>
+            <div class="h-px bg-gray-100 mx-1 my-2"></div>
+            <div id="mobile-lang-switcher" class="flex flex-wrap gap-2 px-1 py-1"></div>
+            <div class="flex flex-col gap-2.5 pt-3">
+                <a href="https://web.openrainbow.net/rb/2.176.0/login" class="w-full text-center px-6 py-3 rounded-btn border-2 border-brand-500 text-purple-900 hover:bg-gray-50 text-base font-semibold transition-all active:scale-95" data-i18n="common.nav.se-connecter_3">Se connecter</a>
+                <a href="https://web.openrainbow.net/rb/2.177.4/trial" class="w-full text-center px-6 py-3 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-base font-semibold shadow-md hover:shadow-lg transition-all active:scale-95" data-i18n="common.nav.essai-gratuit_3">Essai gratuit</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== HERO ===== -->
+    <header class="relative pt-40 pb-20 px-6 overflow-hidden bg-white">
+        <div class="absolute top-0 left-0 w-[300px] h-[700px] bg-purple-500 rounded-full blur-[200px] opacity-30 pointer-events-none"></div>
+        <div class="absolute bottom-0 right-0 w-[300px] h-[700px] bg-pink-500 rounded-full blur-[220px] opacity-30 pointer-events-none"></div>
+
+        <div class="max-w-4xl mx-auto text-center relative z-10 animate-on-scroll">
+            <p class="text-sm md:text-base font-bold uppercase tracking-[0.15em] mb-4 hero-badge-gradient" data-i18n="a-propos-de-rainbow.body.l-diteur-fran-ais-des">
+                L'&eacute;diteur fran&ccedil;ais des communications d'entreprise
+            </p>
+            <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold tracking-[-0.03em] leading-[1.2] mb-6 text-gray-900" data-i18n-rich="a-propos-de-rainbow.body.rainbow-by-alcatel-lucent-l-diteur">
+                Rainbow by <span class="text-brand-500">Alcatel-Lucent</span> : l'&eacute;diteur fran&ccedil;ais des communications d'entreprise
+            </h1>
+            <p class="text-base md:text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed mb-10" data-i18n="a-propos-de-rainbow.body.rainbow-est-d-velopp-par-alcatel">
+                Rainbow est d&eacute;velopp&eacute; par Alcatel-Lucent, h&eacute;ritier direct d'Alcatel, plus d'un si&egrave;cle d'innovation dans les t&eacute;l&eacute;communications, aujourd'hui au service de votre collaboration cloud.
+            </p>
+            <div class="flex justify-center">
+                <a href="/fr/rainbow-donnees-hebergees-en-france" class="px-8 py-3 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-base font-bold whitespace-nowrap shadow-2xl shadow-purple-900/20 transition-all active:scale-95 inline-flex items-center justify-center" data-i18n="a-propos-de-rainbow.body.notre-engagement-souverainet">
+                    Notre engagement souverainet&eacute;
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- PADDING BOX (wraps all sections after the hero) -->
+    <div class="px-4 md:px-6 lg:px-8 pt-10 md:pt-16 pb-4 md:pb-6 lg:pb-8">
+        <div class="rounded-[32px] shadow-sm border overflow-hidden relative" style="border-color:#672fa287;">
+
+            <!-- ===== HÉRITAGE / REPÈRES ===== -->
+            <section id="heritage" class="section-anchor py-20 lg:py-24 px-6 bg-white text-center">
+                <div class="max-w-3xl mx-auto animate-on-scroll">
+                    <p class="text-xs font-bold uppercase tracking-[0.16em] text-brand-500 mb-4" data-i18n="a-propos-de-rainbow.heritage.notre-histoire">Notre histoire</p>
+                    <h2 class="text-2xl md:text-4xl font-extrabold text-navy-900 tracking-tight leading-[1.15] mb-6" data-i18n="a-propos-de-rainbow.heritage.rainbow-s-appuie-sur-un-si-cle-d">
+                        Rainbow s'appuie sur un si&egrave;cle d'exp&eacute;rience t&eacute;l&eacute;com
+                    </h2>
+                    <p class="text-base md:text-lg text-gray-500 leading-relaxed" data-i18n="a-propos-de-rainbow.heritage.rainbow-est-la-plateforme-cloud-de">
+                        Rainbow est la plateforme cloud de communication et collaboration d'entreprise d'Alcatel-Lucent, &eacute;diteur fran&ccedil;ais fort de plus de 100&nbsp;ans d'expertise en communications d'entreprise. N&eacute;e en 2014 de la scission d'Alcatel-Lucent, ALE a con&ccedil;u Rainbow comme sa r&eacute;ponse aux nouveaux usages de la collaboration cloud, sans jamais quitter la France ni renoncer &agrave; son savoir-faire historique en t&eacute;l&eacute;phonie et r&eacute;seaux d'entreprise.
+                    </p>
+                </div>
+
+                <div class="max-w-4xl mx-auto mt-16 pt-14 border-t border-gray-100 animate-stagger">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-10">
+                        <div class="flex flex-col items-center">
+                            <span class="text-4xl md:text-5xl font-bold text-navy-900 tracking-tight">100+</span>
+                            <span class="text-xs md:text-sm text-gray-500 mt-2 font-medium leading-snug" data-i18n="a-propos-de-rainbow.heritage.ans-d-innovation-dans-les">Ans d'innovation dans les communications d'entreprise</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <span class="text-4xl md:text-5xl font-bold text-navy-900 tracking-tight">2014</span>
+                            <span class="text-xs md:text-sm text-gray-500 mt-2 font-medium leading-snug" data-i18n="a-propos-de-rainbow.heritage.naissance-d-ale-comme-entreprise">Naissance d'ALE comme entreprise ind&eacute;pendante</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <span class="text-4xl md:text-5xl font-bold text-navy-900 tracking-tight">3400+</span>
+                            <span class="text-xs md:text-sm text-gray-500 mt-2 font-medium leading-snug" data-i18n="a-propos-de-rainbow.heritage.partenaires-business-dans-le-monde">Partenaires business dans le monde</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <span class="text-4xl md:text-5xl font-bold text-navy-900 tracking-tight" data-i18n="a-propos-de-rainbow.heritage.france">France</span>
+                            <span class="text-xs md:text-sm text-gray-500 mt-2 font-medium leading-snug" data-i18n="a-propos-de-rainbow.heritage.si-ge-social-colombes-op-r-sous">Si&egrave;ge social &agrave; Colombes, op&eacute;r&eacute; sous droit fran&ccedil;ais</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== CHRONOLOGIE ===== -->
+            <section id="chronologie" class="section-anchor py-20 lg:py-28 px-6 bg-white border-t border-gray-100">
+                <div class="max-w-3xl mx-auto">
+                    <div class="text-center mb-16 animate-on-scroll">
+                        <p class="text-xs font-bold uppercase tracking-[0.16em] text-brand-500 mb-3" data-i18n="a-propos-de-rainbow.chronologie.chronologie">Chronologie</p>
+                        <h2 class="text-2xl md:text-4xl font-extrabold text-navy-900 tracking-tight leading-[1.15]" data-i18n="a-propos-de-rainbow.chronologie.de-la-lign-e-alcatel-la-plateforme">
+                            De la lign&eacute;e Alcatel &agrave; la plateforme Rainbow d'aujourd'hui
+                        </h2>
+                    </div>
+
+                    <div class="relative timeline-wrap animate-on-scroll">
+                        <div class="timeline-rail"></div>
+
+                        <div class="space-y-10">
+                            <!-- Origines -->
+                            <div class="relative pl-14 md:pl-20 timeline-step animate-on-scroll" style="transition-delay:0s">
+                                <div class="timeline-dot absolute left-0 top-0 rounded-full bg-white border-2 border-brand-500 flex items-center justify-center shadow-sm">
+                                    <svg class="w-5 h-5 md:w-6 md:h-6 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                                </div>
+                                <span class="inline-block text-xs font-bold uppercase tracking-wider text-brand-500 mb-1.5" data-i18n="a-propos-de-rainbow.chronologie.origines">Origines</span>
+                                <h3 class="text-lg md:text-xl font-bold text-navy-900 mb-2 leading-snug" data-i18n="a-propos-de-rainbow.chronologie.un-h-ritage-alcatel-de-plus-de-100">Un h&eacute;ritage Alcatel de plus de 100&nbsp;ans</h3>
+                                <p class="text-sm md:text-[15px] text-gray-600 leading-relaxed" data-i18n="a-propos-de-rainbow.chronologie.d-cennies-d-innovation-dans-les-t">D&eacute;cennies d'innovation dans les t&eacute;l&eacute;communications fran&ccedil;aises et mondiales, &agrave; l'origine de technologies encore utilis&eacute;es aujourd'hui dans les r&eacute;seaux d'entreprise.</p>
+                            </div>
+
+                            <!-- 2014 -->
+                            <div class="relative pl-14 md:pl-20 timeline-step animate-on-scroll" style="transition-delay:.08s">
+                                <div class="timeline-dot absolute left-0 top-0 rounded-full bg-brand-500 border-2 border-brand-500 flex items-center justify-center shadow-md">
+                                    <span class="text-white font-extrabold text-[10px] md:text-xs">2014</span>
+                                </div>
+                                <span class="inline-block text-xs font-bold uppercase tracking-wider text-brand-500 mb-1.5">2014</span>
+                                <h3 class="text-lg md:text-xl font-bold text-navy-900 mb-2 leading-snug" data-i18n="a-propos-de-rainbow.chronologie.naissance-d-alcatel-lucent">Naissance d'Alcatel-Lucent</h3>
+                                <p class="text-sm md:text-[15px] text-gray-600 leading-relaxed" data-i18n="a-propos-de-rainbow.chronologie.la-division-enterprise-d-alcatel">La division Enterprise d'Alcatel-Lucent devient une soci&eacute;t&eacute; ind&eacute;pendante, avec son si&egrave;ge social &agrave; Colombes, en France.</p>
+                            </div>
+
+                            <!-- 2016 -->
+                            <div class="relative pl-14 md:pl-20 timeline-step animate-on-scroll" style="transition-delay:.16s">
+                                <div class="timeline-dot absolute left-0 top-0 rounded-full bg-brand-500 border-2 border-brand-500 flex items-center justify-center shadow-md">
+                                    <span class="text-white font-extrabold text-[10px] md:text-xs">2016</span>
+                                </div>
+                                <span class="inline-block text-xs font-bold uppercase tracking-wider text-brand-500 mb-1.5">2016</span>
+                                <h3 class="text-lg md:text-xl font-bold text-navy-900 mb-2 leading-snug" data-i18n="a-propos-de-rainbow.chronologie.lancement-de-rainbow">Lancement de Rainbow</h3>
+                                <p class="text-sm md:text-[15px] text-gray-600 leading-relaxed" data-i18n="a-propos-de-rainbow.chronologie.ale-lance-rainbow-sa-plateforme">ALE lance Rainbow, sa plateforme cloud de communication et de collaboration, con&ccedil;ue pour connecter &eacute;quipes internes et partenaires externes.</p>
+                            </div>
+
+                            <!-- 2019 -->
+                            <div class="relative pl-14 md:pl-20 timeline-step animate-on-scroll" style="transition-delay:.24s">
+                                <div class="timeline-dot absolute left-0 top-0 rounded-full bg-brand-500 border-2 border-brand-500 flex items-center justify-center shadow-md">
+                                    <span class="text-white font-extrabold text-[10px] md:text-xs">2019</span>
+                                </div>
+                                <span class="inline-block text-xs font-bold uppercase tracking-wider text-brand-500 mb-1.5">2019</span>
+                                <h3 class="text-lg md:text-xl font-bold text-navy-900 mb-2 leading-snug" data-i18n="a-propos-de-rainbow.chronologie.le-cap-du-million-d-utilisateurs">Le cap du million d'utilisateurs</h3>
+                                <p class="text-sm md:text-[15px] text-gray-600 leading-relaxed" data-i18n="a-propos-de-rainbow.chronologie.rainbow-d-passe-le-million-d">Rainbow d&eacute;passe le million d'utilisateurs actifs dans le monde, port&eacute; par des d&eacute;ploiements dans l'entreprise, le secteur public et l'&eacute;ducation.</p>
+                            </div>
+
+                            <!-- Aujourd'hui -->
+                            <div class="relative pl-14 md:pl-20 timeline-step animate-on-scroll" style="transition-delay:.32s">
+                                <div class="timeline-dot absolute left-0 top-0 rounded-full bg-white border-2 border-brand-500 flex items-center justify-center shadow-sm">
+                                    <svg class="w-5 h-5 md:w-6 md:h-6 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                                </div>
+                                <span class="inline-block text-xs font-bold uppercase tracking-wider text-brand-500 mb-1.5" data-i18n="a-propos-de-rainbow.chronologie.aujourd-hui">Aujourd'hui</span>
+                                <h3 class="text-lg md:text-xl font-bold text-navy-900 mb-2 leading-snug" data-i18n="a-propos-de-rainbow.chronologie.rainbow-collaboration-et-rainbow">Rainbow Collaboration et Rainbow Webinar</h3>
+                                <p class="text-sm md:text-[15px] text-gray-600 leading-relaxed" data-i18n="a-propos-de-rainbow.chronologie.deux-solutions-une-infrastructure">Deux solutions, une infrastructure souveraine h&eacute;berg&eacute;e en France, d&eacute;ploy&eacute;es aupr&egrave;s de PME, grands comptes et organismes publics dans le monde entier.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== CLIENTS / ORGANISATIONS ===== -->
+            <section id="clients" class="section-anchor py-20 lg:py-28 px-6 border-t border-gray-100" style="background: radial-gradient(ellipse 70% 90% at 50% 0%, rgba(124,58,237,0.12) 0%, transparent 65%), linear-gradient(180deg, #f5f3ff 0%, #ffffff 100%);">
+                <div class="max-w-6xl mx-auto">
+                    <div class="text-center max-w-2xl mx-auto mb-14 animate-on-scroll">
+                        <p class="text-xs font-bold uppercase tracking-[0.16em] text-brand-500 mb-3" data-i18n="a-propos-de-rainbow.clients.ils-nous-font-confiance">Ils nous font confiance</p>
+                        <h2 class="text-2xl md:text-4xl font-extrabold text-navy-900 tracking-tight leading-[1.15] mb-4" data-i18n="a-propos-de-rainbow.clients.des-organisations-de-toute-taille">
+                            Des organisations de toute taille, partout dans le monde
+                        </h2>
+                        <p class="text-base text-gray-500 leading-relaxed" data-i18n="a-propos-de-rainbow.clients.des-collectivit-s-aux-grands">
+                            Des collectivit&eacute;s aux grands comptes, des &eacute;tablissements de sant&eacute; aux universit&eacute;s&nbsp;: chaque jour, des &eacute;quipes s'appuient sur Rainbow pour rester connect&eacute;es, port&eacute;es par l'&eacute;cosyst&egrave;me de plus de 3&nbsp;400 partenaires business d'ALE.
+                        </p>
+                    </div>
+
+                    <div class="logo-wave-row" id="logo-wave-row">
+                        <div class="logo-wave-card">
+                            <div class="logo-wave-reel">
+                                <img src="/images/clients/bestford-insurance.png" alt="Bestford Insurance" data-i18n-attr="alt:a-propos-de-rainbow.clients.bestford-insurance_alt">
+                                <img src="/images/clients/herrenberg.png" alt="Herrenberg" data-i18n-attr="alt:a-propos-de-rainbow.clients.herrenberg_alt">
+                            </div>
+                        </div>
+                        <div class="logo-wave-card">
+                            <div class="logo-wave-reel">
+                                <img src="/images/clients/hellweg.png" alt="Hellweg" data-i18n-attr="alt:a-propos-de-rainbow.clients.hellweg_alt">
+                                <img src="/images/clients/taketa-city.png" alt="Taketa City" data-i18n-attr="alt:a-propos-de-rainbow.clients.taketa-city_alt">
+                            </div>
+                        </div>
+                        <div class="logo-wave-card">
+                            <div class="logo-wave-reel">
+                                <img src="/images/clients/careoutlook.webp" alt="CareOutlook" data-i18n-attr="alt:a-propos-de-rainbow.clients.careoutlook_alt">
+                                <img src="/images/clients/region-occitanie.png" alt="R&eacute;gion Occitanie" data-i18n-attr="alt:a-propos-de-rainbow.clients.r-gion-occitanie_alt">
+                            </div>
+                        </div>
+                        <div class="logo-wave-card">
+                            <div class="logo-wave-reel">
+                                <img src="/images/clients/morbihan.jpg" alt="Morbihan" data-i18n-attr="alt:a-propos-de-rainbow.clients.morbihan_alt">
+                                <img src="/images/clients/hokkaido.png" alt="Hokkaido" data-i18n-attr="alt:a-propos-de-rainbow.clients.hokkaido_alt">
+                            </div>
+                        </div>
+                        <div class="logo-wave-card">
+                            <div class="logo-wave-reel">
+                                <img src="/images/clients/ludwigshafen.png" alt="Ludwigshafen" data-i18n-attr="alt:a-propos-de-rainbow.clients.ludwigshafen_alt">
+                                <img src="/images/clients/paytren.webp" alt="Paytren" data-i18n-attr="alt:a-propos-de-rainbow.clients.paytren_alt">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== NOTRE ADN / ENGAGEMENT ===== -->
+            <section id="engagement" class="section-anchor py-20 lg:py-28 px-6 border-t border-gray-100" style="background: radial-gradient(ellipse 70% 90% at 100% 0%, rgba(124,58,237,0.08) 0%, transparent 55%), #f9f8fe;">
+                <div class="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+                    <!-- Left: text + checklist -->
+                    <div class="animate-on-scroll">
+                        <p class="text-xs font-bold uppercase tracking-[0.16em] text-brand-500 mb-3" data-i18n="a-propos-de-rainbow.engagement.notre-adn">Notre ADN</p>
+                        <h2 class="text-2xl md:text-4xl font-extrabold text-navy-900 tracking-tight leading-[1.15] mb-6" data-i18n="a-propos-de-rainbow.engagement.rainbow-n-est-pas-une-startup-isol">
+                            Rainbow n'est pas une startup isol&eacute;e&nbsp;: c'est un produit by Alcatel-Lucent
+                        </h2>
+                        <p class="text-base text-gray-600 leading-relaxed mb-8 max-w-xl" data-i18n="a-propos-de-rainbow.engagement.choisir-rainbow-c-est-s-appuyer">
+                            Choisir Rainbow, c'est s'appuyer sur l'infrastructure et les &eacute;quipes d'un &eacute;diteur &eacute;tabli, et non sur une jeune pousse sans historique. Concr&egrave;tement, cela signifie&nbsp;:
+                        </p>
+                        <ul class="space-y-4">
+                            <li class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                                <span class="text-sm md:text-[15px] text-gray-700 leading-relaxed" data-i18n-rich="a-propos-de-rainbow.engagement.rainbow-est-dit-par-ale">Rainbow est &eacute;dit&eacute; par <strong>ALE International SAS</strong>, soci&eacute;t&eacute; de droit fran&ccedil;ais dont le si&egrave;ge social est &agrave; Colombes.</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                                <span class="text-sm md:text-[15px] text-gray-700 leading-relaxed" data-i18n-rich="a-propos-de-rainbow.engagement.l-h-bergement-l-exploitation-et-le">L'h&eacute;bergement, l'exploitation et le support de Rainbow sont assur&eacute;s depuis la France par les &eacute;quipes ALE  consultez notre <a href="/fr/rainbow-donnees-hebergees-en-france" class="text-brand-500 font-semibold underline underline-offset-2 hover:text-brand-600">page souverainet&eacute;</a> pour le d&eacute;tail des certifications.</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                                <span class="text-sm md:text-[15px] text-gray-700 leading-relaxed" data-i18n="a-propos-de-rainbow.engagement.la-r-d-de-rainbow-s-appuie-sur-des">La R&amp;D de Rainbow s'appuie sur des d&eacute;cennies d'expertise ALE en t&eacute;l&eacute;phonie IP, r&eacute;seaux d'entreprise et communications unifi&eacute;es.</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                                <span class="text-sm md:text-[15px] text-gray-700 leading-relaxed" data-i18n="a-propos-de-rainbow.engagement.en-choisissant-rainbow-vous">En choisissant Rainbow, vous rejoignez un &eacute;cosyst&egrave;me d&eacute;ploy&eacute; par ALE aupr&egrave;s de plus de 3&nbsp;400 partenaires business &agrave; travers le monde  pas seulement un logiciel isol&eacute;.</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Right: image -->
+                    <div class="relative animate-on-scroll">
+                        <img src="/images/rainbow-cross.webp" alt="&Eacute;quipes Rainbow by Alcatel-Lucent" class="w-full h-auto rounded-2xl shadow-xl" data-i18n-attr="alt:a-propos-de-rainbow.engagement.quipes-rainbow-by-alcatel-lucent_alt">
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer-premium text-gray-400 relative z-10 overflow-hidden">
+        <!-- Top hairline glow -->
+        <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-300/60 to-transparent"></div>
+        <!-- Ambient purple wash -->
+        <div class="pointer-events-none absolute inset-0" style="background:
+            radial-gradient(ellipse 70% 55% at 50% -8%, rgba(124,58,237,0.32) 0%, rgba(124,58,237,0.10) 34%, transparent 68%),
+            radial-gradient(ellipse 55% 60% at 88% 108%, rgba(207,0,114,0.16) 0%, transparent 62%),
+            radial-gradient(ellipse 45% 50% at 6% 96%, rgba(94,45,145,0.20) 0%, transparent 60%);"></div>
+        <!-- Soft focal glow behind the CTA -->
+        <div class="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-[760px] h-[440px] bg-brand-500/25 rounded-full blur-[150px]"></div>
+
+        <div class="max-w-6xl mx-auto px-6 relative">
+            <!-- ===== CTA BAND ===== -->
+            <div class="text-center pt-24 pb-16 md:pt-28 md:pb-20 border-b border-white/10">
+                <div class="mb-9">
+                    <img src="/images/rainbow-logo.png" alt="Rainbow" class="w-[70px] h-[70px] object-contain mx-auto" data-i18n-attr="alt:common.footer.rainbow_alt">
+                </div>
+                <h2 class="text-2xl md:text-4xl lg:text-[2.6rem] font-semibold text-white tracking-[-0.025em] leading-[1.18] max-w-4xl mx-auto" style="text-wrap:balance" data-i18n="common.footer.la-prochaine-conversation-de-votre_7">
+                    La prochaine conversation de votre &eacute;quipe m&eacute;rite une infrastructure qui la prot&egrave;ge
+                </h2>
+                <p class="mt-5 text-base md:text-lg text-gray-300/90 max-w-xl mx-auto" style="text-wrap:balance" data-i18n="common.footer.essayez-nos-solutions-rainbow_7">
+                    Essayez nos solutions Rainbow gratuitement pendant 30 jours. Sans carte bancaire.
+                </p>
+                <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a href="/fr/tarifs" class="group inline-flex items-center justify-center gap-2.5 px-9 py-4 rounded-[14px] text-white text-base font-bold tracking-tight"
+                       style="background:#5e2d91;" data-i18n-rich="common.footer.commencez-l-essai-gratuit-path_5">
+                        Commencez l'essai gratuit
+                        <svg class="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                    </a>
+                    <a href="/fr/tarifs" class="inline-flex items-center justify-center px-9 py-4 rounded-[14px] text-white text-base font-bold tracking-tight border border-white/25 hover:bg-white/10 hover:border-white/40 transition-colors" data-i18n="common.footer.voir-les-tarifs_5">
+                        Voir les tarifs
+                    </a>
+                </div>
+            </div>
+
+            <!-- ===== LINK COLUMNS ===== -->
+            <div class="flex flex-col lg:flex-row lg:justify-between gap-12 lg:gap-16 py-16">
+                <!-- Brand -->
+                <div class="max-w-xs">
+                    <img src="/images/ale_white.png" alt="Alcatel-Lucent" class="h-11 w-auto opacity-90 mb-6" data-i18n-attr="alt:common.footer.alcatel-lucent_alt">
+                    <address class="not-italic text-sm text-gray-400 leading-relaxed" data-i18n-rich="common.footer.ale-international-32-avenue-kl-ber_5">
+                        ALE International<br>
+                        32 avenue Kl&eacute;ber<br>
+                        92700 Colombes, France
+                    </address>
+                </div>
+                <!-- Columns -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-8 sm:gap-14">
+                    <div>
+                        <h4 class="text-[11px] font-bold text-white uppercase tracking-[0.16em] mb-5" data-i18n="common.footer.solutions_7">Solutions</h4>
+                        <ul class="space-y-3.5 text-sm">
+                            <li><a href="/fr/products/collaboration" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.rainbow-collaboration">Rainbow Collaboration</a></li>
+                            <li><a href="/fr/products/webinar" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.rainbow-webinar">Rainbow Webinar</a></li>
+                            <li><a href="/fr/tarifs" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.tarifs">Tarifs</a></li>
+                            <li><a href="/fr/telecharger-application-rainbow" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.t-l-chargements">T&eacute;l&eacute;chargements</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.api">API</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-[11px] font-bold text-white uppercase tracking-[0.16em] mb-5" data-i18n="common.footer.developers_5">Developers</h4>
+                        <ul class="space-y-3.5 text-sm">
+                            <li><a href="/fr/centre-aide-rainbow" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.centre-d-aide_3">Centre d'aide</a></li>
+                            <li><a href="/fr/faq" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.faq">FAQ</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.guide-technique">Guide technique</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.code-samples_5">Code samples</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.int-grations">Int&eacute;grations</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.forum-dev_4">Forum dev</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-[11px] font-bold text-white uppercase tracking-[0.16em] mb-5" data-i18n="common.footer.company_5">Company</h4>
+                        <ul class="space-y-3.5 text-sm">
+                            <li><a href="/fr/a-propos-de-rainbow" class="text-white font-semibold" data-i18n="common.footer.a-propos_3">A propos</a></li>
+                            <li><a href="/fr/rainbow-donnees-hebergees-en-france" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.souverainet_7">Souverainet&eacute;</a></li>
+                            <li><a href="/fr/partenaires" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.devenir-partenaire">Devenir partenaire</a></li>
+                            <li><a href="/fr/trouver-un-partenaire" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.trouver-un-partenaire">Trouver un partenaire</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.carri-res">Carri&egrave;res</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.presse">Presse</a></li>
+                            <li><a href="/fr/form-al" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.contact_5">Contact</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== BOTTOM BAR ===== -->
+            <div class="border-t border-white/10 py-8 flex flex-col gap-6">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-5">
+                    <div class="flex items-center gap-3">
+                        <a href="#" aria-label="X" class="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 ring-1 ring-white/10 hover:ring-white/20 flex items-center justify-center transition-all">
+                            <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                        </a>
+                        <a href="#" aria-label="LinkedIn" class="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 ring-1 ring-white/10 hover:ring-white/20 flex items-center justify-center transition-all" data-i18n-attr="aria-label:common.footer.linkedin_aria-label">
+                            <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                        </a>
+                    </div>
+                    <div class="flex items-center gap-6 text-sm">
+                        <a href="/fr/privacy" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.privacy_5">Privacy</a>
+                        <a href="/fr/legal" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.terms_10">Terms</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.cookies">Cookies</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.gdpr_3">GDPR</a>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 leading-relaxed" data-i18n-rich="common.footer.ale-international-ale-usa-inc-all_7">&copy;ALE International, ALE USA Inc. All rights reserved in all countries. The Alcatel-Lucent name and logo are trademarks of Nokia used under license by ALE. To view a list of proprietary ALE trademarks, visit: <a href="https://www.al-enterprise.com/en/legal/trademarks-copyright" target="_blank" rel="noopener" class="hover:text-white transition-colors underline-offset-2 hover:underline">www.al-enterprise.com/en/legal/trademarks-copyright</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ===== SCRIPTS ===== -->
+    <script src="/js/mega-menu.js"></script>
+    <script src="/js/i18n.js"></script>
+    <script>
+        // Scroll-triggered animations
+        (function() {
+            var observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+            document.querySelectorAll('.animate-on-scroll, .animate-stagger').forEach(function(el) {
+                observer.observe(el);
+            });
+        })();
+
+        // Navbar scroll shadow
+        var nav = document.getElementById('navbar');
+        window.addEventListener('scroll', function(){
+            nav.style.boxShadow = window.scrollY > 8 ? '0 1px 12px rgba(30,27,75,.07)' : '';
+        }, {passive:true});
+    </script>
+    <script>
+        // ── Logo carousel: left-to-right wave swap ──
+        // Single global clock drives every card; each card is staggered by STAGGER_MS
+        // so the swap sweeps left-to-right, repeating every CYCLE_MS with no drift.
+        (function () {
+            var LOGOS = [
+                { src: '/images/clients/bestford-insurance.png', alt: 'Bestford Insurance' },
+                { src: '/images/clients/herrenberg.png', alt: 'Herrenberg' },
+                { src: '/images/clients/loughborough-university-london.png', alt: 'Loughborough University London' },
+                { src: '/images/clients/eydap.webp', alt: 'EYDAP' },
+                { src: '/images/clients/hellweg.png', alt: 'Hellweg' },
+                { src: '/images/clients/taketa-city.png', alt: 'Taketa City' },
+                { src: '/images/clients/kingsway-hospitals.jpg', alt: 'Kingsway Hospitals' },
+                { src: '/images/clients/mayfair-hotels-resorts.jpg', alt: 'Mayfair Hotels & Resorts' },
+                { src: '/images/clients/csf-inox.png', alt: 'CSF Inox' },
+                { src: '/images/clients/careoutlook.webp', alt: 'CareOutlook' },
+                { src: '/images/clients/region-occitanie.png', alt: 'Région Occitanie' },
+                { src: '/images/clients/montpellier-mediterranee-metropole.png', alt: 'Montpellier Méditerranée Métropole' },
+                { src: '/images/clients/perpignan-mediterranee-metropole.png', alt: 'Perpignan Méditerranée Métropole' },
+                { src: '/images/clients/doma-hotels.jpg', alt: 'DOMA Hotels' },
+                { src: '/images/clients/morbihan.jpg', alt: 'Morbihan' },
+                { src: '/images/clients/hokkaido.png', alt: 'Hokkaido' },
+                { src: '/images/clients/chu-rennes.webp', alt: 'CHU Rennes' },
+                { src: '/images/clients/nexon.webp', alt: 'Nexon' },
+                { src: '/images/clients/obrien-winter-partners.jpg', alt: "O'Brien Winter Partners" },
+                { src: '/images/clients/ludwigshafen.png', alt: 'Ludwigshafen' },
+                { src: '/images/clients/paytren.webp', alt: 'Paytren' },
+                { src: '/images/clients/centre-hospitalier-mayotte.png', alt: 'Centre Hospitalier de Mayotte' },
+                { src: '/images/clients/region-bourgogne-franche-comte.jpg', alt: 'Région Bourgogne-Franche-Comté' },
+                { src: '/images/clients/ajuntament-cunit.png', alt: 'Ajuntament Cunit' }
+            ];
+
+            var row = document.getElementById('logo-wave-row');
+            if (!row) return;
+            var cards = Array.prototype.slice.call(row.querySelectorAll('.logo-wave-card'));
+            if (!cards.length) return;
+
+            // The initial <img src="/images/clients/..."> tags get base-path-prefixed
+            // at build time (e.g. "/store/images/clients/..." on GitHub Pages), but LOGOS
+            // above holds the raw un-prefixed paths as authored. Derive the real prefix
+            // from an image already on the page so swapped-in logos resolve the same way
+            // instead of 404ing once the wave starts overwriting src.
+            var ASSET_BASE = (function () {
+                var probe = row.querySelector('.logo-wave-reel img');
+                var raw = probe ? probe.getAttribute('src') || '' : '';
+                var marker = '/images/clients/';
+                var idx = raw.indexOf(marker);
+                return idx > -1 ? raw.slice(0, idx) : '';
+            })();
+
+            // Preload every logo up front so swapped-in images are already cached by
+            // the time the wave reaches them, instead of showing alt-text while they load.
+            LOGOS.forEach(function (item) {
+                var preload = new Image();
+                preload.src = ASSET_BASE + item.src;
+            });
+
+            var TICK_MS = 50;          // master clock resolution
+            var HOLD_MS = 3000;        // ~3s steady hold before a card moves
+            var TRANSITION_MS = 600;   // slide duration
+            var STAGGER_MS = 200;      // delay between each card's move (left → right wave)
+            var CYCLE_MS = HOLD_MS + TRANSITION_MS; // full period between a card's successive moves
+
+            var state = cards.map(function (card, i) {
+                var reel = card.querySelector('.logo-wave-reel');
+                var imgs = reel.querySelectorAll('img');
+                var start = Math.floor(i * LOGOS.length / cards.length);
+                return {
+                    reel: reel,
+                    imgs: imgs,
+                    index: start,
+                    phase: HOLD_MS + i * STAGGER_MS, // first move happens ~3s in, wave order left → right
+                    busy: false
+                };
+            });
+
+            function advance(s) {
+                if (s.busy) return;
+                s.busy = true;
+
+                var height = s.reel.parentElement.getBoundingClientRect().height || 110;
+                s.reel.style.transition = 'transform ' + (TRANSITION_MS / 1000) + 's ease-out';
+                s.reel.style.transform = 'translateY(-' + height + 'px)';
+
+                var resolved = false;
+                function reset() {
+                    if (resolved) return;
+                    resolved = true;
+                    s.reel.removeEventListener('transitionend', reset);
+
+                    s.reel.style.transition = 'none';
+                    s.reel.style.transform = 'translateY(0)';
+
+                    s.index = (s.index + 1) % LOGOS.length;
+                    var nextIndex = (s.index + 1) % LOGOS.length;
+                    s.imgs[0].src = ASSET_BASE + LOGOS[s.index].src;
+                    s.imgs[0].alt = LOGOS[s.index].alt;
+                    s.imgs[1].src = ASSET_BASE + LOGOS[nextIndex].src;
+                    s.imgs[1].alt = LOGOS[nextIndex].alt;
+
+                    void s.reel.offsetHeight; // force reflow so 'transition: none' takes effect first
+                    s.busy = false;
+                }
+                s.reel.addEventListener('transitionend', reset);
+                setTimeout(reset, TRANSITION_MS + 150); // safety net if transitionend never fires
+            }
+
+            var clock = 0;
+            setInterval(function () {
+                clock += TICK_MS;
+                state.forEach(function (s) {
+                    var elapsed = (clock - s.phase) % CYCLE_MS;
+                    if (elapsed < 0) elapsed += CYCLE_MS;
+                    if (elapsed < TICK_MS) advance(s);
+                });
+            }, TICK_MS);
+        })();
+    </script>
+<!-- impeccable-live-start -->
+<script src="http://localhost:8400/live.js?token=7e1a9f72-559f-41b5-9268-cc7ffe4bf926"></script>
+<!-- impeccable-live-end -->
+</body>
+</html>

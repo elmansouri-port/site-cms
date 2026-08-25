@@ -1,0 +1,33 @@
+{
+  "name": "rainbow-site-cms",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Rainbow by ALE — Astro frontend, MongoDB-backed CMS and content API",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "concurrently -n api,web,cms -c cyan,green,magenta \"npm:dev:api\" \"npm:dev:web\" \"npm:dev:cms\"",
+    "dev:api": "npm run dev --workspace @rainbow/api",
+    "dev:web": "npm run dev --workspace @rainbow/web",
+    "dev:cms": "npm run dev --workspace @rainbow/cms",
+    "build": "npm run build --workspace @rainbow/web && npm run build --workspace @rainbow/cms",
+    "seed": "npm run seed --workspace @rainbow/api",
+    "seed:reset": "npm run seed:reset --workspace @rainbow/api",
+    "verify": "node tools/verify-fidelity.mjs",
+    "verify:live": "node tools/verify-live.mjs",
+    "verify:menu": "node tools/verify-megamenu.mjs",
+    "test": "node --test tests/core.test.mjs && npm run verify && npm run test --workspace @rainbow/api",
+    "test:core": "node --test tests/core.test.mjs",
+    "lint": "npm run lint --workspaces --if-present"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  },
+  "license": "UNLICENSED"
+}

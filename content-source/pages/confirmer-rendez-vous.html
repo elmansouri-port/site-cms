@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmer votre rendez-vous  Rainbow by Alcatel-Lucent</title>
+    <meta name="description" content="Confirmez votre rendez-vous Rainbow en un clic.">
+    <meta name="robots" content="noindex,nofollow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand: #5e2d91;
+            --brand-600: #4a2373;
+            --brand-50: #f5f3ff;
+            --brand-300: #c4b5fd;
+            --navy: #1e1b4b;
+            --ink: #1e1b4b;
+            --muted: #6b6a85;
+            --line: #eceafc;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Google Sans', system-ui, sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(1100px 560px at 12% -8%, #ede9fe 0%, transparent 55%),
+                radial-gradient(900px 480px at 105% 108%, #e6edff 0%, transparent 52%),
+                #f4f2fb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 540px;
+            background: #fff;
+            border-radius: 24px;
+            padding: 44px 40px 38px;
+            text-align: center;
+            box-shadow: 0 30px 70px -28px rgba(30, 27, 75, .4), 0 6px 20px rgba(30, 27, 75, .07);
+            animation: fadeUp .35s ease;
+        }
+
+        @media (max-width:520px) {
+            .card {
+                padding: 32px 22px 28px;
+                border-radius: 18px;
+            }
+        }
+
+        .brand {
+            height: 46px;
+            width: auto;
+            margin-bottom: 26px;
+        }
+
+        .ic {
+            width: 74px;
+            height: 74px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 22px;
+            border: 2px solid var(--brand-300);
+            background: var(--brand-50);
+        }
+
+        .ic svg {
+            width: 34px;
+            height: 34px;
+            color: var(--brand);
+        }
+
+        .ic.is-ok {
+            background: radial-gradient(circle at 35% 35%, #d1fae5, #a7f3d0);
+            border-color: #6ee7b7;
+        }
+
+        .ic.is-ok svg {
+            color: #16a34a;
+        }
+
+        .ic.is-err {
+            background: #fef2f2;
+            border-color: #fecaca;
+        }
+
+        .ic.is-err svg {
+            color: #dc2626;
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 3px solid var(--brand-300);
+            border-top-color: var(--brand);
+            animation: spin .8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        h1 {
+            font-size: 1.42rem;
+            font-weight: 700;
+            letter-spacing: -.02em;
+            color: var(--navy);
+            margin-bottom: 10px;
+        }
+
+        p.sub {
+            color: var(--muted);
+            font-size: .94rem;
+            line-height: 1.6;
+        }
+
+        .slot-box {
+            margin: 22px 0 4px;
+            padding: 15px 18px;
+            background: var(--brand-50);
+            border: 1.5px solid var(--line);
+            border-radius: 12px;
+            font-weight: 700;
+            color: var(--navy);
+            font-size: .98rem;
+        }
+
+        .actions {
+            margin-top: 26px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            padding: 13px 26px;
+            border: none;
+            border-radius: 12px;
+            background: var(--brand);
+            color: #fff;
+            font-size: .95rem;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all .15s;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--brand-600);
+            transform: translateY(-1px);
+            box-shadow: 0 12px 24px -8px rgba(94, 45, 145, .55);
+        }
+
+        .btn-primary:disabled {
+            opacity: .45;
+            cursor: not-allowed;
+        }
+
+        .btn-link {
+            background: none;
+            border: none;
+            color: var(--muted);
+            font-size: .88rem;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .btn-link:hover {
+            color: var(--brand);
+        }
+
+        .lang-switch {
+            display: flex;
+            gap: 2px;
+            background: var(--brand-50);
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 3px;
+            width: fit-content;
+            margin: 0 auto 22px;
+        }
+
+        .lang-btn {
+            border: none;
+            background: none;
+            color: var(--brand-600);
+            font-size: .74rem;
+            font-weight: 700;
+            padding: 5px 11px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .lang-btn.active {
+            background: var(--brand);
+            color: #fff;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+    <a id="booking-page-link" href="/form-al" hidden aria-hidden="true"></a>
+    <div class="card">
+        <img class="brand" src="/images/Rainbow-AL-logo-banner.webp" alt="Rainbow by Alcatel-Lucent">
+
+        <div class="lang-switch" id="lang-switch">
+            <button class="lang-btn active" data-lang="fr">FR</button>
+            <button class="lang-btn" data-lang="en">EN</button>
+            <button class="lang-btn" data-lang="de">DE</button>
+        </div>
+
+        <!-- WORKING: the click has landed, we are creating the meeting -->
+        <section id="state-working">
+            <div class="ic"><div class="spinner"></div></div>
+            <h1 data-i18n="working_title">Confirmation en cours…</h1>
+            <p class="sub" data-i18n="working_sub">Nous préparons votre bulle Rainbow. Merci de patienter quelques
+                secondes.</p>
+        </section>
+
+        <!-- READY: shown when the visitor must click (no auto-confirm) -->
+        <section id="state-ready" hidden>
+            <div class="ic"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                </svg></div>
+            <h1 data-i18n="ready_title">Confirmez votre rendez-vous</h1>
+            <p class="sub" data-i18n="ready_sub">Un dernier clic et votre créneau est réservé.</p>
+            <div class="actions">
+                <button class="btn-primary" id="btn-confirm" data-i18n="ready_cta">Confirmer mon rendez-vous</button>
+            </div>
+        </section>
+
+        <!-- DONE -->
+        <section id="state-done" hidden>
+            <div class="ic is-ok"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg></div>
+            <h1 data-i18n="done_title">Rendez-vous confirmé !</h1>
+            <p class="sub" id="done-sub"></p>
+            <div class="slot-box" id="done-slot" hidden></div>
+            <div class="actions">
+                <a class="btn-primary" id="btn-join" href="#" hidden target="_blank" rel="noopener"
+                    data-i18n="done_join">Rejoindre la bulle</a>
+                <a class="btn-link" href="/" data-i18n="home">Retour à l'accueil</a>
+            </div>
+        </section>
+
+        <!-- ERROR -->
+        <section id="state-error" hidden>
+            <div class="ic is-err"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 9v3.75m0 3.75h.008M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg></div>
+            <h1 id="error-title" data-i18n="error_title">Confirmation impossible</h1>
+            <p class="sub" id="error-sub"></p>
+            <div class="actions">
+                <a class="btn-primary" id="btn-rebook" href="#" hidden data-i18n="error_rebook">Reprendre rendez-vous</a>
+                <button class="btn-link" id="btn-retry" hidden data-i18n="error_retry">Réessayer</button>
+                <a class="btn-link" href="/" data-i18n="home">Retour à l'accueil</a>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        /* ================================================================
+           IP-BASED LANGUAGE DETECTION  (same behaviour as the other pages)
+           ================================================================ */
+        (function detectLangByIP() {
+            try {
+                if (sessionStorage.getItem('lang-manual')) return;
+                fetch('https://ipapi.co/json/')
+                    .then(function (r) { return r.json(); })
+                    .then(function (d) {
+                        var c = (d.country_code || '').toUpperCase();
+                        var FR = ['FR', 'BE', 'LU', 'MC', 'CH', 'SN', 'CI', 'MA', 'DZ', 'TN', 'CM', 'ML', 'BF'];
+                        var DE = ['DE', 'AT', 'LI'];
+                        window.__ipLang = FR.indexOf(c) > -1 ? 'fr' : DE.indexOf(c) > -1 ? 'de' : 'en';
+                        if (typeof window.__applyIpLang === 'function') window.__applyIpLang();
+                    })
+                    .catch(function () { });
+            } catch (e) { }
+        })();
+        /* ================================================================ */
+
+        (function () {
+            'use strict';
+
+            var CONFIRM_API_URL = 'https://n8n.openrainbow.org/webhook/booking-confirm';
+            // Read from a real href (not a hardcoded string) so the GitHub Pages
+            // build's path-prefixer (tools/build-pages.js) can rewrite it for the
+            // /store subpath the same way it rewrites every other on-site link.
+            var BOOKING_PAGE_URL = document.getElementById('booking-page-link').getAttribute('href');
+
+            var I18N = {
+                fr: {
+                    title: "Confirmer votre rendez-vous  Rainbow",
+                    working_title: "Confirmation en cours…",
+                    working_sub: "Nous préparons votre bulle Rainbow. Merci de patienter quelques secondes.",
+                    ready_title: "Confirmez votre rendez-vous",
+                    ready_sub: "Un dernier clic et votre créneau est réservé.",
+                    ready_cta: "Confirmer mon rendez-vous",
+                    done_title: "Rendez-vous confirmé !",
+                    done_sub: "C'est fait. Vous recevrez un e-mail avec le lien de visioconférence et de quoi l'ajouter à votre agenda.",
+                    done_already: "Ce rendez-vous était déjà confirmé. Tout est en ordre, rien d'autre à faire.",
+                    done_join: "Rejoindre la bulle",
+                    error_title: "Confirmation impossible",
+                    error_rebook: "Reprendre rendez-vous",
+                    error_retry: "Réessayer",
+                    home: "Retour à l'accueil",
+                    err_missing_token: "Ce lien est incomplet. Utilisez le bouton présent dans l'e-mail que nous vous avons envoyé.",
+                    err_not_found: "Ce lien de confirmation n'est plus valide. Il a probablement expiré.",
+                    err_expired: "Ce lien a expiré et le créneau a été remis à disposition. Vous pouvez reprendre rendez-vous.",
+                    err_slot_passed: "Ce créneau est déjà passé. Vous pouvez reprendre rendez-vous.",
+                    err_slot_taken: "Ce créneau a été réservé par quelqu'un d'autre pendant que ce lien attendait. Choisissez un autre horaire.",
+                    err_cancelled: "Ce rendez-vous a été annulé et ne peut plus être confirmé.",
+                    err_bubble_failed: "Nous n'avons pas pu préparer la salle de réunion. Votre créneau est toujours réservé : réessayez dans un instant.",
+                    err_generic: "Une erreur est survenue. Réessayez dans un instant.",
+                    langname: "Français"
+                },
+                en: {
+                    title: "Confirm your meeting  Rainbow",
+                    working_title: "Confirming…",
+                    working_sub: "We're setting up your Rainbow bubble. This takes a few seconds.",
+                    ready_title: "Confirm your meeting",
+                    ready_sub: "One last click and your slot is booked.",
+                    ready_cta: "Confirm my meeting",
+                    done_title: "Meeting confirmed!",
+                    done_sub: "All done. You'll get an email with the video call link and everything you need to add it to your calendar.",
+                    done_already: "This meeting was already confirmed. Nothing else to do.",
+                    done_join: "Join the bubble",
+                    error_title: "We couldn't confirm this",
+                    error_rebook: "Book another time",
+                    error_retry: "Try again",
+                    home: "Back to homepage",
+                    err_missing_token: "This link is incomplete. Please use the button in the email we sent you.",
+                    err_not_found: "This confirmation link is no longer valid. It has most likely expired.",
+                    err_expired: "This link has expired and the slot was released. You're welcome to book again.",
+                    err_slot_passed: "That slot has already passed. You're welcome to book again.",
+                    err_slot_taken: "Someone else took that slot while this link sat unconfirmed. Please pick another time.",
+                    err_cancelled: "This meeting was cancelled and can no longer be confirmed.",
+                    err_bubble_failed: "We couldn't set up the meeting room. Your slot is still held — please try again in a moment.",
+                    err_generic: "Something went wrong. Please try again in a moment.",
+                    langname: "English"
+                },
+                de: {
+                    title: "Termin bestätigen  Rainbow",
+                    working_title: "Wird bestätigt…",
+                    working_sub: "Wir richten Ihre Rainbow-Bubble ein. Das dauert nur wenige Sekunden.",
+                    ready_title: "Bestätigen Sie Ihren Termin",
+                    ready_sub: "Ein letzter Klick und Ihr Termin ist gebucht.",
+                    ready_cta: "Termin bestätigen",
+                    done_title: "Termin bestätigt!",
+                    done_sub: "Erledigt. Sie erhalten eine E-Mail mit dem Link zur Videokonferenz und allem für Ihren Kalender.",
+                    done_already: "Dieser Termin war bereits bestätigt. Es ist nichts weiter zu tun.",
+                    done_join: "Bubble beitreten",
+                    error_title: "Bestätigung nicht möglich",
+                    error_rebook: "Neuen Termin buchen",
+                    error_retry: "Erneut versuchen",
+                    home: "Zur Startseite",
+                    err_missing_token: "Dieser Link ist unvollständig. Bitte nutzen Sie die Schaltfläche in unserer E-Mail.",
+                    err_not_found: "Dieser Bestätigungslink ist nicht mehr gültig. Er ist vermutlich abgelaufen.",
+                    err_expired: "Dieser Link ist abgelaufen und der Termin wurde freigegeben. Sie können gerne neu buchen.",
+                    err_slot_passed: "Dieser Termin liegt bereits in der Vergangenheit. Sie können gerne neu buchen.",
+                    err_slot_taken: "Der Termin wurde vergeben, während dieser Link unbestätigt war. Bitte wählen Sie eine andere Zeit.",
+                    err_cancelled: "Dieser Termin wurde storniert und kann nicht mehr bestätigt werden.",
+                    err_bubble_failed: "Wir konnten den Meetingraum nicht einrichten. Ihr Termin ist weiterhin reserviert — bitte versuchen Sie es gleich erneut.",
+                    err_generic: "Etwas ist schiefgelaufen. Bitte versuchen Sie es gleich erneut.",
+                    langname: "Deutsch"
+                }
+            };
+            var LOCALE = { fr: 'fr-FR', en: 'en-GB', de: 'de-DE' };
+
+            var lang = 'fr';
+            var params = new URLSearchParams(window.location.search);
+            var TOKEN = params.get('t') || params.get('token') || '';
+            // Some corporate mail scanners fetch every link in a message. A GET
+            // would confirm bookings nobody clicked, so confirmation is a POST
+            // triggered from this page. `auto` still fires it on load, because
+            // the visitor has by then genuinely clicked the button in the email.
+            var AUTO_CONFIRM = params.get('auto') !== '0';
+
+            // The URL's /fr /en /de segment is authoritative — it's set by
+            // whatever page linked here, so it takes priority over IP-based
+            // guessing (which only kicks in as a fallback for a bare URL).
+            var URL_LANG = (window.location.pathname.match(/\/(fr|en|de)(\/|$)/) || [])[1];
+            if (URL_LANG) { lang = URL_LANG; window.__langManualSet = true; }
+            document.querySelectorAll('.lang-btn').forEach(function (b) {
+                b.classList.toggle('active', b.dataset.lang === lang);
+            });
+
+            function t(k) { return (I18N[lang] && I18N[lang][k]) || I18N.fr[k] || k; }
+
+            // Swap the /fr|en|de segment of the current path, preserving
+            // whatever precedes it (e.g. a GitHub Pages "/store" subpath)
+            // and the query string (the confirmation token).
+            function langSwitchUrl(newLang) {
+                var m = window.location.pathname.match(/^(.*?)\/(fr|en|de)(\/.*|$)/);
+                var base = m ? m[1] : '';
+                var rest = m ? m[3] : window.location.pathname;
+                return base + '/' + newLang + rest + window.location.search + window.location.hash;
+            }
+
+            window.__applyIpLang = function () {
+                if (!window.__ipLang || window.__langManualSet) return;
+                lang = window.__ipLang;
+                document.querySelectorAll('.lang-btn').forEach(function (b) {
+                    b.classList.toggle('active', b.dataset.lang === lang);
+                });
+                applyI18n();
+            };
+            if (!URL_LANG && window.__ipLang && !window.__langManualSet) lang = window.__ipLang;
+
+            function show(id) {
+                ['state-working', 'state-ready', 'state-done', 'state-error']
+                    .forEach(function (s) { document.getElementById(s).hidden = (s !== id); });
+            }
+
+            function applyI18n() {
+                document.documentElement.lang = lang;
+                document.title = t('title');
+                document.querySelectorAll('[data-i18n]').forEach(function (el) {
+                    el.textContent = t(el.getAttribute('data-i18n'));
+                });
+                // Re-render whichever outcome is currently on screen.
+                if (lastResult) render(lastResult);
+            }
+
+            var lastResult = null;
+
+            function fmtSlot(iso) {
+                if (!iso) return '';
+                try {
+                    return new Intl.DateTimeFormat(LOCALE[lang], {
+                        weekday: 'long', day: 'numeric', month: 'long',
+                        hour: '2-digit', minute: '2-digit'
+                    }).format(new Date(iso));
+                } catch (e) { return iso; }
+            }
+
+            function render(res) {
+                lastResult = res;
+                if (res.kind === 'done') {
+                    document.getElementById('done-sub').textContent =
+                        res.already ? t('done_already') : t('done_sub');
+                    var slotBox = document.getElementById('done-slot');
+                    if (res.datetime) {
+                        slotBox.hidden = false;
+                        slotBox.textContent = fmtSlot(res.datetime);
+                    } else { slotBox.hidden = true; }
+                    var join = document.getElementById('btn-join');
+                    if (res.invitation_url) {
+                        join.hidden = false; join.href = res.invitation_url;
+                    } else { join.hidden = true; }
+                    show('state-done');
+                    return;
+                }
+                if (res.kind === 'error') {
+                    document.getElementById('error-sub').textContent = t(res.messageKey);
+                    // Only offer "book again" when the slot is genuinely gone.
+                    var rebook = document.getElementById('btn-rebook');
+                    rebook.hidden = !res.canRebook;
+                    rebook.href = BOOKING_PAGE_URL;
+                    // Only offer a retry when trying again could actually work.
+                    document.getElementById('btn-retry').hidden = !res.canRetry;
+                    show('state-error');
+                    return;
+                }
+                show('state-ready');
+            }
+
+            var ERRORS = {
+                missing_token: { key: 'err_missing_token', rebook: true, retry: false },
+                not_found: { key: 'err_not_found', rebook: true, retry: false },
+                expired: { key: 'err_expired', rebook: true, retry: false },
+                slot_passed: { key: 'err_slot_passed', rebook: true, retry: false },
+                slot_taken: { key: 'err_slot_taken', rebook: true, retry: false },
+                cancelled: { key: 'err_cancelled', rebook: true, retry: false },
+                unexpected_status: { key: 'err_generic', rebook: true, retry: false },
+                // The hold is kept on a 502, so clicking again is worth doing.
+                bubble_failed: { key: 'err_bubble_failed', rebook: false, retry: true }
+            };
+
+            function fail(code) {
+                var e = ERRORS[code] || { key: 'err_generic', rebook: false, retry: true };
+                render({ kind: 'error', messageKey: e.key, canRebook: e.rebook, canRetry: e.retry });
+            }
+
+            function confirmBooking() {
+                if (!TOKEN) { fail('missing_token'); return; }
+                show('state-working');
+
+                fetch(CONFIRM_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: TOKEN, lang: lang })
+                })
+                    .then(function (r) {
+                        return r.json().catch(function () { return {}; }).then(function (body) {
+                            return { ok: r.ok, status: r.status, body: body };
+                        });
+                    })
+                    .then(function (res) {
+                        if (res.ok && res.body.status === 'confirmed') {
+                            render({
+                                kind: 'done',
+                                already: !!res.body.already,
+                                datetime: res.body.datetime,
+                                invitation_url: res.body.invitation_url
+                            });
+                            return;
+                        }
+                        fail(res.body.error_code);
+                    })
+                    .catch(function (err) {
+                        console.error('[confirm] request failed:', err);
+                        // Network-level failure: retrying is the right advice.
+                        render({ kind: 'error', messageKey: 'err_generic', canRebook: false, canRetry: true });
+                    });
+            }
+
+            document.getElementById('btn-confirm').addEventListener('click', confirmBooking);
+            document.getElementById('btn-retry').addEventListener('click', confirmBooking);
+
+            document.getElementById('lang-switch').addEventListener('click', function (e) {
+                var b = e.target.closest('.lang-btn'); if (!b) return;
+                if (b.dataset.lang === lang) return;
+                sessionStorage.setItem('lang-manual', '1');
+                window.location.href = langSwitchUrl(b.dataset.lang);
+            });
+
+            applyI18n();
+            if (!TOKEN) { fail('missing_token'); }
+            else if (AUTO_CONFIRM) { confirmBooking(); }
+            else { show('state-ready'); }
+        })();
+    </script>
+</body>
+
+</html>

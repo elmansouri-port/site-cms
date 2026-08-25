@@ -1,0 +1,24 @@
+# Keep the build context small: the site's media alone is ~260 MB, so anything
+# that does not belong in an image must not be sent to the daemon.
+.git
+_source
+node_modules
+**/node_modules
+**/dist
+**/.astro
+apps/web/dist
+apps/cms/dist
+data
+uploads
+# Every .env, at any depth: Vite inlines them at build time, so one reaching
+# the build context would freeze the wrong values into the image — and bake any
+# secret it holds into the bundle.
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+*.log
+docs-internal
+.vscode
+.idea

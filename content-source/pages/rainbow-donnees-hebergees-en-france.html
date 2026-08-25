@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="rainbow-donnees-hebergees-en-france.meta.title">Souveraineté numérique  Vos données hébergées en France | Rainbow by ALE</title>
+    <meta name="description" content="Rainbow héberge vos données en France sous droit français : RGPD, HDS, qualification ANSSI, zéro exposition au Cloud Act, zéro compromis." data-i18n-attr="content:rainbow-donnees-hebergees-en-france.meta.description">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://rainbow-portal.example.com/rainbow-donnees-hebergees-en-france">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Souveraineté numérique  Vos données hébergées en France" data-i18n-attr="content:rainbow-donnees-hebergees-en-france.meta.title_2">
+    <meta property="og:description" content="Rainbow héberge vos données en France sous droit français : RGPD, HDS, qualification ANSSI, zéro exposition au Cloud Act, zéro compromis." data-i18n-attr="content:rainbow-donnees-hebergees-en-france.meta.description">
+    <meta property="og:url" content="https://rainbow-portal.example.com/rainbow-donnees-hebergees-en-france">
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json" data-i18n-raw="rainbow-donnees-hebergees-en-france.meta.schema">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Souveraineté numérique  Vos données hébergées en France",
+        "url": "https://rainbow-portal.example.com/rainbow-donnees-hebergees-en-france",
+        "description": "Rainbow héberge vos données en France sous droit français : RGPD, HDS, qualification ANSSI, zéro exposition au Cloud Act, zéro compromis.",
+        "publisher": { "@type": "Organization", "name": "ALE International", "url": "https://rainbow-portal.example.com/" }
+    }
+    </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 300: '#c4b5fd', 400: '#a78bfa', 500: '#5e2d91', 600: '#4a2373', 700: '#3c1c5e' },
+                        navy: { 900: '#1e1b4b', 800: '#312e81', 700: '#3730a3' }
+                    },
+                    fontFamily: { sans: ['Google Sans', 'system-ui', 'sans-serif'] },
+                    borderRadius: { btn: '10px' }
+                }
+            }
+        }
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/mega-menu.css">
+    <style>
+        .section-anchor { scroll-margin-top: 110px; }
+
+        /* ── Certification flip cards (same component as the homepage carousel) ── */
+        .compliance-card { perspective: 1000px; min-height: 300px; cursor: pointer; }
+        .compliance-card-inner {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            transition: transform 0.65s cubic-bezier(.4,0,.2,1);
+            transform-style: preserve-3d;
+            border-radius: 20px;
+            box-shadow: 0 2px 12px rgba(80,70,160,0.06);
+        }
+        .compliance-card:hover .compliance-card-inner,
+        .compliance-card.flipped .compliance-card-inner { transform: rotateY(180deg); }
+        .compliance-card.flip-demo .compliance-card-inner { transform: rotateY(180deg); }
+        .compliance-card-front, .compliance-card-back {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        .compliance-card-front {
+            background: white; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; padding: 2rem; text-align: center;
+        }
+        .compliance-card-back {
+            transform: rotateY(180deg); background: white;
+            display: flex; flex-direction: column; padding: 2rem 1.75rem;
+        }
+        .compliance-card-back p { font-size: 0.9375rem; color: #374151; line-height: 1.7; flex: 1; display: flex; align-items: center; }
+        .cert-carousel { position: relative; display: flex; align-items: center; gap: 10px; }
+        .cert-carousel-track {
+            flex: 1 1 auto; display: flex; gap: 16px; overflow-x: auto;
+            scroll-snap-type: x mandatory; scroll-behavior: smooth; padding: 10px 4px;
+            -webkit-overflow-scrolling: touch; scrollbar-width: none;
+            -webkit-mask-image: linear-gradient(to right, transparent 0, #000 56px, #000 calc(100% - 56px), transparent 100%);
+            mask-image: linear-gradient(to right, transparent 0, #000 56px, #000 calc(100% - 56px), transparent 100%);
+        }
+        .cert-carousel-track::-webkit-scrollbar { display: none; }
+        .cert-slide { flex: 0 0 auto; width: 280px; scroll-snap-align: start; }
+        @media (max-width: 640px) {
+            .cert-slide { width: 82%; }
+            .cert-carousel-arrow { display: none; }
+            .compliance-card { min-height: 260px; }
+            .compliance-card-front { padding: 1.5rem; }
+            .compliance-card-back { padding: 1.5rem 1.25rem; }
+        }
+        .cert-carousel-arrow {
+            flex: 0 0 auto; width: 44px; height: 44px; border-radius: 9999px;
+            border: 1px solid #e5e1f3; background: #ffffff; color: #5e2d91;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+            box-shadow: 0 4px 14px rgba(80,55,145,0.12);
+            transition: background 0.2s, color 0.2s, opacity 0.2s; z-index: 2;
+        }
+        .cert-carousel-arrow:hover { background: #5e2d91; color: #ffffff; }
+        .cert-carousel-arrow svg { width: 20px; height: 20px; }
+        .cert-carousel-arrow[disabled] { opacity: 0.3; cursor: default; box-shadow: none; }
+        .cert-carousel-arrow[disabled]:hover { background: #ffffff; color: #5e2d91; }
+    </style>
+</head>
+<body class="font-sans text-gray-700 antialiased bg-white">
+
+    <!-- ===== NAV ===== -->
+    <nav id="navbar" class="fixed top-0 w-full z-50 glass-nav">
+        <div class="max-w-6xl mx-auto px-6 flex items-center justify-between h-16">
+            <a href="/fr" class="flex items-center gap-2.5 shrink-0">
+                <img src="/images/Rainbow-AL-logo-banner.webp" alt="Rainbow" class="h-12 w-auto" data-i18n-attr="alt:common.nav.rainbow_alt">
+            </a>
+            <div class="hidden lg:flex items-center justify-center flex-1 gap-8">
+                <div class="nav-dropdown">
+                    <a href="#" class="text-sm text-gray-500 hover:text-navy-900 transition-colors font-medium">
+                        <span data-i18n="common.nav.produits">Produits</span>
+                        <svg class="chevron w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                    </a>
+
+                </div>
+                <a href="/fr/tarifs" class="text-sm text-gray-500 hover:text-navy-900 transition-colors font-medium" style="font-size:1rem" data-i18n="common.nav.tarifs">Tarifs</a>
+                <div class="nav-dropdown">
+                    <a href="#" class="text-sm text-gray-500 hover:text-navy-900 transition-colors font-medium" data-i18n-rich="common.nav.ressources-path-stroke-linecap_5">Ressources
+                        <svg class="chevron w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                    </a>
+
+                </div>
+            </div>
+            <div class="hidden lg:flex items-center gap-4 shrink-0">
+                <div class="lang-switcher" id="lang-switcher">
+                    <button onclick="document.getElementById('lang-switcher').classList.toggle('open')">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"/></svg>
+                        <span id="lang-current" data-i18n="common.nav.en_3">EN</span>
+                        <svg class="lang-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div class="lang-dropdown" id="lang-dropdown"></div>
+                </div>
+                <a href="https://web.openrainbow.net/rb/2.176.0/login" class="px-5 py-2.5 rounded-btn border-2 border-brand-500 text-purple-900 hover:bg-gray-50 text-sm font-semibold transition-all active:scale-95 inline-flex items-center justify-center" data-i18n="common.nav.se-connecter_3">Se connecter</a>
+                <a href="https://web.openrainbow.net/rb/2.177.4/trial" class="px-5 py-2.5 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold whitespace-nowrap shadow-md hover:shadow-lg transition-all" data-i18n="common.nav.essai-gratuit_3">Essai gratuit</a>
+            </div>
+            <button id="mobile-menu-btn" class="lg:hidden p-2" aria-label="Menu" data-i18n-attr="aria-label:common.nav.menu_aria-label_5">
+                <svg class="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+        </div>
+        <div id="mobile-menu" class="lg:hidden hidden border-t border-gray-100 bg-white px-5 pt-2 pb-6 shadow-lg space-y-1">
+            <a href="#" class="mob-section-hdr"><span data-i18n="common.nav.produits">Produits</span></a>
+            <div class="mobile-submenu space-y-1">
+                <a href="/fr/products/collaboration" class="block py-1" data-i18n="common.nav.rainbow-collaboration">Rainbow Collaboration</a>
+                <a href="/fr/products/webinar" class="block py-1" data-i18n="common.nav.rainbow-webinar">Rainbow Webinar</a>
+            </div>
+            <a href="/fr/tarifs" class="mob-section-hdr" data-i18n="common.nav.tarifs">Tarifs</a>
+            <a href="#" class="mob-section-hdr" data-i18n="common.nav.ressources">Ressources</a>
+            <div class="mobile-submenu space-y-1">
+                <a href="/fr/blog" class="block py-1" data-i18n="common.nav.blog">Blog</a>
+                <a href="/fr/reviews" class="block py-1" data-i18n="common.nav.avis">Avis</a>
+                <a href="/fr/support" class="block py-1" data-i18n="common.nav.support">Support</a>
+                <a href="/fr/tutorials" class="block py-1" data-i18n="common.nav.tutoriels">Tutoriels</a>
+            </div>
+            <div class="h-px bg-gray-100 mx-1 my-2"></div>
+            <div id="mobile-lang-switcher" class="flex flex-wrap gap-2 px-1 py-1"></div>
+            <div class="flex flex-col gap-2.5 pt-3">
+                <a href="https://web.openrainbow.net/rb/2.176.0/login" class="w-full text-center px-6 py-3 rounded-btn border-2 border-brand-500 text-purple-900 hover:bg-gray-50 text-base font-semibold transition-all active:scale-95" data-i18n="common.nav.se-connecter_3">Se connecter</a>
+                <a href="https://web.openrainbow.net/rb/2.177.4/trial" class="w-full text-center px-6 py-3 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-base font-semibold shadow-md hover:shadow-lg transition-all active:scale-95" data-i18n="common.nav.essai-gratuit_3">Essai gratuit</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== HERO ===== -->
+    <header class="relative pt-40 pb-20 px-6 overflow-hidden bg-white">
+        <div class="absolute top-0 left-0 w-[300px] h-[700px] bg-purple-500 rounded-full blur-[200px] opacity-30 pointer-events-none"></div>
+        <div class="absolute bottom-0 right-0 w-[300px] h-[700px] bg-pink-500 rounded-full blur-[220px] opacity-30 pointer-events-none"></div>
+
+        <div class="max-w-4xl mx-auto text-center relative z-10 animate-on-scroll">
+            <p class="text-sm md:text-base font-bold uppercase tracking-[0.15em] mb-4 hero-badge-gradient" data-i18n="rainbow-donnees-hebergees-en-france.body.souverainet-num-rique">
+                Souverainet&eacute; num&eacute;rique
+            </p>
+            <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold tracking-[-0.03em] leading-[1.2] mb-6 text-gray-900" data-i18n-rich="rainbow-donnees-hebergees-en-france.body.vos-donn-es-sont-h-berg-es-op-r-es">
+                Vos donn&eacute;es sont h&eacute;berg&eacute;es, op&eacute;r&eacute;es, prot&eacute;g&eacute;es <span class="text-brand-500">en France</span>
+            </h1>
+            <p class="text-base md:text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed mb-10" data-i18n="rainbow-donnees-hebergees-en-france.body.rainbow-est-con-u-h-berg-et">
+                Rainbow est con&ccedil;u, h&eacute;berg&eacute; et exploit&eacute; sous droit fran&ccedil;ais, sans exposition au Cloud Act am&eacute;ricain. Une architecture pens&eacute;e pour les organisations qui ne peuvent pas transiger sur la confidentialit&eacute; de leurs &eacute;changes.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="/fr/form-al" class="px-8 py-3 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-base font-bold whitespace-nowrap shadow-2xl shadow-purple-900/20 transition-all active:scale-95 inline-flex items-center justify-center" data-i18n="rainbow-donnees-hebergees-en-france.body.parler-un-expert">
+                    Parler &agrave; un expert
+                </a>
+                <a href="#certifications" class="px-8 py-3 rounded-btn border-2 border-brand-500 text-purple-900 hover:bg-gray-50 text-base font-bold transition-all active:scale-95 inline-flex items-center justify-center" data-i18n="rainbow-donnees-hebergees-en-france.body.voir-nos-certifications">
+                    Voir nos certifications
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- PADDING BOX (wraps all sections after the hero) -->
+    <div class="px-4 md:px-6 lg:px-8 pt-10 md:pt-16 pb-4 md:pb-6 lg:pb-8">
+        <div class="rounded-[32px] shadow-sm border overflow-hidden relative" style="border-color:#672fa287;">
+
+            <!-- ===== RISQUES ===== -->
+            <section id="risques" class="section-anchor py-20 lg:py-24 px-6 bg-white">
+                <div class="max-w-3xl mx-auto text-center mb-14 animate-on-scroll">
+                    <h2 class="text-2xl md:text-4xl font-extrabold text-navy-900 tracking-tight leading-[1.15] mb-6" data-i18n="rainbow-donnees-hebergees-en-france.risques.pourquoi-la-souverainet-num-rique">
+                        Pourquoi la souverainet&eacute; num&eacute;rique n'est plus n&eacute;gociable
+                    </h2>
+                    <p class="text-base md:text-lg text-gray-500 leading-relaxed" data-i18n="rainbow-donnees-hebergees-en-france.risques.le-cloud-act-permet-aux-autorit-s">
+                        Le Cloud Act permet aux autorit&eacute;s am&eacute;ricaines d'acc&eacute;der aux donn&eacute;es h&eacute;berg&eacute;es par une entreprise am&eacute;ricaine, y compris lorsque ces donn&eacute;es sont stock&eacute;es hors des &Eacute;tats-Unis. Pour une collectivit&eacute;, un &eacute;tablissement de sant&eacute; ou une entreprise r&eacute;gul&eacute;e, cela signifie qu'une messagerie ou un outil de visioconf&eacute;rence &eacute;dit&eacute; par un acteur am&eacute;ricain reste, en th&eacute;orie, consultable par une autorit&eacute; &eacute;trang&egrave;re.
+                    </p>
+                </div>
+
+                <div class="max-w-5xl mx-auto grid sm:grid-cols-2 gap-6 animate-stagger">
+                    <div class="border border-brand-200 bg-white rounded-2xl p-7 md:p-8 hover:shadow-lg hover:-translate-y-1 hover:border-brand-300 transition-all duration-300">
+                        <div class="w-11 h-11 rounded-full bg-brand-50 flex items-center justify-center mb-5">
+                            <svg class="w-5 h-5 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9.303 3.376c.866 1.5-.217 3.374-1.948 3.374H4.645c-1.73 0-2.813-1.874-1.948-3.374L10.598 3.378c.866-1.5 3.032-1.5 3.898 0l8.657 15.372ZM12 15.75h.007v.008H12v-.008Z"/></svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-navy-900 mb-3" data-i18n="rainbow-donnees-hebergees-en-france.risques.le-risque-n-est-pas-hypoth-tique">Le risque n'est pas hypoth&eacute;tique</h3>
+                        <p class="text-sm md:text-[15px] text-gray-600 leading-relaxed" data-i18n="rainbow-donnees-hebergees-en-france.risques.le-cloud-act-2018-et-le-patriot">Le Cloud Act (2018) et le Patriot Act s'appliquent &agrave; toute entreprise de droit am&eacute;ricain, quel que soit le lieu physique d'h&eacute;bergement des donn&eacute;es. La localisation du datacenter ne suffit donc pas &agrave; garantir l'&eacute;tanch&eacute;it&eacute; juridique.</p>
+                    </div>
+                    <div class="border border-brand-200 bg-white rounded-2xl p-7 md:p-8 hover:shadow-lg hover:-translate-y-1 hover:border-brand-300 transition-all duration-300">
+                        <div class="w-11 h-11 rounded-full bg-brand-50 flex items-center justify-center mb-5">
+                            <svg class="w-5 h-5 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 5.592-3.824 10.29-9 11.622-5.176-1.332-9-6.03-9-11.622 0-1.31.21-2.571.598-3.751A11.959 11.959 0 0 1 12 2.714a11.959 11.959 0 0 1 8.402 3.535A11.99 11.99 0 0 1 21 12Z"/></svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-navy-900 mb-3" data-i18n="rainbow-donnees-hebergees-en-france.risques.rainbow-une-r-ponse-structurelle">Rainbow, une r&eacute;ponse structurelle et non contractuelle</h3>
+                        <p class="text-sm md:text-[15px] text-gray-600 leading-relaxed" data-i18n="rainbow-donnees-hebergees-en-france.risques.la-conformit-de-rainbow-ne-repose">La conformit&eacute; de Rainbow ne repose pas sur une clause contractuelle mais sur son architecture m&ecirc;me&nbsp;: soci&eacute;t&eacute; &eacute;ditrice fran&ccedil;aise, h&eacute;bergement fran&ccedil;ais, exploitation fran&ccedil;aise. Le Cloud Act ne peut structurellement pas s'appliquer.</p>
+                    </div>
+                    <div class="border border-brand-200 bg-white rounded-2xl p-7 md:p-8 hover:shadow-lg hover:-translate-y-1 hover:border-brand-300 transition-all duration-300">
+                        <div class="w-11 h-11 rounded-full bg-brand-50 flex items-center justify-center mb-5">
+                            <svg class="w-5 h-5 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-navy-900 mb-3" data-i18n="rainbow-donnees-hebergees-en-france.risques.le-secteur-public-et-la-sant-en">Le secteur public et la sant&eacute; en premi&egrave;re ligne</h3>
+                        <p class="text-sm md:text-[15px] text-gray-600 leading-relaxed" data-i18n="rainbow-donnees-hebergees-en-france.risques.collectivit-s-h-pitaux">Collectivit&eacute;s, h&ocirc;pitaux, &eacute;tablissements d'enseignement et entreprises de secteurs r&eacute;gul&eacute;s sont soumis &agrave; des obligations de confidentialit&eacute; renforc&eacute;es, souvent incompatibles avec une solution soumise &agrave; une juridiction &eacute;trang&egrave;re.</p>
+                    </div>
+                    <div class="border border-brand-200 bg-white rounded-2xl p-7 md:p-8 hover:shadow-lg hover:-translate-y-1 hover:border-brand-300 transition-all duration-300">
+                        <div class="w-11 h-11 rounded-full bg-brand-50 flex items-center justify-center mb-5">
+                            <svg class="w-5 h-5 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3v1.5M3 21v-6m0 0 2.77-.693a9 9 0 0 1 6.208.682l.108.054a9 9 0 0 0 6.086.71l3.114-.732a48.524 48.524 0 0 1-.005-10.499l-3.11.732a9 9 0 0 1-6.085-.711l-.108-.054a9 9 0 0 0-6.208-.682L3 4.5M3 15V4.5"/></svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-navy-900 mb-3" data-i18n="rainbow-donnees-hebergees-en-france.risques.une-gouvernance-rest-e-fran-aise">Une gouvernance rest&eacute;e fran&ccedil;aise</h3>
+                        <p class="text-sm md:text-[15px] text-gray-600 leading-relaxed" data-i18n="rainbow-donnees-hebergees-en-france.risques.alcatel-lucent-est-une-soci-t-de">Alcatel-Lucent est une soci&eacute;t&eacute; de droit fran&ccedil;ais, avec un si&egrave;ge social &agrave; Colombes. Sa strat&eacute;gie produit et la gouvernance des donn&eacute;es restent pilot&eacute;es depuis la France, ind&eacute;pendamment de la structure actionnariale du groupe.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== ARCHITECTURE ===== -->
+            <section id="architecture" class="section-anchor py-20 lg:py-28 px-6 bg-white border-t border-gray-100">
+                <div class="max-w-3xl mx-auto text-center mb-14 animate-on-scroll">
+                    <h2 class="text-2xl md:text-4xl font-extrabold text-navy-900 tracking-tight leading-[1.15] mb-6" data-i18n="rainbow-donnees-hebergees-en-france.architecture.une-architecture-pens-e-pour">
+                        Une architecture pens&eacute;e pour rester sous droit fran&ccedil;ais
+                    </h2>
+                    <p class="text-base md:text-lg text-gray-500 leading-relaxed" data-i18n="rainbow-donnees-hebergees-en-france.architecture.de-la-conception-l-exploitation">
+                        De la conception &agrave; l'exploitation, Rainbow est un produit fran&ccedil;ais port&eacute; par des &eacute;quipes fran&ccedil;aises.
+                    </p>
+                </div>
+
+                <div class="max-w-5xl mx-auto grid sm:grid-cols-3 gap-6 animate-stagger">
+                    <div class="text-center px-4">
+                        <div class="w-14 h-14 rounded-full bg-brand-50 flex items-center justify-center mx-auto mb-5">
+                            <svg class="w-6 h-6 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/></svg>
+                        </div>
+                        <h3 class="text-base font-bold text-navy-900 mb-2" data-i18n="rainbow-donnees-hebergees-en-france.architecture.conception-et-r-d-en-france">Conception et R&amp;D en France</h3>
+                        <p class="text-sm text-gray-600 leading-relaxed" data-i18n="rainbow-donnees-hebergees-en-france.architecture.les-quipes-de-conception-et-d-ing">Les &eacute;quipes de conception et d'ing&eacute;nierie de fiabilit&eacute; (SRE) d'Alcatel-Lucent sont bas&eacute;es dans trois sites fran&ccedil;ais&nbsp;: Brest, Illkirch et Colombes.</p>
+                    </div>
+                    <div class="text-center px-4">
+                        <div class="w-14 h-14 rounded-full bg-brand-50 flex items-center justify-center mx-auto mb-5">
+                            <svg class="w-6 h-6 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 3.75c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125"/></svg>
+                        </div>
+                        <h3 class="text-base font-bold text-navy-900 mb-2" data-i18n="rainbow-donnees-hebergees-en-france.architecture.h-bergement-en-france">H&eacute;bergement en France</h3>
+                        <p class="text-sm text-gray-600 leading-relaxed" data-i18n="rainbow-donnees-hebergees-en-france.architecture.les-donn-es-europ-ennes-de-rainbow">Les donn&eacute;es europ&eacute;ennes de Rainbow sont h&eacute;berg&eacute;es chez un op&eacute;rateur cloud fran&ccedil;ais, sur des datacenters isol&eacute;s g&eacute;ographiquement et surveill&eacute;s 24 heures sur 24.</p>
+                    </div>
+                    <div class="text-center px-4">
+                        <div class="w-14 h-14 rounded-full bg-brand-50 flex items-center justify-center mx-auto mb-5">
+                            <svg class="w-6 h-6 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72"/></svg>
+                        </div>
+                        <h3 class="text-base font-bold text-navy-900 mb-2" data-i18n="rainbow-donnees-hebergees-en-france.architecture.rainbow-edge-pour-aller-plus-loin">Rainbow Edge, pour aller plus loin</h3>
+                        <p class="text-sm text-gray-600 leading-relaxed" data-i18n="rainbow-donnees-hebergees-en-france.architecture.pour-les-organisations-qui-l">Pour les organisations qui l'exigent, Rainbow peut &ecirc;tre d&eacute;ploy&eacute; dans le datacenter priv&eacute; du client, offrant un niveau de ma&icirc;trise encore sup&eacute;rieur sur les donn&eacute;es et les traitements.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== CERTIFICATIONS ===== -->
+            <section id="certifications" class="section-anchor py-20 lg:py-28 bg-gray-50 border-t border-gray-100">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center max-w-3xl mx-auto mb-14 animate-on-scroll">
+                        <h2 class="text-2xl md:text-4xl font-extrabold text-navy-900 tracking-tight leading-[1.15] mb-4" data-i18n="rainbow-donnees-hebergees-en-france.certifications.nos-certifications-votre-garantie">
+                            Nos certifications, votre garantie
+                        </h2>
+                        <p class="text-base md:text-lg text-gray-500 leading-relaxed" data-i18n="rainbow-donnees-hebergees-en-france.certifications.chaque-certification-atteste-d-une">
+                            Chaque certification atteste d'une exigence v&eacute;rifi&eacute;e par un tiers ind&eacute;pendant&nbsp;: retournez les cartes pour le d&eacute;tail.
+                        </p>
+                    </div>
+
+                    <!-- Certifications carousel (one sliding row) -->
+                    <div class="cert-carousel max-w-6xl mx-auto">
+                        <button type="button" class="cert-carousel-arrow cert-prev" aria-label="Certification pr&eacute;c&eacute;dente" data-i18n-attr="aria-label:rainbow-donnees-hebergees-en-france.certifications.certification-pr-c-dente_aria-label">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                        </button>
+                        <div class="cert-carousel-track" id="cert-track">
+                            <!-- ANSSI CSPN -->
+                            <div class="cert-slide">
+                                <div class="compliance-card group">
+                                    <div class="compliance-card-inner">
+                                        <div class="compliance-card-front">
+                                            <div class="compliance-card-logo-area">
+                                                <img src="/images/certs/anssi-cspn.png" alt="ANSSI CSPN" / data-i18n-attr="alt:rainbow-donnees-hebergees-en-france.certifications.anssi-cspn_alt">
+                                            </div>
+                                            <h3 class="compliance-card-title" data-i18n="rainbow-donnees-hebergees-en-france.certifications.anssi-cspn">ANSSI &ndash; CSPN</h3>
+                                            <div class="card-deco-blob"></div>
+                                            <div class="card-deco-dots">
+                                                <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                                <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                                <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                                <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                            </div>
+                                        </div>
+                                        <div class="compliance-card-back">
+                                            <p data-i18n="rainbow-donnees-hebergees-en-france.certifications.certification-de-s-curit-de">Certification de S&eacute;curit&eacute; de Premier Niveau d&eacute;livr&eacute;e par l'Agence Nationale de la S&eacute;curit&eacute; des Syst&egrave;mes d'Information sur l'infrastructure cloud priv&eacute;e de Rainbow.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- HDS -->
+                            <div class="cert-slide">
+                                <div class="compliance-card group">
+                                    <div class="compliance-card-inner">
+                                        <div class="compliance-card-front">
+                                            <div class="compliance-card-logo-area">
+                                                <img src="/images/hds.webp" alt="HDS" / data-i18n-attr="alt:rainbow-donnees-hebergees-en-france.certifications.hds_alt">
+                                            </div>
+                                            <h3 class="compliance-card-title" data-i18n="rainbow-donnees-hebergees-en-france.certifications.hds">HDS</h3>
+                                            <div class="card-deco-waves">
+                                                <svg viewBox="0 0 100 100">
+                                                    <path d="M-20,120 C 20,80 60,80 120,-20" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                                    <path d="M-10,120 C 30,90 70,90 120,-10" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                                    <path d="M0,120 C 40,100 80,100 120,0" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                                    <path d="M10,120 C 50,110 90,110 120,10" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                                    <path d="M20,120 C 60,120 100,120 120,20" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                                </svg>
+                                                <div class="card-wave-dot-1"></div>
+                                                <div class="card-wave-dot-2"></div>
+                                            </div>
+                                        </div>
+                                        <div class="compliance-card-back">
+                                            <p data-i18n="rainbow-donnees-hebergees-en-france.certifications.h-bergeur-de-donn-es-de-sant">H&eacute;bergeur de Donn&eacute;es de Sant&eacute;&nbsp;: certification fran&ccedil;aise encadrant strictement l'h&eacute;bergement des donn&eacute;es m&eacute;dicales et de sant&eacute;.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- BSI C5 -->
+                            <div class="cert-slide">
+                                <div class="compliance-card group">
+                                    <div class="compliance-card-inner">
+                                        <div class="compliance-card-front">
+                                            <div class="compliance-card-logo-area">
+                                                <img src="/images/certs/c5.png" alt="BSI C5" / data-i18n-attr="alt:rainbow-donnees-hebergees-en-france.certifications.bsi-c5_alt">
+                                            </div>
+                                            <h3 class="compliance-card-title" data-i18n="rainbow-donnees-hebergees-en-france.certifications.bsi-c5">BSI C5</h3>
+                                            <div class="card-deco-blob"></div>
+                                            <div class="card-deco-dots">
+                                                <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                                <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                                <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                                <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                            </div>
+                                        </div>
+                                        <div class="compliance-card-back">
+                                            <p data-i18n="rainbow-donnees-hebergees-en-france.certifications.r-f-rentiel-allemand-de-s-curit">R&eacute;f&eacute;rentiel allemand de s&eacute;curit&eacute; cloud (Cloud Computing Compliance Criteria Catalogue) du BSI.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- RGPD -->
+                            <div class="cert-slide">
+                                <div class="compliance-card group">
+                                    <div class="compliance-card-inner">
+                                        <div class="compliance-card-front">
+                                            <div class="compliance-card-logo-area">
+                                                <img src="/images/rgpd.jpg" alt="RGPD" / data-i18n-attr="alt:rainbow-donnees-hebergees-en-france.certifications.rgpd_alt">
+                                            </div>
+                                            <h3 class="compliance-card-title" data-i18n="rainbow-donnees-hebergees-en-france.certifications.rgpd">RGPD</h3>
+                                            <div class="card-deco-blob"></div>
+                                            <div class="card-deco-dots">
+                                                <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                                <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                                <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                                <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                            </div>
+                                        </div>
+                                        <div class="compliance-card-back">
+                                            <p data-i18n="rainbow-donnees-hebergees-en-france.certifications.conformit-totale-au-r-glement-g-n">Conformit&eacute; totale au R&egrave;glement G&eacute;n&eacute;ral sur la Protection des Donn&eacute;es&nbsp;: droit d'acc&egrave;s, de rectification et de suppression garanti.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ISO/IEC 27001 -->
+                            <div class="cert-slide">
+                                <div class="compliance-card group">
+                                    <div class="compliance-card-inner">
+                                        <div class="compliance-card-front">
+                                            <div class="compliance-card-logo-area">
+                                                <img src="/images/iso9001.png" alt="ISO/IEC 27001" / data-i18n-attr="alt:rainbow-donnees-hebergees-en-france.certifications.iso-iec-27001_alt">
+                                            </div>
+                                            <h3 class="compliance-card-title" data-i18n="rainbow-donnees-hebergees-en-france.certifications.iso-iec-27001">ISO/IEC 27001</h3>
+                                            <div class="card-deco-waves">
+                                                <svg viewBox="0 0 100 100">
+                                                    <path d="M-20,120 C 20,80 60,80 120,-20" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                                    <path d="M-10,120 C 30,90 70,90 120,-10" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                                    <path d="M0,120 C 40,100 80,100 120,0" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                                    <path d="M10,120 C 50,110 90,110 120,10" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                                    <path d="M20,120 C 60,120 100,120 120,20" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                                </svg>
+                                                <div class="card-wave-dot-1"></div>
+                                                <div class="card-wave-dot-2"></div>
+                                            </div>
+                                        </div>
+                                        <div class="compliance-card-back">
+                                            <p data-i18n="rainbow-donnees-hebergees-en-france.certifications.norme-internationale-de-r-f-rence">Norme internationale de r&eacute;f&eacute;rence pour le management de la s&eacute;curit&eacute; de l'information, couvrant l'ensemble des services cloud d'ALE.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- HIPAA -->
+                            <div class="cert-slide">
+                                <div class="compliance-card group">
+                                    <div class="compliance-card-inner">
+                                        <div class="compliance-card-front">
+                                            <div class="compliance-card-logo-area">
+                                                <img src="/images/hipaa.png" alt="HIPAA" / data-i18n-attr="alt:rainbow-donnees-hebergees-en-france.certifications.hipaa_alt">
+                                            </div>
+                                            <h3 class="compliance-card-title" data-i18n="rainbow-donnees-hebergees-en-france.certifications.hipaa">HIPAA</h3>
+                                            <div class="card-deco-blob"></div>
+                                            <div class="card-deco-dots">
+                                                <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                                <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                                <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                                <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                            </div>
+                                        </div>
+                                        <div class="compliance-card-back">
+                                            <p data-i18n="rainbow-donnees-hebergees-en-france.certifications.r-f-rentiel-am-ricain-de">R&eacute;f&eacute;rentiel am&eacute;ricain de protection des donn&eacute;es de sant&eacute;, pour les clients internationaux de Rainbow dans le secteur m&eacute;dical.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- FERPA -->
+                            <div class="cert-slide">
+                                <div class="compliance-card group">
+                                    <div class="compliance-card-inner">
+                                        <div class="compliance-card-front">
+                                            <div class="compliance-card-logo-area">
+                                                <img src="/images/certs/ferpa.png" alt="FERPA" / data-i18n-attr="alt:rainbow-donnees-hebergees-en-france.certifications.ferpa_alt">
+                                            </div>
+                                            <h3 class="compliance-card-title" data-i18n="rainbow-donnees-hebergees-en-france.certifications.ferpa">FERPA</h3>
+                                            <div class="card-deco-waves">
+                                                <svg viewBox="0 0 100 100">
+                                                    <path d="M-20,120 C 20,80 60,80 120,-20" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                                    <path d="M-10,120 C 30,90 70,90 120,-10" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                                    <path d="M0,120 C 40,100 80,100 120,0" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                                    <path d="M10,120 C 50,110 90,110 120,10" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                                    <path d="M20,120 C 60,120 100,120 120,20" fill="none" stroke="#f0c0d4" stroke-width="1.2" />
+                                                </svg>
+                                                <div class="card-wave-dot-1"></div>
+                                                <div class="card-wave-dot-2"></div>
+                                            </div>
+                                        </div>
+                                        <div class="compliance-card-back">
+                                            <p data-i18n="rainbow-donnees-hebergees-en-france.certifications.r-f-rentiel-de-protection-des-donn">R&eacute;f&eacute;rentiel de protection des donn&eacute;es des &eacute;tudiants, applicable aux &eacute;tablissements d'enseignement utilisant Rainbow.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ANC -->
+                            <div class="cert-slide">
+                                <div class="compliance-card group">
+                                    <div class="compliance-card-inner">
+                                        <div class="compliance-card-front">
+                                            <div class="compliance-card-logo-area">
+                                                <img src="/images/acn.png" alt="ANC" / data-i18n-attr="alt:rainbow-donnees-hebergees-en-france.certifications.anc_alt">
+                                            </div>
+                                            <h3 class="compliance-card-title" data-i18n="rainbow-donnees-hebergees-en-france.certifications.anc">ANC</h3>
+                                            <div class="card-deco-blob"></div>
+                                            <div class="card-deco-dots">
+                                                <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                                <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                                <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                                <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                            </div>
+                                        </div>
+                                        <div class="compliance-card-back">
+                                            <p data-i18n="rainbow-donnees-hebergees-en-france.certifications.r-f-rentiel-de-l-agence-italienne">R&eacute;f&eacute;rentiel de l'Agence italienne pour la cybers&eacute;curit&eacute;, garantissant une infrastructure robuste pour les clients italiens.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ENS -->
+                            <div class="cert-slide">
+                                <div class="compliance-card group">
+                                    <div class="compliance-card-inner">
+                                        <div class="compliance-card-front">
+                                            <div class="compliance-card-logo-area">
+                                                <img src="/images/certs/ens.webp" alt="ENS" / data-i18n-attr="alt:rainbow-donnees-hebergees-en-france.certifications.ens_alt">
+                                            </div>
+                                            <h3 class="compliance-card-title" data-i18n="rainbow-donnees-hebergees-en-france.certifications.ens">ENS</h3>
+                                            <div class="card-deco-blob"></div>
+                                            <div class="card-deco-dots">
+                                                <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                                <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                                <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                                <div class="card-deco-dots-row"><div class="card-deco-dot"></div><div class="card-deco-dot"></div><div class="card-deco-dot"></div></div>
+                                            </div>
+                                        </div>
+                                        <div class="compliance-card-back">
+                                            <p data-i18n="rainbow-donnees-hebergees-en-france.certifications.r-f-rentiel-du-syst-me-national-de">R&eacute;f&eacute;rentiel du syst&egrave;me national de s&eacute;curit&eacute; espagnol (Esquema Nacional de Seguridad) visant &agrave; prot&eacute;ger les syst&egrave;mes d'information contre les cybermenaces.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="cert-carousel-arrow cert-next" aria-label="Certification suivante" data-i18n-attr="aria-label:rainbow-donnees-hebergees-en-france.certifications.certification-suivante_aria-label">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+
+                    <p class="text-center text-sm text-gray-500 max-w-2xl mx-auto mt-12" data-i18n="rainbow-donnees-hebergees-en-france.certifications.les-certificats-sont-disponibles">
+                        Les certificats sont disponibles sur demande aupr&egrave;s de votre contact commercial.
+                    </p>
+                </div>
+            </section>
+
+            <!-- ===== SÉCURITÉ TECHNIQUE ===== -->
+            <section id="securite" class="section-anchor py-20 lg:py-28 px-6 bg-white border-t border-gray-100">
+                <div class="max-w-3xl mx-auto text-center mb-14 animate-on-scroll">
+                    <h2 class="text-2xl md:text-4xl font-extrabold text-navy-900 tracking-tight leading-[1.15] mb-6" data-i18n="rainbow-donnees-hebergees-en-france.securite.s-curit-technique-le-d-tail-qui">
+                        S&eacute;curit&eacute; technique, le d&eacute;tail qui rassure
+                    </h2>
+                    <p class="text-base md:text-lg text-gray-500 leading-relaxed" data-i18n="rainbow-donnees-hebergees-en-france.securite.la-conformit-r-glementaire-ne">
+                        La conformit&eacute; r&egrave;glementaire ne suffit pas sans une architecture technique robuste. Voici ce qui prot&egrave;ge concr&egrave;tement vos &eacute;changes au quotidien.
+                    </p>
+                </div>
+
+                <div class="max-w-5xl mx-auto grid sm:grid-cols-3 gap-6 animate-stagger">
+                    <div class="text-center px-4">
+                        <div class="w-14 h-14 rounded-full bg-brand-50 flex items-center justify-center mx-auto mb-5">
+                            <svg class="w-6 h-6 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+                        </div>
+                        <h3 class="text-base font-bold text-navy-900 mb-2" data-i18n="rainbow-donnees-hebergees-en-france.securite.chiffrement-syst-matique">Chiffrement syst&eacute;matique</h3>
+                        <p class="text-sm text-gray-600 leading-relaxed" data-i18n="rainbow-donnees-hebergees-en-france.securite.chiffrement-des-flux-en-transit">Chiffrement des flux en transit (WebRTC, TLS) et des donn&eacute;es au repos (AES-256), sur l'ensemble des usages Rainbow&nbsp;: messages, appels, visio, fichiers.</p>
+                    </div>
+                    <div class="text-center px-4">
+                        <div class="w-14 h-14 rounded-full bg-brand-50 flex items-center justify-center mx-auto mb-5">
+                            <svg class="w-6 h-6 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 17.25v-.228a4.5 4.5 0 00-.12-1.03l-2.268-9.64a3.375 3.375 0 00-3.285-2.602H7.923a3.375 3.375 0 00-3.285 2.602l-2.268 9.64a4.5 4.5 0 00-.12 1.03v.228m19.5 0a3 3 0 01-3 3H5.25a3 3 0 01-3-3m19.5 0a3 3 0 00-3-3H5.25a3 3 0 00-3 3m16.5 0h.008v.008h-.008v-.008zm-3 0h.008v.008h-.008v-.008z"/></svg>
+                        </div>
+                        <h3 class="text-base font-bold text-navy-900 mb-2" data-i18n="rainbow-donnees-hebergees-en-france.securite.datacenters-sous-haute">Datacenters sous haute surveillance</h3>
+                        <p class="text-sm text-gray-600 leading-relaxed" data-i18n="rainbow-donnees-hebergees-en-france.securite.acc-s-physique-strictement-contr-l">Acc&egrave;s physique strictement contr&ocirc;l&eacute;s 24h/24 et 7j/7, infrastructures certifi&eacute;es ISO 27001 et SOC, isolation r&eacute;seau renforc&eacute;e.</p>
+                    </div>
+                    <div class="text-center px-4">
+                        <div class="w-14 h-14 rounded-full bg-brand-50 flex items-center justify-center mx-auto mb-5">
+                            <svg class="w-6 h-6 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/></svg>
+                        </div>
+                        <h3 class="text-base font-bold text-navy-900 mb-2" data-i18n="rainbow-donnees-hebergees-en-france.securite.audits-et-tests-d-intrusion">Audits et tests d'intrusion continus</h3>
+                        <p class="text-sm text-gray-600 leading-relaxed" data-i18n="rainbow-donnees-hebergees-en-france.securite.scans-de-vuln-rabilit-s-r-seau">Scans de vuln&eacute;rabilit&eacute;s r&eacute;seau, tests d'intrusion applicatifs et audits de s&eacute;curit&eacute; manuels men&eacute;s en continu par des tiers ind&eacute;pendants.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== COMPARATIF ===== -->
+            <section id="comparatif" class="section-anchor py-20 lg:py-28 px-6 border-t border-gray-100" style="background: radial-gradient(ellipse 70% 90% at 50% 0%, rgba(124,58,237,0.10) 0%, transparent 65%), linear-gradient(180deg, #f5f3ff 0%, #ffffff 100%);">
+                <div class="max-w-3xl mx-auto text-center mb-12 animate-on-scroll">
+                    <h2 class="text-2xl md:text-4xl font-extrabold text-navy-900 tracking-tight leading-[1.15] mb-4" data-i18n="rainbow-donnees-hebergees-en-france.comparatif.rainbow-face-aux-plateformes-am">
+                        Rainbow face aux plateformes am&eacute;ricaines
+                    </h2>
+                    <p class="text-base md:text-lg text-gray-500 leading-relaxed" data-i18n="rainbow-donnees-hebergees-en-france.comparatif.un-comparatif-simple-pour">
+                        Un comparatif simple pour objectiver ce que &laquo;&nbsp;souverainet&eacute;&nbsp;&raquo; signifie concr&egrave;tement.
+                    </p>
+                </div>
+
+                <div class="max-w-4xl mx-auto bg-white border border-gray-200 rounded-[10px] shadow-[0_4px_25px_-5px_rgba(0,0,0,0.02)] overflow-hidden animate-on-scroll">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-gray-200 bg-gray-50/50">
+                                    <th class="p-6 text-sm font-bold text-navy-900 w-[34%]" data-i18n="rainbow-donnees-hebergees-en-france.comparatif.crit-re">Crit&egrave;re</th>
+                                    <th class="p-6 text-sm font-bold text-navy-900 w-[33%] text-center bg-brand-50/30" data-i18n="rainbow-donnees-hebergees-en-france.comparatif.rainbow">Rainbow</th>
+                                    <th class="p-6 text-sm font-bold text-navy-900 w-[33%] text-center" data-i18n="rainbow-donnees-hebergees-en-france.comparatif.plateforme-am-ricaine-standard">Plateforme am&eacute;ricaine standard</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 text-sm text-gray-600">
+                                <tr class="bg-slate-50/50">
+                                    <td colspan="3" class="px-6 py-3.5 font-bold text-navy-900 text-[11px] uppercase tracking-wider" data-i18n="rainbow-donnees-hebergees-en-france.comparatif.souverainet-conformit">Souverainet&eacute; &amp; conformit&eacute;</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-6 font-medium text-navy-900" data-i18n="rainbow-donnees-hebergees-en-france.comparatif.soci-t-ditrice">Soci&eacute;t&eacute; &eacute;ditrice</td>
+                                    <td class="p-6 text-center bg-brand-50/10 font-semibold text-green-600" data-i18n="rainbow-donnees-hebergees-en-france.comparatif.fran-aise-droit-fran-ais">Fran&ccedil;aise (droit fran&ccedil;ais)</td>
+                                    <td class="p-6 text-center font-semibold text-blue-500" data-i18n="rainbow-donnees-hebergees-en-france.comparatif.am-ricaine">Am&eacute;ricaine</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-6 font-medium text-navy-900" data-i18n="rainbow-donnees-hebergees-en-france.comparatif.exposition-au-cloud-act">Exposition au Cloud Act</td>
+                                    <td class="p-6 text-center bg-brand-50/10 font-semibold text-green-600" data-i18n="rainbow-donnees-hebergees-en-france.comparatif.non-applicable">Non applicable</td>
+                                    <td class="p-6 text-center font-semibold text-blue-500" data-i18n="rainbow-donnees-hebergees-en-france.comparatif.applicable">Applicable</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-6 font-medium text-navy-900" data-i18n="rainbow-donnees-hebergees-en-france.comparatif.conformit-rgpd">Conformit&eacute; RGPD</td>
+                                    <td class="p-6 text-center bg-brand-50/10 font-semibold text-green-600" data-i18n="rainbow-donnees-hebergees-en-france.comparatif.native">Native</td>
+                                    <td class="p-6 text-center font-semibold text-blue-500" data-i18n="rainbow-donnees-hebergees-en-france.comparatif.souvent-partielle">Souvent partielle</td>
+                                </tr>
+
+                                <tr class="bg-slate-50/50">
+                                    <td colspan="3" class="px-6 py-3.5 font-bold text-navy-900 text-[11px] uppercase tracking-wider" data-i18n="rainbow-donnees-hebergees-en-france.comparatif.h-bergement-certifications">H&eacute;bergement &amp; certifications</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-6 font-medium text-navy-900" data-i18n="rainbow-donnees-hebergees-en-france.comparatif.h-bergement-des-donn-es-europe">H&eacute;bergement des donn&eacute;es (Europe)</td>
+                                    <td class="p-6 text-center bg-brand-50/10 font-semibold text-green-600" data-i18n="rainbow-donnees-hebergees-en-france.comparatif.ovh-cloud-france">OVH Cloud France</td>
+                                    <td class="p-6 text-center font-semibold text-blue-500" data-i18n="rainbow-donnees-hebergees-en-france.comparatif.variable-souvent-hors-ue">Variable, souvent hors UE</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-6 font-medium text-navy-900" data-i18n="rainbow-donnees-hebergees-en-france.comparatif.certification-hds-donn-es-de-sant">Certification HDS (donn&eacute;es de sant&eacute;)</td>
+                                    <td class="p-6 text-center bg-brand-50/10 font-semibold text-green-600" data-i18n="rainbow-donnees-hebergees-en-france.comparatif.oui">Oui</td>
+                                    <td class="p-6 text-center font-semibold text-blue-500" data-i18n="rainbow-donnees-hebergees-en-france.comparatif.rarement">Rarement</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-6 font-medium text-navy-900" data-i18n="rainbow-donnees-hebergees-en-france.comparatif.qualification-anssi">Qualification ANSSI</td>
+                                    <td class="p-6 text-center bg-brand-50/10 font-semibold text-green-600" data-i18n="rainbow-donnees-hebergees-en-france.comparatif.oui-cspn">Oui (CSPN)</td>
+                                    <td class="p-6 text-center font-semibold text-blue-500" data-i18n="rainbow-donnees-hebergees-en-france.comparatif.non">Non</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="max-w-2xl mx-auto text-center mt-16 animate-on-scroll">
+                    <h2 class="text-xl md:text-2xl font-extrabold text-navy-900 tracking-tight leading-[1.2] mb-4" data-i18n="rainbow-donnees-hebergees-en-france.comparatif.une-question-sur-la-conformit-de">
+                        Une question sur la conformit&eacute; de vos &eacute;changes&nbsp;?
+                    </h2>
+                    <p class="text-base text-gray-500 leading-relaxed mb-8" data-i18n="rainbow-donnees-hebergees-en-france.comparatif.nos-experts-souverainet-r-pondent">
+                        Nos experts souverainet&eacute; r&eacute;pondent &agrave; vos questions techniques, juridiques et sectorielles sous 48h.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <a href="/fr/form-al" class="px-8 py-3 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-base font-bold whitespace-nowrap shadow-md hover:shadow-lg transition-all active:scale-95 inline-flex items-center justify-center" data-i18n="rainbow-donnees-hebergees-en-france.comparatif.contacter-un-expert">
+                            Contacter un expert
+                        </a>
+                        <a href="/fr/a-propos-de-rainbow" class="px-8 py-3 rounded-btn border-2 border-brand-500 text-purple-900 hover:bg-gray-50 text-base font-bold transition-all active:scale-95 inline-flex items-center justify-center" data-i18n="rainbow-donnees-hebergees-en-france.comparatif.d-couvrir-alcatel-lucent">
+                            D&eacute;couvrir Alcatel-Lucent
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Related resource -->
+                <div class="max-w-4xl mx-auto mt-16 animate-on-scroll">
+                    <p class="text-xs font-bold uppercase tracking-wider text-brand-500 mb-4" data-i18n="rainbow-donnees-hebergees-en-france.comparatif.cet-article-pourrait-vous-int">Cet article pourrait vous int&eacute;resser</p>
+                    <a href="/fr/blog" class="group flex flex-col sm:flex-row bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-brand-200 hover:shadow-lg transition-all">
+                        <div class="sm:w-[30%] shrink-0">
+                            <img src="/images/collaboration_hero.jpg" alt="Rainbow x OVHcloud" class="w-full h-48 sm:h-full object-cover" data-i18n-attr="alt:rainbow-donnees-hebergees-en-france.comparatif.rainbow-x-ovhcloud_alt">
+                        </div>
+                        <div class="flex-1 min-w-0 p-6 sm:p-8 flex flex-col justify-center">
+                            <h3 class="text-lg md:text-xl font-bold text-navy-900 leading-snug mb-3 group-hover:text-brand-600 transition-colors" data-i18n="rainbow-donnees-hebergees-en-france.comparatif.rainbow-x-ovh-cloud-l-alliance">Rainbow x OVH Cloud, l'alliance pour une collaboration souveraine</h3>
+                            <p class="text-sm text-gray-600 leading-relaxed mb-5" data-i18n="rainbow-donnees-hebergees-en-france.comparatif.comment-rainbow-et-ovhcloud">Comment Rainbow et OVHcloud unissent leurs infrastructures pour offrir aux entreprises une collaboration cloud pens&eacute;e, h&eacute;berg&eacute;e et op&eacute;r&eacute;e en France, de bout en bout.</p>
+                            <div class="flex items-center justify-between gap-4 flex-wrap">
+                                <span class="text-xs text-gray-400 font-medium" data-i18n="rainbow-donnees-hebergees-en-france.comparatif.par-marie-hillion">Par Marie Hillion</span>
+                                <span class="inline-flex items-center gap-1.5 text-sm font-bold text-brand-500 group-hover:text-brand-600" data-i18n-rich="rainbow-donnees-hebergees-en-france.comparatif.lire-l-article-path-stroke-linecap">
+                                    Lire l'article
+                                    <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                                </span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer-premium text-gray-400 relative z-10 overflow-hidden">
+        <!-- Top hairline glow -->
+        <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-300/60 to-transparent"></div>
+        <!-- Ambient purple wash -->
+        <div class="pointer-events-none absolute inset-0" style="background:
+            radial-gradient(ellipse 70% 55% at 50% -8%, rgba(124,58,237,0.32) 0%, rgba(124,58,237,0.10) 34%, transparent 68%),
+            radial-gradient(ellipse 55% 60% at 88% 108%, rgba(207,0,114,0.16) 0%, transparent 62%),
+            radial-gradient(ellipse 45% 50% at 6% 96%, rgba(94,45,145,0.20) 0%, transparent 60%);"></div>
+        <!-- Soft focal glow behind the CTA -->
+        <div class="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-[760px] h-[440px] bg-brand-500/25 rounded-full blur-[150px]"></div>
+
+        <div class="max-w-6xl mx-auto px-6 relative">
+            <!-- ===== CTA BAND ===== -->
+            <div class="text-center pt-24 pb-16 md:pt-28 md:pb-20 border-b border-white/10">
+                <div class="mb-9">
+                    <img src="/images/rainbow-logo.png" alt="Rainbow" class="w-[70px] h-[70px] object-contain mx-auto" data-i18n-attr="alt:common.footer.rainbow_alt">
+                </div>
+                <h2 class="text-2xl md:text-4xl lg:text-[2.6rem] font-semibold text-white tracking-[-0.025em] leading-[1.18] max-w-4xl mx-auto" style="text-wrap:balance" data-i18n="common.footer.la-prochaine-conversation-de-votre_8">
+                    La prochaine conversation de votre &eacute;quipe m&eacute;rite une infrastructure qui la prot&egrave;ge
+                </h2>
+                <p class="mt-5 text-base md:text-lg text-gray-300/90 max-w-xl mx-auto" style="text-wrap:balance" data-i18n="common.footer.essayez-nos-solutions-rainbow_8">
+                    Essayez nos solutions Rainbow gratuitement pendant 30 jours. Sans carte bancaire.
+                </p>
+                <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a href="/fr/tarifs" class="group inline-flex items-center justify-center gap-2.5 px-9 py-4 rounded-[14px] text-white text-base font-bold tracking-tight"
+                       style="background:#5e2d91;" data-i18n-rich="common.footer.commencez-l-essai-gratuit-path_5">
+                        Commencez l'essai gratuit
+                        <svg class="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                    </a>
+                    <a href="/fr/tarifs" class="inline-flex items-center justify-center px-9 py-4 rounded-[14px] text-white text-base font-bold tracking-tight border border-white/25 hover:bg-white/10 hover:border-white/40 transition-colors" data-i18n="common.footer.voir-les-tarifs_6">
+                        Voir les tarifs
+                    </a>
+                </div>
+            </div>
+
+            <!-- ===== LINK COLUMNS ===== -->
+            <div class="flex flex-col lg:flex-row lg:justify-between gap-12 lg:gap-16 py-16">
+                <!-- Brand -->
+                <div class="max-w-xs">
+                    <img src="/images/ale_white.png" alt="Alcatel-Lucent" class="h-11 w-auto opacity-90 mb-6" data-i18n-attr="alt:common.footer.alcatel-lucent_alt">
+                    <address class="not-italic text-sm text-gray-400 leading-relaxed" data-i18n-rich="common.footer.ale-international-32-avenue-kl-ber_5">
+                        ALE International<br>
+                        32 avenue Kl&eacute;ber<br>
+                        92700 Colombes, France
+                    </address>
+                </div>
+                <!-- Columns -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-8 sm:gap-14">
+                    <div>
+                        <h4 class="text-[11px] font-bold text-white uppercase tracking-[0.16em] mb-5" data-i18n="common.footer.solutions_8">Solutions</h4>
+                        <ul class="space-y-3.5 text-sm">
+                            <li><a href="/fr/products/collaboration" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.rainbow-collaboration">Rainbow Collaboration</a></li>
+                            <li><a href="/fr/products/webinar" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.rainbow-webinar">Rainbow Webinar</a></li>
+                            <li><a href="/fr/tarifs" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.tarifs">Tarifs</a></li>
+                            <li><a href="/fr/telecharger-application-rainbow" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.t-l-chargements">T&eacute;l&eacute;chargements</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.api">API</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-[11px] font-bold text-white uppercase tracking-[0.16em] mb-5" data-i18n="common.footer.developers_5">Developers</h4>
+                        <ul class="space-y-3.5 text-sm">
+                            <li><a href="/fr/centre-aide-rainbow" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.centre-d-aide_3">Centre d'aide</a></li>
+                            <li><a href="/fr/faq" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.faq">FAQ</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.guide-technique">Guide technique</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.code-samples_6">Code samples</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.int-grations">Int&eacute;grations</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.forum-dev_4">Forum dev</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-[11px] font-bold text-white uppercase tracking-[0.16em] mb-5" data-i18n="common.footer.company_5">Company</h4>
+                        <ul class="space-y-3.5 text-sm">
+                            <li><a href="/fr/a-propos-de-rainbow" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.a-propos_4">A propos</a></li>
+                            <li><a href="/fr/rainbow-donnees-hebergees-en-france" class="text-white font-semibold" data-i18n="common.footer.souverainet_8">Souverainet&eacute;</a></li>
+                            <li><a href="/fr/partenaires" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.devenir-partenaire">Devenir partenaire</a></li>
+                            <li><a href="/fr/trouver-un-partenaire" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.trouver-un-partenaire">Trouver un partenaire</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.carri-res">Carri&egrave;res</a></li>
+                            <li><a href="/fr/form-al" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.contact_5">Contact</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== BOTTOM BAR ===== -->
+            <div class="border-t border-white/10 py-8 flex flex-col gap-6">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-5">
+                    <div class="flex items-center gap-3">
+                        <a href="#" aria-label="X" class="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 ring-1 ring-white/10 hover:ring-white/20 flex items-center justify-center transition-all">
+                            <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                        </a>
+                        <a href="#" aria-label="LinkedIn" class="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 ring-1 ring-white/10 hover:ring-white/20 flex items-center justify-center transition-all" data-i18n-attr="aria-label:common.footer.linkedin_aria-label">
+                            <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                        </a>
+                    </div>
+                    <div class="flex items-center gap-6 text-sm">
+                        <a href="/fr/privacy" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.privacy_5">Privacy</a>
+                        <a href="/fr/legal" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.terms_11">Terms</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.cookies">Cookies</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.gdpr_3">GDPR</a>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 leading-relaxed" data-i18n-rich="common.footer.ale-international-ale-usa-inc-all_8">&copy;ALE International, ALE USA Inc. All rights reserved in all countries. The Alcatel-Lucent name and logo are trademarks of Nokia used under license by ALE. To view a list of proprietary ALE trademarks, visit: <a href="https://www.al-enterprise.com/en/legal/trademarks-copyright" target="_blank" rel="noopener" class="hover:text-white transition-colors underline-offset-2 hover:underline">www.al-enterprise.com/en/legal/trademarks-copyright</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ===== SCRIPTS ===== -->
+    <script src="/js/mega-menu.js"></script>
+    <script src="/js/i18n.js"></script>
+    <script>
+        // Scroll-triggered animations
+        (function() {
+            var observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+            document.querySelectorAll('.animate-on-scroll, .animate-stagger').forEach(function(el) {
+                observer.observe(el);
+            });
+        })();
+
+        // Navbar scroll shadow
+        var nav = document.getElementById('navbar');
+        window.addEventListener('scroll', function(){
+            nav.style.boxShadow = window.scrollY > 8 ? '0 1px 12px rgba(30,27,75,.07)' : '';
+        }, {passive:true});
+    </script>
+    <script>
+        // Certifications carousel arrows
+        (function() {
+            var track = document.getElementById('cert-track');
+            if (!track) return;
+            var prev = document.querySelector('.cert-prev');
+            var next = document.querySelector('.cert-next');
+            function step() {
+                var slide = track.querySelector('.cert-slide');
+                return slide ? slide.getBoundingClientRect().width + 16 : 296;
+            }
+            function updateArrows() {
+                var maxScroll = track.scrollWidth - track.clientWidth - 2;
+                if (prev) prev.disabled = track.scrollLeft <= 2;
+                if (next) next.disabled = track.scrollLeft >= maxScroll;
+            }
+            if (prev) prev.addEventListener('click', function(){ track.scrollBy({ left: -step(), behavior: 'smooth' }); });
+            if (next) next.addEventListener('click', function(){ track.scrollBy({ left: step(), behavior: 'smooth' }); });
+            track.addEventListener('scroll', updateArrows, { passive: true });
+            window.addEventListener('resize', updateArrows);
+            updateArrows();
+
+            // Tap-to-flip: :hover never fires on touch devices, so without this,
+            // mobile users could never see the certification descriptions on the card backs.
+            track.querySelectorAll('.compliance-card').forEach(function (card) {
+                card.addEventListener('click', function () {
+                    card.classList.toggle('flipped');
+                });
+            });
+        })();
+    </script>
+<!-- impeccable-live-start -->
+<script src="http://localhost:8400/live.js?token=7e1a9f72-559f-41b5-9268-cc7ffe4bf926"></script>
+<!-- impeccable-live-end -->
+</body>
+</html>

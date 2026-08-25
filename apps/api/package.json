@@ -1,0 +1,33 @@
+{
+  "name": "@rainbow/api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Content API and CMS backend — MongoDB, Redis, JWT auth",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "seed": "node src/seed/seed.js",
+    "seed:reset": "node src/seed/seed.js --reset",
+    "test": "node --test tests/"
+  },
+  "dependencies": {
+    "@rainbow/core": "*",
+    "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.2.1",
+    "helmet": "^8.1.0",
+    "ioredis": "^5.9.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^9.9.4",
+    "multer": "^2.0.2",
+    "pino": "^10.1.0",
+    "pino-http": "^11.0.0",
+    "zod": "^4.3.4"
+  },
+  "license": "UNLICENSED"
+}

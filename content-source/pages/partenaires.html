@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="partenaires.meta.title">Programme Partenaires Rainbow by Alcatel-Lucent</title>
+    <meta name="description" content="Rejoignez le programme partenaires Rainbow by ALE. Développez votre activité avec nos solutions UCaaS souveraines et sécurisées." data-i18n-attr="content:partenaires.meta.description">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/mega-menu.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50:'#f5f3ff',100:'#ede9fe',200:'#ddd6fe',300:'#c4b5fd',400:'#a78bfa',500:'#5e2d91',600:'#4a2373',700:'#3c1c5e' },
+                        navy:  { 900:'#1e1b4b',800:'#312e81',700:'#3730a3' }
+                    },
+                    fontFamily: { sans:['Google Sans','system-ui','sans-serif'] },
+                    borderRadius: { btn:'10px' }
+                }
+            }
+        }
+    </script>
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:'Google Sans',sans-serif;background:#f4f6f8;color:#374151}
+
+        /* ---- Nav ---- */
+        .glass-nav{background:rgba(255,255,255,.9);backdrop-filter:blur(16px);border-bottom:1px solid rgba(0,0,0,.07)}
+        .nav-dropdown{position:relative}
+        .nav-dropdown>a{display:flex;align-items:center;gap:4px}
+        .chevron{transition:transform .2s}
+        .nav-dropdown:hover>.mega-menu,.nav-dropdown.mega-open>.mega-menu{display:block;opacity:1}
+
+        /* ---- Page layout ---- */
+        .page-wrap{max-width:1180px;margin:0 auto;padding:64px 24px 80px}
+        .two-col{display:grid;grid-template-columns:1.15fr 1fr;gap:60px;align-items:start}
+        @media(max-width:900px){.two-col{grid-template-columns:1fr}.sticky-col{position:static!important}}
+
+        /* ---- Left column ---- */
+        .page-heading{font-size:2.6rem;font-weight:800;line-height:1.15;color:#111827;margin-bottom:28px}
+        @media(max-width:640px){.page-heading{font-size:1.9rem}}
+
+        /* ---- Circle visual ---- */
+        .visual-wrap{position:relative;width:100%;margin:0 0 32px 0}
+        .visual-wrap img{width:100%;height:auto;display:block;border-radius:12px}
+        .circle-outer{width:300px;height:300px;border-radius:50%;overflow:hidden;position:relative;background:linear-gradient(160deg,#e0d7f5 0%,#cce6ff 50%,#d4f0d2 100%)}
+        /* decorative arcs (like GoTo's teal shapes) */
+        .arc-deco{position:absolute;top:0;right:0;width:140px;height:140px;border:18px solid rgba(94,45,145,.18);border-radius:50%;transform:translate(40%,-40%)}
+        .arc-deco2{position:absolute;top:0;right:0;width:100px;height:100px;border:12px solid rgba(0,133,202,.15);border-radius:50%;transform:translate(20%,-20%)}
+        /* people illustration inside circle */
+        .people-svg{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:260px}
+        /* partner network badge */
+        .pn-badge{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);background:#fff;border-radius:50px;padding:8px 18px 8px 10px;display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(0,0,0,.13);white-space:nowrap;border:1px solid #ede9fe}
+        .pn-badge-icon{width:34px;height:34px;background:#5e2d91;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+        .pn-badge-text-top{font-size:11px;font-weight:700;color:#111827;line-height:1.2}
+        .pn-badge-text-sub{font-size:10px;color:#6b7280;line-height:1.2}
+
+        /* ---- Partner list ---- */
+        .partner-list{list-style:none;margin-top:10px}
+        .partner-list li{display:flex;align-items:flex-start;gap:12px;margin-bottom:18px}
+        .check-circle{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+        .list-intro{font-size:.9375rem;color:#374151;margin-bottom:16px}
+
+        /* ---- Form card ---- */
+        .form-card{background:#fff;border-radius:14px;box-shadow:0 2px 32px rgba(0,0,0,.09);overflow:hidden}
+        .form-card-title{font-size:1.125rem;font-weight:700;color:#111827;text-align:center;padding:24px 28px 20px;border-bottom:1px solid #f3f4f6}
+        .form-body{padding:22px 28px 28px}
+
+        /* ---- Inputs ---- */
+        .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px}
+        .field-wrap{margin-bottom:10px;position:relative}
+        .form-input{width:100%;height:46px;padding:0 14px;border:1.5px solid #d1d5db;border-radius:8px;font-size:.875rem;color:#111827;font-family:'Google Sans',sans-serif;background:#fff;outline:none;transition:border-color .18s,box-shadow .18s;display:block}
+        .form-input::placeholder{color:#9ca3af}
+        .form-input:focus{border-color:#5e2d91;box-shadow:0 0 0 3px rgba(94,45,145,.1)}
+        .form-input.err{border-color:#ef4444}
+
+        /* select with custom arrow */
+        select.form-input{appearance:none;cursor:pointer;padding-right:38px;color:#9ca3af}
+        select.form-input.has-val{color:#111827}
+        .select-wrap{position:relative}
+        .select-wrap::after{content:'';position:absolute;right:14px;top:50%;transform:translateY(-50%);width:12px;height:12px;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:center;background-size:12px}
+
+        /* error messages */
+        .err-msg{font-size:.72rem;color:#ef4444;margin-top:3px;display:none}
+        .err-msg.show{display:block}
+
+        /* ---- Submit button ---- */
+        .btn-submit{width:100%;height:48px;background:#5e2d91;color:#fff;border:none;border-radius:8px;font-size:.9375rem;font-weight:700;font-family:'Google Sans',sans-serif;cursor:pointer;transition:background .18s,transform .12s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px}
+        .btn-submit:hover{background:#4a2373}
+        .btn-submit:active{transform:scale(.98)}
+        .btn-submit.loading{opacity:.7;pointer-events:none}
+        .spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none}
+        .btn-submit.loading .spinner{display:block}
+        .btn-submit.loading .btn-label{display:none}
+        @keyframes spin{to{transform:rotate(360deg)}}
+
+        /* ---- Legal text ---- */
+        .legal{font-size:.72rem;color:#9ca3af;text-align:center;margin-top:14px;line-height:1.6}
+        .legal a{color:#5e2d91;text-decoration:underline}
+
+        /* ---- Success state ---- */
+        #success-msg{display:none;text-align:center;padding:32px 0 16px}
+        .success-icon{width:60px;height:60px;background:#dcfce7;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+
+        /* ---- Footer ---- */
+        .footer-premium{background:linear-gradient(180deg,#0f0b2e 0%,#1e1b4b 100%)}
+
+        /* ---- Mobile nav ---- */
+        #mobile-menu a{font-size:.875rem;color:#374151;display:block;padding:8px 0}
+        #mobile-menu .mobile-section-title{font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#6b7280;margin-top:4px}
+    </style>
+    <!-- translated strings for this page's inline scripts; must precede them -->
+    <script data-i18n-js="partenaires.js"></script>
+</head>
+<body>
+
+    <!-- ===== NAV ===== -->
+    <nav id="navbar" class="fixed top-0 w-full z-50 glass-nav">
+        <div class="max-w-6xl mx-auto px-6 flex items-center justify-between h-16">
+            <a href="/fr" class="flex items-center gap-2.5 shrink-0">
+                <img src="/images/Rainbow-AL-logo-banner.webp" alt="Rainbow" class="h-12 w-auto" data-i18n-attr="alt:common.nav.rainbow_alt">
+            </a>
+            <div class="hidden lg:flex items-center justify-center flex-1 gap-8">
+                <div class="nav-dropdown">
+                    <a href="#" class="text-sm text-gray-500 hover:text-navy-900 transition-colors font-medium">
+                        <span data-i18n="common.nav.produits">Produits</span>
+                        <svg class="chevron w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                    </a>
+
+                </div>
+                <a href="/fr/tarifs" class="text-sm text-gray-500 hover:text-navy-900 transition-colors font-medium" style="font-size:1rem" data-i18n="common.nav.tarifs">Tarifs</a>
+                <div class="nav-dropdown">
+                    <a href="#" class="text-sm text-gray-500 hover:text-navy-900 transition-colors font-medium" data-i18n-rich="common.nav.ressources-path-stroke-linecap_5">Ressources
+                        <svg class="chevron w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                    </a>
+
+                </div>
+            </div>
+            <div class="hidden lg:flex items-center gap-4 shrink-0">
+                <div class="lang-switcher" id="lang-switcher">
+                    <button onclick="document.getElementById('lang-switcher').classList.toggle('open')">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"/></svg>
+                        <span id="lang-current" data-i18n="common.nav.en_2">EN</span>
+                        <svg class="lang-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div class="lang-dropdown" id="lang-dropdown"></div>
+                </div>
+                <a href="https://web.openrainbow.net/rb/2.176.0/login" class="px-5 py-2.5 rounded-btn border-2 border-brand-500 text-purple-900 hover:bg-gray-50 text-sm font-semibold transition-all active:scale-95 inline-flex items-center justify-center" data-i18n="common.nav.se-connecter">Se connecter</a>
+                <a href="https://web.openrainbow.net/rb/2.177.4/trial" class="px-5 py-2.5 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold whitespace-nowrap shadow-md hover:shadow-lg transition-all" data-i18n="common.nav.essai-gratuit_2">Essai gratuit</a>
+            </div>
+            <button id="mobile-menu-btn" class="lg:hidden p-2" aria-label="Menu" data-i18n-attr="aria-label:common.nav.menu_aria-label_5">
+                <svg class="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+        </div>
+        <div id="mobile-menu" class="lg:hidden hidden border-t border-gray-100 bg-white px-5 pt-2 pb-6 shadow-lg space-y-1">
+            <a href="#" class="mob-section-hdr"><span data-i18n="common.nav.produits">Produits</span></a>
+            <div class="mobile-submenu space-y-1">
+                <a href="/fr/products/collaboration" class="block py-1" data-i18n="common.nav.rainbow-collaboration">Rainbow Collaboration</a>
+                <a href="/fr/products/webinar" class="block py-1" data-i18n="common.nav.rainbow-webinar">Rainbow Webinar</a>
+            </div>
+            <a href="/fr/tarifs" class="mob-section-hdr" data-i18n="common.nav.tarifs">Tarifs</a>
+            <a href="#" class="mob-section-hdr" data-i18n="common.nav.ressources">Ressources</a>
+            <div class="mobile-submenu space-y-1">
+                <a href="/fr/blog" class="block py-1" data-i18n="common.nav.blog">Blog</a>
+                <a href="/fr/reviews" class="block py-1" data-i18n="common.nav.avis">Avis</a>
+                <a href="/fr/support" class="block py-1" data-i18n="common.nav.support">Support</a>
+                <a href="/fr/tutorials" class="block py-1" data-i18n="common.nav.tutoriels">Tutoriels</a>
+            </div>
+            <div class="h-px bg-gray-100 mx-1 my-2"></div>
+            <div id="mobile-lang-switcher" class="flex flex-wrap gap-2 px-1 py-1"></div>
+            <div class="flex flex-col gap-2.5 pt-3">
+                <a href="https://web.openrainbow.net/rb/2.176.0/login" class="w-full text-center px-6 py-3 rounded-btn border-2 border-brand-500 text-purple-900 hover:bg-gray-50 text-base font-semibold transition-all active:scale-95" data-i18n="common.nav.se-connecter">Se connecter</a>
+                <a href="https://web.openrainbow.net/rb/2.177.4/trial" class="w-full text-center px-6 py-3 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-base font-semibold shadow-md hover:shadow-lg transition-all active:scale-95" data-i18n="common.nav.essai-gratuit_2">Essai gratuit</a>
+            </div>
+        </div>
+    </nav>
+
+<!-- ═══════════════════ MAIN ═══════════════════ -->
+<main style="padding-top:64px;background:#f4f6f8;min-height:calc(100vh - 64px)">
+    <div class="page-wrap">
+        <div class="two-col">
+
+            <!-- ══ LEFT COLUMN ══ -->
+            <div>
+                <h1 class="page-heading" data-i18n="partenaires.body.developpez-votre-activite-avec-le">Développez votre activité avec le réseau de partenaires Rainbow</h1>
+
+                <!-- Circular visual (GoTo-style) -->
+                <div class="visual-wrap" style="margin-bottom:48px">
+                    <img src="/images/meetings.png" alt="Partners" data-i18n-attr="alt:partenaires.body.partners_alt">
+                    </div>
+
+                <!-- Partner types -->
+                <p class="list-intro" data-i18n="partenaires.body.choisissez-le-type-de-partenariat">Choisissez le type de partenariat qui vous est adapté.</p>
+                <ul class="partner-list">
+                    <li>
+                        <svg style="width:18px;height:18px;flex-shrink:0;margin-top:2px" fill="none" viewBox="0 0 24 24" stroke="#5e2d91" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                        <p style="font-size:.9rem;line-height:1.6;color:#374151" data-i18n-rich="partenaires.body.agent-partners-beneficiez-d-une">
+                            <strong>Agent Partners.</strong> Bénéficiez d'une rétribution et de primes performantes pour la vente de notre portefeuille de solutions Rainbow depuis n'importe où.
+                        </p>
+                    </li>
+                    <li>
+                        <svg style="width:18px;height:18px;flex-shrink:0;margin-top:2px" fill="none" viewBox="0 0 24 24" stroke="#5e2d91" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                        <p style="font-size:.9rem;line-height:1.6;color:#374151" data-i18n-rich="partenaires.body.partenaires-de-services-complets">
+                            <strong>Partenaires de services complets.</strong> Nos partenaires de services complets proposent à leurs clients tout ce dont ils ont besoin, de la mise en œuvre à la gestion du réseau.
+                        </p>
+                    </li>
+                    <li>
+                        <svg style="width:18px;height:18px;flex-shrink:0;margin-top:2px" fill="none" viewBox="0 0 24 24" stroke="#5e2d91" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                        <p style="font-size:.9rem;line-height:1.6;color:#374151" data-i18n-rich="partenaires.body.partenaires-technologiques-tirez">
+                            <strong>Partenaires technologiques.</strong> Tirez parti des intégrations et des API ouvertes pour améliorer les résultats parmi les outils que vos clients utilisent déjà.
+                        </p>
+                    </li>
+                    <li>
+                        <svg style="width:18px;height:18px;flex-shrink:0;margin-top:2px" fill="none" viewBox="0 0 24 24" stroke="#5e2d91" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                        <p style="font-size:.9rem;line-height:1.6;color:#374151" data-i18n-rich="partenaires.body.revendeurs-integrez-rainbow-a">
+                            <strong>Revendeurs.</strong> Intégrez Rainbow à votre portefeuille de solutions. Achetez chez nous et vendez directement à votre clientèle.
+                        </p>
+                    </li>
+                    <li>
+                        <svg style="width:18px;height:18px;flex-shrink:0;margin-top:2px" fill="none" viewBox="0 0 24 24" stroke="#5e2d91" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                        <p style="font-size:.9rem;line-height:1.6;color:#374151" data-i18n-rich="partenaires.body.recommandations-utilisez-votre">
+                            <strong>Recommandations.</strong> Utilisez votre réseau pour nous recommander des clients. Envoyez-les nous et nous vous récompenserons généreusement.
+                        </p>
+                    </li>
+                    <li>
+                        <svg style="width:18px;height:18px;flex-shrink:0;margin-top:2px" fill="none" viewBox="0 0 24 24" stroke="#5e2d91" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                        <p style="font-size:.9rem;line-height:1.6;color:#374151" data-i18n-rich="partenaires.body.integrateurs-de-services-laissez">
+                            <strong>Intégrateurs de services.</strong> Laissez nos équipes vous aider à planifier et à gérer les besoins commerciaux et technologiques de vos clients à grande échelle.
+                        </p>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- ══ RIGHT COLUMN: Form card ══ -->
+            <div class="sticky-col" style="position:sticky;top:84px">
+                <div class="form-card">
+                    <div class="form-card-title" data-i18n="partenaires.body.rejoindre-le-reseau-de-partenaires">Rejoindre le réseau de partenaires Rainbow</div>
+
+                    <div class="form-body">
+                        <!-- FORM -->
+                        <form id="partner-form" method="post" action="https://s138097979.t.eloqua.com/e/f2" novalidate>
+                            <!-- Eloqua required hidden fields -->
+                            <input type="hidden" name="elqFormName" value="MKT">
+                            <input type="hidden" name="elqSiteId" value="138097979">
+                            <input type="hidden" name="elqCampaignId" value="">
+                            <input type="hidden" name="hiddenCampaignId" value="">
+                            <input type="hidden" name="hiddenField" value="">
+                            <input type="hidden" name="marketingActivityName" value="Sales Inquiry form submit">
+                            <input type="hidden" name="hp" value="">
+                            <input type="hidden" name="optInALUECommunications" value="0">
+                            <!-- paragraphText: populated from visible dropdowns before submit -->
+                            <textarea name="paragraphText" id="f-paragraph" style="display:none" aria-hidden="true"></textarea>
+
+                            <!-- Prénom / Nom -->
+                            <div class="field-row">
+                                <div>
+                                    <input type="text" id="f-first" name="firstName" placeholder="Prénom" class="form-input" required autocomplete="given-name" data-i18n-attr="placeholder:partenaires.body.prenom_placeholder">
+                                    <p class="err-msg" id="e-first" data-i18n="partenaires.body.champ-requis">Champ requis</p>
+                                </div>
+                                <div>
+                                    <input type="text" id="f-last" name="lastName" placeholder="Nom de famille" class="form-input" required autocomplete="family-name" data-i18n-attr="placeholder:partenaires.body.nom-de-famille_placeholder">
+                                    <p class="err-msg" id="e-last" data-i18n="partenaires.body.champ-requis">Champ requis</p>
+                                </div>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="field-wrap">
+                                <input type="email" id="f-email" name="emailAddress" placeholder="Courriel professionnel" class="form-input" required autocomplete="email" data-i18n-attr="placeholder:partenaires.body.courriel-professionnel_placeholder">
+                                <p class="err-msg" id="e-email" data-i18n="partenaires.body.adresse-e-mail-valide-requise">Adresse e-mail valide requise</p>
+                            </div>
+
+                            <!-- Entreprise -->
+                            <div class="field-wrap">
+                                <input type="text" id="f-company" name="company" placeholder="Nom de l'entreprise" class="form-input" required autocomplete="organization" data-i18n-attr="placeholder:partenaires.body.nom-de-l-entreprise_placeholder">
+                                <p class="err-msg" id="e-company" data-i18n="partenaires.body.champ-requis">Champ requis</p>
+                            </div>
+
+                            <!-- Téléphone -->
+                            <div class="field-wrap">
+                                <input type="tel" id="f-phone" name="busPhone" placeholder="Numéro de téléphone" class="form-input" autocomplete="tel" data-i18n-attr="placeholder:partenaires.body.numero-de-telephone_placeholder">
+                            </div>
+
+                            <!-- Pays -->
+                            <div class="field-wrap">
+                                <div class="select-wrap">
+                                    <select id="f-country" name="countryID1" class="form-input" required>
+                                        <option value="" data-i18n="partenaires.body.pays">Pays</option>
+                                        <option value="a082000000PV1BGAA1" data-i18n="partenaires.body.france">France</option>
+                                        <option value="a082000000PV1ARAA1" data-i18n="partenaires.body.belgique">Belgique</option>
+                                        <option value="a082000000PV1DSAA1" data-i18n="partenaires.body.suisse">Suisse</option>
+                                        <option value="a082000000PV1C6AAL" data-i18n="partenaires.body.luxembourg">Luxembourg</option>
+                                        <option value="a082000000PV1BNAA1" data-i18n="partenaires.body.allemagne">Allemagne</option>
+                                        <option value="a082000000PV1DIAA1" data-i18n="partenaires.body.espagne">Espagne</option>
+                                        <option value="a082000000PV1BmAAL" data-i18n="partenaires.body.italie">Italie</option>
+                                        <option value="a082000000PV1CWAA1" data-i18n="partenaires.body.pays-bas">Pays-Bas</option>
+                                        <option value="a082000000PV1DlAAL" data-i18n="partenaires.body.royaume-uni">Royaume-Uni</option>
+                                        <option value="a082000000PV1CtAAL" data-i18n="partenaires.body.portugal">Portugal</option>
+                                        <option value="a082000000PV1CQAA1" data-i18n="partenaires.body.maroc">Maroc</option>
+                                        <option value="a082000000PV1A9AAL" data-i18n="partenaires.body.algerie">Algérie</option>
+                                        <option value="a082000000PV1DdAAL" data-i18n="partenaires.body.tunisie">Tunisie</option>
+                                        <option value="a082000000PV1DmAAL" data-i18n="partenaires.body.etats-unis">États-Unis</option>
+                                        <option value="a082000000PV1AiAAL" data-i18n="partenaires.body.canada">Canada</option>
+                                    </select>
+                                </div>
+                                <p class="err-msg" id="e-country" data-i18n="partenaires.body.veuillez-selectionner-un-pays">Veuillez sélectionner un pays</p>
+                            </div>
+
+                            <!-- CA prévisionnel -->
+                            <div class="field-wrap">
+                                <div class="select-wrap">
+                                    <select id="f-revenue" class="form-input">
+                                        <option value="" data-i18n="partenaires.body.ventes-prevues-pour-la-premiere">Ventes prévues pour la première année</option>
+                                        <option value="under100k" data-i18n="partenaires.body.moins-de-100-000">Moins de 100 000 €</option>
+                                        <option value="100k-500k">100 000 € – 500 000 €</option>
+                                        <option value="500k-2m">500 000 € – 2 000 000 €</option>
+                                        <option value="over2m" data-i18n="partenaires.body.plus-de-2-000-000">Plus de 2 000 000 €</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Type de partenariat -->
+                            <div class="field-wrap">
+                                <div class="select-wrap">
+                                    <select id="f-type" class="form-input" required>
+                                        <option value="" data-i18n="partenaires.body.interet-d-un-partenariat">Intérêt d'un partenariat</option>
+                                        <option value="agent" data-i18n="partenaires.body.agent-partenaire">Agent partenaire</option>
+                                        <option value="revendeur" data-i18n="partenaires.body.revendeur">Revendeur</option>
+                                        <option value="services" data-i18n="partenaires.body.partenaire-de-services-complets">Partenaire de services complets</option>
+                                        <option value="tech" data-i18n="partenaires.body.partenaire-technologique">Partenaire technologique</option>
+                                        <option value="recommandation" data-i18n="partenaires.body.recommandation">Recommandation</option>
+                                        <option value="integrateur" data-i18n="partenaires.body.integrateur-de-services">Intégrateur de services</option>
+                                    </select>
+                                </div>
+                                <p class="err-msg" id="e-type" data-i18n="partenaires.body.veuillez-selectionner-un-type">Veuillez sélectionner un type</p>
+                            </div>
+
+                            <!-- Produit -->
+                            <div class="field-wrap">
+                                <div class="select-wrap">
+                                    <select id="f-product" class="form-input">
+                                        <option value="" data-i18n="partenaires.body.produit">Produit</option>
+                                        <option value="hub" data-i18n="partenaires.body.rainbow-hub-solution-100-cloud">Rainbow™ Hub  solution 100% cloud tout-en-un avec téléphonie intégrée</option>
+                                        <option value="hybrid" data-i18n="partenaires.body.rainbow-hybrid-integration-cloud">Rainbow™ Hybrid  intégration cloud avec infrastructure téléphonique existante (PABX)</option>
+                                        <option value="edge" data-i18n="partenaires.body.rainbow-edge-version-on-premises">Rainbow™ Edge  version on-premises pour un contrôle total des données</option>
+                                        <option value="webinar" data-i18n="partenaires.body.rainbow-webinar">Rainbow™ Webinar</option>
+                                        <option value="classroom" data-i18n="partenaires.body.rainbow-classroom">Rainbow™ Classroom</option>
+                                        <option value="room" data-i18n="partenaires.body.rainbow-room">Rainbow™ Room</option>
+                                        <option value="alert" data-i18n="partenaires.body.rainbow-alert">Rainbow™ Alert</option>
+                                        <option value="cpaas" data-i18n="partenaires.body.rainbow-cpaas">Rainbow™ CPaaS</option>
+                                        <option value="attendant" data-i18n="partenaires.body.rainbow-attendant">Rainbow™ Attendant</option>
+                                        <option value="connectors" data-i18n="partenaires.body.rainbow-connectors">Rainbow™ Connectors</option>
+                                        <option value="hospitality" data-i18n="partenaires.body.rainbow-hospitality">Rainbow™ Hospitality</option>
+                                        <option value="click-to-connect" data-i18n="partenaires.body.rainbow-click-to-connect">Rainbow™ Click-to-connect</option>
+                                        <option value="service-hds" data-i18n="partenaires.body.rainbow-service-hds">Rainbow™ Service HDS</option>
+                                        <option value="all" data-i18n="partenaires.body.toutes-les-solutions">Toutes les solutions</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Submit -->
+                            <button type="submit" id="submit-btn" class="btn-submit">
+                                <svg class="spinner" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,.3)" stroke-width="3"/><path d="M12 2a10 10 0 0 1 10 10" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>
+                                <span class="btn-label" data-i18n="partenaires.body.envoyer">Envoyer</span>
+                            </button>
+
+                            <!-- Legal -->
+                            <p class="legal" data-i18n-rich="partenaires.body.en-cliquant-sur-envoyer-j-accepte">
+                                En cliquant sur &laquo;&nbsp;Envoyer&nbsp;&raquo;, j'accepte les
+                                <a href="/fr/privacy">Conditions d'utilisation</a> et
+                                <a href="/fr/privacy">Politique de confidentialité</a>.
+                                Je souhaite recevoir des e-mails promotionnels, notamment des mises à jour de produits, des offres spéciales et des bonnes pratiques, sauf si je
+                                <a href="/fr/privacy">me désengage</a>.
+                            </p>
+                        </form>
+                        <!-- SUCCESS STATE -->
+                        <div id="success-msg">
+                            <div style="text-align:center;padding:36px 16px 20px">
+                                <div style="width:68px;height:68px;background:linear-gradient(135deg,#ede9fe 0%,#ddd6fe 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 4px 18px rgba(94,45,145,.15)">
+                                    <svg style="width:32px;height:32px;color:#5e2d91" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+                                    </svg>
+                                </div>
+                                <h3 style="font-size:1.25rem;font-weight:700;color:#111827;margin-bottom:10px" data-i18n="partenaires.body.candidature-envoyee">Candidature envoyée&nbsp;!</h3>
+                                <p style="font-size:.875rem;color:#6b7280;line-height:1.7;max-width:270px;margin:0 auto 6px" data-i18n="partenaires.body.notre-equipe-partenaires-reviendra">Notre équipe partenaires reviendra vers vous dans les</p>
+                                <p style="font-size:.9rem;font-weight:600;color:#111827;margin-bottom:24px" data-i18n="partenaires.body.2-a-3-jours-ouvres">2 à 3 jours ouvrés</p>
+                                <a href="/fr" style="display:inline-flex;align-items:center;gap:6px;font-size:.875rem;font-weight:600;color:#5e2d91;text-decoration:none" data-i18n-rich="partenaires.body.path-stroke-linecap-round-stroke">
+                                    <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+                                    Retour à l'accueil
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /two-col -->
+    </div><!-- /page-wrap -->
+</main>
+
+<!-- ═══════════════════ SECTION: Pourquoi rejoindre ═══════════════════ -->
+<section class="py-20 lg:py-28 px-6" style="background:radial-gradient(ellipse 70% 90% at 0% 0%, rgba(124,58,237,0.09) 0%, transparent 55%), #ffffff">
+    <div class="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <!-- Left: text -->
+        <div>
+            <h2 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-navy-900 tracking-tight leading-[1.1] mb-6" data-i18n="partenaires.body.pourquoi-rejoindre-le-reseau-de">
+                Pourquoi rejoindre le réseau de partenaires Rainbow&nbsp;?
+            </h2>
+            <p class="text-base md:text-lg text-gray-600 leading-relaxed mb-9 max-w-xl" data-i18n="partenaires.body.en-tant-que-partenaire-rainbow">
+                En tant que partenaire Rainbow, vous aidez vos clients à bénéficier de solutions de communication et de collaboration fiables et sécurisées, tout en développant votre activité grâce à des programmes de commissions et un accompagnement dédié.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4">
+                <a href="#partner-form" class="inline-flex items-center justify-center px-8 py-3.5 rounded-btn bg-brand-500 hover:bg-brand-600 text-white text-base font-bold shadow-md hover:shadow-lg transition-all active:scale-95" data-i18n="partenaires.body.s-inscrire">S'inscrire</a>
+                <a href="/fr/trouver-un-partenaire" class="inline-flex items-center justify-center px-8 py-3.5 rounded-btn border-2 border-gray-200 text-navy-900 hover:bg-gray-50 hover:border-gray-300 text-base font-bold transition-all active:scale-95" data-i18n="partenaires.body.trouver-un-partenaire">Trouver un partenaire</a>
+            </div>
+        </div>
+        <!-- Right: image -->
+        <div class="relative">
+            <img src="/images/rainbow-cross.webp" alt="Rainbow" class="w-full h-auto rounded-2xl" data-i18n-attr="alt:partenaires.body.rainbow_alt">
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════ SECTION: Parcours vers le succès ═══════════════════ -->
+<section class="py-20 lg:py-28 px-6" style="background:linear-gradient(180deg,#efe8fc 0%,#ffffff 55%)">
+    <div class="max-w-6xl mx-auto">
+        <div class="max-w-2xl mx-auto text-center mb-16">
+            <h2 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-navy-900 tracking-tight mb-4" data-i18n="partenaires.body.votre-parcours-vers-le-succes">Votre parcours vers le succès</h2>
+            <p class="text-base md:text-lg text-gray-600 leading-relaxed" data-i18n="partenaires.body.rainbow-vous-accompagne-a-chaque">
+                Rainbow vous accompagne à chaque étape, du lancement de votre activité partenaire jusqu'à votre premier succès commercial  et bien au-delà.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Étape 1 -->
+            <div class="relative overflow-hidden border border-dashed border-brand-200 bg-gradient-to-b from-brand-100/60 to-white p-8 flex flex-col min-h-[340px]">
+                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-400 to-brand-600"></div>
+                <span class="text-5xl font-extrabold text-brand-200 leading-none mb-6 select-none tracking-tight">01</span>
+                <h3 class="text-xl font-bold text-navy-900 mb-6" data-i18n="partenaires.body.demarrer">Démarrer</h3>
+                <div class="w-full border-t border-dashed border-brand-200 mb-6"></div>
+                <ul class="space-y-3 text-sm text-gray-600">
+                    <li class="flex items-start gap-2.5"><svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="partenaires.body.contrat-partenaire-rainbow">Contrat partenaire Rainbow</span></li>
+                    <li class="flex items-start gap-2.5"><svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="partenaires.body.formation-sales-post-sales">Formation sales &amp; post-sales</span></li>
+                    <li class="flex items-start gap-2.5"><svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="partenaires.body.licences-gratuites-partenaires">Licences gratuites partenaires</span></li>
+                    <li class="flex items-start gap-2.5"><svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="partenaires.body.outils-actions-marketing">Outils &amp; actions marketing</span></li>
+                </ul>
+            </div>
+            <!-- Étape 2 -->
+            <div class="relative overflow-hidden border border-dashed border-brand-200 bg-gradient-to-b from-brand-100/60 to-white p-8 flex flex-col min-h-[340px]">
+                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-400 to-brand-600"></div>
+                <span class="text-5xl font-extrabold text-brand-200 leading-none mb-6 select-none tracking-tight">02</span>
+                <h3 class="text-xl font-bold text-navy-900 mb-6" data-i18n="partenaires.body.signer-votre-1er-client">Signer votre 1er client</h3>
+                <div class="w-full border-t border-dashed border-brand-200 mb-6"></div>
+                <ul class="space-y-3 text-sm text-gray-600">
+                    <li class="flex items-start gap-2.5"><svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="partenaires.body.try-buy-pour-le-client">Try &amp; Buy pour le client</span></li>
+                    <li class="flex items-start gap-2.5"><svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="partenaires.body.support-avant-vente-rainbow">Support avant-vente Rainbow</span></li>
+                    <li class="flex items-start gap-2.5"><svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="partenaires.body.assistance-deploiement-mise-en">Assistance déploiement &amp; mise en production</span></li>
+                    <li class="flex items-start gap-2.5"><svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="partenaires.body.acces-au-support-rainbow-jetons">Accès au support Rainbow (jetons)</span></li>
+                </ul>
+            </div>
+            <!-- Étape 3 -->
+            <div class="relative overflow-hidden border border-dashed border-brand-200 bg-gradient-to-b from-brand-100/60 to-white p-8 flex flex-col min-h-[340px]">
+                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-400 to-brand-600"></div>
+                <span class="text-5xl font-extrabold text-brand-200 leading-none mb-6 select-none tracking-tight">03</span>
+                <h3 class="text-xl font-bold text-navy-900 mb-6" data-i18n="partenaires.body.etre-recompense">Être récompensé</h3>
+                <div class="w-full border-t border-dashed border-brand-200 mb-6"></div>
+                <ul class="space-y-3 text-sm text-gray-600">
+                    <li class="flex items-start gap-2.5"><svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="partenaires.body.bonus-nouveau-client">Bonus nouveau client</span></li>
+                    <li class="flex items-start gap-2.5"><svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="partenaires.body.bonus-croissance">Bonus croissance</span></li>
+                </ul>
+            </div>
+            <!-- Étape 4 -->
+            <div class="relative overflow-hidden border border-dashed border-brand-200 bg-gradient-to-b from-brand-100/60 to-white p-8 flex flex-col min-h-[340px]">
+                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-400 to-brand-600"></div>
+                <span class="text-5xl font-extrabold text-brand-200 leading-none mb-6 select-none tracking-tight">04</span>
+                <h3 class="text-xl font-bold text-navy-900 mb-6" data-i18n="partenaires.body.fideliser">Fidéliser</h3>
+                <div class="w-full border-t border-dashed border-brand-200 mb-6"></div>
+                <ul class="space-y-3 text-sm text-gray-600">
+                    <li class="flex items-start gap-2.5"><svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="partenaires.body.equipes-customer-success-dediees">Équipes Customer Success dédiées</span></li>
+                    <li class="flex items-start gap-2.5"><svg class="w-4 h-4 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span data-i18n="partenaires.body.adoption-renouvellement-facilites">Adoption &amp; renouvellement facilités</span></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════ SECTION: Vidéo ═══════════════════ -->
+<section class="py-20 lg:py-28 px-6" style="background:radial-gradient(ellipse 75% 95% at 100% 0%, rgba(124,58,237,0.09) 0%, transparent 55%), #ffffff">
+    <div class="max-w-6xl mx-auto grid lg:grid-cols-12 gap-12 lg:gap-14 items-center">
+        <!-- Left: text + checklist -->
+        <div class="lg:col-span-5">
+            <h2 class="text-2xl md:text-3xl lg:text-4xl font-extrabold text-navy-900 tracking-tight leading-[1.15] mb-5" data-i18n="partenaires.body.developpez-votre-activite">
+                Développez votre activité : rejoignez le réseau de partenaires Rainbow
+            </h2>
+            <p class="text-sm md:text-base text-gray-600 leading-relaxed mb-7 max-w-md" data-i18n="partenaires.body.inscrivez-vous-des-aujourd-hui-ou">
+                Inscrivez-vous dès aujourd'hui ou contactez votre responsable de partenaires local pour en savoir plus sur le fonctionnement de Rainbow.
+            </p>
+            <ul class="space-y-3.5">
+                <li class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                    <span class="text-sm text-gray-700 leading-relaxed" data-i18n="partenaires.body.une-equipe-d-assistance-aux">Une équipe d'assistance aux partenaires dédiée</span>
+                </li>
+                <li class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                    <span class="text-sm text-gray-700 leading-relaxed" data-i18n="partenaires.body.des-ressources-a-la-demande">Des ressources à la demande</span>
+                </li>
+                <li class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-brand-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                    <span class="text-sm text-gray-700 leading-relaxed" data-i18n="partenaires.body.des-primes-tres-interessantes-et">Des primes très intéressantes et des commissions parmi les meilleures du secteur</span>
+                </li>
+            </ul>
+        </div>
+        <!-- Right: video -->
+        <div class="lg:col-span-7 w-full aspect-video rounded-2xl overflow-hidden shadow-xl ring-1 ring-black/5 bg-black">
+            <iframe class="w-full h-full block" src="https://www.youtube.com/embed/mBNGQbAwGlM?si=qBF-Bf-5EYvf6rgB" title="Rainbow en action" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen data-i18n-attr="title:partenaires.body.rainbow-en-action_title"></iframe>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════ SECTION: Témoignages (carousel) ═══════════════════ -->
+<section class="py-20 lg:py-28 px-6" style="background:radial-gradient(ellipse 85% 75% at 50% 100%, rgba(124,58,237,0.10) 0%, transparent 60%), #ffffff">
+    <div class="max-w-5xl mx-auto">
+        <div class="mb-16 text-center">
+            <h2 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-navy-900 tracking-tight" data-i18n="partenaires.body.temoignages-partenaires-rainbow">Témoignages partenaires Rainbow</h2>
+        </div>
+
+        <div id="testimonial-carousel" class="flex items-center gap-4 md:gap-8">
+            <button type="button" class="tc-prev shrink-0 w-11 h-11 rounded-full border border-gray-200 bg-white text-brand-500 hover:bg-brand-500 hover:text-white hover:border-brand-500 flex items-center justify-center transition-all shadow-sm" aria-label="Témoignage précédent" data-i18n-attr="aria-label:partenaires.body.temoignage-precedent_aria-label">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+
+            <div class="tc-viewport flex-1 overflow-hidden">
+                <div class="tc-track flex transition-transform duration-500 ease-out">
+                    <!-- Slide 1: Orange Business (partenaire) -->
+                    <figure class="tc-slide shrink-0 w-full px-2 md:px-8 flex flex-col items-center justify-center text-center min-h-[320px]">
+                        <blockquote class="text-lg md:text-xl text-gray-700 leading-relaxed italic max-w-3xl mx-auto" data-i18n="partenaires.body.au-travers-de-rainbow-nous">« Au travers de Rainbow™, nous confirmons notre partenariat historique avec Alcatel-Lucent, et notre volonté commune de développer des solutions en adéquation avec les besoins de nos clients. Ils attendent des solutions qui unissent les différents univers de la téléphonie et de la collaboration. Rainbow™ s'inscrit dans notre proposition de valeur globale avec un interlocuteur unique et un accompagnement de bout en bout. »</blockquote>
+                        <figcaption class="mt-8">
+                            <p class="text-base font-bold text-navy-900" data-i18n="partenaires.body.vannina-kellershohn">Vannina Kellershohn</p>
+                            <p class="text-sm text-gray-500 mt-1" data-i18n="partenaires.body.directrice-de-la-business-unit">Directrice de la Business Unit Universal Communications &amp; Collaboration  Orange Business</p>
+                        </figcaption>
+                        <img src="/images/orange-logo.webp" alt="Orange Business" class="h-10 w-auto object-contain mt-6" onerror="this.style.display='none'" data-i18n-attr="alt:partenaires.body.orange-business_alt">
+                    </figure>
+                    <!-- Slide 2 -->
+                    <figure class="tc-slide shrink-0 w-full px-2 md:px-8 flex flex-col items-center justify-center text-center min-h-[320px]">
+                        <blockquote class="text-lg md:text-xl text-gray-700 leading-relaxed italic max-w-3xl mx-auto" data-i18n="partenaires.body.nos-equipes-collaborent-enfin-au">« Nos équipes collaborent enfin au même endroit. Espaces partagés, fichiers, discussions : tout est centralisé et accessible en un instant. »</blockquote>
+                        <figcaption class="mt-8">
+                            <p class="text-base font-bold text-navy-900" data-i18n="partenaires.body.responsable-collaboration">Responsable collaboration</p>
+                            <p class="text-sm text-gray-500 mt-1" data-i18n="partenaires.body.ville-de-herrenberg">Ville de Herrenberg</p>
+                        </figcaption>
+                        <img src="/images/orange-logo.webp" alt="Orange Business" class="h-10 w-auto object-contain mt-6" onerror="this.style.display='none'" data-i18n-attr="alt:partenaires.body.orange-business_alt">
+                    </figure>
+                    <!-- Slide 3 -->
+                    <figure class="tc-slide shrink-0 w-full px-2 md:px-8 flex flex-col items-center justify-center text-center min-h-[320px]">
+                        <blockquote class="text-lg md:text-xl text-gray-700 leading-relaxed italic max-w-3xl mx-auto" data-i18n="partenaires.body.passer-d-un-message-a-un-appel">« Passer d'un message à un appel visio en un clic a transformé notre réactivité. Nous échangeons en temps réel, sans jamais quitter Rainbow. »</blockquote>
+                        <figcaption class="mt-8">
+                            <p class="text-base font-bold text-navy-900" data-i18n="partenaires.body.directrice-des-operations">Directrice des opérations</p>
+                            <p class="text-sm text-gray-500 mt-1" data-i18n="partenaires.body.region-bourgogne-franche-comte">Région Bourgogne-Franche-Comté</p>
+                        </figcaption>
+                        <img src="/images/orange-logo.webp" alt="Orange Business" class="h-10 w-auto object-contain mt-6" onerror="this.style.display='none'" data-i18n-attr="alt:partenaires.body.orange-business_alt">
+                    </figure>
+                    <!-- Slide 4 -->
+                    <figure class="tc-slide shrink-0 w-full px-2 md:px-8 flex flex-col items-center justify-center text-center min-h-[320px]">
+                        <blockquote class="text-lg md:text-xl text-gray-700 leading-relaxed italic max-w-3xl mx-auto" data-i18n="partenaires.body.la-facilite-d-usage-etait-un">« La facilité d'usage était un critère clé pour nous. La bibliothèque de médias, notamment vidéo, nous permet d'assurer un accompagnement de qualité auprès de nos utilisateurs. »</blockquote>
+                        <figcaption class="mt-8">
+                            <p class="text-base font-bold text-navy-900" data-i18n="partenaires.body.responsable-si">Responsable SI</p>
+                            <p class="text-sm text-gray-500 mt-1" data-i18n="partenaires.body.eurometropole-de-strasbourg">Eurométropole de Strasbourg</p>
+                        </figcaption>
+                        <img src="/images/orange-logo.webp" alt="Orange Business" class="h-10 w-auto object-contain mt-6" onerror="this.style.display='none'" data-i18n-attr="alt:partenaires.body.orange-business_alt">
+                    </figure>
+                </div>
+            </div>
+
+            <button type="button" class="tc-next shrink-0 w-11 h-11 rounded-full border border-gray-200 bg-white text-brand-500 hover:bg-brand-500 hover:text-white hover:border-brand-500 flex items-center justify-center transition-all shadow-sm" aria-label="Témoignage suivant" data-i18n-attr="aria-label:partenaires.body.temoignage-suivant_aria-label">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </button>
+        </div>
+
+        <!-- Dots -->
+        <div class="tc-dots flex justify-center gap-2.5 mt-12"></div>
+    </div>
+
+    <script>
+    (function(){
+        var root = document.getElementById('testimonial-carousel');
+        if(!root) return;
+        var track = root.querySelector('.tc-track');
+        var slides = root.querySelectorAll('.tc-slide');
+        var prev = root.querySelector('.tc-prev');
+        var next = root.querySelector('.tc-next');
+        var dotsWrap = document.querySelector('.tc-dots');
+        var i = 0, n = slides.length;
+
+        for(var d=0; d<n; d++){
+            var b = document.createElement('button');
+            b.setAttribute('aria-label',t('testimonialLabel')+' '+(d+1));
+            b.className = 'tc-dot w-2.5 h-2.5 rounded-full transition-all';
+            (function(idx){ b.addEventListener('click', function(){ go(idx); }); })(d);
+            dotsWrap.appendChild(b);
+        }
+        var dots = dotsWrap.querySelectorAll('.tc-dot');
+
+        function render(){
+            track.style.transform = 'translateX(-' + (i*100) + '%)';
+            for(var k=0;k<dots.length;k++){
+                dots[k].style.width = (k===i) ? '22px' : '10px';
+                dots[k].style.background = (k===i) ? '#5e2d91' : '#d1d5db';
+            }
+        }
+        function go(idx){ i = (idx + n) % n; render(); }
+        prev.addEventListener('click', function(){ go(i-1); });
+        next.addEventListener('click', function(){ go(i+1); });
+        render();
+    })();
+    </script>
+</section>
+
+<!-- ═══════════════════ FOOTER ═══════════════════ -->
+<footer class="footer-premium text-gray-400 relative z-10 overflow-hidden">
+        <!-- Top hairline glow -->
+        <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-300/60 to-transparent"></div>
+        <!-- Ambient purple wash -->
+        <div class="pointer-events-none absolute inset-0" style="background:
+            radial-gradient(ellipse 70% 55% at 50% -8%, rgba(124,58,237,0.32) 0%, rgba(124,58,237,0.10) 34%, transparent 68%),
+            radial-gradient(ellipse 55% 60% at 88% 108%, rgba(207,0,114,0.16) 0%, transparent 62%),
+            radial-gradient(ellipse 45% 50% at 6% 96%, rgba(94,45,145,0.20) 0%, transparent 60%);"></div>
+        <!-- Soft focal glow behind the CTA -->
+        <div class="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-[760px] h-[440px] bg-brand-500/25 rounded-full blur-[150px]"></div>
+
+        <div class="max-w-6xl mx-auto px-6 relative">
+            <!-- ===== CTA BAND ===== -->
+            <div class="text-center pt-24 pb-16 md:pt-28 md:pb-20 border-b border-white/10">
+                <div class="mb-9">
+                    <img src="/images/rainbow-logo.png" alt="Rainbow" class="w-[70px] h-[70px] object-contain mx-auto" data-i18n-attr="alt:common.footer.rainbow_alt">
+                </div>
+                <h2 class="text-2xl md:text-4xl lg:text-[2.6rem] font-semibold text-white tracking-[-0.025em] leading-[1.18] max-w-4xl mx-auto" style="text-wrap:balance" data-i18n="common.footer.la-prochaine-conversation-de-votre_5">
+                    La prochaine conversation de votre &eacute;quipe m&eacute;rite une infrastructure qui la prot&egrave;ge
+                </h2>
+                <p class="mt-5 text-base md:text-lg text-gray-300/90 max-w-xl mx-auto" style="text-wrap:balance" data-i18n="common.footer.essayez-nos-solutions-rainbow_6">
+                    Essayez nos solutions Rainbow gratuitement pendant 30 jours. Sans carte bancaire.
+                </p>
+                <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a href="/fr/tarifs" class="group inline-flex items-center justify-center gap-2.5 px-9 py-4 rounded-[14px] text-white text-base font-bold tracking-tight"
+                       style="background:#5e2d91;" data-i18n-rich="common.footer.commencez-l-essai-gratuit-path_5">
+                        Commencez l'essai gratuit
+                        <svg class="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                    </a>
+                    <a href="/fr/tarifs" class="inline-flex items-center justify-center px-9 py-4 rounded-[14px] text-white text-base font-bold tracking-tight border border-white/25 hover:bg-white/10 hover:border-white/40 transition-colors" data-i18n="common.footer.voir-les-tarifs_5">
+                        Voir les tarifs
+                    </a>
+                </div>
+            </div>
+
+            <!-- ===== LINK COLUMNS ===== -->
+            <div class="flex flex-col lg:flex-row lg:justify-between gap-12 lg:gap-16 py-16">
+                <!-- Brand -->
+                <div class="max-w-xs">
+                    <img src="/images/ale_white.png" alt="Alcatel-Lucent" class="h-11 w-auto opacity-90 mb-6" data-i18n-attr="alt:common.footer.alcatel-lucent_alt">
+                    <address class="not-italic text-sm text-gray-400 leading-relaxed" data-i18n-rich="common.footer.ale-international-32-avenue-kl-ber_5">
+                        ALE International<br>
+                        32 avenue Kl&eacute;ber<br>
+                        92700 Colombes, France
+                    </address>
+                </div>
+                <!-- Columns -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-8 sm:gap-14">
+                    <div>
+                        <h4 class="text-[11px] font-bold text-white uppercase tracking-[0.16em] mb-5" data-i18n="common.footer.solutions_5">Solutions</h4>
+                        <ul class="space-y-3.5 text-sm">
+                            <li><a href="/fr/products/collaboration" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.rainbow-collaboration">Rainbow Collaboration</a></li>
+                            <li><a href="/fr/products/webinar" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.rainbow-webinar">Rainbow Webinar</a></li>
+                            <li><a href="/fr/tarifs" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.tarifs">Tarifs</a></li>
+                            <li><a href="/fr/telecharger-application-rainbow" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.t-l-chargements">T&eacute;l&eacute;chargements</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.api">API</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-[11px] font-bold text-white uppercase tracking-[0.16em] mb-5" data-i18n="common.footer.developers_3">Developers</h4>
+                        <ul class="space-y-3.5 text-sm">
+                            <li><a href="/fr/centre-aide-rainbow" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.centre-d-aide_3">Centre d'aide</a></li>
+                            <li><a href="/fr/faq" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.faq">FAQ</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.guide-technique">Guide technique</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.code-samples_5">Code samples</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.int-grations">Int&eacute;grations</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.forum-dev_3">Forum dev</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-[11px] font-bold text-white uppercase tracking-[0.16em] mb-5" data-i18n="common.footer.company_3">Company</h4>
+                        <ul class="space-y-3.5 text-sm">
+                            <li><a href="/fr/a-propos-de-rainbow" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.a-propos_3">A propos</a></li>
+                            <li><a href="/fr/rainbow-donnees-hebergees-en-france" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.souverainet_5">Souverainet&eacute;</a></li>
+                            <li><a href="/fr/partenaires" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.devenir-partenaire">Devenir partenaire</a></li>
+                            <li><a href="/fr/trouver-un-partenaire" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.trouver-un-partenaire">Trouver un partenaire</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.carri-res">Carri&egrave;res</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.presse">Presse</a></li>
+                            <li><a href="/fr/form-al" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.contact_4">Contact</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== BOTTOM BAR ===== -->
+            <div class="border-t border-white/10 py-8 flex flex-col gap-6">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-5">
+                    <div class="flex items-center gap-3">
+                        <a href="#" aria-label="X" class="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 ring-1 ring-white/10 hover:ring-white/20 flex items-center justify-center transition-all">
+                            <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                        </a>
+                        <a href="#" aria-label="LinkedIn" class="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 ring-1 ring-white/10 hover:ring-white/20 flex items-center justify-center transition-all" data-i18n-attr="aria-label:common.footer.linkedin_aria-label">
+                            <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                        </a>
+                    </div>
+                    <div class="flex items-center gap-6 text-sm">
+                        <a href="/fr/privacy" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.privacy_3">Privacy</a>
+                        <a href="/fr/legal" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.terms_8">Terms</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.cookies">Cookies</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors" data-i18n="common.footer.gdpr">GDPR</a>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 leading-relaxed" data-i18n-rich="common.footer.ale-international-ale-usa-inc-all_5">&copy;ALE International, ALE USA Inc. All rights reserved in all countries. The Alcatel-Lucent name and logo are trademarks of Nokia used under license by ALE. To view a list of proprietary ALE trademarks, visit: <a href="https://www.al-enterprise.com/en/legal/trademarks-copyright" target="_blank" rel="noopener" class="hover:text-white transition-colors underline-offset-2 hover:underline">www.al-enterprise.com/en/legal/trademarks-copyright</a></p>
+            </div>
+        </div>
+    </footer>
+
+<!-- ═══════════════════ SCRIPTS ═══════════════════ -->
+<script src="/js/mega-menu.js"></script>
+<script src="/js/i18n.js"></script>
+<script>
+(function(){
+    'use strict';
+
+    // Navbar scroll shadow
+    var nav = document.getElementById('navbar');
+    window.addEventListener('scroll', function(){
+        nav.style.boxShadow = window.scrollY > 8 ? '0 1px 12px rgba(30,27,75,.07)' : '';
+    }, {passive:true});
+
+    // Select color on change
+    document.querySelectorAll('select.form-input').forEach(function(sel){
+        sel.addEventListener('change', function(){
+            this.classList.toggle('has-val', !!this.value);
+        });
+    });
+
+    // Form validation
+    var form    = document.getElementById('partner-form');
+    var submitBtn = document.getElementById('submit-btn');
+    var successMsg = document.getElementById('success-msg');
+
+    function val(name){ return (form.querySelector('[name="'+name+'"]')||{value:''}).value.trim(); }
+    function setErr(id, errId, show){
+        var el = document.getElementById(id);
+        var er = document.getElementById(errId);
+        if(!el || !er) return;
+        el.classList.toggle('err', show);
+        er.classList.toggle('show', show);
+    }
+    function validEmail(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+    ['f-first','f-last','f-email','f-company','f-country','f-type'].forEach(function(id){
+        var el = document.getElementById(id);
+        if(el){ el.addEventListener('input', function(){ el.classList.remove('err'); }); el.addEventListener('change', function(){ el.classList.remove('err'); }); }
+    });
+
+    form.addEventListener('submit', function(e){
+        e.preventDefault();
+        var ok = true;
+
+        if(!val('firstName'))              { setErr('f-first','e-first',true);   ok=false; } else setErr('f-first','e-first',false);
+        if(!val('lastName'))               { setErr('f-last','e-last',true);     ok=false; } else setErr('f-last','e-last',false);
+        if(!validEmail(val('emailAddress'))){ setErr('f-email','e-email',true);   ok=false; } else setErr('f-email','e-email',false);
+        if(!val('company'))                { setErr('f-company','e-company',true); ok=false; } else setErr('f-company','e-company',false);
+        if(!val('countryID1'))             { setErr('f-country','e-country',true); ok=false; } else setErr('f-country','e-country',false);
+
+        var typeEl = document.getElementById('f-type');
+        if(!typeEl || !typeEl.value){ setErr('f-type','e-type',true); ok=false; } else setErr('f-type','e-type',false);
+
+        if(!ok){
+            var firstErr = form.querySelector('.err');
+            if(firstErr) firstErr.scrollIntoView({behavior:'smooth',block:'center'});
+            return;
+        }
+
+        // Build paragraphText from visual-only dropdowns
+        var parts = [];
+        var revenueEl = document.getElementById('f-revenue');
+        var productEl = document.getElementById('f-product');
+        if(typeEl && typeEl.value)    parts.push('Partenariat: ' + typeEl.options[typeEl.selectedIndex].text);
+        if(revenueEl && revenueEl.value) parts.push('CA prévisionnel: ' + revenueEl.options[revenueEl.selectedIndex].text);
+        if(productEl && productEl.value) parts.push('Produit: ' + productEl.options[productEl.selectedIndex].text);
+        document.getElementById('f-paragraph').value = parts.join(' | ');
+
+        submitBtn.classList.add('loading');
+        submitBtn.disabled = true;
+
+        // POST to Eloqua with no-cors  request is sent and tracked,
+        // response is intentionally ignored (opaque), no page redirect occurs
+        var fd = new FormData(form);
+        fd.set('paragraphText', document.getElementById('f-paragraph').value);
+
+        fetch('https://s138097979.t.eloqua.com/e/f2', {
+            method: 'POST',
+            mode: 'no-cors',
+            body: fd
+        }).finally(function(){
+            form.style.display = 'none';
+            successMsg.style.display = 'block';
+        });
+    });
+})();
+</script>
+<!-- impeccable-live-start -->
+<script src="http://localhost:8400/live.js?token=7e1a9f72-559f-41b5-9268-cc7ffe4bf926"></script>
+<!-- impeccable-live-end -->
+</body>
+</html>

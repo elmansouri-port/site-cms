@@ -1,0 +1,27 @@
+# The authored templates, their catalogues and the assets the site serves are
+# byte-exact inputs: the whole point of this project is that what ships is what
+# was authored, down to the byte. Line-ending conversion would rewrite every
+# one of them on checkout — LF on Linux, CRLF on Windows — and the rendered
+# pages would differ from the originals depending on where they were built.
+#
+# `-text` disables that conversion entirely for these paths.
+
+content-source/**    -text
+apps/web/public/**   -text
+tools/fidelity.hashes.json -text
+
+# Everything else is ordinary source: normalised to LF in the repository.
+*                    text=auto eol=lf
+
+# Binary, in case the wildcard above is ever loosened.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.avif binary
+*.mp4 binary
+*.webm binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
