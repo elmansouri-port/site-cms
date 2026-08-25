@@ -1,17 +1,17 @@
+# Ordinary source is normalised to LF in the repository.
+# (The last matching pattern wins, so this general rule comes first.)
+*                    text=auto eol=lf
+
 # The authored templates, their catalogues and the assets the site serves are
 # byte-exact inputs: the whole point of this project is that what ships is what
 # was authored, down to the byte. Line-ending conversion would rewrite every
 # one of them on checkout — LF on Linux, CRLF on Windows — and the rendered
-# pages would differ from the originals depending on where they were built.
+# pages would then differ from the originals depending on where they were built.
 #
-# `-text` disables that conversion entirely for these paths.
-
+# `-text` disables conversion entirely for these paths.
 content-source/**    -text
 apps/web/public/**   -text
 tools/fidelity.hashes.json -text
-
-# Everything else is ordinary source: normalised to LF in the repository.
-*                    text=auto eol=lf
 
 # Binary, in case the wildcard above is ever loosened.
 *.png binary
