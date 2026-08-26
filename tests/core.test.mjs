@@ -5,7 +5,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { scan, parseAttrs, applyEdits, flatten, unflatten, slugify, attr } from '../packages/core/src/html.js';
+import {
+  scan, parseAttrs, applyEdits, flatten, unflatten, slugify, attr, replaceElementInner,
+} from '../packages/core/src/html.js';
 import { collectUnits, stripMarkers } from '../packages/core/src/units.js';
 import { render } from '../packages/core/src/render.js';
 import { sliceBody, sliceDocument, extractHeadMeta, uniqueKeys } from '../packages/core/src/slice.js';
@@ -268,6 +270,28 @@ test('replaceAutoLd swaps the generated data out entirely', () => {
 test('page URLs always carry their locale', () => {
   assert.equal(pageUrl('https://example.test/', 'fr', ''), 'https://example.test/fr/');
   assert.equal(pageUrl('https://example.test', 'de', '/products/'), 'https://example.test/de/products/');
+});
+
+test('replaceElementInner replaces a whole nested container', () => {
+  // The article body is a div full of divs. A lazy regex stops at the first
+  // inner </div> and leaves the tail of the old article on the page.
+  const html = '<article><div itemprop="articleBody"><p>old</p><div class="box"><ul><li>x</li></ul></div><p>tail</p></div><footer>f</footer></article>';
+  const out = replaceElementInner(html, 'itemprop="articleBody"', '<p>new</p>');
+  assert.equal(out, '<article><div itemprop="articleBody"><p>new</p></div><footer>f</footer></article>');
+  assert.ok(!out.includes('tail'), 'nothing of the old contents survives');
+  assert.ok(out.includes('<footer>f</footer>'), 'siblings are untouched');
+});
+
+test('replaceElementInner skips a void element carrying the same attribute', () => {
+  const html = '<meta itemprop="articleSection" content="Old"><span itemprop="articleSection">Old</span>';
+  const out = replaceElementInner(html, 'itemprop="articleSection"', 'New');
+  assert.equal(out, '<meta itemprop="articleSection" content="Old"><span itemprop="articleSection">New</span>');
+});
+
+test('replaceElementInner leaves markup alone when it cannot match safely', () => {
+  assert.equal(replaceElementInner('<p>x</p>', 'itemprop="nope"', 'y'), '<p>x</p>');
+  // Unbalanced: no closing tag to anchor on, so nothing is rewritten.
+  assert.equal(replaceElementInner('<div itemprop="body"><p>x</p>', 'itemprop="body"', 'y'), '<div itemprop="body"><p>x</p>');
 });
 
 test('attr reads a value off a raw tag', () => {

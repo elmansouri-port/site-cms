@@ -68,9 +68,14 @@ export async function getPagePayload(route, locale, { preview = false } = {}) {
 }
 
 export async function getPageByKey(key, locale, { preview = false } = {}) {
-  const filter = preview ? { key } : { key, status: 'published' };
-  const page = await Page.findOne(filter).lean();
-  return page ? shapePage(page, locale) : null;
+  const producer = async () => {
+    const filter = preview ? { key } : { key, status: 'published' };
+    const page = await Page.findOne(filter).lean();
+    return page ? shapePage(page, locale) : null;
+  };
+  // The article template is fetched by key on every database-backed article,
+  // so it earns the same cache the route lookup gets.
+  return preview ? producer() : cached(`page-key:${locale}:${key}`, CACHE_TTL, producer);
 }
 
 /**

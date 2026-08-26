@@ -65,7 +65,14 @@ export function resolveExperiments(experiments, { cookies, url }) {
     assignments.push({ name: cookieName(exp.key), value: chosen, days: exp.cookieDays || 14 });
   }
 
-  return { variants, assignments, paramActive };
+  // When a cookie decides what the page looks like, the response is per
+  // visitor: a shared cache holding one copy would serve one visitor's variant
+  // to everybody and quietly invalidate the experiment.
+  const cookieScoped = (experiments || []).some(
+    exp => exp.mode !== 'param' && variants[exp.key] !== undefined,
+  );
+
+  return { variants, assignments, paramActive, cookieScoped };
 }
 
 /** Persist newly assigned variants for the configured window. */

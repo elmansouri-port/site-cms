@@ -123,20 +123,6 @@ export async function cacheSet(key, value, ttl = config.cache.ttl) {
   }
 }
 
-export async function cacheDel(pattern) {
-  const r = getRedis();
-  if (!r || !healthy) return 0;
-  const match = fullKey(await revision(), pattern);
-  let removed = 0;
-  try {
-    const stream = r.scanStream({ match, count: 200 });
-    for await (const keys of stream) {
-      if (keys.length) removed += await r.del(...keys);
-    }
-  } catch { /* best effort */ }
-  return removed;
-}
-
 /** Read-through helper. */
 export async function cached(key, ttl, producer) {
   const hit = await cacheGet(key);

@@ -110,13 +110,19 @@ stringsRouter.post('/bulk', requireRole('editor'), validate(patchMany), asyncHan
       if (value === null) unset[`values.${locale}`] = '';
       else set[`values.${locale}`] = value;
     }
+    // A key a template references but the catalogue has never held is created
+    // on first save; the page and zone come from the key itself, the way the
+    // import does it.
+    const [page, zone] = item.key.split('.');
     ops.push({
       updateOne: {
         filter: { key: item.key },
         update: {
           ...(Object.keys(set).length ? { $set: set } : {}),
           ...(Object.keys(unset).length ? { $unset: unset } : {}),
+          $setOnInsert: { page: page || 'common', zone: zone || 'body', owner: 'content', type: 'text' },
         },
+        upsert: true,
       },
     });
   }
@@ -218,6 +224,19 @@ stringsRouter.get('/for-page/:pageKey', asyncHandler(async (req, res) => {
   const all = [...new Set(bySection.flatMap(s => s.keys))];
   const rows = await ContentString.find({ key: { $in: all } }).lean();
   const index = Object.fromEntries(rows.map(r => [r.key, r]));
+
+  // A developer can add a marker to a template before any copy exists for it.
+  // Returning a stub means the editor can see the key and fill it in, instead
+  // of the string being invisible in the CMS and untranslated on the site.
+  for (const key of all) {
+    if (index[key]) continue;
+    const [page_, zone] = key.split('.');
+    index[key] = {
+      key, page: page_ || 'common', zone: zone || 'body',
+      owner: 'content', type: 'text', values: {}, missing: true,
+    };
+  }
+
   res.json({ sections: bySection, strings: index, seoKeys: page.seoKeys || [] });
 }));
 

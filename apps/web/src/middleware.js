@@ -70,7 +70,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const locale = first;
 
   // 3. Experiments: assigned once, then stable for the cookie's lifetime.
-  const { variants, assignments, paramActive } = resolveExperiments(boot?.experiments || [], {
+  const { variants, assignments, paramActive, cookieScoped } = resolveExperiments(boot?.experiments || [], {
     cookies,
     url,
   });
@@ -91,6 +91,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   const response = await next();
   if (paramActive) response.headers.set('x-robots-tag', 'noindex, nofollow');
+  if (cookieScoped) {
+    // The page is one visitor's variant. Without this a CDN would cache the
+    // first response and serve that variant to everyone, which ends the
+    // experiment without anyone noticing.
+    response.headers.set('cache-control', 'private, no-cache, must-revalidate');
+    response.headers.append('vary', 'Cookie');
+  }
   if (preview) response.headers.set('cache-control', 'no-store');
   return response;
 });

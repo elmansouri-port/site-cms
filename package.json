@@ -21,8 +21,9 @@
     "seed:reset": "npm run seed:reset --workspace @rainbow/api",
     "verify": "node tools/verify-fidelity.mjs",
     "verify:live": "node tools/verify-live.mjs",
+    "verify:assets": "node tools/verify-assets.mjs",
     "verify:menu": "node tools/verify-megamenu.mjs",
-    "test": "node --test tests/core.test.mjs && npm run verify && npm run test --workspace @rainbow/api",
+    "test": "node --test tests/core.test.mjs && npm run verify && npm run verify:assets && npm run test --workspace @rainbow/api",
     "test:core": "node --test tests/core.test.mjs",
     "lint": "npm run lint --workspaces --if-present"
   },

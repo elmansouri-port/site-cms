@@ -23,10 +23,16 @@ export function notFoundHandler(req, res) {
 }
 
 export function errorHandler(err, req, res, _next) {
-  const status = err.status || (err.name === 'ValidationError' ? 400 : 500);
+  // A malformed id in the URL is a bad request, not a server fault: Mongoose
+  // raises CastError before the query ever runs.
+  const badInput = err.name === 'ValidationError' || err.name === 'CastError';
+  const status = err.status || (badInput ? 400 : 500);
 
   if (err.code === 11000) {
     return res.status(409).json({ error: 'Duplicate value', details: err.keyValue });
+  }
+  if (err.name === 'CastError') {
+    return res.status(400).json({ error: `"${err.value}" is not a valid ${err.kind}` });
   }
   if (status >= 500) logger.error({ err, path: req.originalUrl }, 'request failed');
   else logger.debug({ err: err.message, path: req.originalUrl }, 'request rejected');

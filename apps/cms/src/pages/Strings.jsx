@@ -6,7 +6,7 @@
  */
 import { useMemo, useState } from 'react';
 import { useResource, useDebounced } from '../lib/hooks.js';
-import { api, qs, getToken } from '../lib/api.js';
+import { api, qs } from '../lib/api.js';
 import { useToast } from '../lib/toast.jsx';
 import { useAuth } from '../lib/auth.jsx';
 import { Panel, Spinner, ErrorBox, Icon, Empty, Modal, Field } from '../components/ui.jsx';

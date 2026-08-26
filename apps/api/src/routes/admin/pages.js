@@ -271,9 +271,18 @@ pagesRouter.post('/:key/sections', requireRole('editor'), validate(newSection), 
     order: page.sections.length,
   };
 
-  const at = req.body.afterKey ? page.sections.findIndex(s => s.key === req.body.afterKey) : -1;
-  if (at >= 0) page.sections.splice(at + 1, 0, section);
-  else page.sections.push(section);
+  if (req.body.afterKey) {
+    const at = page.sections.findIndex(s => s.key === req.body.afterKey);
+    if (at >= 0) page.sections.splice(at + 1, 0, section);
+    else page.sections.push(section);
+  } else {
+    // Content belongs above the footer and the closing scripts. Appending to
+    // the very end would put a new hero underneath the footer, which is never
+    // what an editor means by "add a block".
+    const tail = page.sections.findIndex(s => s.tag === 'footer' || s.type === 'script' || s.type === 'style');
+    if (tail >= 0) page.sections.splice(tail, 0, section);
+    else page.sections.push(section);
+  }
   page.sections.forEach((s, i) => { s.order = i; });
 
   page.editedInCms = true;
@@ -324,6 +333,52 @@ pagesRouter.delete('/:key/sections/:sectionKey', requireRole('editor'), asyncHan
   res.json({ ok: true });
 }));
 
+/**
+ * A script block is safe to carry onto a new page when it only loads files —
+ * `<script src=…>` with no body. The inline blocks are page logic (the
+ * homepage's counters, the FAQ's Zendesk fetch) and belong to their page.
+ */
+function isSharedScript(html) {
+  const withoutComments = String(html || '').replace(/<!--[\s\S]*?-->/g, '');
+  const scripts = [...withoutComments.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)];
+  return scripts.length > 0 && scripts.every(s => /\ssrc\s*=/i.test(s[1]) && !s[2].trim());
+}
+
+const isChromeBlock = (s) => (
+  (s.tag === 'nav' && (s.anchorId === 'navbar' || s.key === 'navbar'))
+  || s.tag === 'footer'
+  || (s.type === 'script' && isSharedScript(s.html))
+);
+
+/**
+ * What a new page starts as: the site's own shell.
+ *
+ * An empty page would have no stylesheets, no fonts and no Tailwind config,
+ * so every block dropped onto it would render unstyled and nothing like the
+ * rest of the site. Taking the head scaffolding, the navbar, the footer and
+ * the shared scripts from the homepage means a new page looks like a Rainbow
+ * page from the first save, with an empty middle for the editor to fill.
+ */
+async function siteChrome() {
+  const home = await Page.findOne({ pageKind: 'home' }).lean()
+    || await Page.findOne({ route: '' }).lean();
+  if (!home) return null;
+
+  const sections = (home.sections || [])
+    .slice()
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+    .filter(isChromeBlock)
+    .map((s, i) => ({ ...s, order: i }));
+
+  return {
+    doctype: home.doctype,
+    htmlOpen: home.htmlOpen,
+    bodyOpen: home.bodyOpen,
+    headRaw: home.headRaw,
+    sections,
+  };
+}
+
 const createPage = z.object({
   key: z.string().min(1).max(80).regex(/^[a-z0-9-]+$/),
   route: z.string().max(300),
@@ -345,9 +400,11 @@ pagesRouter.post('/', requireRole('editor'), validate(createPage), asyncHandler(
     if (!base) throw badRequest('The page to copy does not exist');
   }
 
+  const chrome = base ? null : await siteChrome();
   const doc = base
     ? { ...base, _id: undefined, createdAt: undefined, updatedAt: undefined, publishedAt: null }
-    : {
+    : chrome || {
+      // Only reachable before the site has been seeded.
       doctype: '<!DOCTYPE html>\n',
       htmlOpen: '<html lang="fr">',
       bodyOpen: '<body class="font-sans text-gray-600 antialiased bg-white">',

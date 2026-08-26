@@ -91,7 +91,7 @@ export function ingestPage(spec, html, catalogues, locales) {
     visible: true,
     locked: b.type === 'script' || b.type === 'style',
     html: b.html,
-    keys: b.type === 'html' ? keysIn(b.html) : keysIn(b.html).filter(Boolean),
+    keys: keysIn(b.html),
     layout: { spacingTop: null, spacingBottom: null },
     experiment: { key: null, variants: [] },
     componentKey: null,

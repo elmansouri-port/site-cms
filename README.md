@@ -195,6 +195,7 @@ docs/           architecture, operations and content-model notes
 | `npm run verify` | Proves slicing and composition reproduce every page body |
 | `node tools/verify-live.mjs [url]` | Diffs a running server against the authored source |
 | `node tools/verify-megamenu.mjs` | Proves the CMS-driven menu renders identically |
+| `node tools/verify-assets.mjs [url]` | Proves every referenced asset exists and loads |
 | `npm run seed` | Loads the authored site into MongoDB (re-runnable) |
 | `npm run seed:reset` | Drops the content collections first |
 | `node tools/build-nav-seed.mjs` | Regenerates the navigation seed from the shipped menu |

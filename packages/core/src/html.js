@@ -205,14 +205,6 @@ export function unflatten(pairs) {
   return out;
 }
 
-/** Sort object keys recursively so generated JSON diffs stay readable. */
-export function sortDeep(obj) {
-  if (obj === null || typeof obj !== 'object' || Array.isArray(obj)) return obj;
-  const out = {};
-  for (const k of Object.keys(obj).sort()) out[k] = sortDeep(obj[k]);
-  return out;
-}
-
 /** Minimal HTML-attribute escaping for values the CMS emits into tags. */
 export function escapeAttr(s) {
   return String(s ?? '')
@@ -225,4 +217,40 @@ export function escapeAttr(s) {
 /** Escape a string for safe inclusion in a text node. */
 export function escapeHtml(s) {
   return escapeAttr(s).replace(/'/g, '&#39;');
+}
+
+/**
+ * Replace the contents of the first element whose opening tag matches
+ * `openTagPattern` (a regex source fragment, typically an attribute).
+ *
+ * The closing tag is found by walking the tag stream and counting depth. A
+ * lazy `[\s\S]*?</div>` would stop at the first nested close — which, on a
+ * container full of nested elements like an article body, silently leaves the
+ * tail of the old content behind.
+ *
+ * The same microdata attribute often appears on a <meta> as well as on the
+ * element that displays it, so void tags are skipped and the search continues.
+ */
+export function replaceElementInner(html, openTagPattern, value) {
+  const re = new RegExp(`<([a-zA-Z0-9-]+)[^>]*${openTagPattern}[^>]*>`, 'gi');
+
+  for (const opening of html.matchAll(re)) {
+    const tag = opening[1].toLowerCase();
+    if (VOID.has(tag) || /\/>$/.test(opening[0])) continue;
+
+    const innerStart = opening.index + opening[0].length;
+    let depth = 1;
+    for (const span of scan(html.slice(innerStart))) {
+      if (span.kind !== 'tag' || span.name !== tag) continue;
+      if (span.closing) {
+        depth--;
+        if (depth === 0) {
+          return html.slice(0, innerStart) + value + html.slice(innerStart + span.start);
+        }
+      } else if (!/\/>$/.test(span.raw)) {
+        depth++;
+      }
+    }
+  }
+  return html; // no balanced match: leave the markup alone rather than corrupt it
 }

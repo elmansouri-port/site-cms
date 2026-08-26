@@ -50,6 +50,9 @@ jobs:
       - name: Fidelity — the CMS reproduces every authored page
         run: npm run verify
 
+      - name: Assets — every reference resolves
+        run: npm run verify:assets
+
       - name: API integration tests
         run: npm run test --workspace @rainbow/api
         env:
@@ -88,6 +91,9 @@ jobs:
 
       - name: The CMS-driven navigation renders identically
         run: node tools/verify-megamenu.mjs http://localhost:8080
+
+      - name: Assets — everything the pages ask for loads
+        run: node tools/verify-assets.mjs http://localhost:8080
 
       - name: Smoke — the routes that must never 404
         run: |

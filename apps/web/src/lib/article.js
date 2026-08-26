@@ -14,13 +14,9 @@
  */
 import { apiGet } from './api.js';
 import { stripMarkers } from '@rainbow/core/units';
+import { replaceElementInner as replaceInner } from '@rainbow/core/html';
 
 const ARTICLE_TEMPLATE_KEY = 'blog-the-power-of-rainbow';
-
-function replaceInner(html, openTagPattern, value) {
-  const re = new RegExp(`(<([a-zA-Z0-9-]+)[^>]*${openTagPattern}[^>]*>)([\\s\\S]*?)(</\\2>)`, 'i');
-  return html.replace(re, (_m, open, _tag, _inner, close) => `${open}${value}${close}`);
-}
 
 function replaceAttr(html, tagPattern, attrName, value) {
   const re = new RegExp(`(<[a-zA-Z0-9-]+[^>]*${tagPattern}[^>]*?\\s${attrName}=")[^"]*(")`, 'i');

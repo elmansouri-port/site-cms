@@ -15,6 +15,7 @@ import {
 
 export default function Leads() {
   const { can } = useAuth();
+  const toast = useToast();
   const [type, setType] = useState('');
   const [status, setStatus] = useState('');
   const [search, setSearch] = useState('');
@@ -22,6 +23,25 @@ export default function Leads() {
   const debounced = useDebounced(search);
 
   const { data, loading, error, reload } = useResource(`/leads${qs({ type, status, q: debounced, limit: 100 })}`);
+
+  /**
+   * The export endpoint needs the bearer token, so a plain link would come
+   * back 401. Fetch it, then hand the browser the file.
+   */
+  async function exportCsv() {
+    try {
+      const res = await api.raw(`/leads/export.csv${qs({ type })}`, { method: 'GET' });
+      if (!res.ok) throw new Error(`Export failed (${res.status})`);
+      const url = URL.createObjectURL(await res.blob());
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'leads.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      toast.error(err);
+    }
+  }
 
   return (
     <>
@@ -31,7 +51,7 @@ export default function Leads() {
           <p>Whitepaper downloads, demo requests, partner applications and booking forms.</p>
         </div>
         <div className="page-head__actions">
-          <a className="btn" href={`/api/v1/leads/export.csv${qs({ type })}`}>Export CSV</a>
+          <button className="btn" onClick={exportCsv}>Export CSV</button>
         </div>
       </div>
 

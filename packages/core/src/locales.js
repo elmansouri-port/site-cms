@@ -18,5 +18,4 @@ export const LOCALES = [
   { code: 'it', label: 'Italian', nativeLabel: 'Italiano', active: false },
 ];
 
-export const localeCodes = () => LOCALES.map(l => l.code);
 export const activeLocales = () => LOCALES.filter(l => l.active).map(l => l.code);

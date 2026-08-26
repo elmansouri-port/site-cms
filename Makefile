@@ -9,7 +9,7 @@ COMPOSE_DEV  := docker compose -f docker-compose.yml -f docker-compose.dev.yml
 GATEWAY      ?= http://localhost:8080
 
 .DEFAULT_GOAL := help
-.PHONY: help up down restart build logs ps seed seed-reset dev dev-db install test verify verify-live verify-menu shell-api shell-mongo purge backup clean
+.PHONY: help up down restart build logs ps seed seed-reset dev dev-db install test verify verify-live verify-menu verify-assets shell-api shell-mongo purge backup clean
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
@@ -68,6 +68,9 @@ verify: ## Prove the CMS reproduces every authored page
 
 verify-live: ## Diff the running site against the authored source
 	node tools/verify-live.mjs $(GATEWAY)
+
+verify-assets: ## Prove every asset a page asks for exists and loads
+	node tools/verify-assets.mjs $(GATEWAY)
 
 verify-menu: ## Prove the CMS-driven navigation renders identically
 	node tools/verify-megamenu.mjs $(GATEWAY)

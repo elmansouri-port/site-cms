@@ -12,8 +12,20 @@ import { bumpRevision } from '../lib/redis.js';
 import { config } from '../config.js';
 import { logger } from '../lib/log.js';
 
+/** How close two snapshots of the same item can be before the second is skipped. */
+const SNAPSHOT_DEBOUNCE_MS = 60_000;
+
 export async function snapshot(entity, entityId, doc, user, label = '') {
   try {
+    // A page document carries every block's markup — a few hundred kilobytes.
+    // Editing three fields in a row should leave one restore point, not three,
+    // so a snapshot taken moments ago stands for this one too.
+    const recent = await Version.findOne(
+      { entity, entityId: String(entityId), createdAt: { $gt: new Date(Date.now() - SNAPSHOT_DEBOUNCE_MS) } },
+      { _id: 1 },
+    ).lean();
+    if (recent) return;
+
     await Version.create({
       entity,
       entityId: String(entityId),

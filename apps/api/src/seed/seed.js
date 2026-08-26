@@ -120,7 +120,7 @@ async function seedPages(registry, catalogues) {
     const html = read(file);
     const hash = sha(html);
     const doc = ingestPage(spec, html, catalogues, registry.locales);
-    doc.locales = spec.clientTranslated ? registry.routedLocales : registry.routedLocales;
+    doc.locales = registry.routedLocales;
     doc.sourceFile = spec.file;
     doc.sourceHash = hash;
     for (const k of doc.seoKeys) seoKeys.add(k);
