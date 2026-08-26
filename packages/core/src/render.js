@@ -9,6 +9,8 @@
  */
 import * as L from './html.js';
 import { collectUnits } from './units.js';
+import { rewriteEndpoints } from './endpoints.js';
+import { resolveAssets } from './assets.js';
 
 /** Read the marker key(s) off an opening tag. */
 function markersFor(html, unit) {
@@ -49,6 +51,10 @@ export function renderRich(value, unit, html) {
  * opts.sourceLocale  the locale the templates are authored in (default 'fr')
  * opts.onMissing     callback(key, unit) for keys absent from the catalogue
  * opts.editMode      annotate editable units with data-cms-key for the visual editor
+ * opts.integrations  [{url, slug}] — third-party endpoints to route through
+ *                    this origin (see endpoints.js)
+ * opts.assets        [{slug, url, aliases}] — named image references to resolve
+ *                    to their current file (see assets.js)
  */
 export function render(template, catalogue, locale, opts = {}) {
   const stripMarkers = opts.stripMarkers !== false;
@@ -90,11 +96,20 @@ export function render(template, catalogue, locale, opts = {}) {
 
     // The visual editor needs to know which DOM node maps to which key. The
     // attribute is only emitted for preview requests, never for public HTML.
+    //
+    // A rich unit is flagged as such, because it cannot be edited as plain
+    // text: its stored value is a sentence with numbered placeholders standing
+    // in for inline children (`Welcome to <0>Rainbow</0>`). Saving the rendered
+    // element's text back over that would throw the markup away — the
+    // placeholders, and with them the link, the emphasis or the animated span
+    // they stood for. The editor reads this flag and sends the author to the
+    // copy editor, which understands the format.
     if (editMode && unit.type !== 'raw' && !annotated.has(unit.tagStart)) {
       annotated.add(unit.tagStart);
       edits.push({
         start: unit.tagEnd - 1, end: unit.tagEnd - 1,
-        text: ` data-cms-key="${L.escapeAttr(key)}"`,
+        text: ` data-cms-key="${L.escapeAttr(key)}"`
+          + (unit.type === 'rich' ? ' data-cms-rich="1"' : ''),
       });
     }
   }
@@ -142,6 +157,16 @@ export function render(template, catalogue, locale, opts = {}) {
     const re = new RegExp('(\\s(?:href|action)=")/' + sourceLocale + '(/|")', 'g');
     out = out.replace(re, '$1/' + locale + '$2');
   }
+
+  // Third-party endpoints become paths on this origin, so the automation host
+  // never reaches the browser. Same class of transformation as the line above:
+  // the markup is untouched, a URL is repointed.
+  if (opts.integrations?.length) out = rewriteEndpoints(out, opts.integrations);
+
+  // Named image references become the file the asset currently holds, so
+  // replacing one image updates every page that uses it.
+  if (opts.assets?.length) out = resolveAssets(out, opts.assets);
+
   return out;
 }
 
@@ -152,12 +177,14 @@ function dedupe(edits) {
   let last = null;
   for (const e of sorted) {
     if (last && e.start < last.end) {
-      if (e.end <= last.end) {
-        // Zero-width insertions (edit-mode annotations) are kept: they cannot
-        // clash with a replacement because they sit on the tag, not the text.
-        if (e.start === e.end) { out.push(e); continue; }
-        continue; // nested — parent wins
-      }
+      // Nested — the parent wins. That includes zero-width edit-mode
+      // annotations: a rich unit's replacement covers its inline children, so
+      // an annotation on a child tag would be written into text that is about
+      // to be replaced. The parent is the editable unit anyway — its own
+      // annotation sits on its opening tag, outside its inner range — so
+      // dropping the child's is what the editor wants as well as what applying
+      // the edits requires.
+      if (e.end <= last.end) continue;
       throw new Error(`overlapping edits: [${last.start},${last.end}) vs [${e.start},${e.end})`);
     }
     out.push(e);

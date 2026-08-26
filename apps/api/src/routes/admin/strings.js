@@ -101,9 +101,55 @@ const patchMany = z.object({
   })).min(1).max(500),
 });
 
+/**
+ * Placeholder-bearing values describe structure, not just words.
+ *
+ * A rich string reads `Welcome to <0>Rainbow</0>`, where the numbered
+ * placeholders stand in for the inline children of the element it fills — a
+ * link, an emphasis, a styled span. Writing a value with no placeholders over
+ * one that had them deletes that structure, and the element renders as bare
+ * text from then on.
+ *
+ * This refuses that write whatever asked for it. It cost the homepage headline
+ * its word rotator once; a guard at the layer that owns the data is the only
+ * place it cannot happen again.
+ */
+const PLACEHOLDER = /<\d+(?:\/>|>)/;
+
+function wouldFlatten(existing, next) {
+  if (typeof existing !== 'string' || typeof next !== 'string') return false;
+  return PLACEHOLDER.test(existing) && !PLACEHOLDER.test(next);
+}
+
 stringsRouter.post('/bulk', requireRole('editor'), validate(patchMany), asyncHandler(async (req, res) => {
-  const ops = [];
+  const keys = req.body.items.map(i => i.key);
+  const current = new Map(
+    (await ContentString.find({ key: { $in: keys } }, { key: 1, values: 1, _id: 0 }).lean())
+      .map(r => [r.key, r.values || {}]),
+  );
+
+  const refused = [];
   for (const item of req.body.items) {
+    const existing = current.get(item.key) || {};
+    for (const [locale, value] of Object.entries(item.values)) {
+      if (wouldFlatten(existing[locale], value)) {
+        refused.push({ key: item.key, locale });
+        delete item.values[locale];
+      }
+    }
+  }
+  const items = req.body.items.filter(i => Object.keys(i.values).length);
+
+  if (refused.length && !items.length) {
+    throw badRequest(
+      'That would remove the inline markup from a rich text string. Edit it in the copy editor, '
+      + 'where the placeholders are visible.',
+      refused,
+    );
+  }
+
+  const ops = [];
+  for (const item of items) {
     const set = {};
     const unset = {};
     for (const [locale, value] of Object.entries(item.values)) {
@@ -127,9 +173,26 @@ stringsRouter.post('/bulk', requireRole('editor'), validate(patchMany), asyncHan
     });
   }
   const result = await ContentString.bulkWrite(ops, { ordered: false });
-  await audit(req, 'string.bulk_update', 'string', '', { count: req.body.items.length });
+  // The keys, not just how many. A count answers nothing: tracing a changed
+  // string back to who changed it needs the key, and the single-item saves the
+  // visual editor makes are exactly the case where that matters.
+  await audit(req, 'string.bulk_update', 'string', items.length === 1 ? items[0].key : '', {
+    count: items.length,
+    keys: items.slice(0, 50).map(i => i.key),
+    ...(refused.length ? { refused } : {}),
+  });
   await publishChanged('copy bulk updated');
-  res.json({ ok: true, matched: result.matchedCount, modified: result.modifiedCount });
+  res.json({
+    ok: true,
+    matched: result.matchedCount,
+    modified: result.modifiedCount,
+    // Named rather than swallowed: a partial save that says nothing is how an
+    // editor comes to believe a change went in when it did not.
+    ...(refused.length ? {
+      refused,
+      warning: 'Some values were not saved because they would have removed inline markup.',
+    } : {}),
+  });
 }));
 
 const createString = z.object({

@@ -41,6 +41,7 @@ export default function SettingsPage() {
         defaultLocale: form.defaultLocale,
         sourceLocale: form.sourceLocale,
         locales: (form.locales || []).map(({ code, label, nativeLabel, active, order }) => ({ code, label, nativeLabel, active, order })),
+        blogSegment: form.blogSegment || {},
         defaultTitle: form.defaultTitle,
         defaultDescription: form.defaultDescription,
         defaultOgTitle: form.defaultOgTitle,
@@ -187,6 +188,32 @@ export default function SettingsPage() {
                 {(form.locales || []).map(l => <option key={l.code} value={l.code}>{l.code}</option>)}
               </select>
             </Field>
+          </div>
+
+          <h3 style={{ margin: '22px 0 8px' }}>Blog address</h3>
+          <p className="field__hint" style={{ marginBottom: 12 }}>
+            The path segment articles sit under, per language. Leave a language empty to use{' '}
+            <span className="mono">blog</span>. Changing it changes the public URL of every article
+            in that language, so set it before you have inbound links rather than after.
+          </p>
+          <div className="grid grid--3">
+            {(form.locales || []).filter(l => l.active).map(l => (
+              <Field
+                key={l.code}
+                label={l.code.toUpperCase()}
+                hint={`/${l.code}/${form.blogSegment?.[l.code] || 'blog'}/an-article`}
+              >
+                <input
+                  className="code"
+                  placeholder="blog"
+                  value={form.blogSegment?.[l.code] || ''}
+                  onChange={e => setForm(f => ({
+                    ...f,
+                    blogSegment: { ...(f.blogSegment || {}), [l.code]: e.target.value },
+                  }))}
+                />
+              </Field>
+            ))}
           </div>
         </Panel>
       )}

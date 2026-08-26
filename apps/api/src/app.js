@@ -11,6 +11,7 @@ import { redisHealthy, revision } from './lib/redis.js';
 import { notFoundHandler, errorHandler } from './middleware/error.js';
 import { siteRouter } from './routes/site.js';
 import { formsRouter } from './routes/forms.js';
+import { hooksRouter } from './routes/hooks.js';
 import { adminRouter } from './routes/admin/index.js';
 
 export function createApp() {
@@ -64,6 +65,8 @@ export function createApp() {
 
   app.use('/api/v1/site', siteRouter);
   app.use('/api/v1/forms', formsRouter);
+  // Outbound integrations, proxied so the automation host stays server-side.
+  app.use('/api/v1/hooks', hooksRouter);
   app.use('/api/v1', adminRouter);
 
   app.use(notFoundHandler);

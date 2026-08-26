@@ -29,6 +29,41 @@ export function pageUrl(baseUrl, locale, route) {
   return trimSlash(baseUrl) + path;
 }
 
+/**
+ * The route a page answers to in one locale.
+ *
+ * A page carries a base route (the source language's path) and an optional
+ * per-locale override, so German visitors get `/de/preise` rather than
+ * `/de/tarifs`. An absent or empty override falls back to the base route: a
+ * locale nobody has translated the path for keeps working rather than 404ing.
+ * Accepts a Map (Mongoose) or a plain object (JSON payload) indifferently.
+ */
+export function routeFor(page, locale) {
+  const routes = page?.routes;
+  const raw = routes instanceof Map ? routes.get(locale) : routes?.[locale];
+  const value = raw === undefined || raw === null || raw === '' ? page?.route : raw;
+  return String(value || '').replace(/^\/+|\/+$/g, '');
+}
+
+/** Public URL of a page in a locale, honouring its localized route. */
+export function pageUrlFor(baseUrl, locale, page) {
+  return pageUrl(baseUrl, locale, routeFor(page, locale));
+}
+
+/** The blog's own path segment in a locale (`blog` unless overridden). */
+export function blogSegmentFor(settings, locale) {
+  const map = settings?.blogSegment;
+  const raw = map instanceof Map ? map.get(locale) : map?.[locale];
+  const value = String(raw || '').replace(/^\/+|\/+$/g, '');
+  return value || 'blog';
+}
+
+/** `donnees-hebergees-en-france` → `Donnees hebergees en france`. */
+function humanise(segment) {
+  const words = String(segment || '').replace(/[-_]+/g, ' ').trim();
+  return words ? words[0].toUpperCase() + words.slice(1) : '';
+}
+
 function tag(name, attrs) {
   const parts = Object.entries(attrs)
     .filter(([, v]) => v !== undefined && v !== null && String(v).length > 0)
@@ -117,6 +152,7 @@ export function buildJsonLd(page, ctx) {
 
   const blocks = [];
   const kind = page.schemaType || page.pageKind || 'page';
+  const blogSegment = blogSegmentFor(g, ctx.locale);
 
   if (kind === 'home') {
     blocks.push({ '@context': 'https://schema.org', ...org });
@@ -128,7 +164,7 @@ export function buildJsonLd(page, ctx) {
       inLanguage: ctx.locale,
       potentialAction: {
         '@type': 'SearchAction',
-        target: `${trimSlash(ctx.baseUrl)}/${ctx.locale}/blog/?q={search_term_string}`,
+        target: `${trimSlash(ctx.baseUrl)}/${ctx.locale}/${blogSegment}/?q={search_term_string}`,
         'query-input': 'required name=search_term_string',
       },
     });
@@ -173,10 +209,35 @@ export function buildJsonLd(page, ctx) {
       '@type': 'BreadcrumbList',
       itemListElement: [
         { '@type': 'ListItem', position: 1, name: 'Home', item: `${trimSlash(ctx.baseUrl)}/${ctx.locale}/` },
-        { '@type': 'ListItem', position: 2, name: 'Blog', item: `${trimSlash(ctx.baseUrl)}/${ctx.locale}/blog/` },
+        { '@type': 'ListItem', position: 2, name: 'Blog', item: `${trimSlash(ctx.baseUrl)}/${ctx.locale}/${blogSegment}/` },
         { '@type': 'ListItem', position: 3, name: s.title || post.title, item: url },
       ],
     });
+  } else if (kind !== 'error' && page.route) {
+    // Every other page gets a breadcrumb too: it is what puts the path rather
+    // than the bare domain under a search result, and it costs one object.
+    //
+    // Intermediate levels are only listed when the frontend has told us that
+    // route exists (`ctx.knownRoutes`). Linking a crawler at `/fr/products/`
+    // because a page happens to live at `/fr/products/collaboration` would
+    // point it at a 404, which is worse than a shorter trail.
+    const trail = String(page.route).split('/').filter(Boolean);
+    const items = [{ '@type': 'ListItem', position: 1, name: 'Home', item: `${trimSlash(ctx.baseUrl)}/${ctx.locale}/` }];
+    let walked = '';
+    for (let i = 0; i < trail.length; i++) {
+      walked += (walked ? '/' : '') + trail[i];
+      const last = i === trail.length - 1;
+      if (!last && !ctx.knownRoutes?.has(walked)) continue;
+      items.push({
+        '@type': 'ListItem',
+        position: items.length + 1,
+        name: last ? (s.title || page.title) : humanise(trail[i]),
+        item: pageUrl(ctx.baseUrl, ctx.locale, walked),
+      });
+    }
+    if (items.length > 1) {
+      blocks.push({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: items });
+    }
   }
 
   const tags = [];

@@ -22,7 +22,12 @@
  * Events: "wf-submit" → detail { firstName, lastName, email, company, role, newsletter }
  */
 (function () {
-    const LIVRE_BLANC_WEBHOOK_URL = 'https://n8n.openrainbow.org/webhook/livre-blanc-lead';
+    // A path on this origin, not the automation platform's webhook. The server
+    // stores the lead, makes the outbound call and answers with whether it
+    // worked — so the platform, its webhook path and its reply never reach the
+    // browser, and the endpoint cannot be posted to without going through the
+    // site's rate limiting. Managed under Integrations in the CMS.
+    const LIVRE_BLANC_ENDPOINT = '/api/v1/hooks/livre-blanc-lead';
 
     const TEMPLATE = document.createElement('template');
     TEMPLATE.innerHTML = `
@@ -931,7 +936,7 @@
                 newsletter: data.get('newsletter') === 'on',
             };
 
-            fetch(LIVRE_BLANC_WEBHOOK_URL, {
+            fetch(LIVRE_BLANC_ENDPOINT, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(detail),

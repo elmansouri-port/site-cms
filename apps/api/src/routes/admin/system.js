@@ -8,6 +8,7 @@ import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import {
   User, Lead, Redirect, Experiment, Version, AuditLog, Page, BlogPost, ContentString, Media,
+  Integration,
 } from '../../models/index.js';
 import { asyncHandler, notFoundError, badRequest, conflict } from '../../middleware/error.js';
 import { validate, q } from '../../middleware/validate.js';
@@ -24,11 +25,25 @@ systemRouter.use(requireAuth);
 
 /* ── Dashboard ────────────────────────────────────────────────────────────── */
 
+/**
+ * The overview.
+ *
+ * Weighted towards the questions somebody doing marketing actually opens the
+ * CMS with — how many leads came in this week, is anything broken, what is
+ * waiting to go live — rather than row counts, which answer nothing.
+ */
 systemRouter.get('/dashboard', asyncHandler(async (_req, res) => {
   const settings = await getSettings();
   const locales = (settings.locales || []).filter(l => l.active).map(l => l.code);
 
-  const [pages, drafts, posts, postDrafts, leads, newLeads, strings, media, coverage, recent] = await Promise.all([
+  const now = new Date();
+  const weekAgo = new Date(now.getTime() - 7 * 24 * 3600 * 1000);
+  const fortnightAgo = new Date(now.getTime() - 14 * 24 * 3600 * 1000);
+
+  const [
+    pages, drafts, posts, postDrafts, leads, newLeads, strings, media, coverage, recent,
+    leadsThisWeek, leadsLastWeek, leadsByType, runningTests, brokenIntegrations, unpublished,
+  ] = await Promise.all([
     Page.countDocuments({}),
     Page.countDocuments({ status: 'draft' }),
     BlogPost.countDocuments({}),
@@ -39,10 +54,32 @@ systemRouter.get('/dashboard', asyncHandler(async (_req, res) => {
     Media.countDocuments({}),
     translationCoverage(locales.length ? locales : ['fr']),
     AuditLog.find({}).sort({ createdAt: -1 }).limit(12).lean(),
+    Lead.countDocuments({ createdAt: { $gte: weekAgo } }),
+    Lead.countDocuments({ createdAt: { $gte: fortnightAgo, $lt: weekAgo } }),
+    Lead.aggregate([
+      { $match: { createdAt: { $gte: weekAgo } } },
+      { $group: { _id: '$type', count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+    ]),
+    Experiment.find({ status: 'running' }, { key: 1, name: 1, scope: 1, variants: 1, startedAt: 1, _id: 0 }).lean(),
+    Integration.find({ enabled: true, lastError: { $ne: '' } },
+      { slug: 1, label: 1, lastError: 1, lastCallAt: 1, _id: 0 }).lean(),
+    // Pages an editor has changed but never published: the single most common
+    // way a change fails to reach the site.
+    Page.find({ status: 'draft', editedInCms: true }, { key: 1, title: 1, updatedAt: 1, _id: 0 })
+      .sort({ updatedAt: -1 }).limit(6).lean(),
   ]);
 
   res.json({
     counts: { pages, drafts, posts, postDrafts, leads, newLeads, strings, media },
+    leads: {
+      thisWeek: leadsThisWeek,
+      lastWeek: leadsLastWeek,
+      byType: leadsByType.map(r => ({ type: r._id || 'other', count: r.count })),
+    },
+    tests: runningTests,
+    integrations: brokenIntegrations,
+    unpublished,
     coverage,
     recent,
     cache: { redis: redisHealthy(), revision: await revision() },
@@ -205,6 +242,9 @@ const experimentBody = z.object({
   description: z.string().max(2000).optional(),
   status: z.enum(['draft', 'running', 'paused', 'finished']).default('draft'),
   pageKey: z.string().max(80).nullable().optional(),
+  // `block` varies one section; `page` serves a whole alternative page document
+  // at the control's URL.
+  scope: z.enum(['block', 'page']).default('block'),
   mode: z.enum(['cookie', 'param']).default('cookie'),
   paramName: z.string().max(40).default('version'),
   cookieDays: z.number().int().min(1).max(365).default(14),

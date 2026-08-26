@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 const { Schema } = mongoose;
 
 export { Page } from './Page.js';
+export { Chrome } from './Chrome.js';
 
 /* ── Users ────────────────────────────────────────────────────────────────── */
 
@@ -59,6 +60,13 @@ const SettingsSchema = new Schema({
   defaultLocale: { type: String, default: 'fr' },
   sourceLocale: { type: String, default: 'fr' },
   locales: { type: [LocaleSchema], default: [] },
+
+  /**
+   * The blog's URL segment per locale, so articles can sit under the word a
+   * reader of that language expects (`/de/blog`, or `/de/artikel` if that is
+   * what you want). Empty or missing means `blog`. Editable from Settings.
+   */
+  blogSegment: { type: Map, of: String, default: {} },
 
   defaultTitle: { type: String, default: '' },
   defaultDescription: { type: String, default: '' },
@@ -184,6 +192,36 @@ const BlogPostSchema = new Schema({
   bodyHtml: { type: String, default: '' },
   blocks: { type: [BlockSchema], default: [] },
 
+  /**
+   * The body as an ordered list of sections.
+   *
+   * Takes precedence over `bodyHtml` when it has anything in it, so an imported
+   * article keeps rendering from its HTML until somebody starts composing.
+   * Each section says whether it belongs in the contents list, which is what
+   * makes the "sommaire" a projection of the article's structure rather than a
+   * guess made by scanning the output for headings.
+   */
+  sections: {
+    type: [{
+      _id: false,
+      key: { type: String, required: true },
+      type: {
+        type: String,
+        enum: ['heading', 'rich', 'keyPoints', 'image', 'quote', 'callout', 'embed', 'custom'],
+        default: 'rich',
+      },
+      data: { type: Schema.Types.Mixed, default: {} },
+      // Where in-page links point. Derived from the heading when left empty.
+      anchorId: { type: String, default: null },
+      // null follows the type's default (a heading is in, a paragraph is not).
+      inToc: { type: Boolean, default: null },
+      tocLabel: { type: String, default: '' },
+      visible: { type: Boolean, default: true },
+      order: { type: Number, default: 0 },
+    }],
+    default: [],
+  },
+
   status: { type: String, enum: ['published', 'draft', 'scheduled'], default: 'draft', index: true },
   publishedAt: { type: Date, default: null },
 
@@ -232,9 +270,59 @@ const MediaSchema = new Schema({
   // Imported entries point at files that ship with the frontend build.
   source: { type: String, enum: ['upload', 'bundled'], default: 'upload' },
   uploadedBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+
+  /**
+   * What a human calls this image. Free to change; nothing points at it.
+   */
+  name: { type: String, default: '' },
+
+  /**
+   * The stable reference pages use: `/media/a/<slug>`.
+   *
+   * This is what makes an image a *managed asset* rather than a filename. A page
+   * that says `/media/a/hero-home` keeps working when the file behind it is
+   * replaced — which is the whole point, because otherwise updating one photo
+   * used on nine pages means finding nine hard-coded URLs and hoping.
+   *
+   * The renderer resolves the reference to the current immutable file URL, so
+   * visitors still get a long-cached, content-hashed image and no redirect.
+   */
+  slug: { type: String, default: '', index: true },
+
+  /**
+   * Slugs this asset used to answer to.
+   *
+   * Renaming a reference would otherwise silently break every page using the old
+   * one. Old slugs keep resolving here, so a rename is safe and the tidy-up is
+   * optional rather than urgent.
+   */
+  aliases: { type: [String], default: [] },
+
+  /**
+   * Previous files, newest first, from each replacement.
+   *
+   * Kept so "replace this image" is reversible and so the old file is not
+   * unlinked while a cached page might still reference it.
+   */
+  history: {
+    type: [{
+      _id: false,
+      filename: String,
+      url: String,
+      size: Number,
+      width: Number,
+      height: Number,
+      replacedAt: { type: Date, default: Date.now },
+    }],
+    default: [],
+  },
 }, { timestamps: true });
 
 MediaSchema.index({ filename: 1 }, { unique: true });
+// Sparse: bundled entries indexed from the build have no slug until somebody
+// gives them one, and several of them having none must not collide.
+MediaSchema.index({ slug: 1 }, { unique: true, sparse: true });
+MediaSchema.index({ aliases: 1 });
 
 export const Media = mongoose.model('Media', MediaSchema);
 
@@ -288,6 +376,12 @@ const ExperimentSchema = new Schema({
   status: { type: String, enum: ['draft', 'running', 'paused', 'finished'], default: 'draft' },
   // Which page the experiment lives on; sections opt in by naming the key.
   pageKey: { type: String, default: null },
+  /**
+   * What the experiment varies. `block` swaps one section's content; `page`
+   * serves a whole alternative page document at the control's URL. The
+   * assignment mechanism is identical — only what reads it differs.
+   */
+  scope: { type: String, enum: ['block', 'page'], default: 'block' },
   variants: {
     type: [{
       _id: false,
@@ -344,6 +438,63 @@ const PartnerSchema = new Schema({
 PartnerSchema.index({ country: 1, name: 1 });
 
 export const Partner = mongoose.model('Partner', PartnerSchema);
+
+/* ── Integrations (outbound webhooks, proxied) ─────────────────────────────── */
+
+/**
+ * A third-party endpoint the site calls, and the path it answers to here.
+ *
+ * The authored pages posted their forms straight from the browser to an
+ * automation platform, which published the platform, the exact webhook path for
+ * every form, and an endpoint anybody could post to without visiting the site.
+ * Now the browser posts to `/api/v1/hooks/<slug>` and the server makes the
+ * outbound call.
+ *
+ * `url` and `headers` are never returned by a public endpoint — they are the
+ * whole point of the indirection. `responseMode` decides how much of the
+ * upstream reply the browser is allowed to see: `ok` says only whether it
+ * worked, `fields` copies out an allowlist. There is no pass-everything mode,
+ * because an automation platform's reply tends to contain its own internal ids,
+ * execution urls and error text.
+ */
+const IntegrationSchema = new Schema({
+  slug: { type: String, required: true, unique: true, index: true, lowercase: true, trim: true },
+  label: { type: String, default: '' },
+  note: { type: String, default: '' },
+  url: { type: String, required: true },
+  method: { type: String, enum: ['POST', 'GET', 'PUT', 'PATCH'], default: 'POST' },
+  headers: { type: Map, of: String, default: {} },
+  timeoutMs: { type: Number, default: 10000 },
+  enabled: { type: Boolean, default: true },
+
+  responseMode: { type: String, enum: ['ok', 'fields'], default: 'ok' },
+  responseFields: { type: [String], default: [] },
+
+  // Store the submission as a lead before forwarding, so nothing is lost when
+  // the automation platform is down or misconfigured.
+  captureLead: { type: Boolean, default: false },
+  leadType: {
+    type: String,
+    enum: ['whitepaper', 'demo', 'partner', 'booking', 'unsubscribe', 'contact', 'other'],
+    default: 'other',
+  },
+
+  rateLimit: {
+    windowMs: { type: Number, default: 10 * 60 * 1000 },
+    max: { type: Number, default: 20 },
+  },
+
+  // Enough to answer "is this form working?" without opening the automation tool.
+  calls: { type: Number, default: 0 },
+  failures: { type: Number, default: 0 },
+  lastCallAt: { type: Date, default: null },
+  lastStatus: { type: Number, default: null },
+  lastError: { type: String, default: '' },
+
+  updatedBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+}, { timestamps: true, minimize: false });
+
+export const Integration = mongoose.model('Integration', IntegrationSchema);
 
 /* ── Audit log ────────────────────────────────────────────────────────────── */
 

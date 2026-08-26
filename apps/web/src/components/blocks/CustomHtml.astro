@@ -1,0 +1,86 @@
+---
+/*
+ * CustomHtml — the advanced block: markup an editor writes themselves.
+ *
+ * Tailwind is loaded on every page from the CDN and compiles classes in the
+ * browser, so any utility class written here works with no build step — which
+ * is what makes this a real escape hatch rather than a plain-HTML box.
+ *
+ * The optional stylesheet is scoped to this block's own wrapper before it is
+ * emitted, so a selector written as `.card { … }` cannot reach out and restyle
+ * the rest of the page. That is the difference between an advanced block and a
+ * loaded gun: an editor gets full control of their own block and none of
+ * anybody else's.
+ */
+const { data = {}, block = null } = Astro.props;
+const {
+  html = '',
+  css = '',
+  containerClass = '',
+  contained = false,
+} = data;
+
+// A stable id per block key: the same block scopes to the same class on every
+// render, so nothing flickers between requests and the CSS caches cleanly.
+const scope = `cms-block-${String(block?.key || 'custom').replace(/[^a-zA-Z0-9_-]/g, '-')}`;
+
+/**
+ * Prefix every top-level selector in the block's stylesheet with its scope.
+ *
+ * Rules inside an at-block (`@media`, `@supports`) are scoped by recursing into
+ * the block; `@keyframes` and `@font-face` bodies are left alone because their
+ * contents are not selectors. Anything unparseable is dropped rather than
+ * emitted half-scoped.
+ */
+function scopeCss(source, selectorPrefix) {
+  const text = String(source || '').replace(/\/\*[\s\S]*?\*\//g, '');
+  if (!text.trim()) return '';
+
+  const out = [];
+  let i = 0;
+
+  while (i < text.length) {
+    const braceAt = text.indexOf('{', i);
+    if (braceAt < 0) break;
+
+    const head = text.slice(i, braceAt).trim();
+    const body = readBlock(text, braceAt);
+    if (body === null) break;
+
+    if (head.startsWith('@')) {
+      const name = head.slice(1).split(/[\s(]/)[0].toLowerCase();
+      if (name === 'keyframes' || name === 'font-face' || name === 'property') {
+        out.push(`${head}{${body.inner}}`);
+      } else {
+        out.push(`${head}{${scopeCss(body.inner, selectorPrefix)}}`);
+      }
+    } else if (head) {
+      const selectors = head.split(',').map(s => s.trim()).filter(Boolean)
+        .map(s => (s.startsWith('&') ? s.replace('&', selectorPrefix) : `${selectorPrefix} ${s}`));
+      if (selectors.length) out.push(`${selectors.join(',')}{${body.inner}}`);
+    }
+    i = body.end;
+  }
+  return out.join('\n');
+}
+
+/** Read a balanced `{ … }` starting at `open`; null when it never closes. */
+function readBlock(text, open) {
+  let depth = 0;
+  for (let i = open; i < text.length; i++) {
+    if (text[i] === '{') depth++;
+    else if (text[i] === '}') {
+      depth--;
+      if (depth === 0) return { inner: text.slice(open + 1, i), end: i + 1 };
+    }
+  }
+  return null;
+}
+
+const scopedCss = scopeCss(css, `.${scope}`);
+const wrapperClass = [scope, contained ? 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8' : '', containerClass]
+  .filter(Boolean).join(' ');
+---
+
+{scopedCss && <style set:html={scopedCss} />}
+<div class={wrapperClass} set:html={html} />

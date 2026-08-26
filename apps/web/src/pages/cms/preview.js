@@ -13,9 +13,14 @@ export async function GET({ url, cookies, redirect }) {
   const secret = url.searchParams.get('secret');
   const target = url.searchParams.get('redirect') || `/${config.defaultLocale}/`;
   const off = url.searchParams.get('off');
+  // Edit mode is preview plus the visual editor's annotations and bridge. It is
+  // a separate flag so an editor can preview a draft as a visitor would see it,
+  // without the overlay, from the same cookie exchange.
+  const edit = url.searchParams.get('edit');
 
   if (off) {
     cookies.delete(config.previewCookie, { path: '/' });
+    cookies.delete(config.editCookie, { path: '/' });
     return redirect(safeTarget(target), 302);
   }
 
@@ -32,6 +37,11 @@ export async function GET({ url, cookies, redirect }) {
     sameSite: 'lax',
     maxAge: 3600,
   });
+  if (edit) {
+    cookies.set(config.editCookie, '1', { path: '/', httpOnly: true, sameSite: 'lax', maxAge: 3600 });
+  } else {
+    cookies.delete(config.editCookie, { path: '/' });
+  }
   return redirect(safeTarget(target), 302);
 }
 

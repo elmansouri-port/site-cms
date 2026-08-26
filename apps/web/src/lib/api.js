@@ -20,12 +20,14 @@ function put(key, value, ttl) {
 }
 
 /** Fetch JSON with a local TTL cache and stale-on-error fallback. */
-export async function apiGet(path, { ttl = config.cacheTtl, preview = false, signal } = {}) {
+export async function apiGet(path, {
+  ttl = config.cacheTtl, preview = false, signal, headers: extraHeaders = {},
+} = {}) {
   const key = `${preview ? 'p' : 'l'}:${path}`;
   const hit = store.get(key);
   if (!preview && hit && hit.expires > Date.now()) return hit.value;
 
-  const headers = { accept: 'application/json' };
+  const headers = { accept: 'application/json', ...extraHeaders };
   if (preview) headers['x-preview-secret'] = config.previewSecret;
 
   try {

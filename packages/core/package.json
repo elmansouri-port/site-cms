@@ -11,6 +11,9 @@
     "./render": "./src/render.js",
     "./slice": "./src/slice.js",
     "./seo": "./src/seo.js",
+    "./endpoints": "./src/endpoints.js",
+    "./assets": "./src/assets.js",
+    "./article": "./src/article.js",
     "./compose": "./src/compose.js",
     "./ingest": "./src/ingest.js",
     "./locales": "./src/locales.js"

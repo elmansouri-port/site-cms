@@ -14,6 +14,9 @@ import { validate, q } from '../../middleware/validate.js';
 import { requireAuth, requireRole } from '../../middleware/auth.js';
 import { snapshot, audit, publishChanged } from '../../services/publish.js';
 import { slugify } from '@rainbow/core/html';
+import { blogSegmentFor } from '@rainbow/core/seo';
+import { settingsCached } from '../../services/content.js';
+import { config } from '../../config.js';
 
 export const blogRouter = Router();
 
@@ -35,7 +38,7 @@ blogRouter.get('/', validate(listQuery, 'query'), asyncHandler(async (req, res) 
   if (search) filter.title = { $regex: String(search).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), $options: 'i' };
 
   const [items, total] = await Promise.all([
-    BlogPost.find(filter, { bodyHtml: 0, blocks: 0 }).sort({ publishedAt: -1, updatedAt: -1 }).skip(offset).limit(limit).lean(),
+    BlogPost.find(filter, { bodyHtml: 0, blocks: 0, sections: 0 }).sort({ publishedAt: -1, updatedAt: -1 }).skip(offset).limit(limit).lean(),
     BlogPost.countDocuments(filter),
   ]);
   res.json({ items, total });
@@ -64,6 +67,17 @@ const postBody = z.object({
   readingMinutes: z.number().int().min(0).max(300).optional(),
   featured: z.boolean().optional(),
   bodyHtml: z.string().max(2_000_000).optional(),
+  // The body as an ordered list of sections. Takes precedence over bodyHtml.
+  sections: z.array(z.object({
+    key: z.string().max(80).optional(),
+    type: z.enum(['heading', 'rich', 'keyPoints', 'image', 'quote', 'callout', 'embed', 'custom']),
+    data: z.record(z.string(), z.any()).default({}),
+    anchorId: z.string().max(80).nullable().optional(),
+    inToc: z.boolean().nullable().optional(),
+    tocLabel: z.string().max(200).optional(),
+    visible: z.boolean().default(true),
+    order: z.number().int().min(0).max(999).optional(),
+  })).max(200).optional(),
   blocks: z.array(z.object({
     key: z.string().max(80).optional(),
     componentKey: z.string().max(80),
@@ -84,6 +98,31 @@ const postBody = z.object({
   }).optional(),
 });
 
+/** This locale's blog segment, for revalidation paths. */
+async function segmentFor(locale) {
+  return blogSegmentFor(await settingsCached(), locale);
+}
+
+/**
+ * Give every section a stable key.
+ *
+ * The key is what the anchor and the contents entry are derived from, and what
+ * the editor's drag-and-drop reorders by, so it has to survive a save. Sections
+ * arriving without one are new; keys already set are left alone.
+ */
+function withSectionKeys(sections) {
+  const taken = new Set((sections || []).map(s => s.key).filter(Boolean));
+  return (sections || []).map((section, i) => {
+    if (section.key) return { ...section, order: section.order ?? i };
+    const base = slugify(section.type || 'section', 24) || 'section';
+    let key = `${base}-${i + 1}`;
+    let n = i + 1;
+    while (taken.has(key)) key = `${base}-${++n}`;
+    taken.add(key);
+    return { ...section, key, order: section.order ?? i };
+  });
+}
+
 blogRouter.post('/', requireRole('editor'), validate(postBody), asyncHandler(async (req, res) => {
   const slug = slugify(req.body.slug || req.body.title, 120);
   if (await BlogPost.findOne({ slug, locale: req.body.locale }).lean()) {
@@ -91,6 +130,7 @@ blogRouter.post('/', requireRole('editor'), validate(postBody), asyncHandler(asy
   }
   const post = await BlogPost.create({
     ...req.body,
+    ...(req.body.sections ? { sections: withSectionKeys(req.body.sections) } : {}),
     slug,
     groupId: req.body.groupId || slug,
     status: req.body.status || 'draft',
@@ -106,14 +146,34 @@ blogRouter.patch('/:id', requireRole('editor'), validate(postBody.partial()), as
   await snapshot('post', post._id, post.toObject(), req.user, 'before edit');
 
   if (req.body.slug) req.body.slug = slugify(req.body.slug, 120);
+  if (req.body.sections) req.body.sections = withSectionKeys(req.body.sections);
   Object.assign(post, req.body);
   post.updatedBy = req.user._id;
   if (post.status === 'published' && !post.publishedAt) post.publishedAt = new Date();
   await post.save();
 
   await audit(req, 'post.update', 'post', post._id);
-  await publishChanged('article updated', [{ locale: post.locale, slug: `blog/${post.slug}` }]);
+  await publishChanged('article updated', [{ locale: post.locale, slug: `${await segmentFor(post.locale)}/${post.slug}` }]);
   res.json({ post: post.toObject() });
+}));
+
+/**
+ * A one-click link into preview mode for this article.
+ *
+ * The same exchange the page editor uses: the shared secret travels once in the
+ * URL and comes back as an http-only cookie, so an editor can look at a draft on
+ * the real site before publishing it. Without this, "preview" for an article
+ * meant publishing and hoping.
+ */
+blogRouter.get('/:id/preview-url', asyncHandler(async (req, res) => {
+  const post = await BlogPost.findById(req.params.id, { slug: 1, locale: 1 }).lean();
+  if (!post) throw notFoundError('No such article');
+  const settings = await settingsCached();
+  const segment = blogSegmentFor(settings, post.locale);
+  const target = `/${post.locale}/${segment}/${post.slug}`;
+  const url = `${config.siteUrl}/cms/preview?secret=${encodeURIComponent(config.previewSecret)}`
+    + `&redirect=${encodeURIComponent(target)}`;
+  res.json({ url, target });
 }));
 
 blogRouter.post('/:id/publish', requireRole('editor'), asyncHandler(async (req, res) => {
@@ -123,7 +183,7 @@ blogRouter.post('/:id/publish', requireRole('editor'), asyncHandler(async (req, 
   if (!post.publishedAt) post.publishedAt = new Date();
   await post.save();
   await audit(req, 'post.publish', 'post', post._id);
-  const result = await publishChanged('article published', [{ locale: post.locale, slug: `blog/${post.slug}` }]);
+  const result = await publishChanged('article published', [{ locale: post.locale, slug: `${await segmentFor(post.locale)}/${post.slug}` }]);
   res.json({ ok: true, ...result });
 }));
 
@@ -133,7 +193,7 @@ blogRouter.post('/:id/unpublish', requireRole('editor'), asyncHandler(async (req
   post.status = 'draft';
   await post.save();
   await audit(req, 'post.unpublish', 'post', post._id);
-  await publishChanged('article unpublished', [{ locale: post.locale, slug: `blog/${post.slug}` }]);
+  await publishChanged('article unpublished', [{ locale: post.locale, slug: `${await segmentFor(post.locale)}/${post.slug}` }]);
   res.json({ ok: true });
 }));
 

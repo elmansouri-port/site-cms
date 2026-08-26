@@ -3,10 +3,11 @@
  * including repeatable lists with drag-free move buttons (a list of five
  * pricing plans does not need drag and drop, and buttons are keyboard usable).
  */
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { BLOCK_SCHEMAS } from '../lib/blockSchemas.js';
 import { Field, Icon, Checkbox } from './ui.jsx';
 import MediaPicker from './MediaPicker.jsx';
+import CodeEditor, { inspectHtml, inspectCss } from './CodeEditor.jsx';
 
 export default function BlockDataForm({ componentKey, value, onChange }) {
   const schema = BLOCK_SCHEMAS[componentKey];
@@ -43,6 +44,10 @@ export default function BlockDataForm({ componentKey, value, onChange }) {
 }
 
 function FieldControl({ field, value, onChange }) {
+  if (field.type === 'code') {
+    return <CodeField field={field} value={value || ''} onChange={onChange} />;
+  }
+
   if (field.type === 'list') {
     return <ListField field={field} value={Array.isArray(value) ? value : []} onChange={onChange} />;
   }
@@ -107,6 +112,46 @@ function FieldControl({ field, value, onChange }) {
 
 function castOption(raw, options) {
   return typeof options[0] === 'number' ? Number(raw) : raw;
+}
+
+/**
+ * A code field with its own problem list underneath.
+ *
+ * Showing the problems next to the editor rather than on save is the difference
+ * between "your HTML is broken" and seeing which line it is on while you are
+ * still looking at it.
+ */
+function CodeField({ field, value, onChange }) {
+  const problems = useMemo(
+    () => (field.language === 'css' ? inspectCss(value) : inspectHtml(value)),
+    [value, field.language],
+  );
+  const errors = problems.filter(p => p.level !== 'info');
+  const notes = problems.filter(p => p.level === 'info');
+
+  return (
+    <div className="field">
+      <span className="field__label">{field.label}</span>
+      <CodeEditor
+        value={value}
+        onChange={onChange}
+        rows={field.rows || 14}
+        language={field.language || 'html'}
+        problems={errors}
+      />
+      {field.hint && <span className="field__hint">{field.hint}</span>}
+      {errors.length > 0 && (
+        <ul className="code-problems">
+          {errors.slice(0, 6).map((p, i) => (
+            <li key={i}><span className="mono">line {p.line}</span> {p.message}</li>
+          ))}
+        </ul>
+      )}
+      {notes.map((p, i) => (
+        <span key={i} className="field__hint">⚠ {p.message}</span>
+      ))}
+    </div>
+  );
 }
 
 function MediaField({ field, value, onChange }) {

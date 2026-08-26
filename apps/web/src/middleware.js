@@ -70,29 +70,50 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const locale = first;
 
   // 3. Experiments: assigned once, then stable for the cookie's lifetime.
-  const { variants, assignments, paramActive, cookieScoped } = resolveExperiments(boot?.experiments || [], {
+  //
+  // The assignment is made here, before anything renders, but it is not
+  // persisted until the page has said which experiments it actually used —
+  // otherwise every response on the site would have to be treated as
+  // visitor-specific because any of them might have been.
+  const { variants, assignments, paramActive, modes } = resolveExperiments(boot?.experiments || [], {
     cookies,
     url,
   });
-  writeAssignments(cookies, assignments);
 
   // 4. Preview: the CMS sets this cookie through /cms/preview.
   const preview = cookies.get(config.previewCookie)?.value === config.previewSecret;
+  // Edit mode only ever follows preview — the annotations are meaningless on a
+  // published page and must never reach one.
+  const editMode = preview && cookies.get(config.editCookie)?.value === '1';
 
   locals.locale = locale;
   locals.locales = locales;
   locals.settings = settings;
   locals.navigation = boot?.navigation || { items: [] };
+  // One header and footer for the whole site, fetched with the bootstrap so a
+  // page render costs no extra round trip.
+  locals.chrome = boot?.chrome || null;
+  // Named image assets, so `/media/a/<slug>` resolves to the current file.
+  locals.assets = boot?.assets || [];
   locals.experiments = boot?.experiments || [];
   locals.variants = variants;
   locals.preview = preview;
+  locals.editMode = editMode;
+  // The page route fills this in with the experiments its content depended on.
+  locals.usedExperiments = new Set();
   // A campaign entry point must never be indexed (reco.md 3.2).
   locals.noindex = paramActive;
 
   const response = await next();
+
+  const used = locals.usedExperiments;
+  writeAssignments(cookies, assignments, used);
+
   if (paramActive) response.headers.set('x-robots-tag', 'noindex, nofollow');
+
+  const cookieScoped = [...used].some(key => modes[key] !== 'param');
   if (cookieScoped) {
-    // The page is one visitor's variant. Without this a CDN would cache the
+    // This page is one visitor's variant. Without this a CDN would cache the
     // first response and serve that variant to everyone, which ends the
     // experiment without anyone noticing.
     response.headers.set('cache-control', 'private, no-cache, must-revalidate');

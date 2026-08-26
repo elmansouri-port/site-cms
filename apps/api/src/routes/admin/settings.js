@@ -32,6 +32,12 @@ const settingsBody = z.object({
   defaultLocale: z.string().max(5).optional(),
   sourceLocale: z.string().max(5).optional(),
   locales: z.array(localeEntry).max(30).optional(),
+  // Per-locale blog segment. Empty means `blog`, which is also the default for
+  // any locale that is not listed.
+  blogSegment: z.record(
+    z.string().max(5),
+    z.string().max(80).regex(/^$|^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'One lowercase word, hyphens allowed'),
+  ).optional(),
   defaultTitle: z.string().max(300).optional(),
   defaultDescription: z.string().max(1000).optional(),
   defaultOgTitle: z.string().max(300).optional(),
@@ -74,5 +80,7 @@ settingsRouter.put('/', requireRole('admin'), validate(settingsBody), asyncHandl
 
   await audit(req, 'settings.update', 'settings', 'global', { fields: Object.keys(req.body) });
   await publishChanged('settings updated');
-  res.json({ settings: settings.toObject() });
+  // `blogSegment` is a Map, and JSON.stringify renders a Map as `{}` — without
+  // flattening it the response would claim the value was not saved.
+  res.json({ settings: settings.toObject({ flattenMaps: true }) });
 }));

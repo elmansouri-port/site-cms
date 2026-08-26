@@ -1,3 +1,14 @@
+/*
+ * PageEditor — one page, two ways to work on it.
+ *
+ * `Design` is the visual builder: the real page in an iframe, clickable blocks,
+ * copy edited in place. It is the default because it is what somebody who edits
+ * marketing pages for a living actually wants.
+ *
+ * The remaining tabs are the technical surface that was always here — the block
+ * list, the copy table, SEO, snippets, URLs, settings. Nothing was removed to
+ * make room for the builder; the builder is a better door into the same rooms.
+ */
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useResource } from '../lib/hooks.js';
@@ -5,34 +16,24 @@ import { api } from '../lib/api.js';
 import { useToast } from '../lib/toast.jsx';
 import { useAuth } from '../lib/auth.jsx';
 import {
-  Panel, Spinner, ErrorBox, StatusBadge, Badge, Icon, Modal, Field, Tabs, LocalePills,
+  Panel, Spinner, ErrorBox, StatusBadge, Badge, Icon, Field, Tabs, LocalePills,
   Checkbox, formatDate,
 } from '../components/ui.jsx';
 import SectionList from '../components/SectionList.jsx';
 import SectionEditor from '../components/SectionEditor.jsx';
 import PageStrings from '../components/PageStrings.jsx';
-
-const COMPONENT_BLOCKS = [
-  { key: 'hero', label: 'Hero' },
-  { key: 'feature_grid', label: 'Feature grid' },
-  { key: 'image_text', label: 'Image + text' },
-  { key: 'stats_band', label: 'Stats band' },
-  { key: 'logo_marquee', label: 'Logo marquee' },
-  { key: 'pricing_cards', label: 'Pricing cards' },
-  { key: 'faq_accordion', label: 'FAQ accordion' },
-  { key: 'article_list', label: 'Article list' },
-  { key: 'video', label: 'Video' },
-  { key: 'rich_text', label: 'Rich text' },
-  { key: 'cta_banner', label: 'CTA banner' },
-  { key: 'raw_html', label: 'Raw HTML' },
-];
+import VisualEditor from '../components/VisualEditor.jsx';
+import BlockPalette from '../components/BlockPalette.jsx';
+import PageVariants from '../components/PageVariants.jsx';
+import SeoChecklist from '../components/SeoChecklist.jsx';
+import SharePreview from '../components/SharePreview.jsx';
 
 export default function PageEditor() {
   const { key } = useParams();
   const toast = useToast();
   const { can } = useAuth();
   const { data, loading, error, reload } = useResource(`/pages/${key}`);
-  const [tab, setTab] = useState('sections');
+  const [tab, setTab] = useState('design');
   const [editingSection, setEditingSection] = useState(null);
   const [adding, setAdding] = useState(false);
 
@@ -63,6 +64,11 @@ export default function PageEditor() {
     }
   }
 
+  const localised = locales.filter(l => page.routes?.[l] && page.routes[l] !== page.route);
+  // The count has to match the list: body blocks only, no chrome and no scripts.
+  const bodyCount = (page.sections || [])
+    .filter(s => !s.role && s.type !== 'script' && s.type !== 'style').length;
+
   return (
     <>
       <div className="page-head">
@@ -72,9 +78,15 @@ export default function PageEditor() {
             <span className="muted">/</span>
             <StatusBadge status={page.status} />
             {page.noindex && <Badge tone="warn">noindex</Badge>}
+            {page.experiment?.key && <Badge tone="brand">A/B: {page.experiment.key}</Badge>}
           </div>
           <h1>{page.title}</h1>
-          <p className="mono">/{'{lang}'}/{page.route}</p>
+          <p className="mono">
+            /{'{lang}'}/{page.route}
+            {localised.length > 0 && (
+              <span className="muted"> · {localised.map(l => `/${l}/${page.routes[l]}`).join('  ')}</span>
+            )}
+          </p>
         </div>
         <div className="page-head__actions">
           <a className="btn" href={`/${locales[0]}/${page.route}`} target="_blank" rel="noreferrer">
@@ -95,13 +107,25 @@ export default function PageEditor() {
         active={tab}
         onChange={setTab}
         tabs={[
-          { value: 'sections', label: 'Sections', count: page.sections?.length },
+          { value: 'design', label: 'Design' },
+          { value: 'sections', label: 'Blocks', count: bodyCount },
           { value: 'copy', label: 'Copy' },
           { value: 'seo', label: 'SEO' },
-          { value: 'snippets', label: 'Code snippets' },
+          { value: 'urls', label: 'URLs' },
+          { value: 'test', label: 'A/B' },
+          { value: 'snippets', label: 'Code' },
           { value: 'settings', label: 'Settings' },
         ]}
       />
+
+      {tab === 'design' && (
+        <VisualEditor
+          page={page}
+          locales={locales}
+          canEdit={can('editor')}
+          onChanged={reload}
+        />
+      )}
 
       {tab === 'sections' && (
         <div className="split">
@@ -142,6 +166,10 @@ export default function PageEditor() {
 
       {tab === 'seo' && <SeoTab page={page} locales={locales} onSaved={reload} canEdit={can('editor')} />}
 
+      {tab === 'urls' && <UrlsTab page={page} locales={locales} onSaved={reload} canEdit={can('editor')} />}
+
+      {tab === 'test' && <PageVariants page={page} canEdit={can('editor')} onChanged={reload} />}
+
       {tab === 'snippets' && <SnippetsTab page={page} onSaved={reload} canEdit={can('editor')} />}
 
       {tab === 'settings' && <SettingsTab page={page} onSaved={reload} canEdit={can('editor')} />}
@@ -156,10 +184,23 @@ export default function PageEditor() {
       )}
 
       {adding && (
-        <AddBlock
-          pageKey={key}
+        <BlockPalette
           onClose={() => setAdding(false)}
-          onCreated={reload}
+          onInsert={async ({ componentKey, label, data, layout }) => {
+            setAdding(false);
+            try {
+              const body = { type: 'component', componentKey, label };
+              if (data) body.data = data;
+              const created = await api.post(`/pages/${key}/sections`, body);
+              if (layout && created?.section?.key) {
+                await api.patch(`/pages/${key}/sections/${created.section.key}`, { layout });
+              }
+              toast.success('Block added above the footer — drag it into place');
+              reload();
+            } catch (err) {
+              toast.error(err);
+            }
+          }}
         />
       )}
     </>
@@ -175,23 +216,42 @@ function Row({ label, value }) {
   );
 }
 
-function AddBlock({ pageKey, onClose, onCreated }) {
+/**
+ * Per-locale URLs.
+ *
+ * A German visitor searching for pricing types "preise", not "tarifs". Giving
+ * each language its own path is the cheapest organic-search win available on a
+ * translated site, and the reason it is usually skipped is that it is fiddly to
+ * do safely: rename a URL without a redirect and you throw away whatever
+ * ranking and inbound links it had. The API writes the 301 for you and repoints
+ * anything that already pointed at the old path, so the fiddly part is handled.
+ */
+function UrlsTab({ page, locales, onSaved, canEdit }) {
   const toast = useToast();
-  const [componentKey, setComponentKey] = useState('hero');
-  const [label, setLabel] = useState('');
+  const [routes, setRoutes] = useState(() => {
+    const out = {};
+    for (const l of locales) out[l] = page.routes?.[l] || '';
+    return out;
+  });
   const [busy, setBusy] = useState(false);
 
-  async function submit() {
+  useEffect(() => {
+    const out = {};
+    for (const l of locales) out[l] = page.routes?.[l] || '';
+    setRoutes(out);
+  }, [page, locales]);
+
+  const changed = locales.some(l => (routes[l] || '') !== (page.routes?.[l] || ''));
+
+  async function save() {
     setBusy(true);
     try {
-      await api.post(`/pages/${pageKey}/sections`, {
-        type: 'component',
-        componentKey,
-        label: label || COMPONENT_BLOCKS.find(b => b.key === componentKey)?.label || 'New block',
-      });
-      toast.success('Block added at the end of the page');
-      onCreated();
-      onClose();
+      const res = await api.patch(`/pages/${page.key}`, { routes });
+      const written = res?.redirects || [];
+      toast.success(written.length
+        ? `Saved — ${written.length} redirect${written.length === 1 ? '' : 's'} written`
+        : 'URLs saved');
+      onSaved();
     } catch (err) {
       toast.error(err);
     } finally {
@@ -200,29 +260,68 @@ function AddBlock({ pageKey, onClose, onCreated }) {
   }
 
   return (
-    <Modal
-      title="Add a block"
-      onClose={onClose}
-      footer={
-        <>
-          <button className="btn" onClick={onClose}>Cancel</button>
-          <button className="btn btn--primary" onClick={submit} disabled={busy}>Add block</button>
-        </>
-      }
-    >
-      <Field label="Block type">
-        <select value={componentKey} onChange={e => setComponentKey(e.target.value)}>
-          {COMPONENT_BLOCKS.map(b => <option key={b.key} value={b.key}>{b.label}</option>)}
-        </select>
-      </Field>
-      <Field label="Label" hint="What this block is called in the manager.">
-        <input value={label} onChange={e => setLabel(e.target.value)} placeholder={COMPONENT_BLOCKS.find(b => b.key === componentKey)?.label} />
-      </Field>
-      <p className="field__hint">
-        The block is added hidden from nobody — it appears at the end of the page and can be
-        dragged into place. Fill in its content from the block editor.
-      </p>
-    </Modal>
+    <div className="split">
+      <Panel
+        title="Address per language"
+        footer={canEdit && (
+          <button className="btn btn--primary" onClick={save} disabled={busy || !changed}>
+            <Icon name="save" /> Save URLs
+          </button>
+        )}
+      >
+        <p className="field__hint" style={{ marginBottom: 14 }}>
+          Leave a language empty to keep it on the shared path below. Changing a URL writes a
+          permanent redirect from the old one automatically — nothing that links to this page breaks.
+        </p>
+
+        <Field label="Shared path" hint="Used by any language with no address of its own. Edit it under Settings.">
+          <input className="code" value={page.route} disabled readOnly />
+        </Field>
+
+        {locales.map(locale => (
+          <Field
+            key={locale}
+            label={locale.toUpperCase()}
+            hint={`/${locale}/${routes[locale] || page.route}`}
+          >
+            <div className="inline">
+              <span className="muted mono" style={{ flex: 'none' }}>/{locale}/</span>
+              <input
+                className="code"
+                style={{ flex: 1 }}
+                value={routes[locale]}
+                placeholder={page.route}
+                disabled={!canEdit}
+                onChange={e => setRoutes(r => ({ ...r, [locale]: e.target.value }))}
+              />
+            </div>
+          </Field>
+        ))}
+      </Panel>
+
+      <Panel title="Why this matters">
+        <ul className="prose-list">
+          <li>
+            <strong>Search.</strong> The words in a URL are a ranking signal and, more importantly,
+            what somebody sees before they click. <span className="mono">/de/preise</span> reads as
+            German; <span className="mono">/de/tarifs</span> reads as a mistake.
+          </li>
+          <li>
+            <strong>One page, one URL.</strong> Once a language has its own path, the shared path
+            redirects to it. Two URLs serving the same page split their own ranking.
+          </li>
+          <li>
+            <strong>hreflang follows automatically.</strong> Each language is advertised at its own
+            address, so Google sends the German result to the German page rather than through a
+            redirect.
+          </li>
+          <li>
+            <strong>Ads.</strong> A landing page's URL appears in the ad itself. A readable path in
+            the visitor's language measurably lifts click-through.
+          </li>
+        </ul>
+      </Panel>
+    </div>
   );
 }
 
@@ -254,6 +353,7 @@ function SeoTab({ page, locales, onSaved, canEdit }) {
 
   const titleLen = (values.title || '').length;
   const descLen = (values.description || '').length;
+  const route = page.routes?.[locale] || page.route;
 
   return (
     <div className="split">
@@ -265,9 +365,11 @@ function SeoTab({ page, locales, onSaved, canEdit }) {
         <Field label="Title" hint={`${titleLen} characters — around 60 shows in full`}>
           <input value={values.title || ''} onChange={set('title')} disabled={!canEdit} />
         </Field>
+        <Meter value={titleLen} good={[30, 60]} max={75} />
         <Field label="Meta description" hint={`${descLen} characters — around 155 shows in full`}>
           <textarea rows={3} value={values.description || ''} onChange={set('description')} disabled={!canEdit} />
         </Field>
+        <Meter value={descLen} good={[70, 155]} max={180} />
         <Field label="Keywords">
           <input value={values.keywords || ''} onChange={set('keywords')} disabled={!canEdit} />
         </Field>
@@ -296,23 +398,39 @@ function SeoTab({ page, locales, onSaved, canEdit }) {
         />
       </Panel>
 
-      <Panel title="Search preview">
-        <div style={{ border: '1px solid var(--line)', borderRadius: 8, padding: 14 }}>
-          <div className="muted" style={{ fontSize: 12 }}>
-            example.com › {locale} › {page.route || ''}
-          </div>
-          <div style={{ color: '#1a0dab', fontSize: 17, margin: '3px 0' }}>
-            {values.title || page.title}
-          </div>
-          <div className="muted" style={{ fontSize: 13 }}>
-            {values.description || 'No description set — the site default will be used.'}
-          </div>
-        </div>
-        <p className="field__hint" style={{ marginTop: 12 }}>
-          The canonical URL and hreflang links are generated for you: the canonical always points at
-          this locale, and only languages this page exists in are listed.
-        </p>
-      </Panel>
+      <div style={{ display: 'grid', gap: 16 }}>
+        <Panel title="Before you publish">
+          <p className="field__hint" style={{ marginBottom: 12 }}>
+            What a person sees before they decide to click. Switch between the places this page's
+            link will actually appear.
+          </p>
+          <SharePreview
+            title={values.title}
+            description={values.description}
+            image={values.ogImage}
+            url={`/${locale}${route ? `/${route}` : ''}`}
+            fallbackTitle={page.title}
+          />
+          <p className="field__hint" style={{ marginTop: 12 }}>
+            The canonical URL and hreflang links are generated for you: the canonical always points at
+            this locale's own path, and only languages this page exists in are listed.
+          </p>
+        </Panel>
+
+        <SeoChecklist page={page} locale={locale} seo={values} />
+      </div>
+    </div>
+  );
+}
+
+/** A length gauge that turns green inside the range search results actually show. */
+function Meter({ value, good, max }) {
+  const pct = Math.min(100, (value / max) * 100);
+  const tone = value === 0 ? 'empty' : value < good[0] ? 'short' : value <= good[1] ? 'ok' : 'long';
+  return (
+    <div className="meter" style={{ marginTop: -8, marginBottom: 14 }}>
+      <div className={`meter__fill is-${tone}`} style={{ width: `${pct}%` }} />
+      <span className="meter__mark" style={{ left: `${(good[1] / max) * 100}%` }} />
     </div>
   );
 }
@@ -363,6 +481,7 @@ function SettingsTab({ page, onSaved, canEdit }) {
     noindex: !!page.noindex,
     locales: page.locales || [],
     sitemap: { include: true, priority: 0.7, changefreq: 'weekly', ...(page.sitemap || {}) },
+    chrome: { navbar: page.chrome?.navbar !== false, footer: page.chrome?.footer !== false },
   }));
   const [busy, setBusy] = useState(false);
 
@@ -371,20 +490,24 @@ function SettingsTab({ page, onSaved, canEdit }) {
   async function save() {
     setBusy(true);
     try {
-      await api.patch(`/pages/${page.key}`, {
+      const res = await api.patch(`/pages/${page.key}`, {
         title: form.title,
         route: form.route,
         pageKind: form.pageKind,
         type: form.type,
         noindex: form.noindex,
         locales: form.locales,
+        chrome: form.chrome,
         sitemap: {
           include: form.sitemap.include,
           priority: Number(form.sitemap.priority),
           changefreq: form.sitemap.changefreq,
         },
       });
-      toast.success('Page settings saved');
+      const written = res?.redirects || [];
+      toast.success(written.length
+        ? `Saved — ${written.length} redirect${written.length === 1 ? '' : 's'} written`
+        : 'Page settings saved');
       onSaved();
     } catch (err) {
       toast.error(err);
@@ -400,7 +523,7 @@ function SettingsTab({ page, onSaved, canEdit }) {
         footer={canEdit && <button className="btn btn--primary" onClick={save} disabled={busy}><Icon name="save" /> Save</button>}
       >
         <Field label="Title"><input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} disabled={!canEdit} /></Field>
-        <Field label="Route" hint="Without the language prefix. Changing it changes the public URL.">
+        <Field label="Shared path" hint="Without the language prefix. Per-language addresses live under URLs. Changing this writes a redirect.">
           <input className="code" value={form.route} onChange={e => setForm(f => ({ ...f, route: e.target.value }))} disabled={!canEdit} />
         </Field>
         <div className="grid grid--2">
@@ -438,6 +561,33 @@ function SettingsTab({ page, onSaved, canEdit }) {
         </Field>
       </Panel>
 
+      <div style={{ display: 'grid', gap: 16 }}>
+      <Panel title="Header & footer">
+        <p className="field__hint" style={{ marginBottom: 12 }}>
+          Both come from <strong>Header &amp; footer</strong> and are the same on every page. Turn
+          one off here for this page only.
+        </p>
+        <Checkbox
+          label="Show the site header"
+          checked={form.chrome.navbar}
+          disabled={!canEdit}
+          onChange={e => setForm(f => ({ ...f, chrome: { ...f.chrome, navbar: e.target.checked } }))}
+        />
+        <Checkbox
+          label="Show the site footer"
+          checked={form.chrome.footer}
+          disabled={!canEdit}
+          onChange={e => setForm(f => ({ ...f, chrome: { ...f.chrome, footer: e.target.checked } }))}
+        />
+        {(!form.chrome.navbar || !form.chrome.footer) && (
+          <div className="callout">
+            A page with no header is a <strong>landing page</strong>: every link in a navigation bar
+            is a way to leave before converting, which is why paid-traffic pages routinely drop it.
+            Make sure the page has its own way back to the site.
+          </div>
+        )}
+      </Panel>
+
       <Panel title="Indexing">
         <Checkbox
           label="Hide from search engines (noindex, nofollow)"
@@ -469,6 +619,7 @@ function SettingsTab({ page, onSaved, canEdit }) {
           </select>
         </Field>
       </Panel>
+      </div>
     </div>
   );
 }

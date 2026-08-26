@@ -3,7 +3,10 @@
  */
 import { composeParts } from '@rainbow/core/compose';
 import { getKey } from '@rainbow/core/html';
-import { catalogue as loadCatalogue, alternatesFor, baseUrlFrom, activeLocales } from './site.js';
+import {
+  catalogue as loadCatalogue, alternatesFor, baseUrlFrom, activeLocales, knownRoutes,
+  integrationMap,
+} from './site.js';
 import { navRuntime } from './nav.js';
 import { config } from './config.js';
 
@@ -26,7 +29,14 @@ function runtimeFor({ locale, locales, page, settings, navigation, variants }) {
   return {
     locale,
     locales,
-    page: { key: page.key, route: page.route, kind: page.pageKind },
+    page: {
+      key: page.key,
+      route: page.route,
+      kind: page.pageKind,
+      // Which arm of a page-scoped test produced this document, so session
+      // recording and analytics can segment on it the same way they do blocks.
+      variant: page.variantKey || null,
+    },
     variants,
     // Reshaped into what the shipped megamenu script expects, so the menu is
     // CMS-driven without its markup changing.
@@ -50,7 +60,10 @@ export async function renderPage(astro, page, extra = {}) {
   const settings = locals.settings || {};
   const locales = activeLocales(settings);
   const baseUrl = baseUrlFrom(settings, url);
-  const catalogue = await loadCatalogue(locale);
+  const [catalogue, integrations] = await Promise.all([
+    loadCatalogue(locale),
+    integrationMap(),
+  ]);
 
   const ctx = {
     locale,
@@ -61,7 +74,19 @@ export async function renderPage(astro, page, extra = {}) {
     translations: alternatesFor(page, locales, baseUrl),
     noindex: locals.noindex || page.noindex || locals.preview,
     variants: locals.variants || {},
-    editMode: !!locals.preview,
+    // The shared header and footer, and the add-ins, for every page.
+    chrome: locals.chrome || null,
+    // Third-party endpoints, repointed at this origin by the renderer.
+    integrations,
+    // Named images, resolved to the file each asset currently holds.
+    assets: locals.assets || [],
+    // Copy is annotated for inline editing whenever a draft is being previewed;
+    // the block overlay and its bridge script are added only in edit mode.
+    editMode: !!locals.editMode,
+    annotateStrings: !!locals.preview,
+    // Which routes actually exist in this locale, so a breadcrumb never links a
+    // crawler at an intermediate path that would 404.
+    knownRoutes: await knownRoutes(locale),
     runtime: runtimeFor({
       locale,
       locales,

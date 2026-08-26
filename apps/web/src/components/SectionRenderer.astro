@@ -19,6 +19,7 @@ import PricingCards from './blocks/PricingCards.astro';
 import VideoBlock from './blocks/VideoBlock.astro';
 import ArticleList from './blocks/ArticleList.astro';
 import RawHtml from './blocks/RawHtml.astro';
+import CustomHtml from './blocks/CustomHtml.astro';
 
 const REGISTRY = {
   hero: Hero,
@@ -33,9 +34,10 @@ const REGISTRY = {
   video: VideoBlock,
   article_list: ArticleList,
   raw_html: RawHtml,
+  custom_html: CustomHtml,
 };
 
-const { block, locale, context } = Astro.props;
+const { block, locale, context, editMode = false } = Astro.props;
 const Component = REGISTRY[block?.componentKey];
 
 if (!Component) {
@@ -44,7 +46,7 @@ if (!Component) {
 ---
 
 {Component && (
-  <BlockWrapper layout={block.layout} anchorId={block.anchorId}>
-    <Component data={block.data || {}} locale={locale} context={context} />
+  <BlockWrapper layout={block.layout} anchorId={block.anchorId} block={block} editMode={editMode}>
+    <Component data={block.data || {}} locale={locale} context={context} block={block} />
   </BlockWrapper>
 )}

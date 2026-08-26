@@ -50,12 +50,15 @@ export default function Experiments() {
         {loading && <Spinner />}
         {error && <ErrorBox error={error} onRetry={reload} />}
         {data && !data.items.length && (
-          <Empty title="No tests yet">Create one, then assign it to a section block from the page editor.</Empty>
+          <Empty title="No tests yet">
+            Create one, then attach it to a block from a page's Design tab — or start a whole-page
+            test from that page's A/B tab, which creates the test for you.
+          </Empty>
         )}
         {data?.items?.length > 0 && (
           <table className="table">
             <thead>
-              <tr><th>Test</th><th>Mode</th><th>Variants</th><th>Status</th><th>Started</th><th /></tr>
+              <tr><th>Test</th><th>Varies</th><th>Mode</th><th>Variants</th><th>Status</th><th>Started</th><th /></tr>
             </thead>
             <tbody>
               {data.items.map(x => (
@@ -63,6 +66,12 @@ export default function Experiments() {
                   <td>
                     <div style={{ fontWeight: 600 }}>{x.name}</div>
                     <div className="mono muted" style={{ fontSize: 12 }}>{x.key}</div>
+                  </td>
+                  <td>
+                    <Badge tone={x.scope === 'page' ? 'brand' : ''}>
+                      {x.scope === 'page' ? 'whole page' : 'a block'}
+                    </Badge>
+                    {x.pageKey && <div className="mono muted" style={{ fontSize: 11 }}>{x.pageKey}</div>}
                   </td>
                   <td>
                     <Badge>{x.mode === 'param' ? `?${x.paramName}=` : `cookie · ${x.cookieDays}d`}</Badge>

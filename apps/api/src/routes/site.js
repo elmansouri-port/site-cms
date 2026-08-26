@@ -13,8 +13,10 @@ import { allowPreview } from '../middleware/auth.js';
 import { catalogueFor } from '../services/catalogue.js';
 import {
   settingsCached, navigationCached, routeIndexCached, getPagePayload, getPageByKey,
-  redirectsCached, experimentsCached, activeLocaleCodes,
+  redirectsCached, experimentsCached, activeLocaleCodes, chromeCached, integrationsCached,
+  assetsCached,
 } from '../services/content.js';
+import { config } from '../config.js';
 import { BlogPost, Partner } from '../models/index.js';
 
 export const siteRouter = Router();
@@ -31,6 +33,7 @@ function publicSettings(s) {
     defaultLocale: s.defaultLocale,
     sourceLocale: s.sourceLocale,
     locales: (s.locales || []).sort((a, b) => (a.order ?? 0) - (b.order ?? 0)),
+    blogSegment: s.blogSegment || {},
     defaultTitle: s.defaultTitle,
     defaultDescription: s.defaultDescription,
     defaultOgTitle: s.defaultOgTitle,
@@ -49,8 +52,9 @@ function publicSettings(s) {
 }
 
 siteRouter.get('/bootstrap', asyncHandler(async (req, res) => {
-  const [settings, nav, experiments, redirects] = await Promise.all([
+  const [settings, nav, experiments, redirects, chrome, assets] = await Promise.all([
     settingsCached(), navigationCached('main'), experimentsCached(), redirectsCached(),
+    chromeCached(), assetsCached(),
   ]);
   res.set('cache-control', 'public, max-age=30');
   res.json({
@@ -58,7 +62,29 @@ siteRouter.get('/bootstrap', asyncHandler(async (req, res) => {
     navigation: nav,
     experiments,
     redirects,
+    // The header and footer every page renders. This endpoint is public, so it
+    // carries only what ends up in the HTML anyway.
+    chrome,
+    // Named image assets, so the renderer can resolve `/media/a/<slug>`.
+    assets,
   });
+}));
+
+/**
+ * The endpoint map the renderer needs, for the frontend server only.
+ *
+ * Upstream URLs are exactly what the proxy exists to keep out of the browser,
+ * so unlike everything else under /site this route is gated. The frontend
+ * already shares the revalidate secret with the API; a browser has no way to
+ * present it.
+ */
+siteRouter.get('/integrations', asyncHandler(async (req, res) => {
+  const presented = req.get('x-cms-secret');
+  if (!presented || presented !== config.revalidateSecret) {
+    throw notFoundError('No such route');
+  }
+  res.set('cache-control', 'no-store');
+  res.json({ items: await integrationsCached() });
 }));
 
 siteRouter.get('/catalogue/:locale', asyncHandler(async (req, res) => {
@@ -75,20 +101,47 @@ const pageQuery = z.object({
   key: z.string().max(80).optional(),
   locale: localeParam,
   preview: z.coerce.boolean().optional(),
+  // The visitor's A/B assignments, as `experiment=arm` pairs: `hero=B,cta=A`.
+  // Passed rather than resolved here because assignment belongs to the request,
+  // and the frontend middleware has already done it.
+  variants: z.string().max(400).optional(),
 });
 
 siteRouter.get('/page', validate(pageQuery, 'query'), asyncHandler(async (req, res) => {
-  const { route, key, locale, preview } = q(req);
+  const { route, key, locale, preview, variants } = q(req);
   const wantsDraft = !!preview && req.previewAllowed;
   const page = key
     ? await getPageByKey(key, locale, { preview: wantsDraft })
-    : await getPagePayload(normaliseRoute(route || ''), locale, { preview: wantsDraft });
+    : await getPagePayload(normaliseRoute(route || ''), locale, {
+      preview: wantsDraft,
+      variants: parseVariants(variants),
+    });
   if (!page) throw notFoundError('No page for that route');
 
   // Which locales this page actually exists in — the frontend turns this into
   // hreflang and never points at a locale that has no translation.
   res.set('cache-control', wantsDraft ? 'no-store' : 'public, max-age=30');
   res.json({ page });
+}));
+
+/**
+ * The fallback for an asset reference the renderer did not resolve.
+ *
+ * A reference can escape the render pass — inside a JavaScript string, in copy
+ * an editor pasted, in a feed somebody built against the site. Rather than
+ * 404ing, the reference resolves here with a redirect to the current file, so a
+ * managed image works everywhere even when the fast path missed it.
+ */
+siteRouter.get('/asset/:slug', asyncHandler(async (req, res) => {
+  const slug = String(req.params.slug || '').toLowerCase();
+  const assets = await assetsCached();
+  const hit = assets.find(a => a.slug === slug)
+    || assets.find(a => (a.aliases || []).includes(slug));
+  if (!hit) throw notFoundError('No such asset');
+  // Short-lived: the target changes when somebody replaces the image, and the
+  // file it points at is itself immutable and cached for a month.
+  res.set('cache-control', 'public, max-age=60');
+  res.redirect(302, hit.url);
 }));
 
 siteRouter.get('/routes', asyncHandler(async (req, res) => {
@@ -117,7 +170,7 @@ siteRouter.get('/blog', validate(listQuery, 'query'), asyncHandler(async (req, r
   ];
 
   const [items, total] = await Promise.all([
-    BlogPost.find(filter, { bodyHtml: 0, blocks: 0 })
+    BlogPost.find(filter, { bodyHtml: 0, blocks: 0, sections: 0 })
       .sort({ featured: -1, publishedAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
@@ -143,10 +196,23 @@ siteRouter.get('/blog/:slug', asyncHandler(async (req, res) => {
     { locale: 1, slug: 1, _id: 0 },
   ).lean();
 
-  const related = await BlogPost.find(
-    { locale, status: 'published', _id: { $ne: post._id } },
-    { bodyHtml: 0, blocks: 0 },
-  ).sort({ publishedAt: -1 }).limit(3).lean();
+  // Related articles: same category first — that is what "related" means to a
+  // reader — then the most recent, so the section is never short of cards.
+  const exclude = { bodyHtml: 0, blocks: 0, sections: 0 };
+  const sameCategory = post.category
+    ? await BlogPost.find(
+      { locale, status: 'published', category: post.category, _id: { $ne: post._id } },
+      exclude,
+    ).sort({ publishedAt: -1 }).limit(3).lean()
+    : [];
+  const seen = new Set(sameCategory.map(p => String(p._id)));
+  const filler = sameCategory.length < 3
+    ? await BlogPost.find(
+      { locale, status: 'published', _id: { $nin: [post._id, ...sameCategory.map(p => p._id)] } },
+      exclude,
+    ).sort({ publishedAt: -1 }).limit(3 - sameCategory.length).lean()
+    : [];
+  const related = [...sameCategory, ...filler.filter(p => !seen.has(String(p._id)))];
 
   res.set('cache-control', wantsDraft ? 'no-store' : 'public, max-age=60');
   res.json({ post, translations: siblings, related });
@@ -170,6 +236,16 @@ siteRouter.get('/forms/schema', asyncHandler(async (_req, res) => {
 
 function normaliseRoute(route) {
   return String(route || '').replace(/^\/+|\/+$/g, '');
+}
+
+/** `hero=B,cta=A` → `{ hero: 'B', cta: 'A' }`. Malformed pairs are ignored. */
+function parseVariants(raw) {
+  const out = {};
+  for (const pair of String(raw || '').split(',')) {
+    const [key, value] = pair.split('=');
+    if (key && value && /^[\w-]{1,80}$/.test(key) && /^[\w-]{1,20}$/.test(value)) out[key] = value;
+  }
+  return out;
 }
 
 function escapeRegex(s) {

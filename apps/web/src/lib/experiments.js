@@ -62,22 +62,68 @@ export function resolveExperiments(experiments, { cookies, url }) {
     const chosen = pickWeighted(exp.variants || []);
     if (!chosen) continue;
     variants[exp.key] = chosen;
-    assignments.push({ name: cookieName(exp.key), value: chosen, days: exp.cookieDays || 14 });
+    assignments.push({
+      experiment: exp.key,
+      name: cookieName(exp.key),
+      value: chosen,
+      days: exp.cookieDays || 14,
+    });
   }
 
-  // When a cookie decides what the page looks like, the response is per
-  // visitor: a shared cache holding one copy would serve one visitor's variant
-  // to everybody and quietly invalidate the experiment.
-  const cookieScoped = (experiments || []).some(
-    exp => exp.mode !== 'param' && variants[exp.key] !== undefined,
-  );
+  const modes = Object.fromEntries((experiments || []).map(e => [e.key, e.mode || 'cookie']));
 
-  return { variants, assignments, paramActive, cookieScoped };
+  return { variants, assignments, paramActive, modes };
 }
 
-/** Persist newly assigned variants for the configured window. */
-export function writeAssignments(cookies, assignments) {
+/**
+ * Which running experiments actually decided anything about this page.
+ *
+ * Assignment happens for every running experiment on every request, because the
+ * middleware does not know yet which page will be served. Acting on all of them
+ * would be wrong twice over: a visitor would collect cookies for tests they
+ * never saw, and — far more expensive — every response on the site would have to
+ * be marked private, because any one of them *might* have depended on an
+ * assignment. So the page records what it really used, and only that is
+ * persisted and only that suppresses shared caching.
+ */
+export function usedExperiments(page, variants, chrome = null) {
+  const used = new Set();
+  const consider = (key) => { if (key && variants[key] !== undefined) used.add(key); };
+
+  // Whole-page test: the API tells us which experiment chose these sections.
+  consider(page?.experimentKey);
+  for (const section of page?.sections || []) {
+    if (section.visible === false) continue;
+    consider(section.experiment?.key);
+  }
+
+  // A header or footer test applies to every page, so it counts on every page —
+  // which is exactly why it is worth knowing about: it makes the whole site
+  // visitor-specific for as long as it runs.
+  for (const part of ['navbar', 'footer']) {
+    const slot = chrome?.[part];
+    if (!slot || slot.visible === false) continue;
+    if (page?.chrome && page.chrome[part] === false) continue;
+    consider(slot.experiment?.key);
+  }
+  for (const addIn of chrome?.addIns || []) {
+    if (!addIn.enabled) continue;
+    if (addIn.pages?.length && page?.key && !addIn.pages.includes(page.key)) continue;
+    consider(addIn.experiment?.key);
+  }
+
+  return used;
+}
+
+/**
+ * Persist newly assigned variants for the configured window.
+ *
+ * `only` restricts the write to the experiments the page actually used, so a
+ * visitor is not tagged for a test they have not been shown.
+ */
+export function writeAssignments(cookies, assignments, only = null) {
   for (const a of assignments) {
+    if (only && !only.has(a.experiment)) continue;
     cookies.set(a.name, a.value, {
       path: '/',
       sameSite: 'lax',

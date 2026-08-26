@@ -5,6 +5,10 @@
  * Spacing lives here, never inside a block template, so an editor changes the
  * rhythm of a page from one pair of dropdowns and every block obeys the same
  * scale. The anchor id is what the floating section nav links to.
+ *
+ * In preview mode the section also carries the `data-cms-block` attributes the
+ * visual editor reads to map a click on the page back to the block behind it.
+ * Published pages never receive them.
  */
 const SPACING = {
   none: { top: 'pt-0', bottom: 'pb-0' },
@@ -16,12 +20,35 @@ const SPACING = {
   '2xl': { top: 'pt-32', bottom: 'pb-32' },
 };
 
-const { layout = {}, anchorId = null, class: extra = '' } = Astro.props;
+const {
+  layout = {},
+  anchorId = null,
+  class: extra = '',
+  block = null,
+  editMode = false,
+} = Astro.props;
+
 const top = SPACING[layout?.spacingTop || 'lg']?.top ?? SPACING.lg.top;
 const bottom = SPACING[layout?.spacingBottom || 'lg']?.bottom ?? SPACING.lg.bottom;
+const hidden = editMode && block?.visible === false;
 const classes = ['section-anchor', top, bottom, extra].filter(Boolean).join(' ');
+
+const editAttrs = editMode && block
+  ? {
+    'data-cms-block': block.key,
+    'data-cms-block-type': block.componentKey || 'component',
+    'data-cms-block-label': block.label || block.key,
+    ...(block.variantKey ? { 'data-cms-variant': block.variantKey } : {}),
+    ...(hidden ? { 'data-cms-hidden': '1' } : {}),
+  }
+  : {};
 ---
 
-<section id={anchorId || undefined} class={classes}>
+<section
+  id={anchorId || undefined}
+  class={classes}
+  style={hidden ? 'opacity:.4;outline:2px dashed #a78bfa' : undefined}
+  {...editAttrs}
+>
   <slot />
 </section>

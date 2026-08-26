@@ -6,11 +6,28 @@
  * the alternative (deriving forms from the components) would make every field
  * label a code change.
  *
- * type: text | textarea | html | number | boolean | select | media | list
+ * Each schema also carries the metadata the insert palette needs — a category,
+ * a one-line description of what the block is for, and a wireframe that shows
+ * its shape. An editor choosing a block should be looking at pictures, not
+ * reading a dropdown of identifiers.
+ *
+ * type: text | textarea | html | code | number | boolean | select | media | list | lines
  */
+
+export const BLOCK_CATEGORIES = [
+  { key: 'hero', label: 'Openers' },
+  { key: 'content', label: 'Content' },
+  { key: 'proof', label: 'Proof & numbers' },
+  { key: 'convert', label: 'Conversion' },
+  { key: 'advanced', label: 'Advanced' },
+];
+
 export const BLOCK_SCHEMAS = {
   hero: {
     label: 'Hero',
+    category: 'hero',
+    description: 'Full-width opener: headline, subtitle, two buttons and an image.',
+    wireframe: ['title-lg', 'text', 'buttons', 'image'],
     fields: [
       { name: 'eyebrow', label: 'Eyebrow', type: 'text' },
       { name: 'title', label: 'Title', type: 'text' },
@@ -21,12 +38,15 @@ export const BLOCK_SCHEMAS = {
       { name: 'secondaryLabel', label: 'Secondary button', type: 'text' },
       { name: 'secondaryHref', label: 'Secondary link', type: 'text' },
       { name: 'image', label: 'Image', type: 'media' },
-      { name: 'imageAlt', label: 'Image alt text', type: 'text' },
+      { name: 'imageAlt', label: 'Image alt text', type: 'text', hint: 'Describe the image. Required for accessibility and read by image search.' },
       { name: 'align', label: 'Alignment', type: 'select', options: ['center', 'left'] },
     ],
   },
   cta_banner: {
     label: 'CTA banner',
+    category: 'convert',
+    description: 'A band that asks for the click. Use one per page, near the end.',
+    wireframe: ['title', 'text', 'buttons'],
     fields: [
       { name: 'title', label: 'Title', type: 'text' },
       { name: 'subtitle', label: 'Subtitle', type: 'textarea' },
@@ -39,6 +59,9 @@ export const BLOCK_SCHEMAS = {
   },
   faq_accordion: {
     label: 'FAQ accordion',
+    category: 'content',
+    description: 'Questions and answers. Emits FAQ structured data for search results.',
+    wireframe: ['title', 'rows'],
     fields: [
       { name: 'title', label: 'Title', type: 'text' },
       { name: 'subtitle', label: 'Subtitle', type: 'textarea' },
@@ -56,6 +79,9 @@ export const BLOCK_SCHEMAS = {
   },
   feature_grid: {
     label: 'Feature grid',
+    category: 'content',
+    description: 'Two to four columns of icon, title and a line of copy.',
+    wireframe: ['title', 'grid-3'],
     fields: [
       { name: 'title', label: 'Title', type: 'text' },
       { name: 'subtitle', label: 'Subtitle', type: 'textarea' },
@@ -77,6 +103,9 @@ export const BLOCK_SCHEMAS = {
   },
   stats_band: {
     label: 'Stats band',
+    category: 'proof',
+    description: 'Big numbers that count up as they scroll into view.',
+    wireframe: ['stats'],
     fields: [
       { name: 'title', label: 'Title', type: 'text' },
       { name: 'animate', label: 'Animate the numbers on scroll', type: 'boolean' },
@@ -96,6 +125,9 @@ export const BLOCK_SCHEMAS = {
   },
   logo_marquee: {
     label: 'Logo marquee',
+    category: 'proof',
+    description: 'A scrolling row of customer logos.',
+    wireframe: ['logos'],
     fields: [
       { name: 'title', label: 'Title', type: 'text' },
       {
@@ -112,6 +144,9 @@ export const BLOCK_SCHEMAS = {
   },
   rich_text: {
     label: 'Rich text',
+    category: 'content',
+    description: 'A column of prose. The workhorse for long-form copy.',
+    wireframe: ['title', 'text', 'text'],
     fields: [
       { name: 'title', label: 'Title', type: 'text' },
       { name: 'html', label: 'Content', type: 'html', rows: 14 },
@@ -120,12 +155,15 @@ export const BLOCK_SCHEMAS = {
   },
   image_text: {
     label: 'Image + text',
+    category: 'content',
+    description: 'Half image, half copy. Alternate the side down a page.',
+    wireframe: ['split'],
     fields: [
       { name: 'eyebrow', label: 'Eyebrow', type: 'text' },
       { name: 'title', label: 'Title', type: 'text' },
       { name: 'html', label: 'Body', type: 'html' },
       { name: 'image', label: 'Image', type: 'media' },
-      { name: 'imageAlt', label: 'Image alt text', type: 'text' },
+      { name: 'imageAlt', label: 'Image alt text', type: 'text', hint: 'Describe the image. Required for accessibility and read by image search.' },
       { name: 'reverse', label: 'Image on the left', type: 'boolean' },
       { name: 'linkLabel', label: 'Link label', type: 'text' },
       { name: 'linkHref', label: 'Link URL', type: 'text' },
@@ -133,6 +171,9 @@ export const BLOCK_SCHEMAS = {
   },
   pricing_cards: {
     label: 'Pricing cards',
+    category: 'convert',
+    description: 'Plan cards with an optional monthly/yearly toggle.',
+    wireframe: ['cards-3'],
     fields: [
       { name: 'title', label: 'Title', type: 'text' },
       { name: 'subtitle', label: 'Subtitle', type: 'textarea' },
@@ -171,6 +212,9 @@ export const BLOCK_SCHEMAS = {
   },
   video: {
     label: 'Video',
+    category: 'content',
+    description: 'A hosted file or a YouTube embed, with a poster frame.',
+    wireframe: ['video'],
     fields: [
       { name: 'title', label: 'Title', type: 'text' },
       { name: 'src', label: 'Video file', type: 'media' },
@@ -184,6 +228,9 @@ export const BLOCK_SCHEMAS = {
   },
   article_list: {
     label: 'Article list',
+    category: 'content',
+    description: 'The latest blog posts, pulled live. No editing needed after setup.',
+    wireframe: ['cards-3'],
     fields: [
       { name: 'title', label: 'Title', type: 'text' },
       { name: 'subtitle', label: 'Subtitle', type: 'textarea' },
@@ -192,10 +239,148 @@ export const BLOCK_SCHEMAS = {
       { name: 'ctaLabel', label: 'Link to the blog', type: 'text' },
     ],
   },
-  raw_html: {
-    label: 'Raw HTML',
+  custom_html: {
+    label: 'Custom block',
+    category: 'advanced',
+    description: 'Your own HTML with Tailwind classes. Full control, scoped CSS.',
+    wireframe: ['code'],
+    advanced: true,
     fields: [
-      { name: 'html', label: 'HTML', type: 'html', rows: 16 },
+      {
+        name: 'html',
+        label: 'HTML',
+        type: 'code',
+        language: 'html',
+        rows: 20,
+        hint: 'Tailwind utility classes work here — the site compiles them in the browser, so there is no build step to wait for.',
+      },
+      {
+        name: 'css',
+        label: 'CSS',
+        type: 'code',
+        language: 'css',
+        rows: 8,
+        hint: 'Scoped to this block automatically: `.card { … }` becomes `.cms-block-<key> .card { … }`, so it cannot leak into the rest of the page.',
+      },
+      { name: 'containerClass', label: 'Wrapper classes', type: 'text', hint: 'Applied to the block\'s own outer div.' },
+      { name: 'contained', label: 'Constrain to the page width', type: 'boolean', hint: 'Adds the site\'s standard max-width and gutters. Leave off for a full-bleed band.' },
+    ],
+  },
+  raw_html: {
+    label: 'Embed / raw HTML',
+    category: 'advanced',
+    description: 'An unstyled escape hatch for a third-party embed or widget.',
+    wireframe: ['code'],
+    advanced: true,
+    fields: [
+      { name: 'html', label: 'HTML', type: 'code', language: 'html', rows: 16 },
     ],
   },
 };
+
+/**
+ * Starting points for the custom block.
+ *
+ * A blank code box is the least useful thing to hand somebody. These are the
+ * layouts people actually reach for, written in the site's own Tailwind theme
+ * (brand purple, Google Sans, the 10px button radius) so a pasted starter looks
+ * like a Rainbow section from the first render rather than a bootstrap demo.
+ */
+export const CUSTOM_PRESETS = [
+  {
+    key: 'blank',
+    label: 'Blank',
+    description: 'An empty section with the page gutters.',
+    data: {
+      contained: true,
+      html: '<div class="py-20">\n  <h2 class="text-3xl font-bold text-gray-900">Section title</h2>\n  <p class="mt-3 text-lg text-gray-600">Say something worth reading.</p>\n</div>\n',
+    },
+  },
+  {
+    key: 'two-column',
+    label: 'Two columns',
+    description: 'Copy beside an image, stacking on mobile.',
+    data: {
+      contained: true,
+      html: `<div class="py-20 grid gap-12 lg:grid-cols-2 lg:items-center">
+  <div>
+    <p class="text-sm font-semibold uppercase tracking-wider text-brand-500">Eyebrow</p>
+    <h2 class="mt-2 text-3xl font-bold text-gray-900 sm:text-4xl">A claim worth making</h2>
+    <p class="mt-4 text-lg text-gray-600">One paragraph that earns the next click. Keep it to two sentences.</p>
+    <a href="#" class="mt-6 inline-flex rounded-btn bg-brand-500 px-6 py-3 font-semibold text-white transition hover:bg-brand-600">Get started</a>
+  </div>
+  <img src="/images/rainbow-ui.jpg" alt="Describe this image" class="w-full rounded-2xl shadow-xl" />
+</div>
+`,
+    },
+  },
+  {
+    key: 'three-cards',
+    label: 'Three cards',
+    description: 'A row of cards that lifts on hover.',
+    data: {
+      contained: true,
+      html: `<div class="py-20">
+  <h2 class="text-center text-3xl font-bold text-gray-900">Three reasons</h2>
+  <div class="mt-12 grid gap-6 md:grid-cols-3">
+    <div class="group rounded-2xl border border-gray-200 bg-white p-8 transition hover:-translate-y-1 hover:shadow-xl">
+      <h3 class="text-lg font-semibold text-gray-900">First reason</h3>
+      <p class="mt-2 text-gray-600">A sentence of support. Concrete beats clever.</p>
+    </div>
+    <div class="group rounded-2xl border border-gray-200 bg-white p-8 transition hover:-translate-y-1 hover:shadow-xl">
+      <h3 class="text-lg font-semibold text-gray-900">Second reason</h3>
+      <p class="mt-2 text-gray-600">A sentence of support. Concrete beats clever.</p>
+    </div>
+    <div class="group rounded-2xl border border-gray-200 bg-white p-8 transition hover:-translate-y-1 hover:shadow-xl">
+      <h3 class="text-lg font-semibold text-gray-900">Third reason</h3>
+      <p class="mt-2 text-gray-600">A sentence of support. Concrete beats clever.</p>
+    </div>
+  </div>
+</div>
+`,
+    },
+  },
+  {
+    key: 'banner',
+    label: 'Gradient banner',
+    description: 'A full-bleed brand band with one call to action.',
+    data: {
+      contained: false,
+      html: `<div class="bg-gradient-to-br from-brand-500 to-navy-900 px-6 py-20 text-center">
+  <h2 class="mx-auto max-w-2xl text-3xl font-bold text-white sm:text-4xl">Ready when you are</h2>
+  <p class="mx-auto mt-4 max-w-xl text-lg text-white/80">One line that removes the last objection.</p>
+  <a href="#" class="mt-8 inline-flex rounded-btn bg-white px-7 py-3 font-semibold text-brand-500 transition hover:bg-gray-100">Start free</a>
+</div>
+`,
+    },
+  },
+  {
+    key: 'quote',
+    label: 'Testimonial',
+    description: 'One quote, attributed. Emits Review structured data.',
+    data: {
+      contained: true,
+      html: `<figure class="py-20 text-center" itemscope itemtype="https://schema.org/Review">
+  <blockquote class="mx-auto max-w-3xl text-2xl font-medium leading-relaxed text-gray-900" itemprop="reviewBody">
+    “The sentence a customer actually said, not the one marketing wishes they had.”
+  </blockquote>
+  <figcaption class="mt-6 text-gray-600" itemprop="author" itemscope itemtype="https://schema.org/Person">
+    <span class="font-semibold text-gray-900" itemprop="name">Full Name</span>
+    <span class="mx-2 text-gray-300">·</span>
+    <span itemprop="jobTitle">Role, Company</span>
+  </figcaption>
+</figure>
+`,
+    },
+  },
+];
+
+/** Blocks grouped for the insert palette, in category order. */
+export function paletteGroups() {
+  return BLOCK_CATEGORIES.map(category => ({
+    ...category,
+    blocks: Object.entries(BLOCK_SCHEMAS)
+      .filter(([, schema]) => (schema.category || 'content') === category.key)
+      .map(([key, schema]) => ({ key, ...schema })),
+  })).filter(group => group.blocks.length);
+}

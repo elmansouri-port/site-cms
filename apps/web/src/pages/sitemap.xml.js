@@ -8,7 +8,7 @@
 export const prerender = false;
 
 import { routeIndex, bootstrap, baseUrlFrom, activeLocales } from '../lib/site.js';
-import { pageUrl } from '@rainbow/core/seo';
+import { pageUrl, pageUrlFor, blogSegmentFor } from '@rainbow/core/seo';
 
 const escape = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
@@ -25,11 +25,13 @@ export async function GET({ url }) {
     const pageLocales = (page.locales || locales).filter(l => locales.includes(l));
     for (const locale of pageLocales) {
       entries.push({
-        loc: pageUrl(baseUrl, locale, page.route),
+        // Each locale is listed at its own localized path: the sitemap must
+        // agree with the canonical tag, or it advertises URLs that redirect.
+        loc: pageUrlFor(baseUrl, locale, page),
         lastmod: page.updatedAt,
         changefreq: page.sitemap?.changefreq || 'weekly',
         priority: page.sitemap?.priority ?? 0.7,
-        alternates: pageLocales.map(l => ({ locale: l, href: pageUrl(baseUrl, l, page.route) })),
+        alternates: pageLocales.map(l => ({ locale: l, href: pageUrlFor(baseUrl, l, page) })),
       });
     }
   }
@@ -42,17 +44,19 @@ export async function GET({ url }) {
     if (!grouped.has(post.groupId)) grouped.set(post.groupId, []);
     grouped.get(post.groupId).push(post);
   }
+  const articleUrl = (locale, slug) => pageUrl(baseUrl, locale, `${blogSegmentFor(settings, locale)}/${slug}`);
+
   for (const siblings of grouped.values()) {
     for (const post of siblings) {
       if (!locales.includes(post.locale)) continue;
       entries.push({
-        loc: pageUrl(baseUrl, post.locale, `blog/${post.slug}`),
+        loc: articleUrl(post.locale, post.slug),
         lastmod: post.updatedAt || post.publishedAt,
         changefreq: 'monthly',
         priority: 0.6,
         alternates: siblings
           .filter(s => locales.includes(s.locale))
-          .map(s => ({ locale: s.locale, href: pageUrl(baseUrl, s.locale, `blog/${s.slug}`) })),
+          .map(s => ({ locale: s.locale, href: articleUrl(s.locale, s.slug) })),
       });
     }
   }

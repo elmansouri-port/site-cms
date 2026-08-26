@@ -2,30 +2,48 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../lib/auth.jsx';
 import { Icon } from './ui.jsx';
 
+/*
+ * The sidebar, grouped the way the work actually divides.
+ *
+ * "Pages" and "Everywhere" is the distinction that matters once the header and
+ * footer stopped living inside each page: some things you change for one page,
+ * some you change once and they land on all of them. Getting that wrong is how
+ * a footer ends up edited eighteen times.
+ *
+ * "Growth" is separated from both because it is a different job — the person
+ * running a test or reading leads is usually not the person writing the copy.
+ */
 const GROUPS = [
   {
-    label: 'Content',
+    label: 'Pages',
     items: [
-      { to: '/', icon: 'dashboard', label: 'Dashboard', end: true },
+      { to: '/', icon: 'dashboard', label: 'Overview', end: true },
       { to: '/pages', icon: 'pages', label: 'Pages' },
-      { to: '/content', icon: 'text', label: 'Copy & translations' },
       { to: '/blog', icon: 'blog', label: 'Blog' },
-      { to: '/media', icon: 'media', label: 'Media' },
+      { to: '/media', icon: 'media', label: 'Images & video' },
     ],
   },
   {
-    label: 'Site',
+    label: 'Everywhere',
     items: [
-      { to: '/navigation', icon: 'nav', label: 'Navigation' },
-      { to: '/partners', icon: 'partners', label: 'Partners' },
+      { to: '/chrome', icon: 'layout', label: 'Header & footer' },
+      { to: '/navigation', icon: 'nav', label: 'Menus' },
+      { to: '/content', icon: 'text', label: 'Copy & languages' },
+    ],
+  },
+  {
+    label: 'Growth',
+    items: [
       { to: '/experiments', icon: 'flask', label: 'A/B tests' },
+      { to: '/leads', icon: 'leads', label: 'Leads' },
       { to: '/redirects', icon: 'redirect', label: 'Redirects' },
+      { to: '/partners', icon: 'partners', label: 'Partners' },
     ],
   },
   {
-    label: 'Operations',
+    label: 'Setup',
     items: [
-      { to: '/leads', icon: 'leads', label: 'Leads' },
+      { to: '/integrations', icon: 'plug', label: 'Integrations', role: 'admin' },
       { to: '/settings', icon: 'settings', label: 'Settings', role: 'admin' },
       { to: '/users', icon: 'users', label: 'Team', role: 'admin' },
       { to: '/audit', icon: 'audit', label: 'Activity', role: 'admin' },
@@ -34,15 +52,17 @@ const GROUPS = [
 ];
 
 const TITLES = {
-  '/': 'Dashboard',
+  '/': 'Overview',
   '/pages': 'Pages',
-  '/content': 'Copy & translations',
+  '/content': 'Copy & languages',
   '/blog': 'Blog',
-  '/media': 'Media library',
-  '/navigation': 'Navigation',
+  '/media': 'Images & video',
+  '/chrome': 'Header & footer',
+  '/navigation': 'Menus',
   '/partners': 'Partner directory',
   '/experiments': 'A/B tests',
   '/redirects': 'Redirects',
+  '/integrations': 'Integrations',
   '/leads': 'Leads',
   '/settings': 'Settings',
   '/users': 'Team',
@@ -53,6 +73,7 @@ export default function Shell({ children }) {
   const { user, logout, can } = useAuth();
   const { pathname } = useLocation();
   const title = TITLES[pathname] || TITLES[`/${pathname.split('/')[1]}`] || 'Rainbow CMS';
+  const wide = /^\/pages\/[^/]+/.test(pathname);
 
   return (
     <div className="shell">
@@ -102,7 +123,9 @@ export default function Shell({ children }) {
             <Icon name="external" /> View site
           </a>
         </header>
-        <main className="content">{children}</main>
+        {/* The page editor's visual builder wants the whole window rather than
+            the reading-width column every other screen is set in. */}
+        <main className={`content ${wide ? 'content--wide' : ''}`}>{children}</main>
       </div>
     </div>
   );

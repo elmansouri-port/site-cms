@@ -6,29 +6,52 @@
  * language: look the route up in the CMS, compose the document, send it. A
  * blog URL with no matching page falls through to the article template, which
  * is what makes a post published in the CMS appear without a deploy.
+ *
+ * Two SEO rules are enforced here rather than left to the content:
+ *
+ *   - one page, one URL per locale. A page with a localized route answers only
+ *     on that route; arriving on the untranslated path is a 301, not a second
+ *     copy of the page for a crawler to weigh against the first.
+ *   - the blog's own segment is per locale, so articles sit under the word a
+ *     reader of that language expects.
  */
 export const prerender = false;
 
 import PageDocument from '../../components/PageDocument.astro';
-import { pagePayload, blogPost } from '../../lib/site.js';
+import { pagePayload, blogPost, blogSegment, baseUrlFrom } from '../../lib/site.js';
 import { renderPage } from '../../lib/render.js';
 import { renderArticle } from '../../lib/article.js';
+import { usedExperiments } from '../../lib/experiments.js';
 
 const { locale } = Astro.locals;
 const slug = Astro.params.slug || '';
 const route = String(slug).replace(/^\/+|\/+$/g, '');
 
-let page = await pagePayload(route, locale, Astro.locals.preview);
+let page = await pagePayload(route, locale, Astro.locals.preview, Astro.locals.variants);
 let extra = {};
 let status = 200;
 
-// A blog URL that is not an authored page is a database article.
-if (!page && /^blog\/[^/]+$/.test(route)) {
-  const article = await blogPost(route.split('/')[1], locale, Astro.locals.preview);
+// A page whose localized route differs from the path we were asked for is a
+// duplicate waiting to happen. Send the visitor — and the crawler — to the one
+// canonical URL instead of rendering here. Preview is exempt so an editor can
+// still open a draft by whichever path they have.
+if (page?.redirectFrom != null && !Astro.locals.preview) {
+  return Astro.redirect(`/${locale}${page.route ? `/${page.route}` : ''}${Astro.url.search}`, 301);
+}
+
+// A blog URL that is not an authored page is a database article. The segment
+// before the slug is whatever this locale's blog lives under.
+const segment = blogSegment(Astro.locals.settings, locale);
+const blogMatch = new RegExp(`^${escapeRegex(segment)}/([^/]+)$`).exec(route);
+if (!page && blogMatch) {
+  const article = await blogPost(blogMatch[1], locale, Astro.locals.preview);
   if (article?.post) {
-    const built = await renderArticle(article, locale);
+    const built = await renderArticle(article, locale, {
+      blogSegment: segment,
+      baseUrl: baseUrlFrom(Astro.locals.settings, Astro.url),
+    });
     page = built.page;
-    extra = built.extra;
+    extra = { ...built.extra, blogSegment: segment };
   }
 }
 
@@ -36,6 +59,14 @@ if (!page) {
   status = 404;
   const notFound = await pagePayload('404', locale, false);
   page = notFound ? { ...notFound, noindex: true } : null;
+}
+
+// Tell the middleware which experiments this response actually depended on, so
+// only those are persisted and only these responses lose shared caching.
+if (page && Astro.locals.usedExperiments) {
+  for (const key of usedExperiments(page, Astro.locals.variants || {}, Astro.locals.chrome)) {
+    Astro.locals.usedExperiments.add(key);
+  }
 }
 
 const document = page ? await renderPage(Astro, page, extra) : null;
@@ -50,8 +81,12 @@ if (status === 404 || Astro.locals.preview) {
 if (page && (Astro.locals.noindex || page.noindex)) {
   Astro.response.headers.set('x-robots-tag', 'noindex, nofollow');
 }
+
+function escapeRegex(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 ---
 
 {document
-  ? <PageDocument document={document} locale={locale} />
+  ? <PageDocument document={document} locale={locale} editMode={Astro.locals.editMode} />
   : <Fragment set:html={'<!DOCTYPE html><html lang="' + locale + '"><head><meta charset="utf-8"><title>Page not found</title></head><body><h1>Page not found</h1></body></html>'} />}

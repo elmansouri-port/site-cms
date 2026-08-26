@@ -24,4 +24,6 @@ export const config = {
   abCookiePrefix: 'rbw_ab_',
   localeCookie: 'lang',
   previewCookie: 'rbw_preview',
+  // Preview plus the visual editor's block annotations and bridge script.
+  editCookie: 'rbw_edit',
 };

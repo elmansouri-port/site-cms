@@ -205,7 +205,9 @@ export default function SectionEditor({ pageKey, sectionKey, onClose, onSaved })
           )}
           {draft.experiment?.key && isComponent && (
             <p className="field__hint">
-              Component blocks vary by duplicating the block and assigning each copy a variant key.
+              This block varies by field rather than by markup. Open it in the{' '}
+              <strong>Design</strong> tab to fill in each variant's values against a form, with the
+              control's values prefilled.
             </p>
           )}
         </>

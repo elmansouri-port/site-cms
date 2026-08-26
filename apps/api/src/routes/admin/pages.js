@@ -9,18 +9,28 @@
  */
 import { Router } from 'express';
 import { z } from 'zod';
-import { Page } from '../../models/index.js';
+import { Page, Redirect, Experiment } from '../../models/index.js';
 import { asyncHandler, notFoundError, badRequest, conflict } from '../../middleware/error.js';
 import { validate, q } from '../../middleware/validate.js';
 import { requireAuth, requireRole } from '../../middleware/auth.js';
 import { snapshot, audit, publishChanged } from '../../services/publish.js';
 import { keysIn } from '@rainbow/core/ingest';
 import { slugify } from '@rainbow/core/html';
+import { routeFor } from '@rainbow/core/seo';
 import { config } from '../../config.js';
 
 export const pagesRouter = Router();
 
 pagesRouter.use(requireAuth);
+
+/**
+ * A page document as JSON.
+ *
+ * `routes` and `seo` are Mongoose Maps, and `JSON.stringify` renders a Map as
+ * `{}` — so a response built from a plain `toObject()` silently drops both.
+ * Flattening them is what the `.lean()` reads elsewhere already do.
+ */
+const asJson = (doc) => doc.toObject({ flattenMaps: true });
 
 const seoSchema = z.object({
   title: z.string().max(300).optional(),
@@ -81,11 +91,15 @@ pagesRouter.get('/:key/sections', asyncHandler(async (req, res) => {
       key: s.key,
       label: s.label,
       type: s.type,
+      // The block manager filters the shared header and footer out by this, so
+      // omitting it silently showed them again in the Blocks tab.
+      role: s.role || null,
       anchorId: s.anchorId,
       order: s.order,
       visible: s.visible,
       locked: s.locked,
       componentKey: s.componentKey,
+      convertedFrom: s.convertedFrom,
       layout: s.layout,
       experiment: s.experiment,
       keyCount: (s.keys || []).length,
@@ -102,14 +116,27 @@ pagesRouter.get('/:key/sections/:sectionKey', asyncHandler(async (req, res) => {
   res.json({ section });
 }));
 
+const routeSegment = z.string().max(300).regex(
+  /^$|^[a-z0-9]+(?:[-_a-z0-9]*[a-z0-9])?(?:\/[a-z0-9]+(?:[-_a-z0-9]*[a-z0-9])?)*$/,
+  'Use lowercase words separated by - or /, with no leading or trailing slash',
+);
+
 const metaPatch = z.object({
   title: z.string().min(1).max(200).optional(),
   route: z.string().max(300).optional(),
+  // Per-locale route overrides. An empty string clears the override, which puts
+  // that locale back on the base route rather than leaving it on a stale path.
+  routes: z.record(z.string().max(5), routeSegment).optional(),
   pageKind: z.enum(['home', 'product', 'pricing', 'blogIndex', 'blogPost', 'page', 'form', 'error']).optional(),
   type: z.enum(['static', 'hybrid', 'dynamic']).optional(),
   status: z.enum(['published', 'draft']).optional(),
   locales: z.array(z.string().max(5)).optional(),
   noindex: z.boolean().optional(),
+  // Whether this page shows the shared header and footer.
+  chrome: z.object({
+    navbar: z.boolean().optional(),
+    footer: z.boolean().optional(),
+  }).optional(),
   sitemap: z.object({
     include: z.boolean().optional(),
     priority: z.number().min(0).max(1).optional(),
@@ -127,6 +154,11 @@ pagesRouter.patch('/:key', requireRole('editor'), validate(metaPatch), asyncHand
   const page = await Page.findOne({ key: req.params.key });
   if (!page) throw notFoundError('No such page');
 
+  // Every path this page answered to before the edit, per locale. Comparing it
+  // with the paths after tells us exactly which redirects to write, so an
+  // editor who renames a URL never silently breaks the links pointing at it.
+  const before = routeMapOf(page);
+
   if (req.body.route !== undefined) {
     const route = normaliseRoute(req.body.route);
     const clash = await Page.findOne({ route, key: { $ne: page.key } }).lean();
@@ -134,11 +166,22 @@ pagesRouter.patch('/:key', requireRole('editor'), validate(metaPatch), asyncHand
     page.route = route;
   }
 
+  if (req.body.routes) {
+    for (const [locale, value] of Object.entries(req.body.routes)) {
+      const localised = normaliseRoute(value);
+      if (!localised) { page.routes.delete(locale); continue; }
+      await assertRouteFree(localised, locale, page.key);
+      page.routes.set(locale, localised);
+    }
+    page.markModified('routes');
+  }
+
   await snapshot('page', page.key, page.toObject(), req.user, 'before metadata edit');
 
   for (const field of ['title', 'pageKind', 'type', 'status', 'locales', 'noindex']) {
     if (req.body[field] !== undefined) page[field] = req.body[field];
   }
+  if (req.body.chrome) page.chrome = { ...page.chrome?.toObject?.() ?? page.chrome, ...req.body.chrome };
   if (req.body.sitemap) page.sitemap = { ...page.sitemap?.toObject?.() ?? page.sitemap, ...req.body.sitemap };
   if (req.body.snippets) page.snippets = { ...page.snippets?.toObject?.() ?? page.snippets, ...req.body.snippets };
   if (req.body.seo) {
@@ -156,10 +199,73 @@ pagesRouter.patch('/:key', requireRole('editor'), validate(metaPatch), asyncHand
   if (req.body.status === 'published') page.publishedAt = new Date();
   await page.save();
 
-  await audit(req, 'page.update', 'page', page.key, { fields: Object.keys(req.body) });
+  const redirects = await syncRouteRedirects(page, before);
+
+  await audit(req, 'page.update', 'page', page.key, {
+    fields: Object.keys(req.body),
+    ...(redirects.length ? { redirects } : {}),
+  });
   await publishChanged('page updated', [{ route: page.route }]);
-  res.json({ page: page.toObject() });
+  res.json({ page: asJson(page), redirects });
 }));
+
+/** Every locale's current path for a page, as a plain object. */
+function routeMapOf(page) {
+  const locales = page.locales?.length ? page.locales : ['fr'];
+  const out = {};
+  for (const locale of locales) out[locale] = routeFor(page, locale);
+  return out;
+}
+
+/** Refuse a localized path another page already answers to in that locale. */
+async function assertRouteFree(route, locale, ownKey) {
+  const others = await Page.find(
+    { key: { $ne: ownKey } },
+    { key: 1, route: 1, routes: 1, locales: 1, _id: 0 },
+  ).lean();
+  for (const other of others) {
+    const otherLocales = other.locales?.length ? other.locales : ['fr'];
+    if (!otherLocales.includes(locale)) continue;
+    if (routeFor(other, locale) === route) {
+      throw conflict(`"${other.key}" already answers to /${locale}/${route}`);
+    }
+  }
+}
+
+/**
+ * Write a 301 for every locale whose path changed.
+ *
+ * A renamed URL without a redirect throws away whatever ranking and inbound
+ * links the old one had, which is the single most expensive mistake available
+ * in a CMS. Doing it here means an editor cannot forget. An existing redirect
+ * for the same source is updated rather than duplicated, and a redirect that
+ * would point a path at itself is skipped.
+ */
+async function syncRouteRedirects(page, before) {
+  const after = routeMapOf(page);
+  const written = [];
+  for (const [locale, oldRoute] of Object.entries(before)) {
+    const newRoute = after[locale];
+    if (newRoute === undefined || newRoute === oldRoute) continue;
+    const from = `/${locale}${oldRoute ? `/${oldRoute}` : ''}`;
+    const to = `/${locale}${newRoute ? `/${newRoute}` : ''}`;
+    if (from === to) continue;
+    await Redirect.findOneAndUpdate(
+      { from },
+      { from, to, status: 301, active: true, note: `Route change on "${page.key}"` },
+      { upsert: true, new: true },
+    );
+    // A chain (old → older → newest) costs a hop and loses a little authority
+    // each time, so anything that pointed at the old path is repointed.
+    await Redirect.updateMany({ to: from }, { $set: { to } });
+    // Repointing can leave a redirect aimed at itself — it happens whenever a
+    // path is renamed and then renamed back — and a self-redirect is an
+    // infinite loop, not a redirect. Drop those rather than serving them.
+    await Redirect.deleteMany({ $expr: { $eq: ['$from', '$to'] } });
+    written.push({ from, to });
+  }
+  return written;
+}
 
 const sectionPatch = z.object({
   label: z.string().max(120).optional(),
@@ -177,7 +283,10 @@ const sectionPatch = z.object({
     variants: z.array(z.object({
       key: z.string().max(20),
       label: z.string().max(80).optional(),
-      html: z.string().max(2_000_000),
+      // Authored and custom blocks vary by markup; component blocks vary by
+      // field overrides. A variant supplies whichever fits its block.
+      html: z.string().max(2_000_000).optional(),
+      data: z.record(z.string(), z.any()).optional(),
     })).optional(),
   }).optional(),
 }).strict();
@@ -199,7 +308,11 @@ pagesRouter.patch('/:key/sections/:sectionKey', requireRole('editor'), validate(
     section.keys = keysIn(req.body.html);
   }
   if (req.body.layout) section.layout = { ...section.layout, ...req.body.layout };
-  if (req.body.experiment) section.experiment = { ...section.experiment, ...req.body.experiment };
+  if (req.body.experiment) {
+    const current = section.experiment?.toObject?.() ?? section.experiment ?? {};
+    section.experiment = { ...current, ...req.body.experiment };
+    section.markModified('experiment');
+  }
 
   page.editedInCms = true;
   page.updatedBy = req.user._id;
@@ -315,6 +428,60 @@ pagesRouter.post('/:key/sections/:sectionKey/duplicate', requireRole('editor'), 
   res.status(201).json({ key });
 }));
 
+/**
+ * Turn an authored HTML block into an editable custom block.
+ *
+ * The imported pages are stored as the exact bytes they were written with, and
+ * `verify-fidelity` / `verify-live` prove that what a visitor receives is
+ * unchanged. That guarantee is what this endpoint spends: the markup moves into
+ * a `custom_html` component block, which renders it through Astro's block
+ * wrapper instead of splicing it in verbatim. The bytes it produces are
+ * equivalent, not identical — a wrapping `<section>` with the spacing classes
+ * appears around it — so the section stops being covered by the fidelity check.
+ *
+ * In exchange the block becomes a first-class citizen of the visual editor:
+ * editable markup with Tailwind, A/B variants, spacing, duplication. The
+ * response says plainly what was given up, and the previous version is in the
+ * page's history either way.
+ */
+pagesRouter.post('/:key/sections/:sectionKey/convert', requireRole('editor'), asyncHandler(async (req, res) => {
+  const page = await Page.findOne({ key: req.params.key });
+  if (!page) throw notFoundError('No such page');
+  const section = page.sections.find(s => s.key === req.params.sectionKey);
+  if (!section) throw notFoundError('No such section');
+  if (section.type === 'component') throw badRequest('This block is already a component block');
+  if (section.locked) throw badRequest('Structural blocks hold the page\'s scripts and cannot be converted');
+  if (section.type !== 'html') throw badRequest(`A ${section.type} block cannot be converted`);
+
+  await snapshot('page', page.key, page.toObject(), req.user, `before converting "${section.label}"`);
+
+  const markup = section.html || '';
+  section.type = 'component';
+  section.componentKey = 'custom_html';
+  section.data = { html: markup, css: '', containerClass: '', contained: false };
+  // The copy in a converted block is edited in the markup from now on: the
+  // translation keys addressed the authored template, and that template is no
+  // longer what renders. Keeping the list would show an editor strings that no
+  // longer do anything.
+  section.keys = [];
+  section.html = '';
+  // The authored markup carries its own padding, so the wrapper must add none
+  // or the section would suddenly grow 160px taller than it was.
+  section.layout = { spacingTop: 'none', spacingBottom: 'none' };
+  section.convertedFrom = 'html';
+
+  page.editedInCms = true;
+  page.updatedBy = req.user._id;
+  await page.save();
+
+  await audit(req, 'page.section.convert', 'page', page.key, { section: section.key });
+  await publishChanged('section converted', [{ route: page.route }]);
+  res.json({
+    section: section.toObject ? section.toObject() : section,
+    note: 'This section is now a custom block. It no longer takes part in the byte-fidelity check.',
+  });
+}));
+
 pagesRouter.delete('/:key/sections/:sectionKey', requireRole('editor'), asyncHandler(async (req, res) => {
   const page = await Page.findOne({ key: req.params.key });
   if (!page) throw notFoundError('No such page');
@@ -416,6 +583,14 @@ pagesRouter.post('/', requireRole('editor'), validate(createPage), asyncHandler(
     ...doc,
     key: req.body.key,
     route,
+    // A copy inherits content, not identity. Carrying the source's localized
+    // routes over would give two pages the same URL in those languages, and
+    // carrying its experiment would make the copy a second arm of a running
+    // test. Both belong only to the page they were set on.
+    routes: {},
+    experiment: { key: null, variant: null, variantOf: null },
+    sourceFile: null,
+    sourceHash: null,
     title: req.body.title,
     pageKind: req.body.pageKind,
     type: req.body.type,
@@ -425,7 +600,125 @@ pagesRouter.post('/', requireRole('editor'), validate(createPage), asyncHandler(
   });
 
   await audit(req, 'page.create', 'page', page.key, { copiedFrom: req.body.copyFrom || null });
-  res.status(201).json({ page: page.toObject() });
+  res.status(201).json({ page: asJson(page) });
+}));
+
+/* ── Whole-page A/B variants ──────────────────────────────────────────────── */
+
+/**
+ * The arms of a page-scoped experiment, control first.
+ *
+ * A variant arm is a full page document with the same experiment key. It has no
+ * URL of its own: visitors assigned to it are served its sections at the
+ * control's address, which is what keeps one canonical URL and nothing
+ * duplicate in the index.
+ */
+pagesRouter.get('/:key/variants', asyncHandler(async (req, res) => {
+  const control = await Page.findOne({ key: req.params.key }, { key: 1, experiment: 1, title: 1 }).lean();
+  if (!control) throw notFoundError('No such page');
+  if (!control.experiment?.key) return res.json({ experiment: null, items: [] });
+
+  const arms = await Page.find(
+    { 'experiment.key': control.experiment.key },
+    { key: 1, title: 1, status: 1, experiment: 1, updatedAt: 1, sections: { $slice: 0 } },
+  ).lean();
+
+  const experiment = await Experiment.findOne({ key: control.experiment.key }).lean();
+  res.json({
+    experiment: experiment || null,
+    items: arms
+      .map(a => ({
+        key: a.key,
+        title: a.title,
+        status: a.status,
+        variant: a.experiment?.variant || 'A',
+        isControl: !a.experiment?.variantOf,
+        updatedAt: a.updatedAt,
+      }))
+      .sort((a, b) => (a.variant < b.variant ? -1 : 1)),
+  });
+}));
+
+const newVariant = z.object({
+  experimentKey: z.string().min(1).max(80).regex(/^[a-z0-9-]+$/),
+  variant: z.string().min(1).max(20).regex(/^[A-Za-z0-9-]+$/),
+  label: z.string().max(80).optional(),
+  // Start the arm as a copy of the control (the usual case: change one thing),
+  // or empty apart from the site chrome.
+  copyControl: z.boolean().default(true),
+});
+
+pagesRouter.post('/:key/variants', requireRole('editor'), validate(newVariant), asyncHandler(async (req, res) => {
+  const control = await Page.findOne({ key: req.params.key });
+  if (!control) throw notFoundError('No such page');
+  if (control.experiment?.variantOf) throw badRequest('This page is itself a variant arm');
+
+  const { experimentKey, variant, copyControl } = req.body;
+  if (control.experiment?.key && control.experiment.key !== experimentKey) {
+    throw conflict(`This page is already the control of "${control.experiment.key}"`);
+  }
+  if ((control.experiment?.variant || 'A') === variant) {
+    throw badRequest(`"${variant}" is the control arm — pick another letter`);
+  }
+  const exists = await Page.findOne({ 'experiment.key': experimentKey, 'experiment.variant': variant }).lean();
+  if (exists) throw conflict(`Variant "${variant}" already exists as "${exists.key}"`);
+
+  // The experiment record holds the split; create it paused so no traffic moves
+  // until an editor deliberately starts it.
+  await Experiment.findOneAndUpdate(
+    { key: experimentKey },
+    {
+      // `scope` and `pageKey` are in $set only: naming a field in both $set and
+      // $setOnInsert is a conflicting update, and these two want to be correct
+      // on an existing record as well as a new one.
+      $set: { scope: 'page', pageKey: control.key },
+      $setOnInsert: {
+        key: experimentKey,
+        name: req.body.label || `${control.title} test`,
+        status: 'draft',
+        mode: 'cookie',
+        variants: [
+          { key: control.experiment?.variant || 'A', label: 'Control', weight: 50 },
+          { key: variant, label: req.body.label || `Variant ${variant}`, weight: 50 },
+        ],
+      },
+    },
+    { upsert: true, new: true },
+  );
+
+  if (!control.experiment?.key) {
+    control.experiment = { key: experimentKey, variant: control.experiment?.variant || 'A', variantOf: null };
+    await control.save();
+  }
+
+  const source = control.toObject();
+  const armKey = `${control.key}-${variant.toLowerCase()}`;
+  if (await Page.findOne({ key: armKey }).lean()) throw conflict(`A page keyed "${armKey}" already exists`);
+
+  const arm = await Page.create({
+    ...source,
+    _id: undefined,
+    createdAt: undefined,
+    updatedAt: undefined,
+    key: armKey,
+    // An arm is never routed: the route field only has to be unique, and this
+    // value is never turned into a URL. Excluding it from the sitemap and
+    // marking it noindex is belt and braces for the same reason.
+    route: `__variant/${armKey}`,
+    routes: {},
+    title: `${control.title} — ${req.body.label || `Variant ${variant}`}`,
+    status: 'draft',
+    noindex: true,
+    sitemap: { include: false, priority: 0, changefreq: 'never' },
+    sections: copyControl ? source.sections : (source.sections || []).filter(isChromeBlock),
+    experiment: { key: experimentKey, variant, variantOf: control.key },
+    editedInCms: true,
+    publishedAt: null,
+    updatedBy: req.user._id,
+  });
+
+  await audit(req, 'page.variant.create', 'page', control.key, { arm: armKey, variant });
+  res.status(201).json({ page: asJson(arm) });
 }));
 
 pagesRouter.delete('/:key', requireRole('admin'), asyncHandler(async (req, res) => {
@@ -459,11 +752,17 @@ pagesRouter.post('/:key/publish', requireRole('editor'), asyncHandler(async (req
  * link itself is only ever handed to a signed-in editor.
  */
 pagesRouter.get('/:key/preview-url', asyncHandler(async (req, res) => {
-  const page = await Page.findOne({ key: req.params.key }, { route: 1, locales: 1 }).lean();
+  const page = await Page.findOne({ key: req.params.key }, { route: 1, routes: 1, locales: 1 }).lean();
   if (!page) throw notFoundError('No such page');
   const locale = String(req.query.locale || page.locales?.[0] || 'fr');
-  const target = `/${locale}${page.route ? `/${page.route}` : ''}`;
-  const url = `${config.siteUrl}/cms/preview?secret=${encodeURIComponent(config.previewSecret)}&redirect=${encodeURIComponent(target)}`;
+  // The locale's own path, so the editor opens the URL the visitor would.
+  const route = routeFor(page, locale);
+  const target = `/${locale}${route ? `/${route}` : ''}`;
+  // `edit=1` additionally turns on the visual editor's block annotations and
+  // its bridge script. Plain preview renders the draft as a visitor would see it.
+  const edit = req.query.edit ? '&edit=1' : '';
+  const url = `${config.siteUrl}/cms/preview?secret=${encodeURIComponent(config.previewSecret)}`
+    + `&redirect=${encodeURIComponent(target)}${edit}`;
   res.json({ url, target });
 }));
 

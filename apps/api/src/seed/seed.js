@@ -22,9 +22,11 @@ import { bumpRevision, closeRedis } from '../lib/redis.js';
 import { logger } from '../lib/log.js';
 import { ensureBootstrapUser } from './bootstrap.js';
 import {
-  Page, ContentString, Settings, Navigation, BlogPost, Media, Partner,
+  Page, ContentString, Settings, Navigation, BlogPost, Media, Partner, Chrome, Integration,
 } from '../models/index.js';
 import { ingestPage, ingestStrings } from '@rainbow/core/ingest';
+import { slugify } from '@rainbow/core/html';
+import { withoutLeadingTrivia } from '@rainbow/core/compose';
 import { LOCALES } from '@rainbow/core/locales';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -66,6 +68,8 @@ async function main() {
   const { seoKeys } = await seedPages(registry, catalogues);
   await seedStrings(catalogues, registry.locales, seoKeys);
   await seedNavigation();
+  await seedChrome();
+  await seedIntegrations();
   await seedBlog(registry, catalogues);
   await seedMedia();
   await seedPartners();
@@ -215,6 +219,132 @@ async function seedNavigation() {
  * empty on day one. It keeps a pointer to the page that renders it verbatim,
  * so the published URL is unchanged while new articles use the template.
  */
+/**
+ * Consolidate the header and footer into one document, and mark the placeholder
+ * on every page.
+ *
+ * Each migrated page arrived with its own copy of both. The markup was the same
+ * everywhere; what differed was the translation key on each string, because the
+ * extractor minted a fresh key every time it met the same sentence on a new
+ * page. In French that was invisible. In English and German it was not: the same
+ * footer said different things — or nothing, falling back to French — depending
+ * on which page you were reading.
+ *
+ * `CMS_PAGE_SECTIONS.md` already names the homepage's header and footer as the
+ * canonical pair, so those are the ones kept. Every page's own copy stays in the
+ * database untouched, as the record of what that page used to ship; it simply
+ * stops being rendered.
+ *
+ * Re-runnable: the marking is idempotent, and an edited chrome document is left
+ * alone unless --force.
+ */
+async function seedChrome() {
+  const home = await Page.findOne({ pageKind: 'home' }).lean()
+    || await Page.findOne({ route: '' }).lean();
+  if (!home) {
+    logger.warn('no homepage found — header and footer not consolidated');
+    return;
+  }
+
+  const pick = (predicate) => (home.sections || [])
+    .slice()
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+    .find(predicate);
+
+  const navbar = pick(s => s.tag === 'nav' && (s.anchorId === 'navbar' || s.key === 'navbar'));
+  const footer = pick(s => s.tag === 'footer');
+
+  // The element only. The whitespace and comment that preceded it in the
+  // authored page belong to the page, not to the header — a page that nests its
+  // navbar inside a wrapper has its own surroundings, and re-emitting the
+  // homepage's would insert stray bytes there. Each placeholder contributes its
+  // own trivia back at render time.
+  const navHtml = withoutLeadingTrivia(navbar?.html || '');
+  const footerHtml = withoutLeadingTrivia(footer?.html || '');
+
+  const existing = await Chrome.findOne({ key: 'default' });
+  if (!existing) {
+    await Chrome.create({
+      key: 'default',
+      navbar: { html: navHtml, authoredHtml: navHtml, visible: !!navbar },
+      footer: { html: footerHtml, authoredHtml: footerHtml, visible: !!footer },
+    });
+    logger.info({ navbar: navHtml.length, footer: footerHtml.length },
+      'header and footer consolidated from the homepage');
+  } else if (FORCE) {
+    existing.navbar.html = navHtml;
+    existing.navbar.authoredHtml = navHtml;
+    existing.navbar.edited = false;
+    existing.footer.html = footerHtml;
+    existing.footer.authoredHtml = footerHtml;
+    existing.footer.edited = false;
+    await existing.save();
+    logger.warn('header and footer reset to the authored homepage copies');
+  } else {
+    logger.info('header and footer already set up — left as they are');
+  }
+
+  // Mark where the chrome goes on every page. A page with no header block (the
+  // standalone form pages) simply gets no placeholder and renders without one.
+  let marked = 0;
+  for (const page of await Page.find({}, { sections: 1, key: 1 })) {
+    let touched = false;
+    for (const section of page.sections) {
+      const isNav = section.tag === 'nav' && (section.anchorId === 'navbar' || section.key === 'navbar');
+      const isFooter = section.tag === 'footer';
+      const role = isNav ? 'navbar' : isFooter ? 'footer' : null;
+      if (role && section.role !== role) {
+        section.role = role;
+        // The placeholder is structural: its position is the page's layout, and
+        // its content is not this page's to edit.
+        section.locked = true;
+        touched = true;
+      }
+    }
+    if (touched) { await page.save(); marked++; }
+  }
+  logger.info({ pages: marked }, 'chrome placeholders marked');
+}
+
+/**
+ * Register the outbound endpoints the authored pages call.
+ *
+ * Seeding these is what switches the proxy on: until an integration exists, the
+ * renderer has nothing to repoint and the pages keep calling the automation
+ * platform directly, exactly as they did before. Existing records are left
+ * alone — the CMS owns them once they are here.
+ */
+async function seedIntegrations() {
+  const file = path.join(CONTENT_DIR, 'integrations.json');
+  if (!fs.existsSync(file)) {
+    logger.info('no integrations.json — outbound endpoints left as authored');
+    return;
+  }
+  const { integrations = [] } = readJson(file);
+  let created = 0;
+  let skipped = 0;
+
+  for (const spec of integrations) {
+    const existing = await Integration.findOne({ slug: spec.slug }).lean();
+    if (existing && !FORCE) { skipped++; continue; }
+    const doc = {
+      slug: spec.slug,
+      label: spec.label || spec.slug,
+      note: spec.note || '',
+      url: spec.url,
+      method: spec.method || 'POST',
+      responseMode: spec.responseMode || 'ok',
+      responseFields: spec.responseFields || [],
+      captureLead: !!spec.captureLead,
+      leadType: spec.leadType || 'other',
+      enabled: spec.enabled !== false,
+    };
+    await Integration.findOneAndUpdate({ slug: spec.slug }, { $set: doc }, { upsert: true });
+    created++;
+  }
+  logger.info({ created, skipped }, 'integrations seeded');
+}
+
 async function seedBlog(registry, catalogues) {
   const spec = registry.pages.find(p => p.pageKind === 'blogPost');
   if (!spec) return;
@@ -266,22 +396,83 @@ async function seedBlog(registry, catalogues) {
  * manifest written by tools/build-media-index.mjs is the source of truth;
  * walking the directory is the fallback when running from a full checkout.
  */
+/**
+ * `images/collaboration-page/hero_wide` → `hero wide`.
+ *
+ * The folder is already a filter in the library, so repeating it in every label
+ * only means 160 names that all begin with the same word.
+ */
+function readableName(stem) {
+  const last = String(stem).split('/').pop() || stem;
+  return last.replace(/[-_]+/g, ' ').trim();
+}
+
 async function seedMedia() {
   const manifest = path.join(CONTENT_DIR, 'media.bundled.json');
   const entries = fs.existsSync(manifest)
     ? readJson(manifest)
     : [...bundledFromDisk()];
 
-  const ops = entries.map(item => ({
-    updateOne: {
-      filter: { filename: item.filename },
-      update: { $set: { ...item, source: 'bundled' } },
-      upsert: true,
-    },
-  }));
+  /*
+   * Every bundled image gets a readable name and a reference on first index.
+   *
+   * `$setOnInsert` for those two, so re-seeding never overwrites a name somebody
+   * has since improved or a slug pages are already pointing at. The name is only
+   * a label; the slug is the address, which is why it is de-duplicated against
+   * the filename rather than the basename — two `logo.png` in different folders
+   * are two assets.
+   */
+  const taken = new Set(
+    (await Media.find({ slug: { $nin: [null, ''] } }, { slug: 1, _id: 0 }).lean()).map(m => m.slug),
+  );
+  const ops = entries.map((item) => {
+    const stem = String(item.filename).replace(/\.[a-z0-9]+$/i, '');
+    let slug = slugify(stem, 60) || 'image';
+    let n = 1;
+    while (taken.has(slug)) slug = `${slugify(stem, 52) || 'image'}-${++n}`;
+    taken.add(slug);
+    return {
+      updateOne: {
+        filter: { filename: item.filename },
+        update: {
+          $set: { ...item, source: 'bundled' },
+          $setOnInsert: { slug, name: readableName(stem) },
+        },
+        upsert: true,
+      },
+    };
+  });
   for (let i = 0; i < ops.length; i += 500) {
     await Media.bulkWrite(ops.slice(i, i + 500), { ordered: false });
   }
+
+  /*
+   * Backfill.
+   *
+   * `$setOnInsert` above only fires for rows that did not exist, so a database
+   * seeded before assets had names keeps 160 images with no reference — and an
+   * image with no reference is pinned to its filename, which is the whole thing
+   * this is meant to fix. Naming them here is idempotent: a row that already has
+   * a slug is skipped, so nothing an editor renamed is touched.
+   */
+  const unnamed = await Media.find({ $or: [{ slug: null }, { slug: '' }, { slug: { $exists: false } }] });
+  if (unnamed.length) {
+    const taken2 = new Set(
+      (await Media.find({ slug: { $nin: [null, ''] } }, { slug: 1, _id: 0 }).lean()).map(m => m.slug),
+    );
+    for (const item of unnamed) {
+      const stem = String(item.filename).replace(/\.[a-z0-9]+$/i, '');
+      let slug = slugify(stem, 60) || 'image';
+      let n = 1;
+      while (taken2.has(slug)) slug = `${slugify(stem, 52) || 'image'}-${++n}`;
+      taken2.add(slug);
+      item.slug = slug;
+      if (!item.name) item.name = readableName(stem);
+      await item.save();
+    }
+    logger.info({ named: unnamed.length }, 'existing media given references');
+  }
+
   logger.info({ files: ops.length }, 'bundled media indexed');
 }
 

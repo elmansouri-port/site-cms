@@ -3,6 +3,17 @@
  * Keeping them in one file makes the visual language easy to keep consistent.
  */
 import { useEffect, useRef } from 'react';
+import { textOf } from '@rainbow/core/article';
+
+/**
+ * A block label as a human should read it.
+ *
+ * The labels were derived from the authored markup at migration time, so they
+ * carry whatever entities that markup used: "Section: Vos donn&eacute;es". Left
+ * raw they are unreadable in a list; decoding at display keeps the stored value
+ * untouched.
+ */
+export const plainText = (value) => textOf(value) || '';
 
 export function Panel({ title, actions, children, footer, className = '' }) {
   return (
@@ -195,6 +206,9 @@ const PATHS = {
   logout: 'M9 21H4V3h5m6 4 5 5-5 5m5-5H9',
   chevron: 'M9 5l7 7-7 7',
   check: 'M5 13l4 4L19 7',
+  layout: 'M3 4h18v16H3zM3 9h18M3 16h18',
+  plug: 'M9 3v6M15 3v6M6 9h12v3a6 6 0 0 1-6 6 6 6 0 0 1-6-6V9Zm6 12v3',
+  bolt: 'M13 2 4 14h6l-1 8 9-12h-6l1-8Z',
 };
 
 export function Icon({ name }) {

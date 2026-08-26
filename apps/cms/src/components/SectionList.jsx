@@ -8,7 +8,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../lib/api.js';
 import { useToast } from '../lib/toast.jsx';
-import { Icon, Badge, Empty } from './ui.jsx';
+import { Icon, Badge, Empty, plainText as readable } from './ui.jsx';
 
 export default function SectionList({ pageKey, sections, canEdit, onOpen, onChanged }) {
   const toast = useToast();
@@ -17,7 +17,10 @@ export default function SectionList({ pageKey, sections, canEdit, onOpen, onChan
   const [overKey, setOverKey] = useState(null);
   const [busy, setBusy] = useState(false);
 
-  useEffect(() => { setOrder(sections); }, [sections]);
+  // Only the page's own body. The header and footer live in one document for the
+  // whole site and are edited under Header & footer.
+  const body = (sections || []).filter(s => !s.role);
+  useEffect(() => { setOrder(body); }, [sections]);
 
   if (!order?.length) {
     return <Empty title="No blocks yet">Add a block to start building this page.</Empty>;
@@ -103,10 +106,15 @@ export default function SectionList({ pageKey, sections, canEdit, onOpen, onChan
           </span>
 
           <div className="block__body">
-            <div className="block__title">{section.label || section.key}</div>
+            <div className="block__title">{readable(section.label) || section.key}</div>
             <div className="block__meta">
               <span className="mono">{section.key}</span>
               {section.componentKey && <Badge tone="brand">{section.componentKey}</Badge>}
+              {section.convertedFrom && (
+                <span title="Converted from authored markup — outside the byte-fidelity check">
+                  <Badge tone="warn">converted</Badge>
+                </span>
+              )}
               {section.locked && <Badge>structural</Badge>}
               {section.anchorId && <span>#{section.anchorId}</span>}
               {section.keyCount > 0 && <span>{section.keyCount} strings</span>}

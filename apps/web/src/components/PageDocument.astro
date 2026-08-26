@@ -14,7 +14,7 @@
  */
 import SectionRenderer from './SectionRenderer.astro';
 
-const { document, locale } = Astro.props;
+const { document, locale, editMode = false } = Astro.props;
 
 const hasComponents = document.parts.some(p => p.kind === 'component');
 const flat = hasComponents
@@ -28,7 +28,7 @@ const flat = hasComponents
     {document.parts.map((part) => (
       part.kind === 'html'
         ? <Fragment set:html={part.html} />
-        : <SectionRenderer block={part.block} locale={locale} />
+        : <SectionRenderer block={part.block} locale={locale} editMode={editMode} />
     ))}
     <Fragment set:html={document.epilogue} />
   </>

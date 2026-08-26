@@ -12,6 +12,14 @@ const SectionSchema = new Schema({
   key: { type: String, required: true },
   label: { type: String, default: '' },
   type: { type: String, enum: ['html', 'script', 'style', 'component'], default: 'html' },
+  /**
+   * Set on the two blocks that are not this page's content: the header and the
+   * footer. A block with a role keeps its position in the page but takes its
+   * markup from the shared chrome document, so changing the header once changes
+   * it everywhere. The block's own `html` is left in place as the record of what
+   * this page shipped before the chrome was consolidated.
+   */
+  role: { type: String, enum: [null, 'navbar', 'footer'], default: null },
   tag: { type: String, default: null },
   anchorId: { type: String, default: null },
   order: { type: Number, default: 0 },
@@ -22,14 +30,35 @@ const SectionSchema = new Schema({
   html: { type: String, default: '' },
   keys: { type: [String], default: [] },
   componentKey: { type: String, default: null },
+  // Set when an authored block was converted into a component block: it records
+  // that this section is deliberately outside the byte-fidelity guarantee.
+  convertedFrom: { type: String, default: null },
   data: { type: Schema.Types.Mixed, default: {} },
   layout: {
     spacingTop: { type: String, default: null },
     spacingBottom: { type: String, default: null },
   },
+  /**
+   * A/B variants for this one block.
+   *
+   * `html` carries the alternative markup for authored and custom blocks;
+   * `data` carries the field overrides for a component block, merged over the
+   * control's data so a variant only has to state what it changes. Both are
+   * optional — a variant that sets neither renders the control, which is how
+   * "A" (the control arm) is represented.
+   */
   experiment: {
     key: { type: String, default: null },
-    variants: { type: [{ _id: false, key: String, label: String, html: String }], default: [] },
+    variants: {
+      type: [{
+        _id: false,
+        key: String,
+        label: String,
+        html: String,
+        data: { type: Schema.Types.Mixed, default: undefined },
+      }],
+      default: [],
+    },
   },
 }, { _id: false });
 
@@ -58,6 +87,13 @@ const PageSchema = new Schema({
   // is a real value here, so this cannot be `required` — Mongoose treats '' as
   // missing — and uniqueness is enforced by the index below.
   route: { type: String, default: '' },
+  /**
+   * Per-locale route overrides, so a page can answer to the path a speaker of
+   * that language would actually search for: `/en/pricing`, `/de/preise`,
+   * `/fr/tarifs`. A locale with no entry falls back to `route`, which keeps
+   * every existing page working unchanged. Editable per locale from the CMS.
+   */
+  routes: { type: Map, of: String, default: {} },
   title: { type: String, required: true },
   pageKind: {
     type: String,
@@ -91,7 +127,40 @@ const PageSchema = new Schema({
     footer: { type: String, default: '' },
   },
 
+  /**
+   * Whether this page shows the shared header and footer.
+   *
+   * A campaign landing page usually should not: every link in a navbar is a way
+   * to leave before converting, which is why paid-traffic landing pages
+   * routinely drop it. Turning one off here skips the placeholder block rather
+   * than deleting anything.
+   */
+  chrome: {
+    navbar: { type: Boolean, default: true },
+    footer: { type: Boolean, default: true },
+  },
+
   sections: { type: [SectionSchema], default: [] },
+
+  /**
+   * Whole-page A/B testing.
+   *
+   * A control page names the experiment and which arm it is; each other arm is
+   * a separate page document carrying the same experiment key and its own
+   * variant letter. Visitors always stay on the control's URL — the variant's
+   * sections are served there — so there is one canonical URL, one set of
+   * hreflang tags, and nothing duplicate for a crawler to find. Variant pages
+   * are excluded from the sitemap and marked noindex on creation.
+   */
+  experiment: {
+    key: { type: String, default: null },
+    variant: { type: String, default: null },
+    // Set on the alternative arms only, naming the control page they belong to.
+    // A page with this set is never routable on its own — it has no URL, no
+    // sitemap entry and no hreflang, which is what keeps the test invisible to
+    // search engines.
+    variantOf: { type: String, default: null },
+  },
 
   // Set by the ingest so a re-run can tell an untouched page from an edited one.
   sourceFile: { type: String, default: null },
@@ -104,5 +173,6 @@ const PageSchema = new Schema({
 
 PageSchema.index({ route: 1, status: 1 });
 PageSchema.index({ route: 1 }, { unique: true });
+PageSchema.index({ 'experiment.key': 1, 'experiment.variant': 1 });
 
 export const Page = mongoose.model('Page', PageSchema);

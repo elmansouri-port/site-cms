@@ -70,6 +70,27 @@ Nothing in the page render happens in the browser. The middleware resolves the
 locale and the A/B variant before anything is fetched, so the HTML that leaves
 the server already is the visitor's variant, in the visitor's language.
 
+Variant *assignment* happens in the middleware, but it is only *persisted* after
+the page has reported which experiments it actually used. Without that, a test
+running on one page would set a cookie on every page of the site and — much more
+expensively — force every response to be marked `private`, because any of them
+might have depended on an assignment.
+
+## URLs
+
+One page, one URL per language. A page carries a base route plus optional
+per-locale overrides (`routes: { en: 'pricing', de: 'preise' }`), so a German
+visitor gets `/de/preise` rather than the French slug. The consequences are
+enforced rather than left to whoever edits next:
+
+- Arriving on the untranslated path is a **301** to the locale's own path, not a
+  second copy of the page.
+- `canonical`, `hreflang` and the sitemap are all built from the same resolver
+  (`routeFor()`), so they cannot disagree with each other.
+- Renaming a URL writes the redirect for you, and repoints anything that already
+  pointed at the old path so no chain builds up.
+- The blog's own segment is per locale too (`Settings → Languages`).
+
 ## Why the API is separate from the CMS
 
 The CMS is an editor interface. It talks to the same database as the content
@@ -89,6 +110,142 @@ Both layers degrade instead of failing:
 - Redis unreachable → the API serves from MongoDB.
 - API unreachable → the frontend serves its last known copy of that payload.
 - Neither available → a 503 with `retry-after`, not a broken page.
+
+## The visual editor
+
+The page builder does not render blocks a second time in React. The canvas is
+an `<iframe>` of the real page, requested in edit mode, and the CMS talks to it
+over `postMessage`.
+
+```
+CMS (/admin/)                          Astro (/fr/tarifs, edit mode)
+─────────────                          ─────────────────────────────
+iframe src ──────────────────────────▶ compose(): every block's outer tag gets
+                                         data-cms-block="<key>"
+                                       every translatable unit already carries
+                                         data-cms-key="<string key>"
+                                       + /js/cms-editor.js
+       ◀── layout: block rectangles ── reports geometry on scroll/resize/load
+       ◀── select: block clicked ───── click anywhere in a block
+       ◀── stringChange: key, value ── double-click text, type, blur
+       ─── select / editString ──────▶ scroll to and focus a block or string
+```
+
+Consequences worth stating:
+
+- **What you see is what ships**, because it *is* what ships — the same CSS, the
+  same browser-compiled Tailwind, the same page scripts. There is no second
+  renderer to drift from the first.
+- **Nothing is annotated on a public page.** `data-cms-block` and the bridge
+  script are emitted only when the preview cookie *and* the edit cookie are
+  present; `data-cms-key` only under preview.
+- **The iframe never writes to the API.** It reports intent; the parent owns the
+  access token and the error handling.
+
+Because the canvas is the live page, editing an imported section's *copy* is
+safe — the string catalogue is the seam it always was — while editing its
+*structure* is not, and is therefore a deliberate conversion (below) rather than
+a textarea.
+
+## Site chrome
+
+The header and the footer are not page content, so they no longer live in pages.
+One `chromes` document holds both; a page carries a **placeholder** — a section
+with `role: 'navbar' | 'footer'` — that says where they go.
+
+```
+page.sections[]                        chromes.default
+  … hero, features, pricing …
+  { role: 'footer', trivia: '\n\n  <!-- FOOTER -->\n  ' }  ──▶  footer.html
+```
+
+Two details earn their keep:
+
+- **The chrome stores the element, the page stores the trivia.** The slicer
+  attaches the whitespace and comment preceding an element to the block that
+  follows it, which is what makes `blocks.join('')` reproduce the authored body
+  exactly. So the shared copy is `<nav id="navbar">…</nav>` with nothing in front
+  of it, and each placeholder contributes its own leading trivia back at render
+  time. The page payload ships `trivia` instead of `html`, so it does not carry a
+  second copy of the footer.
+- **Nesting is handled by pattern, not by position.** The article template puts
+  its navbar *inside* a `<header>` wrapper, so it has no top-level placeholder.
+  `replaceChromeRegions()` swaps the region wherever it appears, using patterns
+  exported from `compose.js` — the same ones `verify-live` imports, so the tool
+  and the renderer cannot drift. Without it, exactly one page would have kept a
+  header nobody could edit.
+
+A page opts out with `chrome.navbar = false`; the placeholder then renders
+nothing. `usedExperiments()` counts a chrome test on every page, because that is
+what it is.
+
+In edit mode a chrome region is annotated `data-cms-chrome-region`, deliberately
+*not* `data-cms-block`: the bridge treats the second as "this is yours to
+change". Clicking chrome in a page canvas therefore refuses selection and reports
+`chromeClicked`, which the editor turns into a pointer at the screen that owns
+it.
+
+## Outbound integrations
+
+The renderer repoints third-party endpoints at this origin
+(`packages/core/src/endpoints.js`), and `apps/api/src/routes/hooks.js` makes the
+call. The mapping is data, the substitution is exact string replacement, and the
+upstream URL is never on a public route:
+
+```
+browser ──▶ POST /api/v1/hooks/<slug>          (rate limited, honeypot checked)
+                 │
+                 ├── store a Lead first        (nothing is lost if the rest fails)
+                 └── fetch(upstream)  ──▶ automation platform
+                          │
+                          ▼
+            { ok }  or  { ok, …allowlisted fields }
+```
+
+`GET /api/v1/site/integrations` returns the map for the renderer and is gated on
+the shared revalidate secret — every other route under `/site` is public, and
+this one carries exactly the thing the proxy exists to hide.
+
+## Named image assets
+
+The same shape as the endpoint proxy: a data map and an exact string
+replacement, applied in `render()`.
+
+```
+stored     <img src="/media/a/hero-home">
+rendered   <img src="/media/hero-home-9f2c1e.webp">
+```
+
+Two details are what make it hold together:
+
+- **Component fields are resolved too.** A hero's image is in `data.image`, not
+  in markup, so it never reaches the renderer's string pass.
+  `resolveAssetsDeep()` walks the block's data in `composeParts`. Without it,
+  half the site would be managed and half pinned — worse than not having the
+  feature, because you could not tell which was which.
+- **Renaming keeps the old reference.** Old slugs move to `aliases` and keep
+  resolving, so renaming is safe. A rename that broke every page using the old
+  name is a rename nobody performs, which would make the feature ornamental.
+
+`verify-live` still reports zero differences with two pages storing references
+instead of filenames, which is the point: the indirection is invisible in the
+output.
+
+## Converting an authored block
+
+An imported section is stored as the exact bytes it was authored with, which is
+what `verify-fidelity` and `verify-live` prove. Visual block editing of such a
+section cannot preserve that: the markup has to render through the block wrapper
+to gain spacing controls, variants and a form.
+
+So it is an explicit action. `POST /pages/:key/sections/:sectionKey/convert`
+moves the markup into a `custom_html` component block, sets its spacing to
+`none` (the authored markup carries its own padding), clears the now-unused
+translation keys, and stamps `convertedFrom: 'html'`. The CMS labels the section
+`converted` from then on, and the previous version is in the page's history.
+
+Sections nobody converts stay byte-identical, so `verify-live` keeps reporting
+`0 difference(s)` for them.
 
 ## The section registry
 
