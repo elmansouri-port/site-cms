@@ -10,6 +10,12 @@
     "changing an upstream URL in the CMS does not make this file stale — adding,",
     "removing or renaming an integration does.",
     "",
+    "method / queryFields:",
+    "  Every value here was verified against the live platform by probing each",
+    "  endpoint with a deliberately invalid payload, which is safe because it is",
+    "  rejected. `availability` and `booking-lookup` are registered for GET, so",
+    "  their inputs travel in the query string; `queryFields` names them.",
+    "",
     "responseMode:",
     "  ok      the browser is told success or failure and nothing else",
     "  fields  only the listed keys are copied out of the upstream response",
@@ -44,29 +50,54 @@
       "url": "https://n8n.openrainbow.org/webhook/booking",
       "method": "POST",
       "responseMode": "fields",
-      "responseFields": ["ok", "reference", "message", "start", "end"],
+      "responseFields": [
+        "ok",
+        "reference",
+        "message",
+        "start",
+        "end"
+      ],
       "captureLead": true,
       "leadType": "booking",
-      "note": "Books the slot. The reference is shown to the visitor, so it is allowed through."
+      "note": "Books the slot. The reference is shown to the visitor, so it is allowed through. Field names are snake_case: `first_name`, `last_name`, `email`, `datetime`."
     },
     {
       "slug": "availability",
       "label": "Appointment availability",
       "url": "https://n8n.openrainbow.org/webhook/availability",
-      "method": "POST",
+      "method": "GET",
       "responseMode": "fields",
-      "responseFields": ["ok", "slots", "days", "timezone"],
+      "responseFields": [
+        "ok",
+        "slots",
+        "days",
+        "timezone"
+      ],
       "captureLead": false,
-      "note": "Reads free slots for the booking calendar. No lead: nobody has asked for anything yet."
+      "note": "Reads free slots for the booking calendar. No lead: nobody has asked for anything yet. Registered for GET and takes no parameters — it returns the whole window.",
+      "queryFields": []
     },
     {
       "slug": "booking-lookup",
       "label": "Find a booking",
       "url": "https://n8n.openrainbow.org/webhook/booking-lookup",
-      "method": "POST",
+      "method": "GET",
       "responseMode": "fields",
-      "responseFields": ["ok", "found", "reference", "start", "end", "name", "message"],
-      "captureLead": false
+      "responseFields": [
+        "ok",
+        "found",
+        "reference",
+        "start",
+        "end",
+        "name",
+        "message"
+      ],
+      "captureLead": false,
+      "queryFields": [
+        "ref",
+        "token"
+      ],
+      "note": "Finds a booking from the link in the confirmation e-mail. Registered for GET; reads `ref` or `token` from the query string."
     },
     {
       "slug": "booking-confirm",
@@ -74,8 +105,13 @@
       "url": "https://n8n.openrainbow.org/webhook/booking-confirm",
       "method": "POST",
       "responseMode": "fields",
-      "responseFields": ["ok", "reference", "message"],
-      "captureLead": false
+      "responseFields": [
+        "ok",
+        "reference",
+        "message"
+      ],
+      "captureLead": false,
+      "note": "Confirms a booking from the e-mail link. Requires `token`."
     },
     {
       "slug": "booking-change",
@@ -83,8 +119,15 @@
       "url": "https://n8n.openrainbow.org/webhook/booking-change",
       "method": "POST",
       "responseMode": "fields",
-      "responseFields": ["ok", "reference", "start", "end", "message"],
-      "captureLead": false
+      "responseFields": [
+        "ok",
+        "reference",
+        "start",
+        "end",
+        "message"
+      ],
+      "captureLead": false,
+      "note": "Moves a booking. Requires `ref` or `token`, plus one of `new_datetime`, `lang`, `solution`."
     },
     {
       "slug": "booking-cancel",
@@ -92,8 +135,12 @@
       "url": "https://n8n.openrainbow.org/webhook/booking-cancel",
       "method": "POST",
       "responseMode": "fields",
-      "responseFields": ["ok", "message"],
-      "captureLead": false
+      "responseFields": [
+        "ok",
+        "message"
+      ],
+      "captureLead": false,
+      "note": "Cancels a booking. Requires `reference`."
     },
     {
       "slug": "unsubscribe",
@@ -101,9 +148,13 @@
       "url": "https://n8n.openrainbow.org/webhook/unsubscribe",
       "method": "POST",
       "responseMode": "fields",
-      "responseFields": ["ok", "message"],
+      "responseFields": [
+        "ok",
+        "message"
+      ],
       "captureLead": true,
-      "leadType": "unsubscribe"
+      "leadType": "unsubscribe",
+      "note": "Unsubscribes an address. The workflow behind this path was inactive when last probed — submissions are stored under Leads meanwhile."
     },
     {
       "slug": "unsubscribe-check",
@@ -111,8 +162,15 @@
       "url": "https://n8n.openrainbow.org/webhook/unsubscribe-check",
       "method": "POST",
       "responseMode": "fields",
-      "responseFields": ["ok", "found", "email", "lists", "message"],
-      "captureLead": false
+      "responseFields": [
+        "ok",
+        "found",
+        "email",
+        "lists",
+        "message"
+      ],
+      "captureLead": false,
+      "note": "Looks an address up before unsubscribing it. The workflow behind this path was inactive when last probed."
     }
   ]
 }

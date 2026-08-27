@@ -1,0 +1,160 @@
+{
+  "$comment": [
+    "The forms the site actually needs, with the field names the automation",
+    "platform actually demands.",
+    "",
+    "Every `name` here was verified against the live endpoint rather than",
+    "guessed: an empty payload is refused with the fields it was missing, so the",
+    "contract is discoverable without triggering a workflow. The Integrations",
+    "screen records that answer and the form builder compares against it, which",
+    "is why these seeds start out green.",
+    "",
+    "What is deliberately absent: the booking calendar, the reschedule wizard",
+    "and the token-confirmation pages. Those are multi-step flows with a slot",
+    "picker and a lookup-then-confirm handshake, not field lists, and they stay",
+    "as authored pages."
+  ],
+
+  "forms": [
+    {
+      "key": "demande-de-demo",
+      "name": "Demo request",
+      "note": "The form on the product pages. Forwarded to the demo-request workflow, which insists on all seven fields.",
+      "target": "hook:demo-request-lead",
+      "layout": { "columns": 2, "align": "left" },
+      "submitLabel": { "fr": "Demander une démo", "en": "Request a demo", "de": "Demo anfordern", "es": "Solicitar una demo" },
+      "sendingLabel": { "fr": "Envoi…", "en": "Sending…", "de": "Senden…", "es": "Enviando…" },
+      "consent": {
+        "fr": "En envoyant ce formulaire, vous acceptez d'être contacté au sujet de Rainbow.",
+        "en": "By submitting this form you agree to be contacted about Rainbow."
+      },
+      "success": {
+        "title": { "fr": "Merci", "en": "Thank you" },
+        "message": {
+          "fr": "Nous avons bien reçu votre demande et un conseiller vous contactera sous un jour ouvré à l'adresse {email}.",
+          "en": "We have your request. A specialist will be in touch within one working day at {email}."
+        }
+      },
+      "fields": [
+        { "key": "firstName", "name": "firstName", "type": "text", "required": true, "autocomplete": "given-name",
+          "label": { "fr": "Prénom", "en": "First name", "de": "Vorname", "es": "Nombre" } },
+        { "key": "lastName", "name": "lastName", "type": "text", "required": true, "autocomplete": "family-name",
+          "label": { "fr": "Nom", "en": "Last name", "de": "Nachname", "es": "Apellido" } },
+        { "key": "email", "name": "email", "type": "email", "required": true, "autocomplete": "email",
+          "label": { "fr": "E-mail professionnel", "en": "Work email", "de": "Geschäftliche E-Mail", "es": "Correo profesional" } },
+        { "key": "phone", "name": "phone", "type": "tel", "autocomplete": "tel",
+          "label": { "fr": "Téléphone", "en": "Phone", "de": "Telefon", "es": "Teléfono" } },
+        { "key": "company", "name": "company", "type": "text", "required": true, "autocomplete": "organization",
+          "label": { "fr": "Société", "en": "Company", "de": "Unternehmen", "es": "Empresa" } },
+        { "key": "companySize", "name": "companySize", "type": "select", "required": true,
+          "label": { "fr": "Nombre de collaborateurs", "en": "Number of employees", "de": "Mitarbeiterzahl", "es": "Número de empleados" },
+          "options": [
+            { "value": "1-49", "label": { "fr": "1 à 49", "en": "1 to 49", "de": "1 bis 49", "es": "1 a 49" } },
+            { "value": "50-249", "label": { "fr": "50 à 249", "en": "50 to 249", "de": "50 bis 249", "es": "50 a 249" } },
+            { "value": "250-999", "label": { "fr": "250 à 999", "en": "250 to 999", "de": "250 bis 999", "es": "250 a 999" } },
+            { "value": "1000+", "label": { "fr": "1000 et plus", "en": "1000 or more", "de": "1000 oder mehr", "es": "1000 o más" } }
+          ] },
+        { "key": "country", "name": "country", "type": "text", "required": true, "autocomplete": "country-name",
+          "label": { "fr": "Pays", "en": "Country", "de": "Land", "es": "País" } },
+        { "key": "message", "name": "message", "type": "textarea", "width": "full", "rows": 4,
+          "label": { "fr": "Votre besoin", "en": "What do you need?", "de": "Ihr Anliegen", "es": "¿Qué necesita?" },
+          "placeholder": { "fr": "Combien d'utilisateurs, quels usages, quelle échéance…", "en": "How many users, what for, by when…" } },
+        { "key": "consent", "name": "consent", "type": "checkbox", "required": true, "width": "full",
+          "label": {
+            "fr": "J'accepte d'être contacté par Rainbow au sujet de cette demande.",
+            "en": "I agree to be contacted by Rainbow about this request."
+          } }
+      ]
+    },
+
+    {
+      "key": "livre-blanc",
+      "name": "Whitepaper download",
+      "note": "Four fields, because that is all the whitepaper workflow requires — a fifth would cost conversions for nothing.",
+      "target": "hook:livre-blanc-lead",
+      "layout": { "columns": 2, "align": "left" },
+      "submitLabel": { "fr": "Télécharger le livre blanc", "en": "Download the whitepaper" },
+      "sendingLabel": { "fr": "Envoi…", "en": "Sending…" },
+      "consent": {
+        "fr": "Le lien de téléchargement est envoyé par e-mail.",
+        "en": "The download link is sent by email."
+      },
+      "success": {
+        "title": { "fr": "C'est envoyé", "en": "On its way" },
+        "message": {
+          "fr": "Le livre blanc part à l'instant vers {email}. Vérifiez vos indésirables si rien n'arrive dans les cinq minutes.",
+          "en": "The whitepaper is on its way to {email}. Check your spam folder if nothing arrives within five minutes."
+        }
+      },
+      "fields": [
+        { "key": "firstName", "name": "firstName", "type": "text", "required": true, "autocomplete": "given-name",
+          "label": { "fr": "Prénom", "en": "First name" } },
+        { "key": "lastName", "name": "lastName", "type": "text", "required": true, "autocomplete": "family-name",
+          "label": { "fr": "Nom", "en": "Last name" } },
+        { "key": "email", "name": "email", "type": "email", "required": true, "autocomplete": "email",
+          "label": { "fr": "E-mail professionnel", "en": "Work email" } },
+        { "key": "company", "name": "company", "type": "text", "required": true, "autocomplete": "organization",
+          "label": { "fr": "Société", "en": "Company" } }
+      ]
+    },
+
+    {
+      "key": "contact",
+      "name": "Contact enquiry",
+      "note": "Stored under Leads, not forwarded. The general-purpose form for a page that needs one and has no workflow behind it.",
+      "target": "lead:contact",
+      "layout": { "columns": 2, "align": "left" },
+      "submitLabel": { "fr": "Envoyer", "en": "Send" },
+      "sendingLabel": { "fr": "Envoi…", "en": "Sending…" },
+      "success": {
+        "title": { "fr": "Message reçu", "en": "Message received" },
+        "message": {
+          "fr": "Merci. Nous revenons vers vous sous un jour ouvré.",
+          "en": "Thank you. We will come back to you within one working day."
+        }
+      },
+      "fields": [
+        { "key": "name", "name": "name", "type": "text", "required": true, "autocomplete": "name",
+          "label": { "fr": "Nom complet", "en": "Full name" } },
+        { "key": "email", "name": "email", "type": "email", "required": true, "autocomplete": "email",
+          "label": { "fr": "E-mail", "en": "Email" } },
+        { "key": "company", "name": "company", "type": "text", "autocomplete": "organization",
+          "label": { "fr": "Société", "en": "Company" } },
+        { "key": "phone", "name": "phone", "type": "tel", "autocomplete": "tel",
+          "label": { "fr": "Téléphone", "en": "Phone" } },
+        { "key": "message", "name": "message", "type": "textarea", "width": "full", "rows": 5, "required": true,
+          "label": { "fr": "Votre message", "en": "Your message" } }
+      ]
+    },
+
+    {
+      "key": "rappel-partenaire",
+      "name": "Partner enquiry",
+      "note": "For the partner pages. Stored as a partner lead so the sales team can filter on it.",
+      "target": "lead:partner",
+      "layout": { "columns": 2, "align": "left" },
+      "submitLabel": { "fr": "Être recontacté", "en": "Request a call back" },
+      "sendingLabel": { "fr": "Envoi…", "en": "Sending…" },
+      "success": {
+        "title": { "fr": "Demande enregistrée", "en": "Request received" },
+        "message": {
+          "fr": "Un partenaire proche de vous vous rappellera. Nous avons noté {email}.",
+          "en": "A partner near you will call you back. We have noted {email}."
+        }
+      },
+      "fields": [
+        { "key": "name", "name": "name", "type": "text", "required": true, "autocomplete": "name",
+          "label": { "fr": "Nom complet", "en": "Full name" } },
+        { "key": "email", "name": "email", "type": "email", "required": true, "autocomplete": "email",
+          "label": { "fr": "E-mail professionnel", "en": "Work email" } },
+        { "key": "phone", "name": "phone", "type": "tel", "required": true, "autocomplete": "tel",
+          "label": { "fr": "Téléphone", "en": "Phone" } },
+        { "key": "company", "name": "company", "type": "text", "autocomplete": "organization",
+          "label": { "fr": "Société", "en": "Company" } },
+        { "key": "country", "name": "country", "type": "text", "autocomplete": "country-name",
+          "label": { "fr": "Pays", "en": "Country" } },
+        { "key": "source", "name": "source", "type": "hidden", "value": "partner-page", "label": {} }
+      ]
+    }
+  ]
+}

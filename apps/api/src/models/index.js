@@ -195,7 +195,7 @@ const BlogPostSchema = new Schema({
       key: { type: String, required: true },
       type: {
         type: String,
-        enum: ['heading', 'rich', 'keyPoints', 'image', 'quote', 'callout', 'embed', 'custom'],
+        enum: ['heading', 'rich', 'keyPoints', 'image', 'quote', 'callout', 'embed', 'form', 'custom'],
         default: 'rich',
       },
       data: { type: Schema.Types.Mixed, default: {} },
@@ -402,7 +402,7 @@ export const Experiment = mongoose.model('Experiment', ExperimentSchema);
 const VersionSchema = new Schema({
   entity: {
     type: String,
-    enum: ['page', 'post', 'chrome', 'navigation', 'settings'],
+    enum: ['page', 'post', 'chrome', 'navigation', 'settings', 'form'],
     required: true,
     index: true,
   },
@@ -492,6 +492,39 @@ const IntegrationSchema = new Schema({
     max: { type: Number, default: 20 },
   },
 
+  /**
+   * Which keys travel in the query string rather than the body.
+   *
+   * A GET webhook cannot read a JSON body, so a GET integration has to say what
+   * to put in the URL. Empty means "everything the submission carries", which is
+   * the right default for a lookup and harmless for one that ignores them.
+   */
+  queryFields: { type: [String], default: [] },
+
+  /**
+   * What the endpoint itself told us, the last time it was probed.
+   *
+   * The form builder needs to know which fields an endpoint requires, and the
+   * endpoint is the only authority on that. n8n answers a request made with the
+   * wrong method by naming the right one, and a request with missing fields by
+   * naming them — so a probe can learn the contract instead of somebody
+   * transcribing it from a workflow screenshot and getting it wrong.
+   */
+  contract: {
+    probedAt: { type: Date, default: null },
+    // The method the endpoint is actually registered for, when it says so.
+    detectedMethod: { type: String, default: '' },
+    // Field names the endpoint named as missing — a form must collect these.
+    requiredFields: { type: [String], default: [] },
+    // Every field name the endpoint was seen to read, including ones it derives
+    // itself. Offered as suggestions in the form builder, never as warnings.
+    knownFields: { type: [String], default: [] },
+    // 'ok' | 'method-mismatch' | 'not-registered' | 'validation' | 'unreachable'
+    verdict: { type: String, default: '' },
+    // The upstream's own words. Admin-only: never returned by a public route.
+    message: { type: String, default: '' },
+  },
+
   // Enough to answer "is this form working?" without opening the automation tool.
   calls: { type: Number, default: 0 },
   failures: { type: Number, default: 0 },
@@ -519,3 +552,13 @@ const AuditSchema = new Schema({
 AuditSchema.index({ createdAt: -1 });
 
 export const AuditLog = mongoose.model('AuditLog', AuditSchema);
+
+/* ── Forms ────────────────────────────────────────────────────────────────── */
+
+/*
+ * Defined in its own file: a form has two nested schemas and enough commentary
+ * about why the wire name is separate from the label that inlining it here would
+ * bury the six models around it. Re-exported so every importer still has one
+ * place to import a model from.
+ */
+export { Form } from './Form.js';

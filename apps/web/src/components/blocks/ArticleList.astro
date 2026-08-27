@@ -8,7 +8,16 @@
  */
 import { blogList, blogSegment } from '../../lib/site.js';
 
-const { data = {}, locale } = Astro.props;
+const { data = {}, locale, editMode = false } = Astro.props;
+/*
+ * Names the field a click landed on, for the visual editor only.
+ *
+ * This block's anchors are a special case: the "see the blog" link takes its
+ * wording from a field but its destination from the blog's own URL segment, and
+ * the article links come from live database rows. Neither destination is the
+ * block's to edit, so only the label is named.
+ */
+const fieldHook = (name) => (editMode ? { 'data-cms-field': name } : {});
 // The blog's segment is per locale, so a card cannot hardcode `/blog/`.
 const segment = blogSegment(Astro.locals.settings, locale);
 const { title = '', subtitle = '', limit = 3, category = '', ctaLabel = '' } = data;
@@ -51,7 +60,11 @@ const dateFormat = new Intl.DateTimeFormat(locale, { year: 'numeric', month: 'lo
 
   {ctaLabel && (
     <div class="text-center mt-10">
-      <a href={`/${locale}/${segment}`} class="px-7 py-3 rounded-btn border border-gray-300 text-gray-700 font-medium hover:border-brand-500 hover:text-brand-500 transition-colors inline-block">
+      <a
+        href={`/${locale}/${segment}`}
+        class="px-7 py-3 rounded-btn border border-gray-300 text-gray-700 font-medium hover:border-brand-500 hover:text-brand-500 transition-colors inline-block"
+        {...fieldHook('ctaLabel')}
+      >
         {ctaLabel}
       </a>
     </div>

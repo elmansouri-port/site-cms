@@ -140,6 +140,26 @@ proxy the same prefixes themselves (`apps/web/astro.config.mjs`,
 `apps/cms/vite.config.js`). If you add a prefix the gateway owns, add it there
 too or the two environments will disagree.
 
+**A form is submitted and the visitor sees "we have your details — the
+confirmation may take a few minutes".** That is a 502 with `stored: true`: the
+lead is in MongoDB and the automation refused or timed out. Open Integrations,
+run the endpoint's **Test**, and open the form under Forms and press **Check** —
+the usual cause is a required field the form does not send, and the check names
+it. Nothing is lost; the follow-up is not running.
+
+**A form's automation reports `not-registered`.** The workflow behind that path
+is not active on the automation platform. Nothing in the CMS can fix it, which is
+why the verdict says so rather than reporting a bare 404. Submissions are still
+stored.
+
+**The visual editor's canvas is blank, or clicking a block does nothing.** The
+editor talks to the canvas over `postMessage`, which requires them to be one
+origin. Behind the gateway they are; in development the admin's dev server proxies
+the site for exactly that reason. The preview endpoints return a *path* rather
+than an absolute URL so the frame resolves against whichever origin is serving
+the admin — if you change that to an absolute URL, the bridge goes silent and the
+canvas looks broken while the page inside it renders fine.
+
 **A build baked in the wrong config.** Configuration is read from
 `process.env` at runtime, never from `import.meta.env`, and `**/.env` is in
 `.dockerignore`. If you add a new setting, follow that pattern — otherwise Vite

@@ -17,8 +17,9 @@ import { ARTICLE_SECTIONS } from '@rainbow/core/article';
 import { cn } from '../lib/cn.js';
 import CodeEditor, { inspectCss, inspectHtml } from './CodeEditor.jsx';
 import MediaPicker from './MediaPicker.jsx';
+import { useResource } from '../lib/hooks.js';
 import {
-  Badge, Button, Code, Dialog, DialogBody, DialogContent, DialogDescription, DialogHeader,
+  Badge, Button, Callout, Code, Dialog, DialogBody, DialogContent, DialogDescription, DialogHeader,
   DialogTitle, Empty, Field, Input, Label, Select, Textarea, useConfirm,
 } from './ui/index.js';
 
@@ -345,7 +346,48 @@ export function ContentsPreview({ contents }) {
   );
 }
 
+function ArticleFormField({ field, value, onChange, disabled }) {
+  const { data, loading } = useResource('/forms');
+  const forms = data?.items || [];
+  const chosen = forms.find(f => f.key === value);
+
+  return (
+    <Field label={field.label} hint={field.hint}>
+      {id => (
+        <>
+          <Select id={id} value={value} disabled={disabled} onChange={e => onChange(e.target.value)}>
+            <option value="">Choose a form…</option>
+            {forms.map(f => (
+              <option key={f.key} value={f.key}>{f.name} — {f.fieldCount} fields</option>
+            ))}
+          </Select>
+          {chosen && (
+            <p className="text-muted-foreground mt-1.5 text-[12px]">
+              Sends to <Code>{chosen.target}</Code>. Edited under Forms — changing it there changes
+              it here and everywhere else it appears.
+            </p>
+          )}
+          {!forms.length && !loading && (
+            <Callout className="mt-2">
+              No forms yet. Build one under <strong>Forms</strong> first.
+            </Callout>
+          )}
+        </>
+      )}
+    </Field>
+  );
+}
+
 function SectionField({ field, value, onChange, onPick, disabled }) {
+  /*
+   * A form section points at a saved form rather than defining one. An article
+   * body is rendered to a string, so the form is drawn by the same `renderForm`
+   * a page block uses — see packages/core/src/article.js.
+   */
+  if (field.type === 'form') {
+    return <ArticleFormField field={field} value={value || ''} onChange={onChange} disabled={disabled} />;
+  }
+
   if (field.type === 'media') {
     return (
       <Field label={field.label} hint={field.hint}>

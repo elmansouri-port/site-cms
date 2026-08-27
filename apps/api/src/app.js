@@ -64,7 +64,23 @@ export function createApp() {
   });
 
   app.use('/api/v1/site', siteRouter);
+
+  /*
+   * `/api/v1/forms` is served by two routers, deliberately and in this order.
+   *
+   * The first is lead capture: `POST /api/v1/forms/<type>` is what a visitor's
+   * browser calls, it takes no authentication, and the URL is written into the
+   * authored pages — so it cannot move. The second, inside the admin router
+   * below, is form *management*: listing, editing, checking a form against its
+   * endpoint. Everything it defines is either a bare path or two segments deep,
+   * so nothing it answers can be shadowed by `POST /<one-segment>`.
+   *
+   * The rule that keeps this true: never add a single-segment POST to
+   * routes/admin/forms.js. It would be swallowed here, silently, and the caller
+   * would get a stored lead instead of an error.
+   */
   app.use('/api/v1/forms', formsRouter);
+
   // Outbound integrations, proxied so the automation host stays server-side.
   app.use('/api/v1/hooks', hooksRouter);
   app.use('/api/v1', adminRouter);

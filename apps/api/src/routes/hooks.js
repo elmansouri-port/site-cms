@@ -25,6 +25,7 @@ import { z } from 'zod';
 import { Integration, Lead } from '../models/index.js';
 import { asyncHandler, badRequest, notFoundError } from '../middleware/error.js';
 import { logger } from '../lib/log.js';
+import { sendsBody, withQuery } from '../services/integrationProbe.js';
 
 export const hooksRouter = Router();
 
@@ -145,13 +146,27 @@ hooksRouter.post('/:slug', gateLimiter, asyncHandler(async (req, res) => {
   let upstream = null;
   let failure = '';
 
+  const method = integration.method || 'POST';
+  /*
+   * A GET webhook cannot read a JSON body.
+   *
+   * This used to send one anyway, so the two lookups registered for GET — the
+   * booking calendar's availability and the "find my booking" form — received
+   * nothing at all and answered every visitor with "no reference supplied".
+   * `queryFields` names what belongs in the URL; empty means everything scalar
+   * the submission carries.
+   */
+  const target = sendsBody(method)
+    ? integration.url
+    : withQuery(integration.url, forward, integration.queryFields);
+
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), integration.timeoutMs || 10000);
   try {
-    const res2 = await fetch(integration.url, {
-      method: integration.method || 'POST',
+    const res2 = await fetch(target, {
+      method,
       headers,
-      body: integration.method === 'GET' ? undefined : JSON.stringify(forward),
+      body: sendsBody(method) ? JSON.stringify(forward) : undefined,
       signal: controller.signal,
       redirect: 'error',
     });

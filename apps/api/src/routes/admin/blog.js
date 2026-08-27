@@ -26,7 +26,15 @@ const listQuery = z.object({
   locale: z.string().max(5).optional(),
   status: z.enum(['published', 'draft', 'scheduled']).optional(),
   q: z.string().max(120).optional(),
-  limit: z.coerce.number().int().min(1).max(100).default(50),
+  /*
+   * 500, because the link picker asks for every article at once.
+   *
+   * It was 100, and the picker asked for 200 — so the request was rejected and
+   * the picker's article list was silently empty. The rows exclude the body and
+   * the sections, so a few hundred of them is a small payload; a cap below what
+   * the CMS itself asks for is not a limit, it is a bug.
+   */
+  limit: z.coerce.number().int().min(1).max(500).default(50),
   offset: z.coerce.number().int().min(0).default(0),
 });
 
@@ -70,7 +78,7 @@ const postBody = z.object({
   // The body as an ordered list of sections. Takes precedence over bodyHtml.
   sections: z.array(z.object({
     key: z.string().max(80).optional(),
-    type: z.enum(['heading', 'rich', 'keyPoints', 'image', 'quote', 'callout', 'embed', 'custom']),
+    type: z.enum(['heading', 'rich', 'keyPoints', 'image', 'quote', 'callout', 'embed', 'form', 'custom']),
     data: z.record(z.string(), z.any()).default({}),
     anchorId: z.string().max(80).nullable().optional(),
     inToc: z.boolean().nullable().optional(),

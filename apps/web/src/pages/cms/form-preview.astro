@@ -1,0 +1,130 @@
+---
+/*
+ * /cms/form-preview — a surface that renders a form with the site's own styles.
+ *
+ * The form builder has to show what it is building, and the CMS cannot: the
+ * markup is styled by the site's Tailwind configuration and stylesheet, not by
+ * the admin's design tokens. Injecting it into the admin would show an editor a
+ * form that looks nothing like the one a visitor gets, which is worse than no
+ * preview at all.
+ *
+ * So the same decision the visual editor made applies again: preview inside an
+ * iframe of the real thing. This page loads exactly the head the authored pages
+ * load, and the markup arrives from the CMS over postMessage — which means the
+ * preview shows the *unsaved* draft rather than the last save, and there is no
+ * second rendering path to drift from `renderForm`.
+ *
+ * Two gates, for two different reasons:
+ *   - the preview cookie, because a draft form is not published content;
+ *   - an origin check on every message, because a page that will insert markup
+ *     handed to it must only ever accept it from this origin.
+ */
+export const prerender = false;
+
+import { config } from '../../lib/config.js';
+
+const { url, cookies } = Astro;
+
+if (cookies.get(config.previewCookie)?.value !== config.previewSecret) {
+  return new Response('Preview mode is not on for this browser.', {
+    status: 403,
+    headers: { 'content-type': 'text/plain; charset=utf-8' },
+  });
+}
+
+const locale = url.searchParams.get('locale') || config.defaultLocale;
+
+Astro.response.headers.set('cache-control', 'no-store');
+---
+
+<!DOCTYPE html>
+<html lang={locale}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Form preview</title>
+    <!--
+      The authored pages' head, verbatim: the same Tailwind build and the same
+      theme extension, so the preview cannot differ from the page by a shade of
+      purple or a border radius.
+    -->
+    <script is:inline src="https://cdn.tailwindcss.com"></script>
+    <script is:inline>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: { 50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 300: '#c4b5fd', 400: '#a78bfa', 500: '#5e2d91', 600: '#4a2373', 700: '#3c1c5e' },
+              navy: { 900: '#1e1b4b', 800: '#312e81', 700: '#3730a3' },
+            },
+            fontFamily: { sans: ['Google Sans', 'system-ui', 'sans-serif'] },
+            borderRadius: { btn: '10px' },
+          },
+        },
+      };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body class="bg-white font-sans text-gray-900">
+    <div class="mx-auto max-w-3xl px-6 py-8" id="surface"></div>
+
+    <script is:inline>
+      (function () {
+        'use strict';
+
+        var surface = document.getElementById('surface');
+
+        function send(type, payload) {
+          if (window.parent === window) return;
+          var message = { source: 'cms-form-preview', type: type };
+          for (var k in payload) if (Object.prototype.hasOwnProperty.call(payload, k)) message[k] = payload[k];
+          // The CMS and the site are one origin behind the gateway, and the
+          // admin's dev server proxies the site for the same reason.
+          window.parent.postMessage(message, window.location.origin);
+        }
+
+        /*
+         * The parent sizes the iframe to what was rendered rather than guessing:
+         * a two-field form and a fourteen-field form are very different heights,
+         * and an iframe with its own scrollbar inside a panel is miserable.
+         */
+        function reportHeight() {
+          send('height', { height: Math.ceil(document.body.scrollHeight) });
+        }
+
+        window.addEventListener('message', function (event) {
+          if (event.origin !== window.location.origin) return;
+          var msg = event.data;
+          if (!msg || msg.source !== 'cms-parent') return;
+
+          if (msg.type === 'renderForm') {
+            surface.innerHTML = msg.html || '';
+            requestAnimationFrame(reportHeight);
+          }
+        });
+
+        if (window.ResizeObserver) new ResizeObserver(reportHeight).observe(document.body);
+        window.addEventListener('load', reportHeight);
+
+        /*
+         * Deliberately inert. A preview that could post would create leads and
+         * trigger automations from inside the CMS; the builder says so beside
+         * the button rather than letting somebody find out.
+         */
+        document.addEventListener('submit', function (event) { event.preventDefault(); });
+        document.addEventListener('click', function (event) {
+          var link = event.target.closest && event.target.closest('a[href]');
+          if (link) event.preventDefault();
+        });
+
+        send('ready', {});
+      }());
+    </script>
+  </body>
+</html>

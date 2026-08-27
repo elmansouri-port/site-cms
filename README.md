@@ -200,8 +200,37 @@ unconditionally, because that is precisely the moment it is the only copy left.
 
 ### Forms
 
-A **Form** block captures an enquiry: fields you choose, a consent line, a
-thank-you message or a redirect to a page.
+**Forms** is its own screen, because a form is a thing rather than a property of
+the block that shows it. The demo-request form appears on four product pages; it
+should be one form, changed once — not four block-local copies that drift apart
+until one of them is still asking for a fax number.
+
+The builder is three columns:
+
+| | |
+|---|---|
+| **Fields** | Drag to reorder, click to configure, add from a row of types |
+| **Preview** | The real markup, inside a frame of the site, with the site's own stylesheet — so what you see is not an approximation |
+| **This field / Where it goes** | One panel at a time, folded away when you do not need it |
+
+The distinction the panel exists to make obvious is the one that trips everybody
+up. A field has a **label**, which is what a visitor reads and is different in
+every language, and a **name**, which is what the endpoint receives and has to be
+exactly what the automation expects. Send `Adresse e-mail` to a workflow reading
+`email` and the submission is refused for every visitor.
+
+So the CMS checks. Every automation endpoint on this site answers an unusable
+payload by naming the fields it was missing; the Integrations screen records that
+answer, and **Check** compares your form against it:
+
+```
+Missing 3 required fields
+The endpoint refuses a submission without companySize, country, consent.
+```
+
+Before the form goes on a page, and without submitting anything. When nobody has
+tested that endpoint yet it says *not checked* rather than showing a green tick —
+a check that is confidently wrong is worse than no check.
 
 Where a submission goes is one dropdown:
 
@@ -217,6 +246,68 @@ automation platform stays out of the page source — see **Integrations** below.
 
 The honeypot is not optional and not editable: a field a human never sees and a
 bot always fills, answered with a 202 so the bot learns nothing.
+
+**Where a form can go.** A **Form** block on any page, or a **Form** section
+inside a blog article. Both render through one function, so a form cannot look or
+behave differently depending on where it was placed. A block can still define its
+own fields for a genuine one-off — choosing a saved form folds that away, because
+the two are alternatives and filling in the half that is ignored is a trap.
+
+Deleting a form that four pages show is refused, and the refusal names them. A
+dangling reference renders as an HTML comment naming the missing form: visible to
+whoever opens the preview, invisible to a visitor, and never a silent gap.
+
+What forms deliberately are **not**: the booking calendar, the reschedule wizard
+and the token-confirmation pages. Those are multi-step flows with a slot picker
+and a lookup-then-confirm handshake, not field lists. Pretending a field list
+could express them would produce a builder that half-works on the four hardest
+pages on the site, so they stay as authored pages.
+
+### Clicking a button to change where it goes
+
+On the **Design** tab, click any button or link on the page. A panel opens with
+that one element: where it goes, what it says, and whether it opens in a new tab.
+
+That is the edit people actually make — "that button still points at the old
+pricing page" — and finding `secondaryHref` among eighteen fields of a block
+whose name you have to guess from the layout is a worse experience than editing
+the HTML was.
+
+The panel is honest about three different situations:
+
+| What you clicked | What you get |
+|---|---|
+| A link the block drew from one of its fields | Its destination, its label and a new-tab option |
+| A label whose destination is not yours to choose — the blog list's button goes to the blog | The words, and one line saying why the destination is fixed |
+| A link written inside an authored section's own markup | Its destination, spliced over that one attribute's bytes so the rest of the section stays exactly as it was authored |
+
+That last row is the interesting one. The imported pages are stored as the bytes
+they were written with and a verification tool proves the site still ships those
+bytes, so "let an editor fix a link" cannot mean re-serialising the section: a
+parser would normalise the quoting and rewrite two hundred lines to change nine
+characters. Instead the anchor is found by scanning, the `href` value's byte range
+is replaced, and everything around it is untouched.
+
+**Open in a new tab** always writes `rel="noopener noreferrer"` with it. Somebody
+ticking a checkbox is not choosing to hand the new tab a live reference back to
+the page that opened it.
+
+Clicking a field inside a form does not edit it here. It says which form the
+field belongs to and offers to open it, because that form may be on four pages
+and changing it from one of them without saying so is how a CMS loses trust.
+
+### Panels that fold
+
+The sidebar collapses to its icons, both rails of the visual editor fold, and
+every panel on the form builder has a chevron. Each remembers its own state, so a
+layout you arranged for the job you are doing survives the next navigation and
+the next session.
+
+The canvas is why. At 1440px the three-column editor scales a desktop preview to
+roughly half size, which is unreadable for the one thing a preview is for.
+
+A closed inspector still opens itself when you select a block — a click that
+worked and appeared to do nothing would be worse than no fold at all.
 
 ### Links that follow a rename
 
@@ -435,6 +526,8 @@ JSON-LD validity, social image, thin copy. Every check is one you would act on.
 | The overview: what is broken, what is unpublished, what came in | Every route, with landing pages and drafts marked |
 | ![The visual editor](docs/screenshots/03-page-design.png) | ![History](docs/screenshots/20-page-history.png) |
 | The builder — the canvas is the real page in an iframe | History: the way back out of a mistake |
+| ![The form builder](docs/screenshots/10b-form-builder.png) | ![The link inspector](docs/screenshots/06-link-inspector.png) |
+| The form builder: fields, the real markup with the site's own styles, and where submissions go | Click a button on the page and change where it points |
 | ![Header and footer](docs/screenshots/06-chrome.png) | ![Dark](docs/screenshots/01-overview-dark.png) |
 | One header and one footer, at a real device width | And the same thing in dark |
 
@@ -598,6 +691,46 @@ Other properties worth knowing:
 - `content-source/integrations.json` seeds the mapping and lets the verification
   tools reproduce the substitution without holding any credential.
 
+### What each endpoint actually wants
+
+**Test** on the Integrations screen does not send a plausible submission — it
+sends a deliberately invalid one, and that is what makes it safe. Every one of
+these endpoints refuses an unusable payload by naming what was wrong, so a wrong
+method comes back as *did you mean to make a GET request*, an inactive workflow as
+*the workflow must be active*, and an empty body as the list of fields it
+required. No lead is created and no follow-up is triggered.
+
+The answer is stored on the integration, which is what lets the form builder say
+"this form is missing `companySize`" before the form ever goes on a page. Run
+against the live platform, this is what came back:
+
+| Endpoint | Method | Required fields | Verdict |
+|---|---|---|---|
+| `livre-blanc-lead` | POST | `firstName` `lastName` `email` `company` | working |
+| `demo-request-lead` | POST | `firstName` `lastName` `email` `company` `companySize` `country` `consent` | working |
+| `booking` | POST | `email` `first_name` `last_name` `datetime` | working |
+| `booking-change` | POST | `ref` `token` | working |
+| `booking-confirm` | POST | — | working |
+| `booking-cancel` | POST | — | working |
+| `booking-lookup` | **GET**, as a query string | `ref` `token` | working |
+| `availability` | **GET** | — | working |
+| `unsubscribe` | POST | — | **the workflow is not active** |
+| `unsubscribe-check` | POST | — | **the workflow is not active** |
+
+Two of those methods were wrong in the seed data and are fixed: `availability`
+and `booking-lookup` are registered as GET, and the proxy was sending them a
+POST with a JSON body. A GET integration now carries a `queryFields` list and the
+proxy builds the query string instead — see `routes/hooks.js`.
+
+The last two rows are not something the CMS can fix. The workflows behind those
+paths are not active on the automation platform, so the CMS reports exactly that
+rather than a bare 404: the fix is on the other side, and saying so is more useful
+than a status code.
+
+Note the naming: `firstName` in one workflow, `first_name` in another. That is
+why a form field's wire name is a field of its own rather than derived from its
+label — the contract is not negotiable and the wording on the page is.
+
 ## Caching
 
 Reads go through Redis, keyed by a site revision number. Publishing anything
@@ -652,8 +785,9 @@ to run without `--confirm`:
 
 | Command | What it proves |
 |---|---|
-| `npm run verify:editor -- [url] --confirm` | The builder, localized URLs, A/B testing, the header and footer, the integration proxy and article sections — 158 checks |
+| `npm run verify:editor -- [url] --confirm` | The builder, localized URLs, A/B testing, the header and footer, the integration proxy and article sections — 160 checks |
 | `npm run verify:ui -- [url] --confirm` | Every editing flow, driven by a real browser: landing pages, forms, the blog on a page, link references, restore, undo, trash — 43 checks |
+| `npm run verify:forms -- [url]` | The form builder and the link inspector, in a real browser: that the preview is styled by the site rather than the admin, that a clashing field name is refused before a save, that clicking a button on the page repoints it, that a folded panel stays folded — 35 checks |
 
 Content:
 
@@ -673,6 +807,7 @@ tools take both:
 ```bash
 npm run verify:live   -- http://localhost:3000
 npm run verify:ui     -- http://localhost:5173 --confirm
+npm run verify:forms  -- http://localhost:5173
 npm run verify:editor -- http://localhost:4000 --site http://localhost:3000 --confirm
 ```
 

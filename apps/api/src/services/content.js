@@ -13,6 +13,7 @@ import { cached } from '../lib/redis.js';
 import { LOCALES } from '@rainbow/core/locales';
 import { routeFor } from '@rainbow/core/seo';
 import { leadingTrivia } from '@rainbow/core/compose';
+import { attachForms, formIndex } from './forms.js';
 
 const CACHE_TTL = 300;
 
@@ -174,10 +175,16 @@ export async function getPagePayload(route, locale, { preview = false, variants 
     if (!page) return null;
     if (!preview && page.locales?.length && !page.locales.includes(locale)) return null;
     const served = await withPageVariant(page, variants, preview);
-    return shapePage(served.page, locale, {
+    const shaped = shapePage(served.page, locale, {
       requestedRoute: route,
       variantKey: served.variantKey,
     });
+    // A block stores which form to show, not the form. Resolving here rather
+    // than in the frontend means the block component receives plain data and
+    // the article renderer, which cannot mount a component at all, receives the
+    // same thing. See services/forms.js.
+    shaped.sections = attachForms(shaped.sections, await formIndex());
+    return shaped;
   };
 
   // The assigned arm is part of the identity of the response, so it is part of
@@ -234,7 +241,10 @@ export async function getPageByKey(key, locale, { preview = false } = {}) {
   const producer = async () => {
     const filter = preview ? { key } : { key, status: 'published' };
     const page = await Page.findOne(filter).lean();
-    return page ? shapePage(page, locale) : null;
+    if (!page) return null;
+    const shaped = shapePage(page, locale);
+    shaped.sections = attachForms(shaped.sections, await formIndex());
+    return shaped;
   };
   // The article template is fetched by key on every database-backed article,
   // so it earns the same cache the route lookup gets.

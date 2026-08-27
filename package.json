@@ -36,6 +36,7 @@
     "verify:editor": "node tools/verify-editor.mjs",
 
     "verify:ui": "node tools/verify-ui.mjs",
+    "verify:forms": "node tools/verify-forms.mjs",
     "ui:shots": "node tools/ui-shots.mjs",
 
     "check:dev": "node tools/verify-live.mjs http://localhost:3000 && node tools/verify-chrome.mjs http://localhost:3000 && node tools/verify-ui.mjs http://localhost:5173 --confirm"

@@ -22,6 +22,7 @@ const ACTIONS = {
   'page.section.delete': 'deleted a block',
   'page.section.duplicate': 'duplicated a block',
   'page.section.reorder': 'reordered blocks',
+  'page.section.link': 'changed a link',
   'page.section.convert': 'converted a block',
   'page.variant.create': 'created a page variant',
 

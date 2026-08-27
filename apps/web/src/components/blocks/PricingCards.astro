@@ -6,7 +6,19 @@
  * client-side switch, which shows one and hides the other. Nothing here needs
  * to know which period is active.
  */
-const { data = {} } = Astro.props;
+import { linkAttrs } from '../../lib/links.js';
+
+const { data = {}, editMode = false } = Astro.props;
+/*
+ * Names the field a link came from, for the visual editor only.
+ *
+ * A click on the canvas can find the block it landed in, but not which of the
+ * block's fields drew that button — the href has already been resolved from a
+ * `page:` reference and rewritten for the locale, so it cannot be matched back.
+ * Emitted in edit mode and never in a published page.
+ */
+const fieldHook = (name) => (editMode ? { 'data-cms-field': name } : {});
+
 const {
   title = '',
   subtitle = '',
@@ -25,14 +37,14 @@ const {
   {showToggle && (
     <div class="flex justify-center mt-8">
       <div id="billing-toggle" class="inline-flex items-center gap-1 p-1 rounded-full bg-gray-100">
-        <button type="button" data-period="monthly" class="px-4 py-2 rounded-full text-sm font-medium bg-white shadow-sm">{monthlyLabel}</button>
-        <button type="button" data-period="yearly" class="px-4 py-2 rounded-full text-sm font-medium text-gray-600">{yearlyLabel}</button>
+        <button type="button" data-period="monthly" class="px-4 py-2 rounded-full text-sm font-medium bg-white shadow-sm" {...fieldHook('monthlyLabel')}>{monthlyLabel}</button>
+        <button type="button" data-period="yearly" class="px-4 py-2 rounded-full text-sm font-medium text-gray-600" {...fieldHook('yearlyLabel')}>{yearlyLabel}</button>
       </div>
     </div>
   )}
 
   <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-    {plans.map((plan) => (
+    {plans.map((plan, i) => (
       <div class={`pricing-card p-8 rounded-2xl border bg-white flex flex-col ${plan.highlighted ? 'border-brand-500 shadow-xl' : 'border-gray-200 shadow-sm'}`}>
         {plan.badge && <span class="self-start mb-3 px-3 py-1 rounded-full bg-brand-50 text-brand-500 text-xs font-semibold uppercase tracking-wide">{plan.badge}</span>}
         <h3 class="text-xl font-semibold text-gray-900">{plan.name}</h3>
@@ -55,7 +67,11 @@ const {
           </ul>
         )}
         {plan.ctaLabel && (
-          <a href={plan.ctaHref} class={`mt-8 text-center px-6 py-3 rounded-btn font-medium transition-colors ${plan.highlighted ? 'bg-brand-500 text-white hover:bg-brand-600' : 'border border-gray-300 text-gray-700 hover:border-brand-500 hover:text-brand-500'}`}>
+          <a
+            {...linkAttrs(plan.ctaHref, plan.ctaNewTab)}
+            class={`mt-8 text-center px-6 py-3 rounded-btn font-medium transition-colors ${plan.highlighted ? 'bg-brand-500 text-white hover:bg-brand-600' : 'border border-gray-300 text-gray-700 hover:border-brand-500 hover:text-brand-500'}`}
+            {...fieldHook(`plans.${i}.ctaHref`)}
+          >
             {plan.ctaLabel}
           </a>
         )}

@@ -6,7 +6,9 @@
  * the answers are SEO-critical; <details> gives the open/close behaviour with
  * no JavaScript at all.
  */
-const { data = {} } = Astro.props;
+const { data = {}, editMode = false } = Astro.props;
+/* Names the field a click landed on, for the visual editor only. */
+const fieldHook = (name) => (editMode ? { 'data-cms-field': name } : {});
 const { title = '', subtitle = '', items = [] } = data;
 ---
 
@@ -15,9 +17,9 @@ const { title = '', subtitle = '', items = [] } = data;
   {subtitle && <p class="mt-4 text-gray-600 text-center">{subtitle}</p>}
 
   <div class="mt-10 divide-y divide-gray-200 border-t border-gray-200">
-    {items.map((item) => (
+    {items.map((item, i) => (
       <details class="group py-5">
-        <summary class="flex items-center justify-between cursor-pointer list-none text-left">
+        <summary class="flex items-center justify-between cursor-pointer list-none text-left" {...fieldHook(`items.${i}.question`)}>
           <span class="text-lg font-medium text-gray-900">{item.question}</span>
           <svg class="w-5 h-5 shrink-0 text-brand-500 transition-transform group-open:rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />

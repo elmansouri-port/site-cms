@@ -18,19 +18,21 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Copy, Eye, EyeOff, GripVertical, LayoutPanelTop, Loader2, Plus, RefreshCw, Trash2,
+  Copy, Eye, EyeOff, GripVertical, LayoutPanelTop, Loader2, PanelLeftClose, PanelLeftOpen,
+  PanelRightClose, PanelRightOpen, Plus, RefreshCw, Trash2,
 } from 'lucide-react';
 import { api } from '../lib/api.js';
 import { useToast } from '../lib/toast.jsx';
 import { cn } from '../lib/cn.js';
 import BlockInspector from './BlockInspector.jsx';
+import ElementInspector from './ElementInspector.jsx';
 import BlockPalette from './BlockPalette.jsx';
 import ScaledFrame from './ScaledFrame.jsx';
 import { anchorsOf } from './LinkPicker.jsx';
 import { blockLabel } from '../lib/blockLabel.js';
 import {
   Badge, Button, Callout, CheckboxField, Empty, Segmented, Spinner, Tooltip,
-  useConfirm,
+  useCollapsed, useConfirm,
 } from './ui/index.js';
 
 /*
@@ -53,6 +55,13 @@ export default function VisualEditor({ page, locales, canEdit, onChanged }) {
   const [locale, setLocale] = useState(locales[0]);
   const [device, setDevice] = useState('desktop');
   const [selected, setSelected] = useState(null);
+  /*
+   * The one link or button that was clicked, when a click landed on one.
+   * Selecting a block does not set this and clearing it returns to the block
+   * inspector, which is what makes "click the button, then click the block"
+   * behave the way it reads.
+   */
+  const [element, setElement] = useState(null);
   const [hovered, setHovered] = useState(null);
   const [canvas, setCanvas] = useState({ ready: false, blocks: [], scrollY: 0 });
   const [adding, setAdding] = useState(null);
@@ -65,6 +74,14 @@ export default function VisualEditor({ page, locales, canEdit, onChanged }) {
   const [chromeHint, setChromeHint] = useState(null);
   const [scale, setScale] = useState(1);
   const [offset, setOffset] = useState(0);
+  /*
+   * Both rails fold, independently and persistently. The canvas is the column
+   * that matters, and at 1440px the three-column layout scales a desktop
+   * preview to roughly half size — which is unreadable for the one job the
+   * preview exists to do.
+   */
+  const [listOpen, toggleList] = useCollapsed('editor.blocks', true);
+  const [inspectorOpen, toggleInspector, setInspectorOpen] = useCollapsed('editor.inspector', true);
 
   /*
    * The body, and only the body.
@@ -143,6 +160,13 @@ export default function VisualEditor({ page, locales, canEdit, onChanged }) {
       } else if (msg.type === 'select') {
         setSelected(msg.key);
         if (msg.key) setChromeHint(null);
+        // A click on the background of a block is a block selection, so the
+        // element panel from a previous click has to go.
+        setElement(null);
+      } else if (msg.type === 'elementClicked') {
+        // Arrives just after `select`, which is why it is set second and not
+        // cleared by it.
+        setElement(msg);
       } else if (msg.type === 'hover') {
         setHovered(msg.key);
       } else if (msg.type === 'stringChange') {
@@ -165,6 +189,18 @@ export default function VisualEditor({ page, locales, canEdit, onChanged }) {
     return () => window.removeEventListener('message', onMessage);
   }, [post, inlineOn, showStrings, canEdit, saveString, toast]);
 
+  /*
+   * Clicking a block on the page has to show you the block. A closed inspector
+   * that stays closed makes the canvas feel unresponsive — the click worked and
+   * nothing happened — so a selection opens it.
+   */
+  useEffect(() => {
+    if (selected && !inspectorOpen) setInspectorOpen(true);
+    // Only on a new selection: reopening on every render would make the fold
+    // impossible to keep closed while a block is selected.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected]);
+
   useEffect(() => { post('inlineEditing', { enabled: inlineOn }); }, [inlineOn, post]);
   useEffect(() => { post('highlightStrings', { enabled: showStrings }); }, [showStrings, post]);
 
@@ -180,12 +216,14 @@ export default function VisualEditor({ page, locales, canEdit, onChanged }) {
     // The preview URL carries the shared secret once and comes back as an
     // http-only cookie, so the secret never sits in the admin's own state.
     api.get(`/pages/${page.key}/preview-url?locale=${locale}&edit=1`)
-      .then(({ url }) => { if (alive) setSrc(url); })
+      // The path, not the absolute URL: the canvas and this component have to be
+      // one origin to talk to each other. See the endpoint for why both exist.
+      .then(({ path, url }) => { if (alive) setSrc(path || url); })
       .catch((err) => { if (alive) setSrcError(err); });
     return () => { alive = false; };
   }, [page.key, locale, frameKey]);
 
-  const refresh = useCallback(() => setFrameKey(k => k + 1), []);
+  const refresh = useCallback(() => { setElement(null); setFrameKey(k => k + 1); }, []);
 
   /* ── Block operations ─────────────────────────────────────────────────── */
 
@@ -312,21 +350,65 @@ export default function VisualEditor({ page, locales, canEdit, onChanged }) {
         </Tooltip>
       </div>
 
-      <div className="grid min-h-[70vh] grid-cols-1 xl:grid-cols-[260px_minmax(0,1fr)_340px]">
+      {/*
+        Four templates for two folds. Written out rather than composed, because
+        Tailwind only ships the arbitrary values it can see in the source — a
+        computed class string would produce a grid with no columns at all.
+      */}
+      <div
+        className={cn(
+          'grid min-h-[70vh] grid-cols-1',
+          listOpen && inspectorOpen && 'xl:grid-cols-[260px_minmax(0,1fr)_340px]',
+          listOpen && !inspectorOpen && 'xl:grid-cols-[260px_minmax(0,1fr)_44px]',
+          !listOpen && inspectorOpen && 'xl:grid-cols-[44px_minmax(0,1fr)_340px]',
+          !listOpen && !inspectorOpen && 'xl:grid-cols-[44px_minmax(0,1fr)_44px]',
+        )}
+      >
         {/* ── Block list ────────────────────────────────────────────────── */}
         <aside className="flex max-h-[75vh] flex-col border-b xl:border-r xl:border-b-0">
-          <div className="flex items-center gap-2 border-b px-3 py-2">
-            <span className="text-muted-foreground text-[11px] font-semibold tracking-wider uppercase">
-              Blocks
-            </span>
-            {canEdit && (
-              <Button size="sm" className="ml-auto" onClick={() => setAdding({ afterKey: null })}>
-                <Plus /> Add
+          <div className={cn('flex items-center gap-2 border-b py-2', listOpen ? 'px-3' : 'px-1.5')}>
+            <Tooltip content={listOpen ? 'Hide the block list' : 'Show the block list'}>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={toggleList}
+                aria-label={listOpen ? 'Hide the block list' : 'Show the block list'}
+                aria-expanded={listOpen}
+              >
+                {listOpen ? <PanelLeftClose /> : <PanelLeftOpen />}
               </Button>
+            </Tooltip>
+            {listOpen && (
+              <>
+                <span className="text-muted-foreground text-[11px] font-semibold tracking-wider uppercase">
+                  Blocks
+                </span>
+                {canEdit && (
+                  <Button size="sm" className="ml-auto" onClick={() => setAdding({ afterKey: null })}>
+                    <Plus /> Add
+                  </Button>
+                )}
+              </>
             )}
           </div>
 
-          <div className="min-h-0 grow overflow-y-auto p-2">
+          {/*
+            Collapsed, the count is the one thing worth keeping: it tells you
+            the rail is not empty, which an unlabelled sliver does not.
+          */}
+          {!listOpen && (
+            <button
+              type="button"
+              onClick={toggleList}
+              className="text-muted-foreground hover:text-foreground hidden grow flex-col items-center gap-2 py-3 text-[11px] xl:flex"
+              title="Show the block list"
+            >
+              <span className="bg-muted rounded px-1 py-0.5 tabular-nums">{sections.length}</span>
+              <span className="[writing-mode:vertical-rl] tracking-wider uppercase">Blocks</span>
+            </button>
+          )}
+
+          <div className={cn('min-h-0 grow overflow-y-auto p-2', !listOpen && 'hidden xl:hidden')}>
             {sections.map(block => (
               <div key={block.key}>
                 <div
@@ -354,7 +436,11 @@ export default function VisualEditor({ page, locales, canEdit, onChanged }) {
                   <button
                     type="button"
                     className="min-w-0 grow text-left"
-                    onClick={() => { setSelected(block.key); post('select', { key: block.key, scroll: true }); }}
+                    onClick={() => {
+                      setSelected(block.key);
+                      setElement(null);
+                      post('select', { key: block.key, scroll: true });
+                    }}
                   >
                     <span className="block truncate text-[12.5px] font-medium">
                       {blockLabel(block)}
@@ -446,6 +532,17 @@ export default function VisualEditor({ page, locales, canEdit, onChanged }) {
               onScale={setScale}
               onOffset={setOffset}
             >
+              {element?.rect && (
+                <div
+                  className="border-primary bg-primary/5 pointer-events-none absolute rounded-sm border-2 border-dashed"
+                  style={{
+                    top: element.rect.top * scale,
+                    left: offset + element.rect.left * scale,
+                    width: element.rect.width * scale,
+                    height: element.rect.height * scale,
+                  }}
+                />
+              )}
               {geometry && (
                 <div
                   className="border-primary pointer-events-none absolute rounded-sm border-2"
@@ -469,7 +566,61 @@ export default function VisualEditor({ page, locales, canEdit, onChanged }) {
 
         {/* ── Inspector ─────────────────────────────────────────────────── */}
         <aside className="max-h-[75vh] overflow-hidden xl:border-l">
-          {selectedBlock ? (
+          <div className="flex items-center justify-end border-b px-1.5 py-2 xl:justify-start">
+            <Tooltip content={inspectorOpen ? 'Hide this panel' : 'Show the panel'}>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={toggleInspector}
+                aria-label={inspectorOpen ? 'Hide the inspector' : 'Show the inspector'}
+                aria-expanded={inspectorOpen}
+              >
+                {inspectorOpen ? <PanelRightClose /> : <PanelRightOpen />}
+              </Button>
+            </Tooltip>
+            {inspectorOpen && selectedBlock && (
+              <span className="text-muted-foreground ml-2 truncate text-[11px] font-semibold tracking-wider uppercase">
+                {element ? (element.formKey ? 'Form' : 'Link') : 'Block'}
+              </span>
+            )}
+          </div>
+
+          {!inspectorOpen && (
+            <button
+              type="button"
+              onClick={toggleInspector}
+              className="text-muted-foreground hover:text-foreground hidden w-full flex-col items-center gap-2 py-3 text-[11px] xl:flex"
+              title="Show the panel"
+            >
+              <span className="[writing-mode:vertical-rl] tracking-wider uppercase">
+                {selectedBlock ? blockLabel(selectedBlock).slice(0, 18) : 'Inspector'}
+              </span>
+            </button>
+          )}
+
+          {inspectorOpen && (selectedBlock && element ? (
+            <ElementInspector
+              pageKey={page.key}
+              section={selectedBlock}
+              element={element}
+              canEdit={canEdit}
+              anchors={anchors}
+              onSaved={async () => {
+                await onChanged();
+                /*
+                 * The panel stays open — saving a link and losing the panel you
+                 * saved it from makes a second change a second hunt. Only the
+                 * outline goes: the canvas is about to re-render and the
+                 * rectangle measured before it would be drawn in the wrong
+                 * place if the label changed length.
+                 */
+                setElement(e => (e ? { ...e, rect: null } : e));
+                setFrameKey(k => k + 1);
+              }}
+              onClose={() => setElement(null)}
+              onOpenBlock={() => setElement(null)}
+            />
+          ) : selectedBlock ? (
             <BlockInspector
               pageKey={page.key}
               sectionKey={selectedBlock.key}
@@ -505,6 +656,7 @@ export default function VisualEditor({ page, locales, canEdit, onChanged }) {
                 Click a block on the page — or in the list — to edit it.
               </p>
               <ul className="text-muted-foreground grid gap-1.5 text-[12.5px] leading-snug">
+                <li><strong className="text-foreground">Click a button or link</strong> to change where it points.</li>
                 <li><strong className="text-foreground">Double-click</strong> any text on the page to rewrite it in place.</li>
                 <li><strong className="text-foreground">Drag</strong> a block in the list to move it.</li>
                 <li>The <strong className="text-foreground">+</strong> between two blocks inserts exactly there.</li>
@@ -514,7 +666,7 @@ export default function VisualEditor({ page, locales, canEdit, onChanged }) {
                 language; structure and styling are shared.
               </Callout>
             </div>
-          )}
+          ))}
         </aside>
       </div>
 

@@ -21,6 +21,8 @@ import Users from './pages/Users.jsx';
 import Partners from './pages/Partners.jsx';
 import ChromeEditor from './pages/ChromeEditor.jsx';
 import Integrations from './pages/Integrations.jsx';
+import Forms from './pages/Forms.jsx';
+import FormEditor from './pages/FormEditor.jsx';
 import AuditLog from './pages/AuditLog.jsx';
 
 export default function App() {
@@ -49,6 +51,8 @@ export default function App() {
           <Route path="/navigation" element={<NavigationEditor />} />
           <Route path="/chrome" element={<ChromeEditor />} />
           <Route path="/integrations" element={<Integrations />} />
+          <Route path="/forms" element={<Forms />} />
+          <Route path="/forms/:key" element={<FormEditor />} />
           <Route path="/leads" element={<Leads />} />
           <Route path="/partners" element={<Partners />} />
           <Route path="/experiments" element={<Experiments />} />

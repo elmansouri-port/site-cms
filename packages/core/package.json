@@ -14,6 +14,8 @@
     "./endpoints": "./src/endpoints.js",
     "./assets": "./src/assets.js",
     "./links": "./src/links.js",
+    "./form": "./src/form.js",
+    "./anchors": "./src/anchors.js",
     "./article": "./src/article.js",
     "./compose": "./src/compose.js",
     "./ingest": "./src/ingest.js",

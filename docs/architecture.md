@@ -127,9 +127,14 @@ iframe src ───────────────────────
                                        + /js/cms-editor.js
        ◀── layout: block rectangles ── reports geometry on scroll/resize/load
        ◀── select: block clicked ───── click anywhere in a block
+       ◀── elementClicked: what it is ─ click a link, button or form control
        ◀── stringChange: key, value ── double-click text, type, blur
        ─── select / editString ──────▶ scroll to and focus a block or string
 ```
+
+Both sides ignore message types they do not recognise, which is what lets the
+protocol grow: `elementClicked` was added to the canvas script before the parent
+could handle it, and neither half broke.
 
 Consequences worth stating:
 
@@ -146,6 +151,86 @@ Because the canvas is the live page, editing an imported section's *copy* is
 safe — the string catalogue is the seam it always was — while editing its
 *structure* is not, and is therefore a deliberate conversion (below) rather than
 a textarea.
+
+## Clicking an element, not a block
+
+A click on the canvas answers two questions, and the second one is the useful
+one. *Which block* is `data-cms-block` on the outer tag, which the canvas has
+always reported. *Which field drew this button* is harder: by the time the
+browser sees it, the `href` has been resolved from a `page:` reference and
+rewritten for the locale, so it cannot be matched back to the stored value.
+
+So the blocks annotate it. In edit mode only:
+
+```astro
+const fieldHook = (name) => (editMode ? { 'data-cms-field': name } : {});
+…
+<a {...linkAttrs(primaryHref, data.primaryNewTab)} {...fieldHook('primaryHref')}>
+```
+
+`describeElement` in `cms-editor.js` reports the field name, the element's text,
+its rectangle, the form it belongs to if any, and — for markup the CMS did not
+generate — its index among the block's anchors. That index is the fallback
+identity: inside an authored section, "the third link in this block" is the only
+stable handle there is, and it means the same thing on both sides because the
+browser and the server walk the same markup in the same order.
+
+Three cases, three different backends:
+
+| The element came from | Edited by |
+|---|---|
+| A component block's field | `PATCH /pages/:key/sections/:key` with the block's `data` |
+| A label-only field | The same, but the panel says why the destination is fixed |
+| An authored section's own markup | `PATCH /pages/:key/sections/:key/anchors/:index` |
+
+That last endpoint is why `packages/core/src/anchors.js` exists. The authored
+pages are stored as the bytes they were written with, and `verify-live.mjs`
+proves the site still ships those bytes — so changing a link cannot mean
+re-serialising the section. `anchorsIn` scans for anchors quote-aware (a `>`
+inside an attribute value does not end a tag), takes the byte range of the
+`href` *value*, and splices. The quoting style, the whitespace and the two
+hundred lines around it are untouched, so a section under the fidelity guarantee
+stays under it.
+
+`setAnchorTarget` writes `rel="noopener noreferrer"` alongside `target="_blank"`,
+never separately. The same pairing is in `apps/web/src/lib/links.js` for the
+component blocks, for the same reason: `rel` is the half that gets forgotten, and
+forgetting it is a real hazard rather than a cosmetic slip.
+
+## Forms
+
+A form is its own collection, not a property of the block that shows it — see
+`docs/content-model.md`. Three things follow from that, and all three are the
+point:
+
+**One renderer.** `packages/core/src/form.js` produces the markup, and it is
+called from four places: the `FormBlock` Astro component, the `form` article
+section in `core/article.js`, the CMS's preview endpoint, and nothing else. The
+article path is why this lives in core rather than in the web app — an article
+body is an HTML *string* spliced into one page block, so a form inside one can
+never be an Astro component. Without a string renderer, "a form in an article"
+would have been a second implementation.
+
+**Resolution happens server-side.** A block stores `formKey`; `services/forms.js`
+resolves it into `data.form` as the page payload is built, so the block component
+receives plain data and the string renderer receives the same object. The forms
+are cached as one list under the site revision, which is why saving a form calls
+`publishChanged` — the pages showing it have to retire with it.
+
+**The endpoint's contract is recorded, not guessed.** `services/integrationProbe.js`
+sends a deliberately invalid payload — that is what makes it safe — and reads the
+refusal, which names the fields the workflow required. Stored on the integration
+as `contract`. `formContractGaps` compares a form against it, so the builder can
+say "this form is missing `companySize`" without submitting anything. When no
+probe has run the answer is *not checked*, which is a different answer from *fine*.
+
+```
+Form.target         'lead:demo'  → stored under Leads, filed as a demo request
+                    'hook:x'     → stored, then forwarded to integration x
+```
+
+Stored either way, before any forwarding. A misconfigured automation costs a
+retry rather than a fortnight of lost enquiries.
 
 ## Site chrome
 

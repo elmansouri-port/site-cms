@@ -191,7 +191,7 @@ it verbatim.
 ```js
 {
   key, type: 'heading' | 'rich' | 'keyPoints' | 'image' | 'quote'
-            | 'callout' | 'embed' | 'custom',
+            | 'callout' | 'embed' | 'form' | 'custom',
   data: { ... },      // the fields that type asks for
   anchorId,           // the #link; derived from the heading when empty
   inToc,              // null follows the type's default
@@ -215,6 +215,59 @@ Links carry `column` (the resources menu uses two) and `variant`
 (`item`, `showcase`, `cta`), which is how one data shape covers the three
 different menu layouts.
 
+### `forms`
+
+A form, once, referenced by everything that shows it.
+
+```js
+{
+  key: 'demande-de-demo',        // identity — every block points at this
+  name: 'Demo request',          // yours; visitors never see it
+  target: 'hook:demo-request-lead',
+  fields: [{
+    key: 'firstName',            // this form's own bookkeeping
+    name: 'firstName',           // what the ENDPOINT receives
+    label: { fr: 'Prénom', en: 'First name' },
+    placeholder: {…}, hint: {…},
+    type: 'text',                // …email tel textarea select checkbox number url date hidden
+    options: [{ value: 'smb', label: { fr: 'PME' } }],
+    required: true,
+    submit: true,                // false for a consent tick: required, not forwarded
+    width: 'auto',               // or 'full' — spans both columns
+    autocomplete: 'given-name',
+    value: '',                   // a hidden field's fixed value
+    order: 0,
+  }],
+  consent: { fr: '…<a href="page:politique">…</a>' },   // HTML, so it can link
+  submitLabel: {…}, sendingLabel: {…},
+  success: { title: {…}, message: {…}, redirect: 'page:merci' },
+  layout: { columns: 2, align: 'left' },
+}
+```
+
+Two decisions worth the words:
+
+**`name` is separate from `label`.** The label is copy and differs per language;
+the name is a wire contract with another system. The site's original forms use
+three naming conventions between them (`firstName` in the whitepaper form,
+`first_name` in the booking one, `emailAddress` in the Eloqua one), so a builder
+that derived the wire name from the label could not express what is already in
+production.
+
+**Copy is per-locale maps, not catalogue keys.** The same choice the navigation
+editor made, for the same reason: a form is a self-contained thing somebody builds
+in one sitting, and sending them to another screen to name a field would make it a
+two-screen job.
+
+A select's `options[].value` is what gets posted and never varies by language —
+a translated form that posted its visible text would send `Grande entreprise` to a
+workflow expecting `enterprise`, and a different string again in German.
+
+Referenced from `pages.sections[].data.formKey` and from a blog article's
+`sections[].data.formKey`. `services/forms.js` resolves the key into `data.form`
+when the payload is built; a key that no longer resolves renders as an HTML
+comment naming it rather than as a blank space.
+
 ### Others
 
 | Collection | Holds |
@@ -222,6 +275,7 @@ different menu layouts.
 | `settings` | One document: site identity, languages, the blog's segment per locale, default metadata, analytics. Site-wide code lives in `chromes.addIns`, not here |
 | `media` | Named image assets: `slug` is the reference pages point at, `aliases` the ones they used to, `history` the files replaced. See below |
 | `partners` | The 1 130-entry directory behind the locator map |
+| `forms` | The forms an editor built: fields, wording per language, and where submissions go. See above |
 | `leads` | Form submissions, stored before they are forwarded anywhere |
 | `redirects` | Old URL → new URL, applied in the frontend middleware |
 | `experiments` | A/B tests. `scope: 'block'` varies one section; `scope: 'page'` serves a whole alternative page at the control's URL |

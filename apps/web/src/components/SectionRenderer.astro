@@ -49,6 +49,14 @@ if (!Component) {
 
 {Component && (
   <BlockWrapper layout={block.layout} anchorId={block.anchorId} block={block} editMode={editMode}>
-    <Component data={block.data || {}} locale={locale} context={context} block={block} />
+    {/*
+      `editMode` is threaded into the block, not only into the wrapper.
+
+      A block that renders a link from one of its fields has to be able to say
+      which field, so a click on the canvas can be mapped back to it — and that
+      attribute must never appear in a published page. Without this the wrapper
+      knew it was a preview and the block did not.
+    */}
+    <Component data={block.data || {}} locale={locale} context={context} block={block} editMode={editMode} />
   </BlockWrapper>
 )}

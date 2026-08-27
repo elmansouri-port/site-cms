@@ -17,7 +17,7 @@
  * Everything an entity needs to take part is declared in ENTITIES below: how to
  * load the current document, how to write one back, and how to describe it.
  */
-import { BlogPost, Chrome, Navigation, Page, Settings, Version } from '../models/index.js';
+import { BlogPost, Chrome, Form, Navigation, Page, Settings, Version } from '../models/index.js';
 import { logger } from '../lib/log.js';
 
 /** How close two automatic snapshots of the same item can be before the second is skipped. */
@@ -92,6 +92,20 @@ const ENTITIES = {
       title: doc.label || doc.key,
       items: (doc.items || []).length,
       megamenus: (doc.items || []).filter(i => i.megamenu?.enabled).length,
+    }),
+  },
+
+  form: {
+    label: 'form',
+    load: (id) => Form.findOne({ key: id }),
+    // Upserts for the same reason a page does: restoring a deleted form has to
+    // bring it back, not fail because the row is gone.
+    write: (id, snap) => Form.findOneAndUpdate({ key: id }, { $set: snap }, { upsert: true }),
+    digest: (doc) => ({
+      title: doc.name || doc.key,
+      fields: (doc.fields || []).length,
+      target: doc.target,
+      required: (doc.fields || []).filter(f => f.required).length,
     }),
   },
 

@@ -110,6 +110,15 @@ jobs:
         env:
           ADMIN_PASSWORD: CiPassword!2026
 
+      # The form builder and the click-a-button-to-repoint-it panel. Both are
+      # interface behaviour that the API checks above cannot see: that the
+      # preview is styled by the site rather than the admin, that a folded panel
+      # stays folded, that a clashing field name is refused before a save.
+      - name: The form builder and the link inspector
+        run: node tools/verify-forms.mjs http://localhost:8080
+        env:
+          ADMIN_PASSWORD: CiPassword!2026
+
       - name: One header and one footer, in every language
         run: node tools/verify-chrome.mjs http://localhost:8080
 

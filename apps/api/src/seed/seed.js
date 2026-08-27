@@ -22,7 +22,7 @@ import { bumpRevision, closeRedis } from '../lib/redis.js';
 import { logger } from '../lib/log.js';
 import { ensureBootstrapUser, migrateGlobalSnippets } from './bootstrap.js';
 import {
-  Page, ContentString, Settings, Navigation, BlogPost, Media, Partner, Chrome, Integration,
+  Page, ContentString, Settings, Navigation, BlogPost, Media, Partner, Chrome, Integration, Form,
 } from '../models/index.js';
 import { ingestPage, ingestStrings } from '@rainbow/core/ingest';
 import { slugify } from '@rainbow/core/html';
@@ -71,6 +71,7 @@ async function main() {
   await seedChrome();
   await migrateGlobalSnippets();
   await seedIntegrations();
+  await seedForms();
   await seedBlog(registry, catalogues);
   await seedMedia();
   await seedPartners();
@@ -315,6 +316,45 @@ async function seedChrome() {
  * platform directly, exactly as they did before. Existing records are left
  * alone — the CMS owns them once they are here.
  */
+/**
+ * The forms the site needs, with the field names its endpoints demand.
+ *
+ * Created once and then left alone. A form is editorial from the moment somebody
+ * opens it — the wording, the field order, the thank-you copy are all theirs —
+ * so a re-seed that "corrected" them would undo a morning's work. The
+ * integrations' transport is repaired on re-seed because a method is a fact;
+ * a consent line is not.
+ */
+async function seedForms() {
+  const file = path.join(CONTENT_DIR, 'forms.json');
+  if (!fs.existsSync(file)) {
+    logger.info('no forms.json — no forms seeded');
+    return;
+  }
+  const { forms = [] } = readJson(file);
+  let created = 0;
+  let skipped = 0;
+
+  for (const spec of forms) {
+    if (!FORCE && await Form.exists({ key: spec.key })) { skipped++; continue; }
+    await Form.findOneAndUpdate(
+      { key: spec.key },
+      {
+        $set: {
+          ...spec,
+          // Positions from the file's own order, so reordering the JSON is how
+          // you reorder the form rather than editing forty `order` numbers.
+          fields: (spec.fields || []).map((f, i) => ({ ...f, order: i })),
+        },
+      },
+      { upsert: true },
+    );
+    created++;
+  }
+
+  logger.info({ created, skipped }, 'forms seeded');
+}
+
 async function seedIntegrations() {
   const file = path.join(CONTENT_DIR, 'integrations.json');
   if (!fs.existsSync(file)) {
@@ -323,17 +363,47 @@ async function seedIntegrations() {
   }
   const { integrations = [] } = readJson(file);
   let created = 0;
+  let repaired = 0;
   let skipped = 0;
+
+  /*
+   * Which fields the file still owns after the first run.
+   *
+   * The editorial fields — the label, the note, whether a lead is captured —
+   * belong to whoever is running the site, and a re-seed must not undo their
+   * decisions. `method` and `queryFields` are not decisions: they are facts
+   * about how the endpoint is registered, and getting them wrong means the form
+   * receives nothing. Two of them *were* wrong, so a re-seed corrects them.
+   */
+  const TRANSPORT = ['method', 'queryFields'];
 
   for (const spec of integrations) {
     const existing = await Integration.findOne({ slug: spec.slug }).lean();
-    if (existing && !FORCE) { skipped++; continue; }
+
+    if (existing && !FORCE) {
+      const drift = {};
+      for (const field of TRANSPORT) {
+        const wanted = spec[field] ?? (field === 'method' ? 'POST' : []);
+        const held = existing[field] ?? (field === 'method' ? 'POST' : []);
+        if (JSON.stringify(wanted) !== JSON.stringify(held)) drift[field] = wanted;
+      }
+      if (Object.keys(drift).length) {
+        await Integration.updateOne({ slug: spec.slug }, { $set: drift });
+        logger.info({ slug: spec.slug, ...drift }, 'integration transport corrected');
+        repaired++;
+      } else {
+        skipped++;
+      }
+      continue;
+    }
+
     const doc = {
       slug: spec.slug,
       label: spec.label || spec.slug,
       note: spec.note || '',
       url: spec.url,
       method: spec.method || 'POST',
+      queryFields: spec.queryFields || [],
       responseMode: spec.responseMode || 'ok',
       responseFields: spec.responseFields || [],
       captureLead: !!spec.captureLead,
@@ -343,7 +413,7 @@ async function seedIntegrations() {
     await Integration.findOneAndUpdate({ slug: spec.slug }, { $set: doc }, { upsert: true });
     created++;
   }
-  logger.info({ created, skipped }, 'integrations seeded');
+  logger.info({ created, repaired, skipped }, 'integrations seeded');
 }
 
 async function seedBlog(registry, catalogues) {

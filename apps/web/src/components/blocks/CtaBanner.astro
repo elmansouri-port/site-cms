@@ -2,7 +2,9 @@
 /*
  * CtaBanner — the closing call to action used across the site.
  */
-const { data = {} } = Astro.props;
+import { linkAttrs } from '../../lib/links.js';
+
+const { data = {}, editMode = false } = Astro.props;
 const {
   title = '',
   subtitle = '',
@@ -12,6 +14,16 @@ const {
   secondaryHref = '',
   background = '',
 } = data;
+
+/*
+ * Names the field a link came from, for the visual editor only.
+ *
+ * A click on the canvas can find the block it landed in, but not which of the
+ * block's fields drew that button — the href has already been resolved from a
+ * `page:` reference and rewritten for the locale, so it cannot be matched back.
+ * Emitted in edit mode and never in a published page.
+ */
+const fieldHook = (name) => (editMode ? { 'data-cms-field': name } : {});
 
 const style = background ? `background-image:linear-gradient(rgba(94,45,145,.88),rgba(94,45,145,.88)),url('${background}');background-size:cover;background-position:center;` : '';
 ---
@@ -23,12 +35,12 @@ const style = background ? `background-image:linear-gradient(rgba(94,45,145,.88)
     {(primaryLabel || secondaryLabel) && (
       <div class="flex flex-col sm:flex-row gap-4 justify-center mt-9">
         {primaryLabel && (
-          <a href={primaryHref} class="px-7 py-3 rounded-btn bg-white text-brand-500 font-medium hover:bg-gray-100 transition-colors">
+          <a {...linkAttrs(primaryHref, data.primaryNewTab)} class="px-7 py-3 rounded-btn bg-white text-brand-500 font-medium hover:bg-gray-100 transition-colors" {...fieldHook('primaryHref')}>
             {primaryLabel}
           </a>
         )}
         {secondaryLabel && (
-          <a href={secondaryHref} class="px-7 py-3 rounded-btn border border-white/60 text-white font-medium hover:bg-white/10 transition-colors">
+          <a {...linkAttrs(secondaryHref, data.secondaryNewTab)} class="px-7 py-3 rounded-btn border border-white/60 text-white font-medium hover:bg-white/10 transition-colors" {...fieldHook('secondaryHref')}>
             {secondaryLabel}
           </a>
         )}

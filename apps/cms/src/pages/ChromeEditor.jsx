@@ -148,7 +148,8 @@ function ChromePart({ part, chrome, canEdit, onChanged }) {
   useEffect(() => {
     let alive = true;
     api.get(`/pages/index/preview-url?locale=${locale}&edit=1`)
-      .then(({ url }) => { if (alive) setSrc(url); })
+      // The path, so the frame is same-origin and its bridge can be heard.
+      .then(({ path, url }) => { if (alive) setSrc(path || url); })
       .catch(() => { if (alive) setSrc(null); });
     return () => { alive = false; };
   }, [frameKey, locale]);

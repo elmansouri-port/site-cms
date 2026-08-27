@@ -8,6 +8,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { asyncHandler, notFoundError } from '../middleware/error.js';
+import { formIndex, formsFor } from '../services/forms.js';
 import { validate, q } from '../middleware/validate.js';
 import { allowPreview } from '../middleware/auth.js';
 import { catalogueFor } from '../services/catalogue.js';
@@ -188,6 +189,13 @@ siteRouter.get('/blog/:slug', asyncHandler(async (req, res) => {
   const post = await BlogPost.findOne(filter).lean();
   if (!post) throw notFoundError('No such article');
 
+  /*
+   * An article body is rendered to an HTML string, so a form inside one cannot
+   * be a component — it is rendered by the same `renderForm` the page block
+   * uses, from the forms sent alongside. Only the ones this article references.
+   */
+  const forms = formsFor(post.sections, await formIndex());
+
   const siblings = await BlogPost.find(
     { groupId: post.groupId, status: 'published' },
     { locale: 1, slug: 1, _id: 0 },
@@ -212,7 +220,7 @@ siteRouter.get('/blog/:slug', asyncHandler(async (req, res) => {
   const related = [...sameCategory, ...filler.filter(p => !seen.has(String(p._id)))];
 
   res.set('cache-control', wantsDraft ? 'no-store' : 'public, max-age=60');
-  res.json({ post, translations: siblings, related });
+  res.json({ post, forms, translations: siblings, related });
 }));
 
 /**

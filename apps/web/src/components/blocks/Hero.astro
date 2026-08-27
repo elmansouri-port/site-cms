@@ -4,7 +4,9 @@
  * optional product shot. Matches the homepage hero's visual language so a
  * CMS-built landing page sits next to the authored pages without looking new.
  */
-const { data = {} } = Astro.props;
+import { linkAttrs } from '../../lib/links.js';
+
+const { data = {}, editMode = false } = Astro.props;
 const {
   eyebrow = '',
   title = '',
@@ -22,6 +24,17 @@ const {
 } = data;
 
 const alignClass = align === 'left' ? 'text-left items-start' : 'text-center items-center';
+
+/*
+ * Names the field a link came from, for the visual editor only.
+ *
+ * A click on the canvas can find the block it landed in, but not which of the
+ * block's fields drew that button — the href has already been resolved from a
+ * `page:` reference and rewritten for the locale, so it cannot be matched back.
+ * Emitted in edit mode and never in a published page.
+ */
+const fieldHook = (name) => (editMode ? { 'data-cms-field': name } : {});
+
 ---
 
 <div class={`max-w-6xl mx-auto px-6 flex flex-col ${alignClass}`}>
@@ -40,12 +53,12 @@ const alignClass = align === 'left' ? 'text-left items-start' : 'text-center ite
   {(primaryLabel || secondaryLabel) && (
     <div class="flex flex-col sm:flex-row gap-4 mt-10">
       {primaryLabel && (
-        <a href={primaryHref} class="px-7 py-3 rounded-btn bg-brand-500 text-white font-medium hover:bg-brand-600 transition-colors">
+        <a {...linkAttrs(primaryHref, data.primaryNewTab)} class="px-7 py-3 rounded-btn bg-brand-500 text-white font-medium hover:bg-brand-600 transition-colors" {...fieldHook('primaryHref')}>
           {primaryLabel}
         </a>
       )}
       {secondaryLabel && (
-        <a href={secondaryHref} class="px-7 py-3 rounded-btn border border-gray-300 text-gray-700 font-medium hover:border-brand-500 hover:text-brand-500 transition-colors">
+        <a {...linkAttrs(secondaryHref, data.secondaryNewTab)} class="px-7 py-3 rounded-btn border border-gray-300 text-gray-700 font-medium hover:border-brand-500 hover:text-brand-500 transition-colors" {...fieldHook('secondaryHref')}>
           {secondaryLabel}
         </a>
       )}

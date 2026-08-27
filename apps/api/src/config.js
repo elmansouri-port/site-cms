@@ -42,6 +42,18 @@ export const config = {
     maxBytes: int(process.env.UPLOAD_MAX_BYTES, 25 * 1024 * 1024),
   },
 
+  integrations: {
+    /*
+     * Hosts an integration may point at even though they are inside the network.
+     *
+     * The automation platform this site uses is on the company network, so its
+     * public-looking hostname resolves to a private address. Naming it here is
+     * how an administrator is allowed to edit those integrations without the
+     * SSRF guard also permitting the database and the metadata service.
+     */
+    allowedHosts: list(process.env.INTEGRATION_ALLOWED_HOSTS).map(h => h.toLowerCase()),
+  },
+
   bootstrap: {
     email: process.env.ADMIN_EMAIL || 'admin@rainbow.local',
     password: process.env.ADMIN_PASSWORD || 'ChangeMe!2024',

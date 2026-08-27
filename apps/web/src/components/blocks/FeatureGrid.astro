@@ -2,9 +2,22 @@
 /*
  * FeatureGrid — two to four columns of icon + title + copy.
  */
-const { data = {} } = Astro.props;
+import { linkAttrs } from '../../lib/links.js';
+
+const { data = {}, editMode = false } = Astro.props;
 const { title = '', subtitle = '', columns = 3, items = [] } = data;
 const cols = { 2: 'md:grid-cols-2', 3: 'md:grid-cols-3', 4: 'md:grid-cols-4' }[columns] || 'md:grid-cols-3';
+
+/*
+ * Names the field a link came from, for the visual editor only.
+ *
+ * A click on the canvas can find the block it landed in, but not which of the
+ * block's fields drew that button — the href has already been resolved from a
+ * `page:` reference and rewritten for the locale, so it cannot be matched back.
+ * Emitted in edit mode and never in a published page.
+ */
+const fieldHook = (name) => (editMode ? { 'data-cms-field': name } : {});
+
 ---
 
 <div class="max-w-6xl mx-auto px-6">
@@ -12,7 +25,7 @@ const cols = { 2: 'md:grid-cols-2', 3: 'md:grid-cols-3', 4: 'md:grid-cols-4' }[c
   {subtitle && <p class="mt-4 text-gray-600 text-center max-w-2xl mx-auto">{subtitle}</p>}
 
   <div class={`grid grid-cols-1 ${cols} gap-8 mt-12`}>
-    {items.map((item) => (
+    {items.map((item, i) => (
       <div class="p-7 rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow">
         {item.icon && (
           <img src={item.icon} alt="" width="40" height="40" loading="lazy" decoding="async" class="w-10 h-10 mb-4" />
@@ -20,7 +33,7 @@ const cols = { 2: 'md:grid-cols-2', 3: 'md:grid-cols-3', 4: 'md:grid-cols-4' }[c
         {item.title && <h3 class="text-lg font-semibold text-gray-900">{item.title}</h3>}
         {item.description && <p class="mt-2 text-gray-600 leading-relaxed">{item.description}</p>}
         {item.linkLabel && (
-          <a href={item.linkHref} class="inline-flex items-center gap-1 mt-4 text-brand-500 font-medium hover:underline">
+          <a {...linkAttrs(item.linkHref, item.linkNewTab)} class="inline-flex items-center gap-1 mt-4 text-brand-500 font-medium hover:underline" {...fieldHook(`items.${i}.linkHref`)}>
             {item.linkLabel}
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />

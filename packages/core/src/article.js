@@ -17,6 +17,7 @@
  * composed in the CMS is indistinguishable from the article the design came from.
  */
 import { slugify, escapeAttr } from './html.js';
+import { renderForm } from './form.js';
 
 const escapeHtml = (s) => String(s ?? '')
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -137,6 +138,16 @@ export const ARTICLE_SECTIONS = {
       { name: 'caption', label: 'Caption', type: 'text' },
     ],
   },
+  form: {
+    label: 'Form',
+    description: 'A form built under Forms. Collects into Leads, and can forward to an automation.',
+    toc: true,
+    fields: [
+      { name: 'formKey', label: 'Form', type: 'form' },
+      { name: 'title', label: 'Heading above it', type: 'text' },
+      { name: 'subtitle', label: 'Intro line', type: 'textarea' },
+    ],
+  },
   custom: {
     label: 'Custom HTML',
     description: 'Your own markup with Tailwind, and CSS scoped to this section.',
@@ -207,8 +218,14 @@ export function contentsOf(sections) {
   return out;
 }
 
-/** Render one section to the markup the article stylesheet expects. */
-function renderSection(section, id) {
+/**
+ * Render one section to the markup the article stylesheet expects.
+ *
+ * `opts` carries what a section cannot derive from itself: the locale, and the
+ * forms the article references. Only the form section uses either, which is why
+ * they arrive as options rather than as required arguments.
+ */
+function renderSection(section, id, opts = {}) {
   const data = section.data || {};
   const anchor = id ? ` id="${escapeAttr(id)}"` : '';
 
@@ -279,6 +296,32 @@ function renderSection(section, id) {
         + '</figure>';
     }
 
+    case 'form': {
+      /*
+       * The form is passed in resolved: this function is synchronous and has no
+       * database, and an article body that could not be rendered without one
+       * would be a body that cannot be rendered in a preview either.
+       */
+      const form = (opts.forms || {})[data.formKey];
+      if (!form) {
+        // Named, so an editor reading the preview knows which form went missing.
+        return data.formKey
+          ? `<!-- The form "${escapeHtml(data.formKey)}" no longer exists. Choose another on this section. -->`
+          : '';
+      }
+      return `<div${anchor} class="my-10 not-prose">`
+        + renderForm(form, {
+          locale: opts.locale || 'fr',
+          sourceLocale: opts.sourceLocale || 'fr',
+          // Unique per section so two forms in one article cannot share element
+          // ids, which would have a label focus the wrong input.
+          uid: `article-form-${String(section.key || data.formKey).replace(/[^a-zA-Z0-9_-]/g, '-')}`,
+          title: data.title || '',
+          subtitle: data.subtitle || '',
+        })
+        + '</div>';
+    }
+
     case 'custom': {
       if (!data.html && !data.css) return '';
       const scope = `article-section-${String(section.key || 'custom').replace(/[^a-zA-Z0-9_-]/g, '-')}`;
@@ -298,7 +341,7 @@ function renderSection(section, id) {
  * `bodyHtml`, and the contents are then derived from that markup's headings —
  * imported articles keep working without being migrated.
  */
-export function renderArticleBody(post) {
+export function renderArticleBody(post, opts = {}) {
   const sections = (post?.sections || []).filter(s => s.visible !== false);
 
   if (!sections.length) {
@@ -312,7 +355,7 @@ export function renderArticleBody(post) {
 
   for (const section of sections) {
     const id = anchorFor(section, taken);
-    const html = renderSection(section, id);
+    const html = renderSection(section, id, opts);
     if (!html) continue;
     parts.push(html);
     if (inContents(section)) {

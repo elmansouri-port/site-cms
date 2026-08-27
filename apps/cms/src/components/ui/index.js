@@ -27,4 +27,5 @@ export {
   Tooltip, TooltipProvider, Popover, PopoverTrigger, PopoverClose, PopoverContent, Separator,
 } from './menu.jsx';
 export { PageHeader, Toolbar, SearchInput, Meter, DataList, DataRow, Code } from './layout.jsx';
+export { CollapsiblePanel, useCollapsed } from './panel.jsx';
 export { formatBytes, formatDate, formatRelative, plainText } from './format.js';

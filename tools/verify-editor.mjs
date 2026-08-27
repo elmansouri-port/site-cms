@@ -216,6 +216,15 @@ console.log('\nEdit mode');
   ok('a public page carries no editor annotations',
     !clean.html.includes('data-cms-block') && !clean.html.includes('cms-editor.js'));
   ok('a public page carries no string annotations', !clean.html.includes('data-cms-key'));
+  /*
+   * Field annotations are what the link inspector clicks on: a `data-cms-field`
+   * on every button a block drew from one of its own fields. They are added in
+   * edit mode only, and a leak would put the CMS's internal field names into the
+   * markup every visitor and every crawler receives.
+   */
+  ok('a public page carries no field annotations', !clean.html.includes('data-cms-field'));
+  ok('a public page carries no form annotations',
+    !clean.html.includes('data-cms-form-key') && !clean.html.includes('data-cms-form-field'));
 
   const url = await api(`/pages/${testPage}/preview-url?locale=fr&edit=1`);
   ok('an edit preview URL is issued', url.status === 200 && url.body?.url?.includes('edit=1'),

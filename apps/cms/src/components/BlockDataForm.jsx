@@ -51,13 +51,21 @@ export default function BlockDataForm({ componentKey, value, onChange, anchors =
   return (
     <div className="grid gap-4">
       {schema.fields.map(field => (
-        <FieldControl
-          key={field.name}
-          field={field}
-          value={value?.[field.name]}
-          anchors={anchors}
-          onChange={(v) => set(field.name, v)}
-        />
+        /*
+         * `hideWhen` names another field that makes this one moot. The Form
+         * block uses it: choosing a saved form makes the block's own field list
+         * dead weight, and showing a form somebody can fill in that will then be
+         * ignored is worse than showing nothing.
+         */
+        field.hideWhen && value?.[field.hideWhen] ? null : (
+          <FieldControl
+            key={field.name}
+            field={field}
+            value={value?.[field.name]}
+            anchors={anchors}
+            onChange={(v) => set(field.name, v)}
+          />
+        )
       ))}
     </div>
   );
@@ -99,6 +107,9 @@ function FieldControl({ field, value, onChange, anchors }) {
 
     case 'formTarget':
       return <FormTargetField field={field} value={value || ''} onChange={onChange} />;
+
+    case 'form':
+      return <FormPickerField field={field} value={value || ''} onChange={onChange} />;
 
     case 'select':
       return (
@@ -277,6 +288,63 @@ function MediaField({ field, value, onChange }) {
  * enquiries.
  */
 const LEAD_TYPES = ['contact', 'demo', 'whitepaper', 'partner', 'booking', 'unsubscribe', 'other'];
+
+/**
+ * Choose a saved form, or none.
+ *
+ * "None" is a real option rather than an omission: a block that defines its own
+ * fields is legitimate for a one-off, and the picker has to be able to go back
+ * to that. What the block shows either way is a summary, so an editor does not
+ * have to open Forms to remember which one this is.
+ */
+function FormPickerField({ field, value, onChange }) {
+  const { data, loading } = useResource('/forms');
+  const forms = data?.items || [];
+  const chosen = forms.find(f => f.key === value);
+
+  return (
+    <Field label={field.label} hint={field.hint}>
+      {id => (
+        <>
+          <Select id={id} value={value} onChange={e => onChange(e.target.value)}>
+            <option value="">Define the fields in this block</option>
+            {forms.map(f => (
+              <option key={f.key} value={f.key}>
+                {f.name} — {f.fieldCount} field{f.fieldCount === 1 ? '' : 's'}
+              </option>
+            ))}
+          </Select>
+
+          {value && !chosen && !loading && (
+            <Callout tone="warning">
+              No form called <Code>{value}</Code> exists any more. Choose another, or the block will
+              render nothing.
+            </Callout>
+          )}
+
+          {chosen && (
+            <div className="text-muted-foreground mt-2 grid gap-1 text-[12px]">
+              <span>
+                Sends to <Code>{chosen.target}</Code>
+                {chosen.usedBy?.length > 1 && ` · also shown in ${chosen.usedBy.length - 1} other place${chosen.usedBy.length === 2 ? '' : 's'}`}
+              </span>
+              <a href={`/admin/#/forms/${chosen.key}`} className="text-primary hover:underline">
+                Edit this form →
+              </a>
+            </div>
+          )}
+
+          {!forms.length && !loading && (
+            <Callout className="mt-2">
+              No saved forms yet. Build one under <strong>Forms</strong> and it becomes available to
+              every page and article — or define the fields here for a one-off.
+            </Callout>
+          )}
+        </>
+      )}
+    </Field>
+  );
+}
 
 function FormTargetField({ field, value, onChange }) {
   const { data } = useResource('/integrations');

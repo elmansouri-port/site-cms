@@ -41,7 +41,11 @@ const SCREENS = [
   { name: '07-menus', path: '/admin/navigation' },
   { name: '08-copy', path: '/admin/content' },
   { name: '09-experiments', path: '/admin/experiments' },
-  { name: '10-leads', path: '/admin/leads' },
+  { name: '10-forms', path: '/admin/forms' },
+  // The builder is worth its own frame: it is the screen with the most going on,
+  // and the preview inside it takes a moment to render.
+  { name: '10b-form-builder', path: '/admin/forms/demande-de-demo', settle: 4000 },
+  { name: '10c-leads', path: '/admin/leads' },
   { name: '11-redirects', path: '/admin/redirects' },
   { name: '12-partners', path: '/admin/partners' },
   { name: '13-integrations', path: '/admin/integrations' },

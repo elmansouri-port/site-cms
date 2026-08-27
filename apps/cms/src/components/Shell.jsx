@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
-  Activity, ArrowRightLeft, ExternalLink, FileText, FlaskConical, Image, LayoutDashboard,
+  Activity, ArrowRightLeft, ExternalLink, FileInput, FileText, FlaskConical, Image, LayoutDashboard,
+  PanelLeftClose, PanelLeftOpen,
   LayoutPanelTop, Languages, LogOut, Mail, MapPin, Menu as MenuIcon, Monitor, Moon,
   Newspaper, Plug, Search, Settings as SettingsIcon, Sun, Users as UsersIcon, X,
 } from 'lucide-react';
@@ -11,6 +12,7 @@ import { cn } from '../lib/cn.js';
 import CommandPalette from './CommandPalette.jsx';
 import {
   Button, Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator, MenuTrigger, Segmented, Tooltip,
+  useCollapsed,
 } from './ui/index.js';
 
 /*
@@ -46,6 +48,7 @@ export const NAV_GROUPS = [
     label: 'Growth',
     items: [
       { to: '/experiments', icon: FlaskConical, label: 'A/B tests' },
+      { to: '/forms', icon: FileInput, label: 'Forms' },
       { to: '/leads', icon: Mail, label: 'Leads' },
       { to: '/redirects', icon: ArrowRightLeft, label: 'Redirects' },
       { to: '/partners', icon: MapPin, label: 'Partners' },
@@ -71,6 +74,12 @@ export default function Shell({ children }) {
   const { pathname } = useLocation();
   const [drawer, setDrawer] = useState(false);
   const [palette, setPalette] = useState(false);
+  /*
+   * Collapsed to icons, remembered across sessions. Only on wide screens: the
+   * narrow layout already hides the rail behind a drawer, and a collapsed
+   * drawer would be a menu of unlabelled icons over the page.
+   */
+  const [railOpen, toggleRail] = useCollapsed('shell.rail', true);
 
   const title = TITLES[pathname] || TITLES[`/${pathname.split('/')[1]}`] || 'Rainbow CMS';
   // The page editor's visual builder wants the whole window rather than the
@@ -106,18 +115,29 @@ export default function Shell({ children }) {
 
       <aside
         className={cn(
-          'bg-sidebar border-sidebar-border fixed inset-y-0 left-0 z-40 flex w-60 shrink-0 flex-col border-r',
-          'transition-transform lg:sticky lg:top-0 lg:h-screen lg:translate-x-0',
+          'bg-sidebar border-sidebar-border fixed inset-y-0 left-0 z-40 flex shrink-0 flex-col border-r',
+          'transition-[transform,width] lg:sticky lg:top-0 lg:h-screen lg:translate-x-0',
           drawer ? 'translate-x-0' : '-translate-x-full',
+          // The drawer is always full width; only the docked rail collapses.
+          railOpen ? 'w-60' : 'w-60 lg:w-[56px]',
         )}
+        data-collapsed={railOpen ? undefined : 'true'}
       >
-        <div className="border-sidebar-border flex h-14 items-center gap-2.5 border-b px-4">
-          <span className="bg-primary flex size-7 shrink-0 items-center justify-center rounded-lg">
+        <div className={cn(
+          'border-sidebar-border flex h-14 items-center gap-2.5 border-b',
+          railOpen ? 'px-4' : 'px-4 lg:justify-center lg:px-2',
+        )}>
+          <span className={cn(
+            'bg-primary flex size-7 shrink-0 items-center justify-center rounded-lg',
+            !railOpen && 'lg:hidden',
+          )}>
             <svg viewBox="0 0 24 24" className="size-4" aria-hidden="true">
               <path d="M4 18a8 8 0 0 1 16 0" fill="none" stroke="white" strokeWidth="2.6" strokeLinecap="round" />
             </svg>
           </span>
-          <span className="text-[14px] font-semibold tracking-tight">Rainbow CMS</span>
+          {railOpen && (
+            <span className="text-[14px] font-semibold tracking-tight lg:block">Rainbow CMS</span>
+          )}
           <Button
             variant="ghost"
             size="icon-sm"
@@ -127,32 +147,58 @@ export default function Shell({ children }) {
           >
             <X />
           </Button>
+          <Tooltip content={railOpen ? 'Collapse the sidebar' : 'Expand the sidebar'} side="right">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className={cn('hidden lg:inline-flex', railOpen && 'ml-auto')}
+              onClick={toggleRail}
+              aria-label={railOpen ? 'Collapse the sidebar' : 'Expand the sidebar'}
+              aria-expanded={railOpen}
+            >
+              {railOpen ? <PanelLeftClose /> : <PanelLeftOpen />}
+            </Button>
+          </Tooltip>
         </div>
 
-        <nav className="min-h-0 flex-1 overflow-y-auto px-2.5 py-3" aria-label="Sections">
+        <nav
+          className={cn('min-h-0 flex-1 overflow-y-auto py-3', railOpen ? 'px-2.5' : 'px-2.5 lg:px-2')}
+          aria-label="Sections"
+        >
           {NAV_GROUPS.map((group) => {
             const items = group.items.filter(i => !i.role || can(i.role));
             if (!items.length) return null;
             return (
               <div key={group.label} className="mb-4 last:mb-0">
-                <div className="text-muted-foreground px-2 pb-1.5 text-[10.5px] font-semibold tracking-wider uppercase">
+                {/*
+                  Collapsed, a group heading would be three letters of a word
+                  nobody can read. The border above the group carries the
+                  grouping instead.
+                */}
+                <div className={cn(
+                  'text-muted-foreground px-2 pb-1.5 text-[10.5px] font-semibold tracking-wider uppercase',
+                  !railOpen && 'lg:sr-only',
+                )}>
                   {group.label}
                 </div>
                 {items.map(item => (
-                  <NavLink
-                    key={item.to}
-                    to={item.to}
-                    end={item.end}
-                    className={({ isActive }) => cn(
-                      'flex items-center gap-2.5 rounded-md px-2 py-1.5 text-[13px] font-medium transition-colors',
-                      isActive
-                        ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                        : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground',
-                    )}
-                  >
-                    <item.icon className="size-4 shrink-0" />
-                    <span className="truncate">{item.label}</span>
-                  </NavLink>
+                  <Tooltip key={item.to} content={railOpen ? null : item.label} side="right">
+                    <NavLink
+                      to={item.to}
+                      end={item.end}
+                      title={railOpen ? undefined : item.label}
+                      className={({ isActive }) => cn(
+                        'flex items-center gap-2.5 rounded-md px-2 py-1.5 text-[13px] font-medium transition-colors',
+                        !railOpen && 'lg:justify-center lg:px-0',
+                        isActive
+                          ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                          : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground',
+                      )}
+                    >
+                      <item.icon className="size-4 shrink-0" />
+                      <span className={cn('truncate', !railOpen && 'lg:hidden')}>{item.label}</span>
+                    </NavLink>
+                  </Tooltip>
                 ))}
               </div>
             );
@@ -164,12 +210,15 @@ export default function Shell({ children }) {
             <MenuTrigger asChild>
               <button
                 type="button"
-                className="hover:bg-sidebar-accent/60 focus-visible:ring-ring/40 flex w-full items-center gap-2.5 rounded-md p-1.5 text-left transition-colors outline-none focus-visible:ring-[3px]"
+                className={cn(
+                  'hover:bg-sidebar-accent/60 focus-visible:ring-ring/40 flex w-full items-center gap-2.5 rounded-md p-1.5 text-left transition-colors outline-none focus-visible:ring-[3px]',
+                  !railOpen && 'lg:justify-center',
+                )}
               >
                 <span className="bg-accent text-accent-foreground flex size-7 shrink-0 items-center justify-center rounded-full text-[11.5px] font-semibold uppercase">
                   {initials(user.name)}
                 </span>
-                <span className="min-w-0 grow">
+                <span className={cn('min-w-0 grow', !railOpen && 'lg:hidden')}>
                   <span className="block truncate text-[12.5px] font-semibold">{user.name}</span>
                   <span className="text-muted-foreground block truncate text-[11.5px]">{user.role}</span>
                 </span>

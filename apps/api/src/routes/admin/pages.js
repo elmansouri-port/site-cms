@@ -17,6 +17,7 @@ import { snapshot, audit, publishChanged } from '../../services/publish.js';
 import { deletedPages, recoverPage } from '../../services/history.js';
 import { keysIn } from '@rainbow/core/ingest';
 import { firstHeading, slugify } from '@rainbow/core/html';
+import { anchorText, anchorsIn, setAnchorHref, setAnchorTarget } from '@rainbow/core/anchors';
 import { routeFor } from '@rainbow/core/seo';
 import { config } from '../../config.js';
 
@@ -353,6 +354,93 @@ pagesRouter.patch('/:key/sections/:sectionKey', requireRole('editor'), validate(
   await publishChanged('section updated', [{ route: page.route }]);
   res.json({ section: section.toObject ? section.toObject() : section });
 }));
+
+/* ── One link inside an authored block ────────────────────────────────────── */
+
+/**
+ * The links a block contains, for the editor's link panel.
+ *
+ * A component block's links are fields and are edited as fields. An authored
+ * block's links are markup, and the only stable way to name one is its position
+ * among that block's anchors — which is exactly what the canvas reports when
+ * somebody clicks a button on the page.
+ */
+pagesRouter.get('/:key/sections/:sectionKey/anchors', asyncHandler(async (req, res) => {
+  const page = await Page.findOne({ key: req.params.key }, { sections: 1 }).lean();
+  if (!page) throw notFoundError('No such page');
+  const section = (page.sections || []).find(s => s.key === req.params.sectionKey);
+  if (!section) throw notFoundError('No such section');
+
+  const html = section.html || '';
+  res.json({
+    items: anchorsIn(html).map(a => ({
+      index: a.index,
+      href: a.href,
+      target: a.target,
+      text: anchorText(a, html),
+      editable: a.hrefStart >= 0,
+    })),
+  });
+}));
+
+const anchorPatch = z.object({
+  href: z.string().max(600).optional(),
+  target: z.enum(['_self', '_blank']).optional(),
+}).strict();
+
+/**
+ * Point one link in an authored block somewhere else.
+ *
+ * Spliced over the href's byte range rather than re-serialised, so the rest of
+ * the block is byte-identical afterwards and the page keeps whatever the
+ * fidelity check had to say about it. That is the difference between "an editor
+ * can fix a wrong link" and "changing a link rewrites the section".
+ */
+pagesRouter.patch(
+  '/:key/sections/:sectionKey/anchors/:index',
+  requireRole('editor'),
+  validate(anchorPatch),
+  asyncHandler(async (req, res) => {
+    const page = await Page.findOne({ key: req.params.key });
+    if (!page) throw notFoundError('No such page');
+    const section = page.sections.find(s => s.key === req.params.sectionKey);
+    if (!section) throw notFoundError('No such section');
+
+    const index = Number.parseInt(req.params.index, 10);
+    const anchors = anchorsIn(section.html || '');
+    if (!Number.isInteger(index) || !anchors[index]) throw notFoundError('No such link in that block');
+    if (req.body.href !== undefined && anchors[index].hrefStart < 0) {
+      throw badRequest('That link carries no href to change');
+    }
+
+    await snapshot('page', page.key, page.toObject(), req.user, `before editing a link in "${section.label}"`);
+
+    let html = section.html || '';
+    if (req.body.href !== undefined) html = setAnchorHref(html, index, req.body.href);
+    if (req.body.target !== undefined) html = setAnchorTarget(html, index, req.body.target);
+
+    section.html = html;
+    // The copy inside the block did not move, but re-deriving is cheap and keeps
+    // the key list honest if a splice ever touched a marked element.
+    section.keys = keysIn(html);
+    page.editedInCms = true;
+    page.updatedBy = req.user._id;
+    await page.save();
+
+    await audit(req, 'page.section.link', 'page', page.key, {
+      section: section.key,
+      index,
+      ...(req.body.href !== undefined ? { href: req.body.href } : {}),
+    });
+    await publishChanged('link changed', [{ route: page.route }]);
+
+    const updated = anchorsIn(html)[index];
+    res.json({
+      ok: true,
+      link: { index, href: updated.href, target: updated.target, text: anchorText(updated, html) },
+    });
+  }),
+);
 
 const reorder = z.object({ order: z.array(z.string().max(120)).min(1) });
 
@@ -823,9 +911,24 @@ pagesRouter.get('/:key/preview-url', asyncHandler(async (req, res) => {
   // `edit=1` additionally turns on the visual editor's block annotations and
   // its bridge script. Plain preview renders the draft as a visitor would see it.
   const edit = req.query.edit ? '&edit=1' : '';
-  const url = `${config.siteUrl}/cms/preview?secret=${encodeURIComponent(config.previewSecret)}`
+  const query = `secret=${encodeURIComponent(config.previewSecret)}`
     + `&redirect=${encodeURIComponent(target)}${edit}`;
-  res.json({ url, target });
+
+  /*
+   * A path as well as an absolute URL, and the editor uses the path.
+   *
+   * The canvas is an iframe the editor talks to over postMessage, and that only
+   * works while the two are one origin. Behind the gateway they are — the admin
+   * is `/admin/` on the same host as the pages — and the admin's dev server
+   * proxies the site for exactly that reason. A relative path resolves against
+   * whichever origin is serving the admin, so it is same-origin in both. The
+   * absolute URL stays for anything that needs a link somebody can send.
+   */
+  res.json({
+    path: `/cms/preview?${query}`,
+    url: `${config.siteUrl}/cms/preview?${query}`,
+    target,
+  });
 }));
 
 pagesRouter.post('/:key/unpublish', requireRole('editor'), asyncHandler(async (req, res) => {

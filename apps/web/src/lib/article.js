@@ -37,6 +37,25 @@ const initials = (name) => String(name || '')
   .split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('');
 
 /** `Travail hybride` → `travail-hybride`, for the category filter link. */
+/*
+ * A form in an article body needs the same submit handler a page block loads.
+ *
+ * The block can load it with a `<script>` of its own; an article body is a
+ * string spliced into the template, and a script tag inside `articleBody` would
+ * sit inside the prose. It goes in the page's footer snippet instead — and only
+ * when the body actually contains a form, so an article without one ships no
+ * extra request.
+ */
+function withFormScript(snippets, bodyHtml) {
+  if (!String(bodyHtml || '').includes('data-cms-form')) return snippets;
+  const base = snippets || {};
+  const tag = '<script src="/js/cms-form.js" defer></script>';
+  const footer = base.footer || '';
+  if (footer.includes('/js/cms-form.js')) return base;
+  return { ...base, footer: `${footer}
+${tag}` };
+}
+
 const slug = (s) => String(s || '').toLowerCase().normalize('NFD')
   .replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
@@ -60,7 +79,10 @@ export async function renderArticle(article, locale, { blogSegment = 'blog', bas
 
   // The body and its contents come out of one pass, so the anchors the contents
   // links point at are by construction the anchors the body emits.
-  const body = renderArticleBody(post);
+  // The forms this article references, resolved by the API. A form section
+  // renders through the same `renderForm` a page block uses, so a form in an
+  // article is the same form — see packages/core/src/article.js.
+  const body = renderArticleBody(post, { locale, forms: article.forms || {} });
 
   // The breadcrumb, the contents list, the article and the related cards all
   // live in one authored block (`main-content`), so every substitution happens
@@ -152,7 +174,7 @@ export async function renderArticle(article, locale, { blogSegment = 'blog', bas
     },
     // The template's own structured data describes the article it shipped with.
     jsonLd: [],
-    snippets: post.snippets || template.snippets,
+    snippets: withFormScript(post.snippets || template.snippets, body.html),
   };
 
   return { page, extra: { post, contents: body.contents } };

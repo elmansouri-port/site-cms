@@ -14,6 +14,7 @@ import { navRouter } from './navigation.js';
 import { settingsRouter } from './settings.js';
 import { chromeRouter } from './chrome.js';
 import { integrationsRouter } from './integrations.js';
+import { formsRouter } from './forms.js';
 import { partnersRouter } from './partners.js';
 import { versionsRouter } from './versions.js';
 import { dashboardRouter } from './dashboard.js';
@@ -37,6 +38,7 @@ adminRouter.use('/chrome', chromeRouter);
 adminRouter.use('/partners', partnersRouter);
 
 // Growth
+adminRouter.use('/forms', formsRouter);
 adminRouter.use('/experiments', experimentsRouter);
 adminRouter.use('/leads', leadsRouter);
 adminRouter.use('/redirects', redirectsRouter);

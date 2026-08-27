@@ -38,8 +38,10 @@ export const BLOCK_SCHEMAS = {
       { name: 'subtitle', label: 'Subtitle', type: 'textarea' },
       { name: 'primaryLabel', label: 'Primary button', type: 'text' },
       { name: 'primaryHref', label: 'Primary button goes to', type: 'link' },
+      { name: 'primaryNewTab', label: 'Open in a new tab', type: 'boolean' },
       { name: 'secondaryLabel', label: 'Secondary button', type: 'text' },
       { name: 'secondaryHref', label: 'Secondary button goes to', type: 'link' },
+      { name: 'secondaryNewTab', label: 'Open in a new tab', type: 'boolean' },
       { name: 'image', label: 'Image', type: 'media' },
       { name: 'imageAlt', label: 'Image alt text', type: 'text', hint: 'Describe the image. Required for accessibility and read by image search.' },
       { name: 'align', label: 'Alignment', type: 'select', options: ['center', 'left'] },
@@ -55,8 +57,10 @@ export const BLOCK_SCHEMAS = {
       { name: 'subtitle', label: 'Subtitle', type: 'textarea' },
       { name: 'primaryLabel', label: 'Primary button', type: 'text' },
       { name: 'primaryHref', label: 'Primary button goes to', type: 'link' },
+      { name: 'primaryNewTab', label: 'Open in a new tab', type: 'boolean' },
       { name: 'secondaryLabel', label: 'Secondary button', type: 'text' },
       { name: 'secondaryHref', label: 'Secondary button goes to', type: 'link' },
+      { name: 'secondaryNewTab', label: 'Open in a new tab', type: 'boolean' },
       { name: 'background', label: 'Background image', type: 'media' },
     ],
   },
@@ -100,6 +104,7 @@ export const BLOCK_SCHEMAS = {
           { name: 'description', label: 'Description', type: 'textarea' },
           { name: 'linkLabel', label: 'Link label', type: 'text' },
           { name: 'linkHref', label: 'Link goes to', type: 'link' },
+          { name: 'linkNewTab', label: 'Open in a new tab', type: 'boolean' },
         ],
       },
     ],
@@ -170,6 +175,7 @@ export const BLOCK_SCHEMAS = {
       { name: 'reverse', label: 'Image on the left', type: 'boolean' },
       { name: 'linkLabel', label: 'Link label', type: 'text' },
       { name: 'linkHref', label: 'Link goes to', type: 'link' },
+      { name: 'linkNewTab', label: 'Open in a new tab', type: 'boolean' },
     ],
   },
   pricing_cards: {
@@ -198,6 +204,7 @@ export const BLOCK_SCHEMAS = {
           { name: 'features', label: 'Features (one per line)', type: 'lines' },
           { name: 'ctaLabel', label: 'Button label', type: 'text' },
           { name: 'ctaHref', label: 'Button goes to', type: 'link' },
+          { name: 'ctaNewTab', label: 'Open in a new tab', type: 'boolean' },
           { name: 'highlighted', label: 'Highlight this plan', type: 'boolean' },
         ],
       },
@@ -248,17 +255,31 @@ export const BLOCK_SCHEMAS = {
     description: 'Capture an enquiry. Stored here first, then forwarded — so nothing is lost.',
     wireframe: ['title', 'text', 'rows', 'buttons'],
     fields: [
+      {
+        name: 'formKey',
+        label: 'Form',
+        type: 'form',
+        hint: 'Built under Forms, and shareable: the same form on four pages is one thing to change.',
+      },
       { name: 'title', label: 'Title', type: 'text' },
       { name: 'subtitle', label: 'Subtitle', type: 'textarea' },
+      /*
+       * Everything below defines a form inside this block, for a one-off that is
+       * not worth naming. It is hidden once a saved form is chosen, because the
+       * two are alternatives — the block renders the saved one and would ignore
+       * whatever was typed here.
+       */
       {
         name: 'submitTo',
         label: 'Where submissions go',
         type: 'formTarget',
+        hideWhen: 'formKey',
         hint: 'Every submission is stored under Leads either way. An integration also forwards it, server-side.',
       },
       {
         name: 'fields',
         label: 'Fields',
+        hideWhen: 'formKey',
         type: 'list',
         itemLabel: 'label',
         fields: [
@@ -282,20 +303,22 @@ export const BLOCK_SCHEMAS = {
           { name: 'hint', label: 'Hint under the field', type: 'text' },
         ],
       },
-      { name: 'columns', label: 'Columns', type: 'select', options: [1, 2] },
-      { name: 'submitLabel', label: 'Button label', type: 'text' },
+      { name: 'columns', label: 'Columns', type: 'select', options: [1, 2], hideWhen: 'formKey' },
+      { name: 'submitLabel', label: 'Button label', type: 'text', hideWhen: 'formKey' },
       {
         name: 'consentText',
         label: 'Small print',
         type: 'html',
         rows: 3,
+        hideWhen: 'formKey',
         hint: 'Consent and privacy wording, shown under the fields. HTML, so it can carry a link to the policy.',
       },
-      { name: 'successTitle', label: 'Thank-you title', type: 'text' },
+      { name: 'successTitle', label: 'Thank-you title', type: 'text', hideWhen: 'formKey' },
       {
         name: 'successMessage',
         label: 'Thank-you message',
         type: 'textarea',
+        hideWhen: 'formKey',
         hint: 'Shown in place of the form. Say what happens next and when.',
       },
       {

@@ -87,6 +87,49 @@
     reportLayout();
   }
 
+  var INTERACTIVE_SELECTOR = 'a[href], button, input, select, textarea, summary';
+
+  /**
+   * The clicked element, as the parent needs to see it.
+   *
+   * `field` is the block field that produced it, when the template said so.
+   * `authoredIndex` is the fallback for markup the CMS did not generate — an
+   * authored page's own HTML, or a custom block — where the only stable identity
+   * is "the nth link in this block". The parent rewrites that occurrence.
+   */
+  function describeElement(el, block) {
+    var field = el.closest('[data-cms-field]');
+    var anchors = block.querySelectorAll('a[href]');
+    var authoredIndex = -1;
+    for (var i = 0; i < anchors.length; i++) {
+      if (anchors[i] === el) { authoredIndex = i; break; }
+    }
+    var form = el.closest('[data-cms-form-key]');
+    var r = el.getBoundingClientRect();
+
+    return {
+      key: block.getAttribute('data-cms-block'),
+      // A control inside a form belongs to the form, which may be on several
+      // pages. The editor points at the form rather than editing it here.
+      formKey: form ? form.getAttribute('data-cms-form-key') : null,
+      // Viewport-relative, like the block rects — the parent scales them the
+      // same way to draw its outline.
+      rect: { top: r.top, left: r.left, width: r.width, height: r.height },
+      tag: el.tagName.toLowerCase(),
+      field: field ? field.getAttribute('data-cms-field') : null,
+      // The resolved href, for showing the editor where it currently points.
+      href: el.getAttribute('href') || '',
+      text: (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 80),
+      target: el.getAttribute('target') || '',
+      authoredIndex: authoredIndex,
+      // A string annotation on or inside the element: an authored block's label
+      // is editable copy even when its destination is not.
+      stringKey: (el.closest('[data-cms-key]') || el.querySelector('[data-cms-key]') || {}).getAttribute
+        ? (el.closest('[data-cms-key]') || el.querySelector('[data-cms-key]')).getAttribute('data-cms-key')
+        : null,
+    };
+  }
+
   document.addEventListener('click', function (e) {
     // Inside an active inline edit, let the caret move normally.
     if (state.editing && state.editing.contains(e.target)) return;
@@ -108,7 +151,7 @@
 
     var block = blockOf(e.target);
     // Links and buttons would navigate away from the page being edited.
-    var interactive = e.target.closest && e.target.closest('a[href], button, input, select, textarea, summary');
+    var interactive = e.target.closest && e.target.closest(INTERACTIVE_SELECTOR);
     if (interactive && !e.metaKey && !e.ctrlKey) {
       e.preventDefault();
       e.stopPropagation();
@@ -120,6 +163,22 @@
     }
     select(block.getAttribute('data-cms-block'));
     send('select', { key: state.selected, block: describe(block) });
+
+    /*
+     * What exactly was clicked.
+     *
+     * Selecting the block is not enough to edit a button: a hero has two of
+     * them, a pricing table has one per plan, and an editor who clicked the
+     * second card's button means that one. The block templates name the field
+     * each link came from in `data-cms-field` (edit mode only), because the
+     * rendered href has already been resolved from a `page:` reference and
+     * rewritten for the locale and so cannot be matched back to what is stored.
+     *
+     * Sent as a second message rather than folded into `select`, so a parent
+     * that does not know about it keeps working — which is also why the block
+     * is selected first.
+     */
+    if (interactive) send('elementClicked', describeElement(interactive, block));
   }, true);
 
   document.addEventListener('mouseover', function (e) {

@@ -19,6 +19,8 @@ import { validate } from '../../middleware/validate.js';
 import { requireAuth, requireRole } from '../../middleware/auth.js';
 import { audit, publishChanged } from '../../services/publish.js';
 import { proxyPath } from '@rainbow/core/endpoints';
+import { VERDICTS, probeIntegration } from '../../services/integrationProbe.js';
+import { config } from '../../config.js';
 
 export const integrationsRouter = Router();
 
@@ -58,6 +60,9 @@ function publicView(row) {
     timeoutMs: row.timeoutMs,
     responseMode: row.responseMode,
     responseFields: row.responseFields,
+    queryFields: row.queryFields || [],
+    // What the endpoint said about itself when it was last probed. Admin-only.
+    contract: row.contract || {},
     captureLead: row.captureLead,
     leadType: row.leadType,
     rateLimit: row.rateLimit,
@@ -83,6 +88,7 @@ const upsert = z.object({
   enabled: z.boolean().optional(),
   responseMode: z.enum(['ok', 'fields']).default('ok'),
   responseFields: z.array(z.string().max(60)).max(30).optional(),
+  queryFields: z.array(z.string().max(60)).max(30).optional(),
   captureLead: z.boolean().optional(),
   leadType: z.enum(['whitepaper', 'demo', 'partner', 'booking', 'unsubscribe', 'contact', 'other']).optional(),
   rateLimit: z.object({
@@ -136,47 +142,63 @@ integrationsRouter.delete('/:slug', requireRole('admin'), asyncHandler(async (re
 }));
 
 /**
- * Call the upstream once and report only whether it answered.
+ * Ask the endpoint what it expects, and record the answer.
  *
- * "Is the form wired up?" without opening the automation tool, and without the
- * upstream's reply reaching the browser — a test that leaked the response would
- * defeat the point of the proxy.
+ * The old version reported a status code and nothing else, which answered "did
+ * something respond" and no other question. A 404 from n8n can mean the method
+ * is wrong or the workflow is switched off — two different faults with two
+ * different fixes, indistinguishable in a number. A 400 usually means the
+ * endpoint is healthy and named the fields it wanted.
+ *
+ * So the probe reads what the endpoint says and stores it on the record, which
+ * is what lets the form builder warn that a form does not collect a field its
+ * endpoint requires. Admin only, because the upstream's own words are exactly
+ * what the proxy keeps away from visitors.
  */
 integrationsRouter.post('/:slug/test', requireRole('admin'), asyncHandler(async (req, res) => {
   const row = await Integration.findOne({ slug: req.params.slug });
   if (!row) throw notFoundError('No such integration');
 
-  const headers = { 'content-type': 'application/json' };
-  for (const [name, value] of (row.headers || new Map()).entries()) headers[name] = value;
+  const result = await probeIntegration(row);
 
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), row.timeoutMs || 10000);
-  const startedAt = Date.now();
-  let status = null;
-  let error = '';
-  try {
-    const upstream = await fetch(row.url, {
-      method: row.method || 'POST',
-      headers,
-      body: row.method === 'GET' ? undefined : JSON.stringify({ test: true, source: 'rainbow-cms' }),
-      signal: controller.signal,
-      redirect: 'error',
-    });
-    status = upstream.status;
-    await upstream.text();
-  } catch (err) {
-    error = err.name === 'AbortError' ? 'timed out' : 'unreachable';
-  } finally {
-    clearTimeout(timer);
-  }
+  row.contract = {
+    probedAt: new Date(),
+    detectedMethod: result.detectedMethod || '',
+    requiredFields: result.requiredFields,
+    knownFields: result.knownFields,
+    verdict: result.verdict,
+    message: result.message,
+  };
+  // The probe is a real call, so the health counters should reflect it — but a
+  // deliberately invalid payload being rejected is not a failure of the
+  // integration, and counting it as one would make every healthy endpoint look
+  // broken after somebody pressed Test.
+  row.lastCallAt = new Date();
+  row.lastStatus = result.status;
+  row.lastError = ['ok', 'validation'].includes(result.verdict) ? '' : (VERDICTS[result.verdict] || '');
+  await row.save();
 
-  await audit(req, 'integration.test', 'integration', row.slug, { status, error });
+  await audit(req, 'integration.test', 'integration', row.slug, {
+    verdict: result.verdict,
+    status: result.status,
+    detectedMethod: result.detectedMethod || undefined,
+  });
+
   res.json({
-    ok: !error && status >= 200 && status < 400,
-    status,
-    error,
-    ms: Date.now() - startedAt,
-    note: 'The upstream reply is deliberately not shown here.',
+    ok: result.reachable,
+    verdict: result.verdict,
+    explanation: VERDICTS[result.verdict] || '',
+    status: result.status,
+    ms: result.ms,
+    detectedMethod: result.detectedMethod || null,
+    requiredFields: result.requiredFields,
+    knownFields: result.knownFields,
+    // The endpoint's own words, for an administrator only.
+    message: result.message,
+    // The one-click fix, when the endpoint told us what is wrong.
+    fix: result.verdict === 'method-mismatch' && result.detectedMethod
+      ? { field: 'method', value: result.detectedMethod }
+      : null,
   });
 }));
 
@@ -189,6 +211,18 @@ const hostOf = (url) => { try { return new URL(url).host; } catch { return 'inva
  * `/api/v1/hooks/<slug>` route into a probe for the private network the API
  * sits in — the database, the cache, a cloud metadata service. The proxy is
  * meant to reach the internet on the browser's behalf, and nothing else.
+ *
+ * `INTEGRATION_ALLOWED_HOSTS` is the exception, and it exists because this
+ * deployment needs one: the automation platform is on the company network, so
+ * its hostname resolves to a 10.x address. Without an allowlist, an
+ * administrator could not edit the very integrations the site depends on — and
+ * the honest way to permit that is a named host in the environment, which is
+ * auditable and cannot be widened from inside the CMS.
+ *
+ * Note what the check can and cannot do: it inspects the hostname, not the
+ * address it resolves to. A public name pointing at a private address gets
+ * through, which is why the allowlist is a list of names rather than a switch,
+ * and why the proxy refuses redirects and copies out only named fields.
  */
 function assertSafeUrl(raw) {
   let url;
@@ -197,6 +231,8 @@ function assertSafeUrl(raw) {
     throw conflict('Only http and https endpoints are allowed');
   }
   const host = url.hostname.toLowerCase();
+  if (config.integrations.allowedHosts.includes(host)) return;
+
   const blocked = host === 'localhost'
     || host === '::1'
     || host.endsWith('.local')
@@ -207,5 +243,10 @@ function assertSafeUrl(raw) {
     || /^192\.168\./.test(host)
     || /^169\.254\./.test(host)
     || /^172\.(1[6-9]|2\d|3[01])\./.test(host);
-  if (blocked) throw conflict('That address is inside the network — an endpoint must be a public URL');
+  if (blocked) {
+    throw conflict(
+      `${host} is inside the network. An endpoint must be a public URL, or its host `
+      + 'must be listed in INTEGRATION_ALLOWED_HOSTS.',
+    );
+  }
 }

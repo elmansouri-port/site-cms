@@ -94,7 +94,18 @@ export function resolveLinksDeep(value, targets) {
   if (!targets?.size || value == null) return value;
 
   if (typeof value === 'string') {
-    return isRef(value) ? resolveLinks(value, targets) : value;
+    /*
+     * Every string, not only the ones that *are* a reference.
+     *
+     * `primaryHref` holds a bare `page:tarifs`, but a block's HTML-ish fields —
+     * a form's consent line, a callout's body, a custom block's markup — hold a
+     * reference *inside* an anchor. Gating on "starts with page:" left those
+     * unresolved, so a link written in the CMS's own link picker rendered as a
+     * literal `href="page:politique"` on the live page. `resolveLinks` returns
+     * the string untouched when neither prefix appears, so this costs one
+     * `includes` per string.
+     */
+    return resolveLinks(value, targets);
   }
   if (Array.isArray(value)) {
     let changed = false;
