@@ -8,10 +8,11 @@
  * collapsed rail stays collapsed. None of that is visible from the API, and all
  * of it is what somebody actually judges the CMS by.
  *
- *   node tools/verify-forms.mjs [baseUrl] [--shots dir] [--headed]
+ *   node tools/verify-forms.mjs [baseUrl] [--shots dir] [--headed] --confirm
  *
- * It creates a page and a form, uses them, and deletes them. A failed run leaves
- * them behind on purpose — they are the evidence.
+ * It writes to the database: one scratch page and one form, both removed at the
+ * end. A failed run leaves them behind on purpose — they are the evidence.
+ * Never point it at production.
  */
 import { chromium } from 'playwright';
 import { mkdir } from 'node:fs/promises';
@@ -26,6 +27,16 @@ const BASE = (args.find(a => !a.startsWith('--')) || 'http://localhost:5173').re
 const SHOTS = path.resolve(flag('shots', 'artifacts/forms'));
 const EMAIL = process.env.ADMIN_EMAIL || 'admin@rainbow.local';
 const PASSWORD = process.env.ADMIN_PASSWORD || 'Rainbow!Admin2026';
+
+if (!args.includes('--confirm')) {
+  console.error(
+    'This tool writes to the database: it creates a scratch page and a form,\n'
+    + 'uses them and deletes both afterwards.\n'
+    + 'Re-run with --confirm once you are sure this is not production data.\n\n'
+    + `  node tools/verify-forms.mjs ${BASE} --confirm`,
+  );
+  process.exit(2);
+}
 
 const PAGE_KEY = 'verify-forms-page';
 const FORM_KEY = 'verify-forms-form';

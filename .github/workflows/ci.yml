@@ -115,7 +115,7 @@ jobs:
       # preview is styled by the site rather than the admin, that a folded panel
       # stays folded, that a clashing field name is refused before a save.
       - name: The form builder and the link inspector
-        run: node tools/verify-forms.mjs http://localhost:8080
+        run: node tools/verify-forms.mjs http://localhost:8080 --confirm
         env:
           ADMIN_PASSWORD: CiPassword!2026
 
