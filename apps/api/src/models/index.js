@@ -78,10 +78,9 @@ const SettingsSchema = new Schema({
   organizationLogo: { type: String, default: '/images/rainbow-logo.png' },
   socialProfiles: { type: [String], default: [] },
 
-  // reco.md 9.1 — arbitrary HTML injected into three zones, site-wide.
-  globalHeadSnippet: { type: String, default: '' },
-  globalBodySnippet: { type: String, default: '' },
-  globalFooterSnippet: { type: String, default: '' },
+  // Site-wide code lives in Chrome.addIns, which gives each snippet a name, a
+  // note, an on/off switch and a page filter. The three anonymous fields that
+  // used to be here are migrated into add-ins on boot; see seed/bootstrap.js.
 
   analytics: {
     matomoUrl: { type: String, default: '' },
@@ -159,17 +158,6 @@ export const Navigation = mongoose.model('Navigation', NavSchema);
 
 /* ── Blog ─────────────────────────────────────────────────────────────────── */
 
-const BlockSchema = new Schema({
-  key: { type: String, default: '' },
-  componentKey: { type: String, required: true },
-  data: { type: Schema.Types.Mixed, default: {} },
-  visible: { type: Boolean, default: true },
-  layout: {
-    spacingTop: { type: String, default: null },
-    spacingBottom: { type: String, default: null },
-  },
-}, { _id: false });
-
 const BlogPostSchema = new Schema({
   slug: { type: String, required: true, index: true },
   locale: { type: String, required: true, index: true },
@@ -187,10 +175,10 @@ const BlogPostSchema = new Schema({
   readingMinutes: { type: Number, default: 0 },
   featured: { type: Boolean, default: false },
 
-  // The article body: HTML for imported/Zendesk content, blocks for anything
-  // composed in the CMS. Both may be present; blocks render after the body.
+  // The article body as one piece of HTML: how the imported and Zendesk
+  // articles arrived. Superseded by `sections` below, and kept because those
+  // articles are fine as they are; `sections` wins whenever it has anything in it.
   bodyHtml: { type: String, default: '' },
-  blocks: { type: [BlockSchema], default: [] },
 
   /**
    * The body as an ordered list of sections.
@@ -287,7 +275,7 @@ const MediaSchema = new Schema({
    * The renderer resolves the reference to the current immutable file URL, so
    * visitors still get a long-cached, content-hashed image and no redirect.
    */
-  slug: { type: String, default: '', index: true },
+  slug: { type: String, default: '' },
 
   /**
    * Slugs this asset used to answer to.
@@ -403,10 +391,30 @@ export const Experiment = mongoose.model('Experiment', ExperimentSchema);
 
 /* ── Versions (content history) ───────────────────────────────────────────── */
 
+/**
+ * One restore point.
+ *
+ * `snapshot` is the whole document, which for a page is a few hundred kilobytes
+ * of block markup. `digest` is the handful of facts a history list shows —
+ * title, route, status, block count — stored separately so the list can be read
+ * without loading thirty snapshots. See `services/history.js`.
+ */
 const VersionSchema = new Schema({
-  entity: { type: String, enum: ['page', 'post', 'navigation', 'settings', 'strings'], required: true, index: true },
+  entity: {
+    type: String,
+    enum: ['page', 'post', 'chrome', 'navigation', 'settings'],
+    required: true,
+    index: true,
+  },
   entityId: { type: String, required: true, index: true },
   label: { type: String, default: '' },
+  /**
+   * `manual` is a restore point somebody asked for and named. Those are exempt
+   * from trimming: they exist because a human said "this is the state I want to
+   * be able to get back to", and expiring one would defeat the point of making it.
+   */
+  kind: { type: String, enum: ['auto', 'manual'], default: 'auto' },
+  digest: { type: Schema.Types.Mixed, default: {} },
   snapshot: { type: Schema.Types.Mixed, required: true },
   createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
 }, { timestamps: { createdAt: true, updatedAt: false }, minimize: false });

@@ -34,6 +34,29 @@ on the compose network.
 Every service has a Docker healthcheck, and `web` waits for `api` to be healthy
 before it starts.
 
+## Getting content back
+
+Two different problems, two different answers.
+
+**Somebody broke a page.** Use the CMS. Every page, article, menu, the header
+and footer, and the settings carry a **History** tab: a list of restore points,
+what changed at each, and a Restore button. A restore point is written by the
+API before every edit, every delete, every conversion and every publish — not by
+somebody remembering to make one — and an editor can save a named one before a
+change they are unsure about.
+
+Restoring is itself undoable: the state it replaces is snapshotted first, and
+the interface offers the undo immediately.
+
+A **deleted page** is recovered from **Pages → Trash**, which is those same
+snapshots rather than a second copy that could disagree with them. It comes back
+as a draft.
+
+The last 40 automatic snapshots are kept per item. Named restore points are
+never trimmed.
+
+**The database is gone.** That is what the backups below are for.
+
 ## Backups
 
 The database and the uploads volume are the state; everything else is rebuilt
@@ -73,6 +96,28 @@ docker compose logs -f web
 The API redacts `authorization`, `cookie` and anything password-shaped before
 writing.
 
+## Checking a deploy
+
+```bash
+npm run verify:live   -- https://your-host        # the site still ships the authored bytes
+npm run verify:chrome -- https://your-host        # one header and one footer, in every language
+npm run verify:assets -- https://your-host        # every image and link resolves
+```
+
+Two more write to the database, so they belong on staging:
+
+```bash
+ADMIN_PASSWORD=… npm run verify:editor -- https://staging --confirm
+ADMIN_PASSWORD=… npm run verify:ui     -- https://staging --confirm
+```
+
+`verify:ui` drives a real browser through the flows an editor uses — creating a
+landing page with no header or footer, adding a form block and submitting it as a
+visitor, pointing a button at a page by reference, restoring from history,
+recovering from the trash — and checks each result on the rendered site rather
+than in the admin's own state. `npm run ui:shots` photographs every admin screen
+in both themes, which is the fastest way to spot a visual regression.
+
 ## Common problems
 
 **The site returns 503.** The frontend cannot reach the API. Check
@@ -88,6 +133,12 @@ is active in Settings.
 
 **`npm run seed` says a page was skipped.** Someone edited it in the CMS and
 the source template changed too. Decide which wins; `--force` takes the file.
+
+**A form on the site posts into a 404 in development.** The gateway routes
+`/api` and `/media` to the API; in development the Astro and Vite dev servers
+proxy the same prefixes themselves (`apps/web/astro.config.mjs`,
+`apps/cms/vite.config.js`). If you add a prefix the gateway owns, add it there
+too or the two environments will disagree.
 
 **A build baked in the wrong config.** Configuration is read from
 `process.env` at runtime, never from `import.meta.env`, and `**/.env` is in

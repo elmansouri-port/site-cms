@@ -13,7 +13,9 @@
  * the interesting question is never "do you want to save" but "will people see
  * this".
  */
-import { Icon, Badge } from './ui.jsx';
+import { Check, ExternalLink, Eye, Save } from 'lucide-react';
+import { cn } from '../lib/cn.js';
+import { Badge, Button } from './ui/index.js';
 
 export default function PublishBar({
   status,            // 'published' | 'draft'
@@ -39,61 +41,64 @@ export default function PublishBar({
       : null;
 
   return (
-    <div className={`pubbar ${dirty ? 'is-dirty' : ''}`}>
-      <div className="pubbar__state">
-        <Badge tone={live ? 'ok' : 'warn'}>{live ? 'Live' : 'Draft'}</Badge>
-        <span className="pubbar__where">
+    <div
+      className={cn(
+        'bg-card/95 sticky bottom-0 z-20 mt-4 flex flex-wrap items-center gap-3 rounded-xl border',
+        'px-4 py-3 shadow-lg backdrop-blur',
+        dirty && 'border-primary/40',
+      )}
+    >
+      <div className="flex items-center gap-2">
+        <Badge variant={live ? 'success' : 'warning'}>{live ? 'Live' : 'Draft'}</Badge>
+        <span className="text-muted-foreground text-[12.5px]">
           {live
-            ? (dirty
-              ? 'Live, with unsaved changes visitors cannot see yet'
-              : 'Visible to everyone')
-            : (dirty
-              ? 'Not published, and you have unsaved changes'
-              : 'Only you can see this')}
+            ? (dirty ? 'Live, with unsaved changes visitors cannot see yet' : 'Visible to everyone')
+            : (dirty ? 'Not published, and you have unsaved changes' : 'Only you can see this')}
         </span>
       </div>
 
-      {children && <div className="pubbar__extra">{children}</div>}
+      {children}
 
-      <span className="pubbar__spacer" />
+      <span className="grow" />
 
-      <div className="pubbar__times">
+      <div className="text-muted-foreground hidden gap-3 text-[11.5px] lg:flex">
         {savedAt && <span>Saved {savedAt}</span>}
         {live && publishedAt && <span>Published {publishedAt}</span>}
       </div>
 
-      <div className="pubbar__actions">
+      <div className="flex flex-wrap items-center gap-2">
         {onPreview && (
-          <button className="btn btn--sm" onClick={onPreview} disabled={busy}>
-            <Icon name="eye" /> Preview
-          </button>
+          <Button variant="outline" size="sm" onClick={onPreview} disabled={busy}>
+            <Eye /> Preview
+          </Button>
         )}
         {live && viewUrl && (
-          <a className="btn btn--sm" href={viewUrl} target="_blank" rel="noreferrer">
-            <Icon name="external" /> View live
-          </a>
+          <Button variant="outline" size="sm" asChild>
+            <a href={viewUrl} target="_blank" rel="noreferrer"><ExternalLink /> View live</a>
+          </Button>
         )}
 
         {canEdit && (
           <>
-            <button
-              className={`btn btn--sm ${!primary && dirty ? 'btn--primary' : ''}`}
+            <Button
+              variant={!primary && dirty ? 'default' : 'outline'}
+              size="sm"
               onClick={onSave}
               disabled={busy || !dirty}
             >
-              <Icon name="save" /> {busy ? 'Saving…' : live ? 'Save' : 'Save draft'}
-            </button>
+              <Save /> {busy ? 'Saving…' : live ? 'Save' : 'Save draft'}
+            </Button>
 
             {primary && (
-              <button className="btn btn--sm btn--primary" onClick={primary.run} disabled={busy}>
-                <Icon name="check" /> {primary.label}
-              </button>
+              <Button size="sm" onClick={primary.run} disabled={busy}>
+                <Check /> {primary.label}
+              </Button>
             )}
 
             {live && onUnpublish && (
-              <button className="btn btn--sm" onClick={onUnpublish} disabled={busy} title="Take this off the site">
+              <Button variant="outline" size="sm" onClick={onUnpublish} disabled={busy} title="Take this off the site">
                 Unpublish
-              </button>
+              </Button>
             )}
           </>
         )}
@@ -111,16 +116,36 @@ export default function PublishBar({
  */
 export function Steps({ steps, active, onChange }) {
   return (
-    <ol className="steps">
+    <ol className="mb-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
       {steps.map((step, i) => (
-        <li key={step.value} className={active === step.value ? 'is-active' : ''}>
-          <button type="button" onClick={() => onChange(step.value)}>
-            <span className="steps__num">{step.done ? '✓' : i + 1}</span>
-            <span className="steps__text">
-              <strong>{step.label}</strong>
-              {step.hint && <span>{step.hint}</span>}
+        <li key={step.value}>
+          <button
+            type="button"
+            onClick={() => onChange(step.value)}
+            aria-current={active === step.value ? 'step' : undefined}
+            className={cn(
+              'focus-visible:ring-ring/40 flex w-full items-center gap-2.5 rounded-lg border p-2.5',
+              'text-left transition-colors outline-none focus-visible:ring-[3px]',
+              active === step.value ? 'border-primary bg-accent/60' : 'bg-card hover:bg-muted',
+            )}
+          >
+            <span
+              className={cn(
+                'flex size-6 shrink-0 items-center justify-center rounded-full text-[11.5px] font-semibold',
+                step.done
+                  ? 'bg-success/15 text-success'
+                  : active === step.value
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground',
+              )}
+            >
+              {step.done ? <Check className="size-3 stroke-3" /> : i + 1}
             </span>
-            {step.problems > 0 && <span className="steps__badge">{step.problems}</span>}
+            <span className="min-w-0 grow">
+              <span className="block text-[13px] font-semibold">{step.label}</span>
+              {step.hint && <span className="text-muted-foreground block text-[12px]">{step.hint}</span>}
+            </span>
+            {step.problems > 0 && <Badge variant="warning">{step.problems}</Badge>}
           </button>
         </li>
       ))}

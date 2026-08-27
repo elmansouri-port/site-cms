@@ -3,14 +3,14 @@ import { config } from './config.js';
 import { logger } from './lib/log.js';
 import { connectMongo, disconnectMongo } from './lib/mongo.js';
 import { getRedis, closeRedis } from './lib/redis.js';
-import { ensureBootstrapUser } from './seed/bootstrap.js';
+import { bootstrap } from './seed/bootstrap.js';
 
 const app = createApp();
 
 async function main() {
   await connectMongo();
   getRedis();
-  await ensureBootstrapUser();
+  await bootstrap();
 
   const server = app.listen(config.port, config.host, () => {
     logger.info({ port: config.port, env: config.env }, 'content API listening');

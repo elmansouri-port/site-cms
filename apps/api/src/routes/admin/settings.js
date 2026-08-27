@@ -46,9 +46,6 @@ const settingsBody = z.object({
   organizationName: z.string().max(200).optional(),
   organizationLogo: z.string().max(500).optional(),
   socialProfiles: z.array(z.string().max(300)).max(20).optional(),
-  globalHeadSnippet: z.string().max(100000).optional(),
-  globalBodySnippet: z.string().max(100000).optional(),
-  globalFooterSnippet: z.string().max(100000).optional(),
   analytics: z.object({
     matomoUrl: z.string().max(300).optional(),
     matomoSiteId: z.string().max(20).optional(),

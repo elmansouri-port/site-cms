@@ -11,11 +11,12 @@ import * as L from './html.js';
 import { collectUnits } from './units.js';
 import { rewriteEndpoints } from './endpoints.js';
 import { resolveAssets } from './assets.js';
+import { resolveLinks } from './links.js';
 
 /** Read the marker key(s) off an opening tag. */
 function markersFor(html, unit) {
   const raw = html.slice(unit.tagStart, unit.tagEnd);
-  const attrs = L.parseAttrs({ raw, start: unit.tagStart }, html);
+  const attrs = L.parseAttrs({ raw, start: unit.tagStart });
   const get = (n) => (attrs.find(a => a.name === n) || {}).value;
   return {
     plain: get('data-i18n'),
@@ -55,6 +56,7 @@ export function renderRich(value, unit, html) {
  *                    this origin (see endpoints.js)
  * opts.assets        [{slug, url, aliases}] — named image references to resolve
  *                    to their current file (see assets.js)
+ * opts.links         Map of `page:<key>` → path in this locale (see links.js)
  */
 export function render(template, catalogue, locale, opts = {}) {
   const stripMarkers = opts.stripMarkers !== false;
@@ -166,6 +168,10 @@ export function render(template, catalogue, locale, opts = {}) {
   // Named image references become the file the asset currently holds, so
   // replacing one image updates every page that uses it.
   if (opts.assets?.length) out = resolveAssets(out, opts.assets);
+
+  // `page:tarifs` becomes this locale's path for that page, so a link follows a
+  // rename and a translated route instead of pointing at where the page was.
+  if (opts.links?.size) out = resolveLinks(out, opts.links);
 
   return out;
 }

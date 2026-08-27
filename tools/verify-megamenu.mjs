@@ -39,7 +39,6 @@ function build(nav, locale) {
   };
   const runnable = body.slice(0, body.indexOf('function setupDropdown'))
     + `\n;return {${OUTPUTS.map(k => `${k}: typeof ${k} !== 'undefined' ? ${k} : null`).join(', ')}};`;
-  // eslint-disable-next-line no-new-func
   const fn = new Function('window', 'document', 'location', runnable);
   return fn(stub.window, stub.document, stub.location);
 }

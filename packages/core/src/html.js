@@ -98,8 +98,13 @@ export function scan(html) {
   return spans;
 }
 
-/** Parse an opening tag's attributes into [{name, value, valueStart, valueEnd}]. */
-export function parseAttrs(span, html) {
+/**
+ * Parse an opening tag's attributes into [{name, value, valueStart, valueEnd}].
+ *
+ * Offsets are absolute in the document the span came from, which is what lets a
+ * caller splice over an attribute value without re-serialising anything.
+ */
+export function parseAttrs(span) {
   const out = [];
   const inner = span.raw;
   const re = /([a-zA-Z_:][-a-zA-Z0-9_:.]*)\s*=\s*("([^"]*)"|'([^']*)')/g;
@@ -141,6 +146,22 @@ export function isTranslatableAttr(tagName, attrName, attrs) {
 }
 
 const SLUG_MAX = 34;
+
+/**
+ * The inner markup of the first heading in a fragment.
+ *
+ * The imported blocks were labelled from their markup at migration time, which
+ * produced things like "Section: Relative" and "Block: Block 8" — a class name
+ * and a counter. Neither tells an editor which part of the page they are looking
+ * at. The heading inside the block does, and it is already there.
+ *
+ * Returned as markup rather than as text: entity decoding belongs to `textOf`,
+ * and doing it in two places is how `&amp;nbsp;` ends up on a screen.
+ */
+export function firstHeading(html) {
+  const match = /<h[1-4]\b[^>]*>([\s\S]*?)<\/h[1-4]>/i.exec(String(html || ''));
+  return match ? match[1] : '';
+}
 
 /** Human-readable, stable-ish key fragment derived from the source copy. */
 export function slugify(text, max = SLUG_MAX) {

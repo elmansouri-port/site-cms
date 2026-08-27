@@ -12,6 +12,9 @@
  * reading a dropdown of identifiers.
  *
  * type: text | textarea | html | code | number | boolean | select | media | list | lines
+ *     | link       — a destination chosen from the pages, articles and anchors that
+ *                    exist, stored as a reference so it survives a rename (LinkPicker)
+ *     | formTarget — where a form's submissions go: a lead type, or an integration
  */
 
 export const BLOCK_CATEGORIES = [
@@ -34,9 +37,9 @@ export const BLOCK_SCHEMAS = {
       { name: 'highlight', label: 'Highlighted word', type: 'text', hint: 'Rendered in brand purple after the title.' },
       { name: 'subtitle', label: 'Subtitle', type: 'textarea' },
       { name: 'primaryLabel', label: 'Primary button', type: 'text' },
-      { name: 'primaryHref', label: 'Primary link', type: 'text' },
+      { name: 'primaryHref', label: 'Primary button goes to', type: 'link' },
       { name: 'secondaryLabel', label: 'Secondary button', type: 'text' },
-      { name: 'secondaryHref', label: 'Secondary link', type: 'text' },
+      { name: 'secondaryHref', label: 'Secondary button goes to', type: 'link' },
       { name: 'image', label: 'Image', type: 'media' },
       { name: 'imageAlt', label: 'Image alt text', type: 'text', hint: 'Describe the image. Required for accessibility and read by image search.' },
       { name: 'align', label: 'Alignment', type: 'select', options: ['center', 'left'] },
@@ -51,9 +54,9 @@ export const BLOCK_SCHEMAS = {
       { name: 'title', label: 'Title', type: 'text' },
       { name: 'subtitle', label: 'Subtitle', type: 'textarea' },
       { name: 'primaryLabel', label: 'Primary button', type: 'text' },
-      { name: 'primaryHref', label: 'Primary link', type: 'text' },
+      { name: 'primaryHref', label: 'Primary button goes to', type: 'link' },
       { name: 'secondaryLabel', label: 'Secondary button', type: 'text' },
-      { name: 'secondaryHref', label: 'Secondary link', type: 'text' },
+      { name: 'secondaryHref', label: 'Secondary button goes to', type: 'link' },
       { name: 'background', label: 'Background image', type: 'media' },
     ],
   },
@@ -96,7 +99,7 @@ export const BLOCK_SCHEMAS = {
           { name: 'title', label: 'Title', type: 'text' },
           { name: 'description', label: 'Description', type: 'textarea' },
           { name: 'linkLabel', label: 'Link label', type: 'text' },
-          { name: 'linkHref', label: 'Link URL', type: 'text' },
+          { name: 'linkHref', label: 'Link goes to', type: 'link' },
         ],
       },
     ],
@@ -166,7 +169,7 @@ export const BLOCK_SCHEMAS = {
       { name: 'imageAlt', label: 'Image alt text', type: 'text', hint: 'Describe the image. Required for accessibility and read by image search.' },
       { name: 'reverse', label: 'Image on the left', type: 'boolean' },
       { name: 'linkLabel', label: 'Link label', type: 'text' },
-      { name: 'linkHref', label: 'Link URL', type: 'text' },
+      { name: 'linkHref', label: 'Link goes to', type: 'link' },
     ],
   },
   pricing_cards: {
@@ -194,7 +197,7 @@ export const BLOCK_SCHEMAS = {
           { name: 'period', label: 'Period suffix', type: 'text' },
           { name: 'features', label: 'Features (one per line)', type: 'lines' },
           { name: 'ctaLabel', label: 'Button label', type: 'text' },
-          { name: 'ctaHref', label: 'Button link', type: 'text' },
+          { name: 'ctaHref', label: 'Button goes to', type: 'link' },
           { name: 'highlighted', label: 'Highlight this plan', type: 'boolean' },
         ],
       },
@@ -239,6 +242,71 @@ export const BLOCK_SCHEMAS = {
       { name: 'ctaLabel', label: 'Link to the blog', type: 'text' },
     ],
   },
+  form: {
+    label: 'Form',
+    category: 'convert',
+    description: 'Capture an enquiry. Stored here first, then forwarded — so nothing is lost.',
+    wireframe: ['title', 'text', 'rows', 'buttons'],
+    fields: [
+      { name: 'title', label: 'Title', type: 'text' },
+      { name: 'subtitle', label: 'Subtitle', type: 'textarea' },
+      {
+        name: 'submitTo',
+        label: 'Where submissions go',
+        type: 'formTarget',
+        hint: 'Every submission is stored under Leads either way. An integration also forwards it, server-side.',
+      },
+      {
+        name: 'fields',
+        label: 'Fields',
+        type: 'list',
+        itemLabel: 'label',
+        fields: [
+          { name: 'label', label: 'Label', type: 'text' },
+          {
+            name: 'name',
+            label: 'Field name',
+            type: 'text',
+            hint: 'What the submission calls this value. Use email, name, company or phone for those, so they fill the matching columns under Leads.',
+          },
+          {
+            name: 'type',
+            label: 'Kind',
+            type: 'select',
+            options: ['text', 'email', 'tel', 'textarea', 'select', 'checkbox', 'number', 'url', 'date'],
+          },
+          { name: 'placeholder', label: 'Placeholder', type: 'text' },
+          { name: 'options', label: 'Choices (one per line)', type: 'textarea', hint: 'For a dropdown.' },
+          { name: 'required', label: 'Required', type: 'boolean' },
+          { name: 'width', label: 'Full width', type: 'select', options: ['auto', 'full'] },
+          { name: 'hint', label: 'Hint under the field', type: 'text' },
+        ],
+      },
+      { name: 'columns', label: 'Columns', type: 'select', options: [1, 2] },
+      { name: 'submitLabel', label: 'Button label', type: 'text' },
+      {
+        name: 'consentText',
+        label: 'Small print',
+        type: 'html',
+        rows: 3,
+        hint: 'Consent and privacy wording, shown under the fields. HTML, so it can carry a link to the policy.',
+      },
+      { name: 'successTitle', label: 'Thank-you title', type: 'text' },
+      {
+        name: 'successMessage',
+        label: 'Thank-you message',
+        type: 'textarea',
+        hint: 'Shown in place of the form. Say what happens next and when.',
+      },
+      {
+        name: 'redirectTo',
+        label: 'Or send them to a page',
+        type: 'link',
+        hint: 'Leave empty to show the thank-you message in place. A separate page is worth it when you need a conversion URL for ads.',
+      },
+      { name: 'align', label: 'Alignment', type: 'select', options: ['left', 'center'] },
+    ],
+  },
   custom_html: {
     label: 'Custom block',
     category: 'advanced',
@@ -274,6 +342,36 @@ export const BLOCK_SCHEMAS = {
     advanced: true,
     fields: [
       { name: 'html', label: 'HTML', type: 'code', language: 'html', rows: 16 },
+    ],
+  },
+};
+
+/**
+ * What a block starts as when it is dropped onto a page.
+ *
+ * Only the blocks that are useless empty need one. A hero with no headline still
+ * shows an editor a hero; a form with no fields cannot be submitted, renders as
+ * a lone button, and gives nobody anything to react to.
+ */
+export const BLOCK_DEFAULTS = {
+  form: {
+    title: 'Talk to us',
+    subtitle: 'Tell us what you need and we will come back to you within one working day.',
+    submitTo: 'lead:contact',
+    columns: 2,
+    submitLabel: 'Send',
+    successTitle: 'Thank you',
+    successMessage: 'We have your details and will be in touch within one working day.',
+    consentText: 'By sending this form you agree to us contacting you about your enquiry. '
+      + 'We do not share your details with anyone else.',
+    fields: [
+      { label: 'First name', name: 'firstName', type: 'text', required: true, autocomplete: 'given-name' },
+      { label: 'Last name', name: 'lastName', type: 'text', required: true, autocomplete: 'family-name' },
+      { label: 'Work email', name: 'email', type: 'email', required: true, autocomplete: 'email' },
+      { label: 'Company', name: 'company', type: 'text', autocomplete: 'organization' },
+      { label: 'Phone', name: 'phone', type: 'tel', autocomplete: 'tel' },
+      { label: 'How many people work with you?', name: 'size', type: 'select', options: '1–20\n21–100\n101–500\n500+' },
+      { label: 'What can we help with?', name: 'message', type: 'textarea', width: 'full' },
     ],
   },
 };

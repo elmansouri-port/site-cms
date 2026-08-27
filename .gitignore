@@ -12,6 +12,10 @@ coverage/
 # The upstream static site, cloned for reference during the migration.
 _source/
 
+# Screenshots and reports the verification tools write. CI keeps them as build
+# artefacts; the handful checked into docs/screenshots is copied there by hand.
+artifacts/
+
 # Runtime data
 data/
 uploads/

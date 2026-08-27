@@ -14,12 +14,22 @@ import { audit } from '../../services/publish.js';
 
 export const authRouter = Router();
 
+/**
+ * Slow password guessing down without locking anybody out of their own account.
+ *
+ * `skipSuccessfulRequests` is the important part: the limiter exists to make
+ * guessing expensive, and a guess that *works* is not the thing being defended
+ * against. Counting successes too meant an editor who signs in from a few
+ * devices, or a scripted check that signs in on each run, could exhaust the
+ * window and be told to come back in a quarter of an hour.
+ */
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 10,
+  skipSuccessfulRequests: true,
   standardHeaders: 'draft-7',
   legacyHeaders: false,
-  message: { error: 'Too many attempts, try again in a few minutes' },
+  message: { error: 'Too many failed attempts, try again in a few minutes' },
 });
 
 const credentials = z.object({

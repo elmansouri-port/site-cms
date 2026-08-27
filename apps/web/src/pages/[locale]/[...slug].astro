@@ -24,6 +24,23 @@ import { renderArticle } from '../../lib/article.js';
 import { usedExperiments } from '../../lib/experiments.js';
 
 const { locale } = Astro.locals;
+
+/*
+ * A request that never passed through the locale middleware is not a page.
+ *
+ * The middleware waves `/api/*` and `/cms/*` through untouched, because behind
+ * the gateway those belong to the API and never reach Astro at all. In
+ * development they do, and this route matches them — `/cms/nope` reads as
+ * locale "cms". Rendering that asks the API for locale `undefined` and turns an
+ * unknown path into a 500. It is a 404: nothing here answers to it.
+ */
+if (!locale) {
+  return new Response('Not found', {
+    status: 404,
+    headers: { 'content-type': 'text/plain; charset=utf-8' },
+  });
+}
+
 const slug = Astro.params.slug || '';
 const route = String(slug).replace(/^\/+|\/+$/g, '');
 

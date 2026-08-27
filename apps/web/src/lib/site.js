@@ -4,6 +4,7 @@
 import { apiGet } from './api.js';
 import { config } from './config.js';
 import { pageUrlFor, routeFor, blogSegmentFor } from '@rainbow/core/seo';
+import { linkTargets } from '@rainbow/core/links';
 
 export const bootstrap = () => apiGet('/api/v1/site/bootstrap', { ttl: 30 });
 
@@ -62,6 +63,25 @@ export async function knownRoutes(locale) {
     set.add(routeFor(page, locale));
   }
   return set;
+}
+
+/**
+ * Where every `page:<key>` and `post:<slug>` reference points in one locale.
+ *
+ * Built from the same route index the resolver uses, so a link and a canonical
+ * URL cannot disagree about where a page lives. Cached with that index, so this
+ * costs nothing per request.
+ */
+export async function linkMap(settings, locale) {
+  const index = await routeIndex().catch(() => null);
+  if (!index) return new Map();
+  return linkTargets({
+    pages: index.pages || [],
+    posts: index.posts || [],
+    locale,
+    blogSegment: blogSegmentFor(settings, locale),
+    routeFor,
+  });
 }
 
 /** The blog's URL segment in this locale (`blog` unless Settings overrides it). */

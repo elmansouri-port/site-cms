@@ -19,7 +19,7 @@ import { validate, q } from '../../middleware/validate.js';
 import { requireAuth, requireRole } from '../../middleware/auth.js';
 import { audit, publishChanged } from '../../services/publish.js';
 import { slugify } from '@rainbow/core/html';
-import { assetRef, ASSET_PREFIX } from '@rainbow/core/assets';
+import { assetRef } from '@rainbow/core/assets';
 
 export const mediaRouter = Router();
 

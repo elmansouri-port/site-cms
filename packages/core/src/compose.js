@@ -9,6 +9,7 @@
  */
 import { render } from './render.js';
 import { resolveAssetsDeep } from './assets.js';
+import { resolveLinksDeep } from './links.js';
 import { buildHead, buildJsonLd } from './seo.js';
 
 const NL = '\n';
@@ -246,12 +247,28 @@ function renderChrome(role, page, ctx, opts = {}) {
     onMissing: ctx.onMissing,
     integrations: ctx.integrations,
         assets: ctx.assets,
+        links: ctx.links,
   });
   if (part.css) html = `<style data-cms-chrome="${role}">${part.css}</style>` + html;
   if (part.js) html += `<script data-cms-chrome="${role}">${part.js}</script>`;
   // A placeholder block owns the whitespace and comment that preceded it in the
   // authored page; the shared chrome stores only the element.
   return (opts.trivia || '') + html;
+}
+
+/**
+ * A component block with its references resolved.
+ *
+ * Both indirections resolve here rather than inside each block template: a
+ * block should render the data it is handed, and "which file is this image" and
+ * "where is this page in this language" are questions about the site, not about
+ * the block.
+ */
+function withResolvedData(block, ctx) {
+  let data = block.data;
+  if (ctx.assets?.length) data = resolveAssetsDeep(data, ctx.assets);
+  if (ctx.links?.size) data = resolveLinksDeep(data, ctx.links);
+  return data === block.data ? block : { ...block, data };
 }
 
 /**
@@ -274,6 +291,7 @@ export function composeBody(page, opts) {
       onMissing: opts.onMissing,
       integrations: opts.integrations,
       assets: opts.assets,
+      links: opts.links,
     });
     return rendered.slice(rendered.indexOf('>') + 1, rendered.lastIndexOf('</body>'));
   }
@@ -293,6 +311,7 @@ export function composeBody(page, opts) {
       onMissing: opts.onMissing,
       integrations: opts.integrations,
       assets: opts.assets,
+      links: opts.links,
     };
     if (block.role) {
       const html = renderChrome(block.role, page, chromeCtx, {
@@ -306,9 +325,7 @@ export function composeBody(page, opts) {
     if (block.type === 'component') {
       const effective = effectiveBlock(block, opts.variants);
       const html = opts.renderComponent
-        ? opts.renderComponent(opts.assets?.length
-          ? { ...effective, data: resolveAssetsDeep(effective.data, opts.assets) }
-          : effective)
+        ? opts.renderComponent(withResolvedData(effective, opts))
         : '';
       if (html) parts.push(html);
       continue;
@@ -332,6 +349,7 @@ export function composeBody(page, opts) {
       onMissing: opts.onMissing,
       integrations: opts.integrations,
       assets: opts.assets,
+      links: opts.links,
     });
     // Some pages nest the header inside a wrapper rather than carrying it as a
     // block of its own. The region is swapped in place so those pages are
@@ -357,6 +375,7 @@ function renderScriptBlock(raw, opts) {
     onMissing: opts.onMissing,
     integrations: opts.integrations,
       assets: opts.assets,
+      links: opts.links,
   });
 }
 
@@ -382,6 +401,7 @@ export function composeParts(page, ctx) {
       onMissing: ctx.onMissing,
       integrations: ctx.integrations,
         assets: ctx.assets,
+        links: ctx.links,
     })
     : '';
 
@@ -389,7 +409,6 @@ export function composeParts(page, ctx) {
   head.push(buildHead(page, ctx));
   const ld = buildJsonLd(page, ctx);
   if (ld) head.push(ld);
-  if (ctx.settings && ctx.settings.globalHeadSnippet) head.push(ctx.settings.globalHeadSnippet);
   if (page.snippets && page.snippets.head) head.push(page.snippets.head);
   for (const addIn of addInsFor(ctx.chrome, 'head', { variants: ctx.variants, pageKey: page.key })) {
     head.push(addIn.html);
@@ -408,7 +427,8 @@ export function composeParts(page, ctx) {
     raw(composeBody(page, {
       catalogue: ctx.catalogue, locale, sourceLocale: ctx.sourceLocale,
       editMode: ctx.annotateStrings ?? ctx.editMode, onMissing: ctx.onMissing,
-      variants: ctx.variants,
+      variants: ctx.variants, integrations: ctx.integrations,
+      assets: ctx.assets, links: ctx.links,
     }));
   } else {
     // Copy is annotated for inline editing on any preview render; the block
@@ -424,7 +444,8 @@ export function composeParts(page, ctx) {
       sourceLocale: ctx.sourceLocale,
       onMissing: ctx.onMissing,
       integrations: ctx.integrations,
-        assets: ctx.assets,
+      assets: ctx.assets,
+      links: ctx.links,
     };
 
     for (const block of page.sections || []) {
@@ -462,9 +483,7 @@ export function composeParts(page, ctx) {
         const effective = effectiveBlock(block, ctx.variants);
         parts.push({
           kind: 'component',
-          block: ctx.assets?.length
-            ? { ...effective, data: resolveAssetsDeep(effective.data, ctx.assets) }
-            : effective,
+          block: withResolvedData(effective, ctx),
         });
         continue;
       }
@@ -479,6 +498,7 @@ export function composeParts(page, ctx) {
         onMissing: ctx.onMissing,
         integrations: ctx.integrations,
         assets: ctx.assets,
+        links: ctx.links,
       });
       // Some pages nest the header inside a wrapper rather than carrying it as
       // a block of its own, so the region is swapped in place. Without this the
@@ -501,9 +521,7 @@ export function composeParts(page, ctx) {
   // carries it, so there is nothing to strip and nothing to leak.
   if (ctx.editMode) raw('<script src="/js/cms-editor.js" defer></script>');
 
-  if (ctx.settings && ctx.settings.globalBodySnippet) raw(ctx.settings.globalBodySnippet);
   if (page.snippets && page.snippets.body) raw(page.snippets.body);
-  if (ctx.settings && ctx.settings.globalFooterSnippet) raw(ctx.settings.globalFooterSnippet);
   if (page.snippets && page.snippets.footer) raw(page.snippets.footer);
   for (const addIn of addInsFor(ctx.chrome, 'bodyEnd', addInCtx)) raw(addIn.html);
 

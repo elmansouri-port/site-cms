@@ -20,5 +20,7 @@ uploads
 !.env.example
 *.log
 docs-internal
+# Screenshots and reports the verification tools write.
+artifacts
 .vscode
 .idea

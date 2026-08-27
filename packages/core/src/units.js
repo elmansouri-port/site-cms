@@ -144,7 +144,7 @@ export function collectUnits(html) {
 
     // opening tag
     if (nm === 'head') inHead = true;
-    const attrs = L.parseAttrs(span, html);
+    const attrs = L.parseAttrs(span);
 
     if (nm === 'script') {
       const type = (attrs.find(a => a.name === 'type') || {}).value || '';

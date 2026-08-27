@@ -10,7 +10,11 @@
  * check, it is a plugin selling itself.
  */
 import { useCallback, useEffect, useState } from 'react';
-import { Panel, Icon, Spinner } from './ui.jsx';
+import { AlertCircle, Check, RefreshCw, TriangleAlert } from 'lucide-react';
+import { cn } from '../lib/cn.js';
+import {
+  Badge, Button, Card, CardContent, CardHeader, CardTitle, Spinner,
+} from './ui/index.js';
 
 export default function SeoChecklist({ page, locale, seo }) {
   const [state, setState] = useState({ loading: false, error: null, checks: null, stats: null });
@@ -38,56 +42,70 @@ export default function SeoChecklist({ page, locale, seo }) {
   const warned = (state.checks || []).filter(c => c.level === 'warn').length;
 
   return (
-    <Panel
-      title="On-page check"
-      actions={(
-        <button className="btn btn--sm" onClick={run} disabled={state.loading}>
-          <Icon name="refresh" /> Re-check
-        </button>
-      )}
-    >
+    <Card>
+      <CardHeader>
+        <CardTitle>On-page check</CardTitle>
+        <div data-slot="card-actions">
+          <Button variant="outline" size="sm" onClick={run} disabled={state.loading}>
+            <RefreshCw /> Re-check
+          </Button>
+        </div>
+      </CardHeader>
+
       {state.loading && <Spinner label="Reading the live page…" />}
       {state.error && (
-        <p className="muted">
+        <CardContent className="text-muted-foreground text-[12.5px]">
           Could not read {url} — {state.error.message}
-        </p>
+        </CardContent>
       )}
 
       {state.checks && (
         <>
-          <div className="inline" style={{ marginBottom: 12 }}>
+          <div className="flex flex-wrap items-center gap-2 border-b p-3">
             {failed === 0 && warned === 0
-              ? <span className="badge badge--ok">Nothing to fix</span>
+              ? <Badge variant="success">Nothing to fix</Badge>
               : (
                 <>
-                  {failed > 0 && <span className="badge badge--danger">{failed} to fix</span>}
-                  {warned > 0 && <span className="badge badge--warn">{warned} to look at</span>}
+                  {failed > 0 && <Badge variant="destructive">{failed} to fix</Badge>}
+                  {warned > 0 && <Badge variant="warning">{warned} to look at</Badge>}
                 </>
               )}
             {state.stats && (
-              <span className="muted" style={{ fontSize: 12 }}>
+              <span className="text-muted-foreground ml-auto text-[12px]">
                 {state.stats.words.toLocaleString()} words · {state.stats.images} images ·{' '}
                 {state.stats.links} links
               </span>
             )}
           </div>
 
-          <ul className="checks">
+          <ul className="divide-y">
             {state.checks.map(check => (
-              <li key={check.id} className={`checks__row is-${check.level}`}>
-                <span className="checks__icon" aria-hidden="true">
-                  {check.level === 'pass' ? '✓' : check.level === 'warn' ? '!' : '×'}
+              <li key={check.id} className="flex items-start gap-2.5 px-3 py-2">
+                <span
+                  className={cn(
+                    'mt-px flex size-4 shrink-0 items-center justify-center rounded-full',
+                    check.level === 'pass' && 'bg-success/15 text-success',
+                    check.level === 'warn' && 'bg-warning/15 text-warning',
+                    check.level === 'fail' && 'bg-destructive/15 text-destructive',
+                  )}
+                  aria-hidden="true"
+                >
+                  {check.level === 'pass'
+                    ? <Check className="size-2.5 stroke-3" />
+                    : check.level === 'warn'
+                      ? <TriangleAlert className="size-2.5" />
+                      : <AlertCircle className="size-2.5" />}
                 </span>
-                <span>
-                  <strong>{check.label}</strong>
-                  {check.detail && <span className="checks__detail"> {check.detail}</span>}
+                <span className="min-w-0 text-[12.5px] leading-snug">
+                  <strong className="font-medium">{check.label}</strong>
+                  {check.detail && <span className="text-muted-foreground"> {check.detail}</span>}
                 </span>
               </li>
             ))}
           </ul>
         </>
       )}
-    </Panel>
+    </Card>
   );
 }
 

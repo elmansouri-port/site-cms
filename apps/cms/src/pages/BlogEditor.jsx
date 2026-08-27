@@ -1,7 +1,7 @@
 /*
  * BlogEditor — write, configure, look at it, publish.
  *
- * Laid out as those four steps in that order, because that is the order the work
+ * Laid out as those steps in that order, because that is the order the work
  * happens in and the previous screen — three tabs and two buttons in the header —
  * left you guessing which of them still needed attention. The steps carry a
  * count of what is unfinished, so "why should I not publish this yet" is
@@ -12,23 +12,36 @@
  * those two states you are in.
  */
 import { useEffect, useMemo, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useResource, useDirtyGuard } from '../lib/hooks.js';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { AlertCircle, Trash2, TriangleAlert } from 'lucide-react';
+import { useDirtyGuard, useResource } from '../lib/hooks.js';
 import { api } from '../lib/api.js';
 import { useToast } from '../lib/toast.jsx';
 import { useAuth } from '../lib/auth.jsx';
 import { renderArticleBody } from '@rainbow/core/article';
-import {
-  Panel, Spinner, ErrorBox, StatusBadge, Icon, Field, Badge, Checkbox, Empty, formatDate,
-} from '../components/ui.jsx';
+import { cn } from '../lib/cn.js';
 import MediaPicker from '../components/MediaPicker.jsx';
 import ArticleSections, { ContentsPreview } from '../components/ArticleSections.jsx';
 import SharePreview from '../components/SharePreview.jsx';
+import HistoryPanel from '../components/HistoryPanel.jsx';
 import PublishBar, { Steps } from '../components/PublishBar.jsx';
+import {
+  Badge, Button, Callout, Card, CardContent, CardHeader, CardTitle, CheckboxField, DataList,
+  DataRow, ErrorBox, Field, FieldGroupLabel, FieldRow, Input, PageHeader, Spinner, StatusBadge,
+  Textarea, formatDate, useConfirm,
+} from '../components/ui/index.js';
+
+const STEPS = [
+  { value: 'write', label: 'Write', hint: 'The article and its contents' },
+  { value: 'configure', label: 'Configure', hint: 'Category, author, cover' },
+  { value: 'share', label: 'Search & sharing', hint: 'How it looks elsewhere' },
+  { value: 'history', label: 'History', hint: 'Every earlier version' },
+];
 
 export default function BlogEditor() {
   const { id } = useParams();
   const toast = useToast();
+  const confirm = useConfirm();
   const navigate = useNavigate();
   const { can } = useAuth();
   const { data, loading, error, reload } = useResource(`/blog/${id}`);
@@ -38,7 +51,6 @@ export default function BlogEditor() {
   const [dirty, setDirty] = useState(false);
   const [busy, setBusy] = useState(false);
   const [picking, setPicking] = useState(null);
-  const [previewKey, setPreviewKey] = useState(0);
 
   useEffect(() => { if (data?.post) { setDraft(data.post); setDirty(false); } }, [data]);
   useDirtyGuard(dirty);
@@ -61,19 +73,17 @@ export default function BlogEditor() {
   const publicPath = `/${draft.locale}/${segment}/${draft.slug}`;
 
   const set = (field) => (e) => {
-    const value = e?.target ? (e.target.type === 'checkbox' ? e.target.checked : e.target.value) : e;
+    const value = e?.target ? e.target.value : e;
     setDraft(d => ({ ...d, [field]: value }));
     setDirty(true);
   };
   const setSeo = (field) => (e) => {
-    const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+    const value = e?.target ? e.target.value : e;
     setDraft(d => ({ ...d, seo: { ...(d.seo || {}), [field]: value } }));
     setDirty(true);
   };
 
-  const writeProblems = problems.filter(p => p.step === 'write').length;
-  const configProblems = problems.filter(p => p.step === 'configure').length;
-  const shareProblems = problems.filter(p => p.step === 'share').length;
+  const countFor = (value) => problems.filter(p => p.step === value).length;
 
   async function save({ then } = {}) {
     setBusy(true);
@@ -103,7 +113,6 @@ export default function BlogEditor() {
         toast.success('Saved as a draft. Nobody can see it yet.');
       }
       reload();
-      setPreviewKey(k => k + 1);
     } catch (err) {
       toast.error(err);
     } finally {
@@ -125,10 +134,17 @@ export default function BlogEditor() {
     } finally {
       setBusy(false);
     }
+    return undefined;
   }
 
   async function unpublish() {
-    if (!confirm('Take this article off the site? The URL will start returning 404.')) return;
+    const ok = await confirm({
+      title: 'Take this article off the site?',
+      body: 'Its URL will start returning 404, and it disappears from the blog index.',
+      confirmLabel: 'Unpublish',
+      tone: 'danger',
+    });
+    if (!ok) return;
     setBusy(true);
     try {
       await api.post(`/blog/${id}/unpublish`);
@@ -162,7 +178,13 @@ export default function BlogEditor() {
   }
 
   async function remove() {
-    if (!confirm('Delete this article? A snapshot is kept in history.')) return;
+    const ok = await confirm({
+      title: 'Delete this article?',
+      body: 'A restore point is written first, so it can be brought back from History.',
+      confirmLabel: 'Delete',
+      tone: 'danger',
+    });
+    if (!ok) return;
     try {
       await api.del(`/blog/${id}`);
       toast.success('Article deleted');
@@ -174,251 +196,407 @@ export default function BlogEditor() {
 
   const translations = data.translations || [];
   const missing = ['fr', 'en', 'de'].filter(l => !translations.some(t => t.locale === l));
+  const words = countWords(body.html);
 
   return (
-    <div className="editor">
-      <div className="page-head">
-        <div className="page-head__text">
-          <div className="inline" style={{ marginBottom: 4 }}>
-            <Link to="/blog" className="muted">Blog</Link>
-            <span className="muted">/</span>
+    <>
+      <PageHeader
+        title={draft.title || 'Untitled article'}
+        breadcrumb={(
+          <>
+            <Link to="/blog" className="text-muted-foreground hover:underline">Blog</Link>
+            <span className="text-muted-foreground">/</span>
             <StatusBadge status={draft.status} />
-            <Badge>{draft.locale.toUpperCase()}</Badge>
-            {draft.featured && <Badge tone="brand">featured</Badge>}
-          </div>
-          <h1>{draft.title || 'Untitled article'}</h1>
-          <p className="mono">{publicPath}</p>
-        </div>
-      </div>
+            <Badge variant="outline">{draft.locale.toUpperCase()}</Badge>
+            {draft.featured && <Badge variant="primary">featured</Badge>}
+          </>
+        )}
+        description={<span className="font-mono text-[12.5px]">{publicPath}</span>}
+      />
 
       <Steps
         active={step}
         onChange={setStep}
-        steps={[
-          { value: 'write', label: 'Write', hint: 'The article and its contents', problems: writeProblems, done: !writeProblems },
-          { value: 'configure', label: 'Configure', hint: 'Category, author, cover', problems: configProblems, done: !configProblems },
-          { value: 'share', label: 'Search & sharing', hint: 'How it looks elsewhere', problems: shareProblems, done: !shareProblems },
-        ]}
+        steps={STEPS.map(s => ({
+          ...s,
+          // History is a way out of trouble, not a step with work in it, so it
+          // never carries a problem count and is never marked "done".
+          ...(s.value === 'history'
+            ? {}
+            : { problems: countFor(s.value), done: !countFor(s.value) }),
+        }))}
       />
 
       {step === 'write' && (
-        <div className="split">
-          <Panel title="The article">
-            <Field label="Title" hint="Also the H1 and the default meta title.">
-              <input value={draft.title} onChange={set('title')} disabled={!canEdit} />
-            </Field>
-            <Field label="Excerpt" hint="Shown on cards, and used as the meta description when you have not written one.">
-              <textarea rows={3} value={draft.excerpt || ''} onChange={set('excerpt')} disabled={!canEdit} />
-            </Field>
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <Card>
+            <CardHeader><CardTitle>The article</CardTitle></CardHeader>
+            <CardContent className="grid gap-4">
+              <Field label="Title" hint="Also the H1 and the default meta title.">
+                {id2 => <Input id={id2} value={draft.title} onChange={set('title')} disabled={!canEdit} />}
+              </Field>
+              <Field
+                label="Excerpt"
+                hint="Shown on cards, and used as the meta description when you have not written one."
+              >
+                {id2 => (
+                  <Textarea id={id2} rows={3} value={draft.excerpt || ''} onChange={set('excerpt')} disabled={!canEdit} />
+                )}
+              </Field>
 
-            <div className="artsec__divider">
-              <span>Body</span>
-              <span className="muted">
-                {(draft.sections || []).length
+              <FieldGroupLabel
+                hint={(draft.sections || []).length
                   ? `${draft.sections.length} section${draft.sections.length === 1 ? '' : 's'}`
-                  : 'written as one block of HTML'}
-              </span>
-            </div>
+                  : 'Written as one block of HTML'}
+              >
+                Body
+              </FieldGroupLabel>
 
-            {(draft.sections || []).length === 0 && (draft.bodyHtml || '').trim() ? (
-              <LegacyBody
-                draft={draft}
-                canEdit={canEdit}
-                onChange={set('bodyHtml')}
-                onConvert={() => {
-                  // One section holding the existing markup: nothing is lost, and
-                  // from here it can be split up a piece at a time.
-                  setDraft(d => ({
-                    ...d,
-                    sections: [{ key: `rich-${Date.now().toString(36)}`, type: 'rich', data: { html: d.bodyHtml }, visible: true }],
-                    bodyHtml: '',
-                  }));
-                  setDirty(true);
-                }}
-              />
-            ) : (
-              <ArticleSections
-                sections={draft.sections || []}
-                canEdit={canEdit}
-                contents={body.contents}
-                onChange={(sections) => { setDraft(d => ({ ...d, sections })); setDirty(true); }}
-              />
-            )}
-          </Panel>
+              {(draft.sections || []).length === 0 && (draft.bodyHtml || '').trim() ? (
+                <LegacyBody
+                  draft={draft}
+                  canEdit={canEdit}
+                  onChange={set('bodyHtml')}
+                  onConvert={() => {
+                    // One section holding the existing markup: nothing is lost, and
+                    // from here it can be split up a piece at a time.
+                    setDraft(d => ({
+                      ...d,
+                      sections: [{
+                        key: `rich-${Date.now().toString(36)}`,
+                        type: 'rich',
+                        data: { html: d.bodyHtml },
+                        visible: true,
+                      }],
+                      bodyHtml: '',
+                    }));
+                    setDirty(true);
+                  }}
+                />
+              ) : (
+                <ArticleSections
+                  sections={draft.sections || []}
+                  canEdit={canEdit}
+                  onChange={(sections) => { setDraft(d => ({ ...d, sections })); setDirty(true); }}
+                />
+              )}
+            </CardContent>
+          </Card>
 
-          <div className="grid">
-            <Panel title="Contents list">
-              <ContentsPreview contents={body.contents} />
-            </Panel>
-            <Panel title="Reading">
-              <div className="inline" style={{ justifyContent: 'space-between' }}>
-                <span className="muted">Words</span>
-                <strong>{countWords(body.html).toLocaleString()}</strong>
-              </div>
-              <div className="inline" style={{ justifyContent: 'space-between', marginTop: 6 }}>
-                <span className="muted">Reading time</span>
-                <strong>{draft.readingMinutes || Math.max(1, Math.round(countWords(body.html) / 200))} min</strong>
-              </div>
-              <p className="field__hint" style={{ marginTop: 10 }}>
-                Calculated at 200 words a minute unless you set a figure under Configure.
-              </p>
-            </Panel>
+          <div className="grid content-start gap-4">
+            <Card>
+              <CardHeader><CardTitle>Contents list</CardTitle></CardHeader>
+              <CardContent><ContentsPreview contents={body.contents} /></CardContent>
+            </Card>
+            <Card>
+              <CardHeader><CardTitle>Reading</CardTitle></CardHeader>
+              <CardContent>
+                <DataList>
+                  <DataRow label="Words">{words.toLocaleString()}</DataRow>
+                  <DataRow label="Reading time">
+                    {draft.readingMinutes || Math.max(1, Math.round(words / 200))} min
+                  </DataRow>
+                </DataList>
+                <p className="text-muted-foreground mt-3 text-[12px] leading-snug">
+                  Calculated at 200 words a minute unless you set a figure under Configure.
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       )}
 
       {step === 'configure' && (
-        <div className="split">
-          <Panel title="Details">
-            <div className="grid grid--2">
-              <Field label="URL slug" hint={`The article lives at ${publicPath}`}>
-                <input className="code" value={draft.slug} onChange={set('slug')} disabled={!canEdit} />
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <Card>
+            <CardHeader><CardTitle>Details</CardTitle></CardHeader>
+            <CardContent className="grid gap-4">
+              <FieldRow>
+                <Field label="URL slug" hint={`The article lives at ${publicPath}`}>
+                  {id2 => <Input id={id2} mono value={draft.slug} onChange={set('slug')} disabled={!canEdit} />}
+                </Field>
+                <Field
+                  label="Category"
+                  hint="Shown on the card and in the breadcrumb, and used to pick related articles."
+                >
+                  {id2 => <Input id={id2} value={draft.category || ''} onChange={set('category')} disabled={!canEdit} />}
+                </Field>
+              </FieldRow>
+              <Field label="Tags" hint="Comma separated. Used as keywords.">
+                {id2 => (
+                  <Input
+                    id={id2}
+                    value={(draft.tags || []).join(', ')}
+                    disabled={!canEdit}
+                    onChange={(e) => {
+                      setDraft(d => ({ ...d, tags: e.target.value.split(',').map(s => s.trim()).filter(Boolean) }));
+                      setDirty(true);
+                    }}
+                  />
+                )}
               </Field>
-              <Field label="Category" hint="Shown on the card and in the breadcrumb, and used to pick related articles.">
-                <input value={draft.category || ''} onChange={set('category')} disabled={!canEdit} />
-              </Field>
-            </div>
-            <Field label="Tags" hint="Comma separated. Used as keywords.">
-              <input
-                value={(draft.tags || []).join(', ')}
-                disabled={!canEdit}
-                onChange={e => { setDraft(d => ({ ...d, tags: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })); setDirty(true); }}
-              />
-            </Field>
 
-            <div className="artsec__divider"><span>Cover</span></div>
-            <Field label="Cover image" hint="The hero at the top, the card thumbnail, and the sharing image unless you set another.">
-              <div className="inline">
-                <input className="code" style={{ flex: 1 }} value={draft.coverImage || ''} onChange={set('coverImage')} disabled={!canEdit} />
-                <button className="btn btn--sm" onClick={() => setPicking('coverImage')} disabled={!canEdit}>Browse</button>
-              </div>
-            </Field>
-            {draft.coverImage && (
-              <img src={draft.coverImage} alt="" className="artsec__thumb artsec__thumb--wide" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-            )}
-            <Field label="Cover alt text" hint="Describe the image. Read aloud by screen readers and indexed by image search.">
-              <input value={draft.coverAlt || ''} onChange={set('coverAlt')} disabled={!canEdit} />
-            </Field>
-
-            <div className="artsec__divider"><span>Author</span></div>
-            <div className="grid grid--2">
-              <Field label="Name"><input value={draft.authorName || ''} onChange={set('authorName')} disabled={!canEdit} /></Field>
-              <Field label="Role"><input value={draft.authorRole || ''} onChange={set('authorRole')} disabled={!canEdit} /></Field>
-            </div>
-            <div className="grid grid--2">
-              <Field label="Reading time (minutes)" hint="0 calculates it from the word count.">
-                <input type="number" value={draft.readingMinutes || 0} onChange={set('readingMinutes')} disabled={!canEdit} />
+              <FieldGroupLabel>Cover</FieldGroupLabel>
+              <Field
+                label="Cover image"
+                hint="The hero at the top, the card thumbnail, and the sharing image unless you set another."
+              >
+                {id2 => (
+                  <div className="flex items-center gap-2">
+                    <Input id={id2} mono value={draft.coverImage || ''} onChange={set('coverImage')} disabled={!canEdit} />
+                    <Button variant="outline" size="sm" onClick={() => setPicking('coverImage')} disabled={!canEdit}>
+                      Browse…
+                    </Button>
+                  </div>
+                )}
               </Field>
-              <Field label="Published date" hint="Shown on the article and used for ordering.">
-                <input
-                  type="date"
-                  value={draft.publishedAt ? String(draft.publishedAt).slice(0, 10) : ''}
-                  disabled={!canEdit}
-                  onChange={e => { setDraft(d => ({ ...d, publishedAt: e.target.value ? new Date(e.target.value).toISOString() : null })); setDirty(true); }}
+              {draft.coverImage && (
+                <img
+                  src={draft.coverImage}
+                  alt=""
+                  className="bg-muted h-36 w-full rounded-lg border object-cover"
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
                 />
-              </Field>
-            </div>
-            <Checkbox
-              label="Feature this article at the top of the blog"
-              checked={!!draft.featured}
-              onChange={set('featured')}
-              disabled={!canEdit}
-            />
-          </Panel>
-
-          <div className="grid">
-            <Panel title="Translations">
-              {translations.map(t => (
-                <div key={t.locale} className="inline" style={{ justifyContent: 'space-between', padding: '5px 0' }}>
-                  <span>{t.locale.toUpperCase()} — {t.title}</span>
-                  <StatusBadge status={t.status} />
-                </div>
-              ))}
-              {missing.length > 0 && canEdit && (
-                <div className="inline" style={{ marginTop: 10 }}>
-                  {missing.map(l => (
-                    <button key={l} className="btn btn--sm" onClick={() => translate(l)}>Start {l.toUpperCase()}</button>
-                  ))}
-                </div>
               )}
-              <p className="field__hint" style={{ marginTop: 10 }}>
-                Only languages with a published translation get an hreflang entry.
-              </p>
-            </Panel>
+              <Field
+                label="Cover alt text"
+                hint="Describe the image. Read aloud by screen readers and indexed by image search."
+              >
+                {id2 => <Input id={id2} value={draft.coverAlt || ''} onChange={set('coverAlt')} disabled={!canEdit} />}
+              </Field>
+
+              <FieldGroupLabel>Author &amp; date</FieldGroupLabel>
+              <FieldRow>
+                <Field label="Name">
+                  {id2 => <Input id={id2} value={draft.authorName || ''} onChange={set('authorName')} disabled={!canEdit} />}
+                </Field>
+                <Field label="Role">
+                  {id2 => <Input id={id2} value={draft.authorRole || ''} onChange={set('authorRole')} disabled={!canEdit} />}
+                </Field>
+                <Field label="Reading time" hint="Minutes. 0 calculates it from the word count.">
+                  {id2 => (
+                    <Input
+                      id={id2}
+                      type="number"
+                      value={draft.readingMinutes || 0}
+                      onChange={set('readingMinutes')}
+                      disabled={!canEdit}
+                    />
+                  )}
+                </Field>
+                <Field label="Published date" hint="Shown on the article and used for ordering.">
+                  {id2 => (
+                    <Input
+                      id={id2}
+                      type="date"
+                      value={draft.publishedAt ? String(draft.publishedAt).slice(0, 10) : ''}
+                      disabled={!canEdit}
+                      onChange={(e) => {
+                        setDraft(d => ({
+                          ...d,
+                          publishedAt: e.target.value ? new Date(e.target.value).toISOString() : null,
+                        }));
+                        setDirty(true);
+                      }}
+                    />
+                  )}
+                </Field>
+              </FieldRow>
+
+              <CheckboxField
+                label="Feature this article at the top of the blog"
+                checked={!!draft.featured}
+                disabled={!canEdit}
+                onChange={(v) => { setDraft(d => ({ ...d, featured: v })); setDirty(true); }}
+              />
+            </CardContent>
+          </Card>
+
+          <div className="grid content-start gap-4">
+            <Card>
+              <CardHeader><CardTitle>Translations</CardTitle></CardHeader>
+              <CardContent className="grid gap-3">
+                <DataList>
+                  {translations.map(t => (
+                    <DataRow key={t.locale} label={`${t.locale.toUpperCase()} — ${t.title}`}>
+                      <StatusBadge status={t.status} />
+                    </DataRow>
+                  ))}
+                </DataList>
+                {missing.length > 0 && canEdit && (
+                  <div className="flex flex-wrap gap-2">
+                    {missing.map(l => (
+                      <Button key={l} variant="outline" size="sm" onClick={() => translate(l)}>
+                        Start {l.toUpperCase()}
+                      </Button>
+                    ))}
+                  </div>
+                )}
+                <Callout>Only languages with a published translation get an hreflang entry.</Callout>
+              </CardContent>
+            </Card>
 
             {can('admin') && (
-              <Panel title="Danger zone">
-                <button className="btn btn--danger btn--sm" style={{ width: '100%' }} onClick={remove}>
-                  <Icon name="trash" /> Delete this article
-                </button>
-              </Panel>
+              <Card>
+                <CardHeader><CardTitle>Danger zone</CardTitle></CardHeader>
+                <CardContent>
+                  <Button variant="destructive" size="sm" className="w-full" onClick={remove}>
+                    <Trash2 /> Delete this article
+                  </Button>
+                  <p className="text-muted-foreground mt-2 text-[12px]">
+                    Recoverable from History for as long as its restore points are kept.
+                  </p>
+                </CardContent>
+              </Card>
             )}
           </div>
         </div>
       )}
 
       {step === 'share' && (
-        <div className="split">
-          <Panel title="Search & sharing">
-            <Field label="Meta title" hint={`Leave empty to use “${draft.title}”.`}>
-              <input value={draft.seo?.title || ''} placeholder={draft.title} onChange={setSeo('title')} disabled={!canEdit} />
-            </Field>
-            <Field label="Meta description" hint="Leave empty to use the excerpt.">
-              <textarea rows={3} value={draft.seo?.description || ''} placeholder={draft.excerpt || ''} onChange={setSeo('description')} disabled={!canEdit} />
-            </Field>
-            <Field label="Sharing image" hint="Leave empty to use the cover. 1200×630 is the safe size for every platform.">
-              <div className="inline">
-                <input className="code" style={{ flex: 1 }} value={draft.seo?.ogImage || ''} placeholder={draft.coverImage || ''} onChange={setSeo('ogImage')} disabled={!canEdit} />
-                <button className="btn btn--sm" onClick={() => setPicking('seo.ogImage')} disabled={!canEdit}>Browse</button>
-              </div>
-            </Field>
-            <Field label="JSON-LD override" hint="Added alongside the automatic Article and BreadcrumbList data.">
-              <textarea className="code" rows={7} value={draft.seo?.jsonLdOverride || ''} onChange={setSeo('jsonLdOverride')} disabled={!canEdit} />
-            </Field>
-            <Checkbox
-              label="Replace the automatic structured data"
-              checked={!!draft.seo?.replaceAutoLd}
-              onChange={setSeo('replaceAutoLd')}
-              disabled={!canEdit}
-            />
-          </Panel>
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_400px]">
+          <Card>
+            <CardHeader><CardTitle>Search &amp; sharing</CardTitle></CardHeader>
+            <CardContent className="grid gap-4">
+              <Field label="Meta title" hint={`Leave empty to use “${draft.title}”.`}>
+                {id2 => (
+                  <Input
+                    id={id2}
+                    value={draft.seo?.title || ''}
+                    placeholder={draft.title}
+                    onChange={setSeo('title')}
+                    disabled={!canEdit}
+                  />
+                )}
+              </Field>
+              <Field label="Meta description" hint="Leave empty to use the excerpt.">
+                {id2 => (
+                  <Textarea
+                    id={id2}
+                    rows={3}
+                    value={draft.seo?.description || ''}
+                    placeholder={draft.excerpt || ''}
+                    onChange={setSeo('description')}
+                    disabled={!canEdit}
+                  />
+                )}
+              </Field>
+              <Field
+                label="Sharing image"
+                hint="Leave empty to use the cover. 1200×630 is the safe size for every platform."
+              >
+                {id2 => (
+                  <div className="flex items-center gap-2">
+                    <Input
+                      id={id2}
+                      mono
+                      value={draft.seo?.ogImage || ''}
+                      placeholder={draft.coverImage || ''}
+                      onChange={setSeo('ogImage')}
+                      disabled={!canEdit}
+                    />
+                    <Button variant="outline" size="sm" onClick={() => setPicking('seo.ogImage')} disabled={!canEdit}>
+                      Browse…
+                    </Button>
+                  </div>
+                )}
+              </Field>
+              <Field label="JSON-LD override" hint="Added alongside the automatic Article and BreadcrumbList data.">
+                {id2 => (
+                  <Textarea
+                    id={id2}
+                    mono
+                    rows={7}
+                    value={draft.seo?.jsonLdOverride || ''}
+                    onChange={setSeo('jsonLdOverride')}
+                    disabled={!canEdit}
+                  />
+                )}
+              </Field>
+              <CheckboxField
+                label="Replace the automatic structured data"
+                checked={!!draft.seo?.replaceAutoLd}
+                disabled={!canEdit}
+                onChange={(v) => {
+                  setDraft(d => ({ ...d, seo: { ...(d.seo || {}), replaceAutoLd: v } }));
+                  setDirty(true);
+                }}
+              />
+            </CardContent>
+          </Card>
 
-          <Panel title="Before you publish">
-            <p className="field__hint" style={{ marginBottom: 12 }}>
-              What a person sees before they decide to click. Switch between the places this link
-              will actually appear.
-            </p>
-            <SharePreview
-              title={draft.seo?.title}
-              description={draft.seo?.description}
-              image={draft.seo?.ogImage}
-              url={publicPath}
-              fallbackTitle={draft.title}
-              fallbackDescription={draft.excerpt}
-              fallbackImage={draft.coverImage}
-            />
-          </Panel>
+          <Card>
+            <CardHeader><CardTitle>Before you publish</CardTitle></CardHeader>
+            <CardContent className="grid gap-3">
+              <p className="text-muted-foreground text-[12px] leading-snug">
+                What a person sees before they decide to click. Switch between the places this link
+                will actually appear.
+              </p>
+              <SharePreview
+                title={draft.seo?.title}
+                description={draft.seo?.description}
+                image={draft.seo?.ogImage}
+                url={publicPath}
+                fallbackTitle={draft.title}
+                fallbackDescription={draft.excerpt}
+                fallbackImage={draft.coverImage}
+              />
+            </CardContent>
+          </Card>
         </div>
       )}
 
-      {problems.length > 0 && (
-        <Panel title="Worth fixing first" className="editor__problems">
-          <ul className="checks">
+      {step === 'history' && (
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
+          <HistoryPanel entity="post" entityId={id} name={draft.title} onRestored={reload} />
+          <Card>
+            <CardHeader><CardTitle>What is recorded</CardTitle></CardHeader>
+            <CardContent className="prose-sm">
+              <p>
+                A restore point is written before every save, every publish and the delete — so an
+                article rewritten badly, or deleted by mistake, is one click from coming back.
+              </p>
+              <p>
+                Restoring replaces the whole article: body sections, cover, category, SEO. It does not
+                touch the other language versions, which are separate articles tied together only for
+                hreflang.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {problems.length > 0 && step !== 'history' && (
+        <Card className="mt-4">
+          <CardHeader><CardTitle>Worth fixing first</CardTitle></CardHeader>
+          <ul className="divide-y">
             {problems.map((p, i) => (
-              <li key={i} className={`checks__row is-${p.level}`}>
-                <span className="checks__icon" aria-hidden="true">{p.level === 'fail' ? '×' : '!'}</span>
-                <span>
+              <li key={i} className="flex items-start gap-2.5 px-4 py-2">
+                <span
+                  className={cn(
+                    'mt-px flex size-4 shrink-0 items-center justify-center rounded-full',
+                    p.level === 'fail' ? 'bg-destructive/15 text-destructive' : 'bg-warning/15 text-warning',
+                  )}
+                  aria-hidden="true"
+                >
+                  {p.level === 'fail' ? <AlertCircle className="size-2.5" /> : <TriangleAlert className="size-2.5" />}
+                </span>
+                <span className="text-[12.5px] leading-snug">
                   {p.text}{' '}
                   {p.step !== step && (
-                    <button type="button" className="linkish" onClick={() => setStep(p.step)}>
-                      Go to {p.step === 'write' ? 'Write' : p.step === 'configure' ? 'Configure' : 'Search & sharing'}
+                    <button
+                      type="button"
+                      className="text-primary underline underline-offset-2"
+                      onClick={() => setStep(p.step)}
+                    >
+                      Go to {STEPS.find(s => s.value === p.step)?.label}
                     </button>
                   )}
                 </span>
               </li>
             ))}
           </ul>
-        </Panel>
+        </Card>
       )}
 
       <PublishBar
@@ -435,9 +613,9 @@ export default function BlogEditor() {
         publishedAt={draft.publishedAt ? formatDate(draft.publishedAt) : null}
       >
         {problems.some(p => p.level === 'fail') && (
-          <span className="pubbar__warn">
-            {problems.filter(p => p.level === 'fail').length} thing(s) to fix
-          </span>
+          <Badge variant="destructive">
+            {problems.filter(p => p.level === 'fail').length} to fix
+          </Badge>
         )}
       </PublishBar>
 
@@ -453,7 +631,7 @@ export default function BlogEditor() {
           }}
         />
       )}
-    </div>
+    </>
   );
 }
 
@@ -466,21 +644,25 @@ export default function BlogEditor() {
  */
 function LegacyBody({ draft, canEdit, onChange, onConvert }) {
   return (
-    <>
-      <div className="callout">
-        This article is one block of HTML. That works, but the contents list can only be guessed
-        from its headings. <strong>Split it into sections</strong> to choose what appears in the
-        Sommaire, reorder parts, and add images, quotes and custom blocks between them.
+    <div className="grid gap-4">
+      <Callout title="This article is one block of HTML">
+        <p>
+          That works, but the contents list can only be guessed from its headings.{' '}
+          <strong>Split it into sections</strong> to choose what appears in the Sommaire, reorder
+          parts, and add images, quotes and custom blocks between them.
+        </p>
         {canEdit && (
-          <div style={{ marginTop: 10 }}>
-            <button className="btn btn--sm" onClick={onConvert}>Split into sections</button>
-          </div>
+          <Button variant="outline" size="sm" className="mt-1" onClick={onConvert}>
+            Split into sections
+          </Button>
         )}
-      </div>
+      </Callout>
       <Field label="Body HTML" hint="Placed in the article's prose column exactly as written.">
-        <textarea className="code" rows={20} value={draft.bodyHtml || ''} onChange={onChange} disabled={!canEdit} />
+        {id => (
+          <Textarea id={id} mono rows={20} value={draft.bodyHtml || ''} onChange={onChange} disabled={!canEdit} />
+        )}
       </Field>
-    </>
+    </div>
   );
 }
 
@@ -507,7 +689,9 @@ function auditPost(post, body) {
     add('write', 'warn', 'No contents list. Add headings so long articles are skimmable.');
   }
 
-  if (!post.category?.trim()) add('configure', 'warn', 'No category, so the breadcrumb skips a level and related articles fall back to the most recent.');
+  if (!post.category?.trim()) {
+    add('configure', 'warn', 'No category, so the breadcrumb skips a level and related articles fall back to the most recent.');
+  }
   if (!post.coverImage) add('configure', 'fail', 'No cover image. It is the hero, the card thumbnail and the sharing image.');
   else if (!post.coverAlt?.trim()) add('configure', 'warn', 'The cover image has no alt text.');
   if (!post.authorName?.trim()) add('configure', 'warn', 'No author. Bylines measurably help perceived credibility.');

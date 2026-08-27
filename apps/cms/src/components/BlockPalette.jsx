@@ -10,8 +10,12 @@
  * question is not "do you want a code box" but "which layout are you building".
  */
 import { useMemo, useState } from 'react';
-import { paletteGroups, CUSTOM_PRESETS } from '../lib/blockSchemas.js';
-import { Modal, Icon, Badge } from './ui.jsx';
+import { BLOCK_DEFAULTS, CUSTOM_PRESETS, paletteGroups } from '../lib/blockSchemas.js';
+import { cn } from '../lib/cn.js';
+import {
+  Badge, Dialog, DialogBody, DialogContent, DialogDescription, DialogHeader, DialogTitle,
+  SearchInput,
+} from './ui/index.js';
 
 export default function BlockPalette({ onClose, onInsert, position }) {
   const [query, setQuery] = useState('');
@@ -35,7 +39,14 @@ export default function BlockPalette({ onClose, onInsert, position }) {
 
   function choose(block) {
     if (block.key === 'custom_html') { setPreset(block); return; }
-    onInsert({ componentKey: block.key, label: block.label });
+    onInsert({
+      componentKey: block.key,
+      label: block.label,
+      // A block dropped onto a page should look like something. An empty form
+      // block in particular is useless: a form with no fields cannot be
+      // submitted and gives an editor nothing to react to.
+      ...(BLOCK_DEFAULTS[block.key] ? { data: BLOCK_DEFAULTS[block.key] } : {}),
+    });
   }
 
   const where = position?.afterLabel
@@ -44,44 +55,47 @@ export default function BlockPalette({ onClose, onInsert, position }) {
 
   if (preset) {
     return (
-      <Modal
-        title="Custom block — pick a starting point"
-        onClose={() => setPreset(null)}
-        wide
-      >
-        <p className="field__hint" style={{ marginBottom: 14 }}>
-          Every starter is written in the site's own Tailwind theme, so it looks like a Rainbow
-          section before you change a word. You get the markup — edit it however you like.
-        </p>
-        <div className="palette">
-          {CUSTOM_PRESETS.map(p => (
-            <button
-              key={p.key}
-              type="button"
-              className="palette__card"
-              onClick={() => onInsert({
-                componentKey: 'custom_html',
-                label: `Custom — ${p.label}`,
-                data: { css: '', containerClass: '', ...p.data },
-                layout: { spacingTop: 'none', spacingBottom: 'none' },
-              })}
-            >
-              <Wireframe shape={p.key} />
-              <span className="palette__name">{p.label}</span>
-              <span className="palette__desc">{p.description}</span>
-            </button>
-          ))}
-        </div>
-      </Modal>
+      <Dialog open onOpenChange={() => setPreset(null)}>
+        <DialogContent size="lg">
+          <DialogHeader>
+            <DialogTitle>Custom block — pick a starting point</DialogTitle>
+            <DialogDescription>
+              Every starter is written in the site&apos;s own Tailwind theme, so it looks like a
+              Rainbow section before you change a word. You get the markup — edit it however you like.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {CUSTOM_PRESETS.map(p => (
+                <PaletteCard
+                  key={p.key}
+                  shape={p.key}
+                  name={p.label}
+                  description={p.description}
+                  onClick={() => onInsert({
+                    componentKey: 'custom_html',
+                    label: `Custom — ${p.label}`,
+                    data: { css: '', containerClass: '', ...p.data },
+                    layout: { spacingTop: 'none', spacingBottom: 'none' },
+                  })}
+                />
+              ))}
+            </div>
+          </DialogBody>
+        </DialogContent>
+      </Dialog>
     );
   }
 
   return (
-    <Modal title="Add a block" onClose={onClose} wide>
-      <div className="inline" style={{ marginBottom: 14 }}>
-        <div className="search-field">
-          <Icon name="search" />
-          <input
+    <Dialog open onOpenChange={(next) => { if (!next) onClose(); }}>
+      <DialogContent size="xl">
+        <DialogHeader>
+          <DialogTitle>Add a block</DialogTitle>
+          <DialogDescription>Inserting {where}.</DialogDescription>
+        </DialogHeader>
+        <div className="border-b px-5 py-3">
+          <SearchInput
             autoFocus
             value={query}
             onChange={e => setQuery(e.target.value)}
@@ -89,33 +103,49 @@ export default function BlockPalette({ onClose, onInsert, position }) {
             aria-label="Search blocks"
           />
         </div>
-        <span className="muted" style={{ fontSize: 12 }}>Inserting {where}</span>
-      </div>
+        <DialogBody>
+          {filtered.map(group => (
+            <section key={group.key} className="mb-6 last:mb-0">
+              <h3 className="text-muted-foreground mb-2 text-[11px] font-semibold tracking-wider uppercase">
+                {group.label}
+              </h3>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {group.blocks.map(block => (
+                  <PaletteCard
+                    key={block.key}
+                    shape={block.wireframe}
+                    name={block.label}
+                    badge={block.advanced && <Badge variant="primary">advanced</Badge>}
+                    description={block.description}
+                    onClick={() => choose(block)}
+                  />
+                ))}
+              </div>
+            </section>
+          ))}
 
-      {filtered.map(group => (
-        <section key={group.key} style={{ marginBottom: 18 }}>
-          <div className="palette__group">{group.label}</div>
-          <div className="palette">
-            {group.blocks.map(block => (
-              <button key={block.key} type="button" className="palette__card" onClick={() => choose(block)}>
-                <Wireframe shape={block.wireframe} />
-                <span className="palette__name">
-                  {block.label}
-                  {block.advanced && <Badge tone="brand">advanced</Badge>}
-                </span>
-                <span className="palette__desc">{block.description}</span>
-              </button>
-            ))}
-          </div>
-        </section>
-      ))}
+          {!filtered.length && (
+            <p className="text-muted-foreground py-8 text-center text-[13px]">
+              Nothing matches “{query}”.
+            </p>
+          )}
+        </DialogBody>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
-      {!filtered.length && (
-        <p className="muted" style={{ padding: '20px 0', textAlign: 'center' }}>
-          Nothing matches “{query}”.
-        </p>
-      )}
-    </Modal>
+function PaletteCard({ shape, name, description, badge, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="hover:border-primary/50 focus-visible:ring-ring/40 bg-card grid gap-2 rounded-lg border p-3 text-left transition-colors outline-none focus-visible:ring-[3px]"
+    >
+      <Wireframe shape={shape} />
+      <span className="flex items-center gap-1.5 text-[13px] font-semibold">{name}{badge}</span>
+      <span className="text-muted-foreground text-[12px] leading-snug">{description}</span>
+    </button>
   );
 }
 
@@ -129,7 +159,10 @@ export default function BlockPalette({ onClose, onInsert, position }) {
 function Wireframe({ shape }) {
   const parts = Array.isArray(shape) ? shape : PRESET_SHAPES[shape] || ['title', 'text'];
   return (
-    <span className="wire" aria-hidden="true">
+    <span
+      className="bg-muted/60 flex h-24 flex-col items-center justify-center gap-1.5 rounded-md border p-3"
+      aria-hidden="true"
+    >
       {parts.map((part, i) => <WirePart key={i} kind={part} />)}
     </span>
   );
@@ -143,33 +176,79 @@ const PRESET_SHAPES = {
   quote: ['quote'],
 };
 
+/** The ink of the wireframe: one shade for structure, the brand for emphasis. */
+const INK = 'bg-foreground/15';
+const ACCENT = 'bg-primary/45';
+
 function WirePart({ kind }) {
-  if (kind === 'grid-3' || kind === 'cards-3') {
-    return (
-      <span className={`wire__row wire__row--${kind === 'cards-3' ? 'cards' : 'grid'}`}>
-        <i /><i /><i />
-      </span>
-    );
+  const row = 'flex w-full items-center gap-1.5';
+
+  switch (kind) {
+    case 'grid-3':
+    case 'cards-3':
+      return (
+        <span className={row}>
+          {[0, 1, 2].map(i => (
+            <i key={i} className={cn(INK, 'h-8 flex-1 rounded-sm', kind === 'cards-3' && 'h-10')} />
+          ))}
+        </span>
+      );
+    case 'split':
+      return (
+        <span className={row}>
+          <i className={cn(INK, 'h-10 flex-1 rounded-sm')} />
+          <i className={cn(ACCENT, 'h-12 flex-1 rounded-sm')} />
+        </span>
+      );
+    case 'stats':
+      return (
+        <span className={cn(row, 'justify-between')}>
+          {[0, 1, 2, 3].map(i => <i key={i} className={cn(ACCENT, 'h-6 w-6 rounded-sm')} />)}
+        </span>
+      );
+    case 'logos':
+      return (
+        <span className={cn(row, 'justify-between')}>
+          {[0, 1, 2, 3, 4].map(i => <i key={i} className={cn(INK, 'h-3 w-6 rounded-sm')} />)}
+        </span>
+      );
+    case 'rows':
+      return (
+        <span className="grid w-full gap-1">
+          {[0, 1, 2].map(i => <i key={i} className={cn(INK, 'h-2.5 w-full rounded-sm')} />)}
+        </span>
+      );
+    case 'buttons':
+      return (
+        <span className={cn(row, 'justify-center')}>
+          <i className={cn(ACCENT, 'h-4 w-14 rounded-sm')} />
+          <i className={cn(INK, 'h-4 w-14 rounded-sm')} />
+        </span>
+      );
+    case 'image':
+    case 'video':
+      return <i className={cn(INK, 'h-10 w-full rounded-sm')} />;
+    case 'code':
+      return (
+        <span className="grid w-full gap-1">
+          <i className={cn(ACCENT, 'h-2 w-1/3 rounded-sm')} />
+          <i className={cn(INK, 'h-2 w-2/3 rounded-sm')} />
+          <i className={cn(INK, 'h-2 w-1/2 rounded-sm')} />
+        </span>
+      );
+    case 'quote':
+      return (
+        <span className="grid w-full justify-items-center gap-1.5">
+          <i className={cn(INK, 'h-2.5 w-4/5 rounded-sm')} />
+          <i className={cn(INK, 'h-2.5 w-3/5 rounded-sm')} />
+          <i className={cn(ACCENT, 'h-2 w-1/4 rounded-sm')} />
+        </span>
+      );
+    case 'title-lg':
+      return <i className={cn(INK, 'h-3.5 w-3/4 rounded-sm')} />;
+    case 'title':
+      return <i className={cn(INK, 'h-2.5 w-1/2 rounded-sm')} />;
+    default:
+      return <i className={cn(INK, 'h-1.5 w-full rounded-sm opacity-70')} />;
   }
-  if (kind === 'split') {
-    return <span className="wire__row wire__row--split"><i /><i className="wire__img" /></span>;
-  }
-  if (kind === 'stats') {
-    return <span className="wire__row wire__row--stats"><i /><i /><i /><i /></span>;
-  }
-  if (kind === 'logos') {
-    return <span className="wire__row wire__row--logos"><i /><i /><i /><i /><i /></span>;
-  }
-  if (kind === 'rows') {
-    return <span className="wire__rows"><i /><i /><i /></span>;
-  }
-  if (kind === 'buttons') {
-    return <span className="wire__row wire__row--buttons"><i /><i /></span>;
-  }
-  if (kind === 'image' || kind === 'video') {
-    return <span className={`wire__img wire__img--${kind}`} />;
-  }
-  if (kind === 'code') return <span className="wire__code" />;
-  if (kind === 'quote') return <span className="wire__quote" />;
-  return <span className={`wire__bar wire__bar--${kind}`} />;
 }

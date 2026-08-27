@@ -1,126 +1,166 @@
+/*
+ * BlogList — the articles, and the page they are listed on.
+ *
+ * Two views because "configure the blog" is two different jobs: managing
+ * articles is a table, and checking the index looks right is a question only the
+ * rendered page can answer.
+ */
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useResource, useDebounced } from '../lib/hooks.js';
+import { ExternalLink, FileText, Newspaper, Plus, RefreshCw } from 'lucide-react';
+import { useDebounced, useResource } from '../lib/hooks.js';
 import { api, qs } from '../lib/api.js';
 import { useToast } from '../lib/toast.jsx';
 import { useAuth } from '../lib/auth.jsx';
 import {
-  Panel, Spinner, ErrorBox, StatusBadge, Icon, Modal, Field, Empty, Badge, formatDate,
-} from '../components/ui.jsx';
+  Badge, Button, Callout, Card, CardContent, CardHeader, CardTitle, Code, Dialog, DialogBody,
+  DialogContent, DialogFooter, DialogHeader, DialogTitle, Empty, ErrorBox, Field, Input,
+  PageHeader, SearchInput, Segmented, Select, SkeletonRows, StatusBadge, TActions, TBody, THead,
+  TRow, Table, Toolbar, Tooltip, formatDate,
+} from '../components/ui/index.js';
+
+const LOCALES = ['fr', 'en', 'de'];
 
 export default function BlogList() {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
   const [locale, setLocale] = useState('');
   const [creating, setCreating] = useState(false);
+  const [view, setView] = useState('list');
   const debounced = useDebounced(search);
   const { can } = useAuth();
 
-  const [view, setView] = useState('list');
   const { data, loading, error, reload } = useResource(`/blog${qs({ q: debounced, status, locale })}`);
   const settings = useResource('/settings');
   const segmentFor = (code) => settings.data?.settings?.blogSegment?.[code] || 'blog';
-  const drafts = (data?.items || []).filter(pst => pst.status !== 'published').length;
+  const drafts = (data?.items || []).filter(post => post.status !== 'published').length;
 
   return (
     <>
-      <div className="page-head">
-        <div className="page-head__text">
-          <h1>Blog</h1>
-          <p>
-            Articles render through the site's article template — publishing one needs no deploy.
+      <PageHeader
+        title="Blog"
+        description={(
+          <>
+            Articles render through the site&apos;s article template — publishing one needs no deploy.
             {drafts > 0 && <> <strong>{drafts}</strong> waiting in draft.</>}
-          </p>
-        </div>
-        <div className="page-head__actions">
-          <div className="pill-group">
-            <button type="button" className={`pill ${view === 'list' ? 'is-active' : ''}`} onClick={() => setView('list')}>Articles</button>
-            <button type="button" className={`pill ${view === 'page' ? 'is-active' : ''}`} onClick={() => setView('page')}>The blog page</button>
-          </div>
-          {can('editor') && (
-            <button className="btn btn--primary" onClick={() => setCreating(true)}>
-              <Icon name="plus" /> New article
-            </button>
-          )}
-        </div>
-      </div>
+          </>
+        )}
+      >
+        <Segmented
+          value={view}
+          onChange={setView}
+          options={[{ value: 'list', label: 'Articles' }, { value: 'page', label: 'The blog page' }]}
+        />
+        {can('editor') && <Button onClick={() => setCreating(true)}><Plus /> New article</Button>}
+      </PageHeader>
 
       {view === 'page' && <BlogPagePreview segmentFor={segmentFor} />}
 
       {view === 'list' && (
-      <Panel
-        actions={
-          <>
-            <input type="search" placeholder="Search titles…" value={search} onChange={e => setSearch(e.target.value)} style={{ width: 220 }} />
-            <select value={locale} onChange={e => setLocale(e.target.value)} style={{ width: 130 }}>
-              <option value="">All languages</option>
-              {['fr', 'en', 'de'].map(l => <option key={l} value={l}>{l.toUpperCase()}</option>)}
-            </select>
-            <select value={status} onChange={e => setStatus(e.target.value)} style={{ width: 140 }}>
-              <option value="">All statuses</option>
-              <option value="published">Published</option>
-              <option value="draft">Draft</option>
-            </select>
-          </>
-        }
-      >
-        {loading && <Spinner />}
-        {error && <ErrorBox error={error} onRetry={reload} />}
-        {data && !data.items.length && <Empty title="No articles yet">Write the first one.</Empty>}
-        {data?.items?.length > 0 && (
-          <table className="table">
-            <thead>
-              <tr>
-                <th />
-                <th>Title</th>
-                <th>Language</th>
-                <th>Category</th>
-                <th>Status</th>
-                <th>Published</th>
-                <th />
-              </tr>
-            </thead>
-            <tbody>
-              {data.items.map(post => (
-                <tr key={post._id}>
-                  <td className="shrink">
-                    {post.coverImage
-                      ? <img src={post.coverImage} alt="" className="blog-thumb" onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }} />
-                      : <span className="blog-thumb blog-thumb--empty" title="No cover image" />}
-                  </td>
-                  <td>
-                    <Link to={`/blog/${post._id}`} style={{ fontWeight: 600 }}>{post.title}</Link>
-                    {post.featured && <Badge tone="brand">featured</Badge>}
-                    <div className="mono muted" style={{ fontSize: 12 }}>
-                      /{post.locale}/{segmentFor(post.locale)}/{post.slug}
-                    </div>
-                  </td>
-                  <td>{post.locale.toUpperCase()}</td>
-                  <td className="muted">{post.category || '—'}</td>
-                  <td><StatusBadge status={post.status} /></td>
-                  <td className="muted nowrap">{formatDate(post.publishedAt)}</td>
-                  <td className="shrink">
-                    <div className="inline">
-                      <Link className="btn btn--sm" to={`/blog/${post._id}`}>Edit</Link>
-                      {post.status === 'published' && (
-                        <a
-                          className="btn btn--sm btn--ghost btn--icon"
-                          href={`/${post.locale}/${segmentFor(post.locale)}/${post.slug}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          title="View on the site"
-                        >
-                          <Icon name="external" />
-                        </a>
-                      )}
-                    </div>
-                  </td>
+        <Card>
+          <Toolbar className="border-b p-3">
+            <SearchInput
+              placeholder="Search titles…"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full sm:w-60"
+            />
+            <Select
+              value={locale}
+              onChange={e => setLocale(e.target.value)}
+              className="w-auto"
+              placeholder="All languages"
+              options={LOCALES.map(l => ({ value: l, label: l.toUpperCase() }))}
+            />
+            <Select
+              value={status}
+              onChange={e => setStatus(e.target.value)}
+              className="w-auto"
+              placeholder="All statuses"
+              options={[{ value: 'published', label: 'Published' }, { value: 'draft', label: 'Draft' }]}
+            />
+          </Toolbar>
+
+          {loading && <SkeletonRows rows={5} cols={5} />}
+          {error && <ErrorBox error={error} onRetry={reload} />}
+          {data && !data.items.length && (
+            <Empty
+              icon={Newspaper}
+              title={search || status || locale ? 'No article matches that' : 'No articles yet'}
+              action={can('editor') && !search && (
+                <Button onClick={() => setCreating(true)}><Plus /> New article</Button>
+              )}
+            >
+              An article&apos;s body is an ordered list of sections, which is what lets the contents
+              list be a fact about the article rather than a guess made from its headings.
+            </Empty>
+          )}
+
+          {data?.items?.length > 0 && (
+            <Table>
+              <THead>
+                <tr>
+                  <th /><th>Title</th><th>Language</th><th>Category</th>
+                  <th>Status</th><th>Published</th><th />
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </Panel>
+              </THead>
+              <TBody>
+                {data.items.map(post => (
+                  <TRow key={post._id} interactive>
+                    <td className="w-14">
+                      {post.coverImage ? (
+                        <img
+                          src={post.coverImage}
+                          alt=""
+                          className="bg-muted h-9 w-14 rounded object-cover"
+                          onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }}
+                        />
+                      ) : (
+                        <Tooltip content="No cover image — it is the hero, the card thumbnail and the sharing image">
+                          <span className="bg-muted border-input block h-9 w-14 rounded border border-dashed" />
+                        </Tooltip>
+                      )}
+                    </td>
+                    <td>
+                      <div className="flex items-center gap-2">
+                        <Link to={`/blog/${post._id}`} className="font-semibold hover:underline">{post.title}</Link>
+                        {post.featured && <Badge variant="primary">featured</Badge>}
+                      </div>
+                      <div className="text-muted-foreground font-mono text-[11.5px]">
+                        /{post.locale}/{segmentFor(post.locale)}/{post.slug}
+                      </div>
+                    </td>
+                    <td className="uppercase">{post.locale}</td>
+                    <td className="text-muted-foreground">{post.category || '—'}</td>
+                    <td><StatusBadge status={post.status} /></td>
+                    <td className="text-muted-foreground whitespace-nowrap">{formatDate(post.publishedAt)}</td>
+                    <TActions>
+                      <div className="flex justify-end gap-1.5">
+                        <Button variant="outline" size="sm" asChild>
+                          <Link to={`/blog/${post._id}`}>Edit</Link>
+                        </Button>
+                        {post.status === 'published' && (
+                          <Tooltip content="View on the site">
+                            <Button variant="ghost" size="icon-sm" asChild>
+                              <a
+                                href={`/${post.locale}/${segmentFor(post.locale)}/${post.slug}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                aria-label="View on the site"
+                              >
+                                <ExternalLink />
+                              </a>
+                            </Button>
+                          </Tooltip>
+                        )}
+                      </div>
+                    </TActions>
+                  </TRow>
+                ))}
+              </TBody>
+            </Table>
+          )}
+        </Card>
       )}
 
       {creating && <CreateArticle onClose={() => setCreating(false)} />}
@@ -131,8 +171,8 @@ export default function BlogList() {
 /**
  * The blog index, as a reader sees it.
  *
- * "Configure the blog page" is really two questions - does the list look right,
- * and is the newest article where I expect it - and both are answered by looking
+ * "Configure the blog page" is really two questions — does the list look right,
+ * and is the newest article where I expect it — and both are answered by looking
  * at the page rather than at a table. The index itself is an authored page, so
  * its sections are edited under Pages; this is the window onto the result.
  */
@@ -141,57 +181,68 @@ function BlogPagePreview({ segmentFor }) {
   const [nonce, setNonce] = useState(0);
   const pages = useResource('/pages?kind=blogIndex');
   const indexPage = pages.data?.items?.[0] || null;
+  const url = `/${locale}/${segmentFor(locale)}`;
 
   return (
-    <div className="split">
-      <div className="chrome-canvas">
-        <div className="chrome-canvas__bar">
-          <div className="pill-group">
-            {['fr', 'en', 'de'].map(l => (
-              <button key={l} type="button" className={`pill ${locale === l ? 'is-active' : ''}`} onClick={() => setLocale(l)}>
-                {l.toUpperCase()}
-              </button>
-            ))}
+    <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
+      <Card className="overflow-hidden">
+        <CardHeader>
+          <Segmented
+            value={locale}
+            onChange={setLocale}
+            options={LOCALES.map(l => ({ value: l, label: l.toUpperCase() }))}
+          />
+          <Code>{url}</Code>
+          <div data-slot="card-actions">
+            <Button variant="outline" size="sm" onClick={() => setNonce(n => n + 1)}>
+              <RefreshCw /> Refresh
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <a href={url} target="_blank" rel="noreferrer"><ExternalLink /> Open</a>
+            </Button>
           </div>
-          <span className="mono muted" style={{ fontSize: 12 }}>/{locale}/{segmentFor(locale)}</span>
-          <span style={{ flex: 1 }} />
-          <button className="btn btn--sm" onClick={() => setNonce(n => n + 1)}><Icon name="refresh" /> Refresh</button>
-          <a className="btn btn--sm" href={`/${locale}/${segmentFor(locale)}`} target="_blank" rel="noreferrer">
-            <Icon name="external" /> Open
-          </a>
-        </div>
-        <iframe key={nonce} src={`/${locale}/${segmentFor(locale)}`} className="chrome-frame" title="Blog index" />
-      </div>
+        </CardHeader>
+        <iframe
+          key={`${locale}-${nonce}`}
+          src={url}
+          className="bg-background h-[68vh] w-full border-0"
+          title="Blog index"
+        />
+      </Card>
 
-      <div className="grid">
-        <Panel title="How the list is built">
-          <ul className="prose-list">
-            <li><strong>Newest first.</strong> Featured articles are lifted to the top, then everything else by published date.</li>
-            <li><strong>Only published articles appear.</strong> A draft is invisible here and on the site, and its URL returns 404.</li>
-            <li><strong>Related articles</strong> on an article page come from the same category first, topped up with the most recent so the row is never short.</li>
-            <li><strong>The card</strong> uses the cover image, category, title and excerpt. An article with no cover shows a plain gradient.</li>
-          </ul>
-        </Panel>
+      <div className="grid content-start gap-4">
+        <Card>
+          <CardHeader><CardTitle>How the list is built</CardTitle></CardHeader>
+          <CardContent className="prose-sm">
+            <p><strong>Newest first.</strong> Featured articles are lifted to the top, then everything else by published date.</p>
+            <p><strong>Only published articles appear.</strong> A draft is invisible here and on the site, and its URL returns 404.</p>
+            <p><strong>Related articles</strong> on an article page come from the same category first, topped up with the most recent so the row is never short.</p>
+            <p><strong>The card</strong> uses the cover image, category, title and excerpt. An article with no cover shows a plain gradient.</p>
+          </CardContent>
+        </Card>
 
-        <Panel title="The page itself">
-          {indexPage ? (
-            <>
-              <p className="field__hint" style={{ marginBottom: 10 }}>
-                The blog index is an authored page. Its headline, intro and any extra sections are
-                edited like any other page; the article list is a live block inside it.
-              </p>
-              <Link className="btn btn--sm" to={`/pages/${indexPage.key}`}>
-                <Icon name="pages" /> Edit the blog page
-              </Link>
-            </>
-          ) : (
-            <p className="muted">No page is marked as the blog index yet.</p>
-          )}
-          <p className="field__hint" style={{ marginTop: 12 }}>
-            The URL segment (<span className="mono">{segmentFor(locale)}</span>) is set per language
-            under Settings, Languages.
-          </p>
-        </Panel>
+        <Card>
+          <CardHeader><CardTitle>The page itself</CardTitle></CardHeader>
+          <CardContent className="grid gap-3">
+            {indexPage ? (
+              <>
+                <p className="text-muted-foreground text-[12.5px] leading-relaxed">
+                  The blog index is an authored page. Its headline, intro and any extra sections are
+                  edited like any other page; the article list is a live block inside it.
+                </p>
+                <Button variant="outline" size="sm" asChild className="justify-self-start">
+                  <Link to={`/pages/${indexPage.key}`}><FileText /> Edit the blog page</Link>
+                </Button>
+              </>
+            ) : (
+              <p className="text-muted-foreground text-[12.5px]">No page is marked as the blog index yet.</p>
+            )}
+            <Callout>
+              The URL segment (<Code>{segmentFor(locale)}</Code>) is set per language under
+              Settings → Languages.
+            </Callout>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
@@ -205,7 +256,7 @@ function CreateArticle({ onClose }) {
   const [busy, setBusy] = useState(false);
 
   async function submit(e) {
-    e.preventDefault();
+    e?.preventDefault();
     setBusy(true);
     try {
       const { post } = await api.post('/blog', { title, locale, status: 'draft' });
@@ -218,24 +269,33 @@ function CreateArticle({ onClose }) {
   }
 
   return (
-    <Modal
-      title="New article"
-      onClose={onClose}
-      footer={
-        <>
-          <button className="btn" onClick={onClose}>Cancel</button>
-          <button className="btn btn--primary" onClick={submit} disabled={busy || !title.trim()}>Create draft</button>
-        </>
-      }
-    >
-      <form onSubmit={submit}>
-        <Field label="Title"><input value={title} onChange={e => setTitle(e.target.value)} autoFocus required /></Field>
-        <Field label="Language">
-          <select value={locale} onChange={e => setLocale(e.target.value)}>
-            {['fr', 'en', 'de'].map(l => <option key={l} value={l}>{l.toUpperCase()}</option>)}
-          </select>
-        </Field>
-      </form>
-    </Modal>
+    <Dialog open onOpenChange={(next) => { if (!next) onClose(); }}>
+      <DialogContent size="sm">
+        <DialogHeader>
+          <DialogTitle>New article</DialogTitle>
+        </DialogHeader>
+        <DialogBody>
+          <form onSubmit={submit} className="grid gap-4">
+            <Field label="Title" hint="The slug is derived from it, and can be changed afterwards.">
+              {id => <Input id={id} value={title} onChange={e => setTitle(e.target.value)} autoFocus required />}
+            </Field>
+            <Field label="Language">
+              {id => (
+                <Select
+                  id={id}
+                  value={locale}
+                  onChange={e => setLocale(e.target.value)}
+                  options={LOCALES.map(l => ({ value: l, label: l.toUpperCase() }))}
+                />
+              )}
+            </Field>
+          </form>
+        </DialogBody>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button onClick={submit} disabled={busy || !title.trim()}>Create draft</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

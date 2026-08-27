@@ -231,6 +231,58 @@ Two details are what make it hold together:
 instead of filenames, which is the point: the indirection is invisible in the
 output.
 
+## Links that survive a rename
+
+The third indirection, and the same shape as the two above: a data map and an
+exact string replacement.
+
+```
+stored in a block   href="page:tarifs"
+served to a French  href="/fr/tarifs"
+served to a German  href="/de/preise"
+```
+
+A typed path pins a link to three things at once — that path, that language, and
+that path never changing. All three break in ordinary use: a German visitor
+following a French path lands on a redirect at best, renaming a page leaves every
+button pointing at a redirect, and a page moved under a new parent leaves them
+pointing at nothing.
+
+`packages/core/src/links.js` builds the map from the same route index the
+resolver uses, so a link and a canonical URL cannot disagree about where a page
+lives. A reference to a page that does not exist in the locale being rendered is
+left unresolved rather than turned into a confident-looking 404.
+
+`resolveLinksDeep()` walks a component block's data alongside
+`resolveAssetsDeep()`, for the same reason: a hero's button lives in
+`data.primaryHref`, not in markup.
+
+## Restore points
+
+Every content type that can be edited can be put back. The mechanism is one
+collection and one service — `packages/…` no, `apps/api/src/services/history.js` —
+and every entity declares three things: how to load it, how to write a snapshot
+back, and how to describe itself.
+
+Three properties make it an undo rather than a museum:
+
+- **The API takes the snapshot, not the editor.** Before every edit, delete,
+  conversion and publish. A history that depends on somebody pressing "back up
+  first" is empty on the day it is needed.
+- **The list is readable without loading the snapshots.** A page document
+  carries every block's markup — hundreds of kilobytes — so each version stores
+  a small `digest` (title, route, status, block count) written once at snapshot
+  time. The history screen compares consecutive digests to say what each restore
+  would change.
+- **Restoring is undoable.** The state being replaced is snapshotted first, and
+  the response names it, so the interface can offer the undo immediately.
+
+A delete is snapshotted with `force`, bypassing the debounce that collapses
+several edits in a row into one restore point. Without that, deleting something
+you had just edited wrote no snapshot at all — the one case where the snapshot is
+not a convenience but the only remaining copy. **Pages → Trash** is a projection
+of those snapshots, not a second collection that could disagree with them.
+
 ## Converting an authored block
 
 An imported section is stored as the exact bytes it was authored with, which is
@@ -268,4 +320,10 @@ migration.
 | Cutting a document into blocks | `packages/core/src/slice.js` |
 | Building `<head>` and JSON-LD | `packages/core/src/seo.js` |
 | Assembling a page | `packages/core/src/compose.js` |
+| Resolving named images | `packages/core/src/assets.js` |
+| Resolving page references in links | `packages/core/src/links.js` |
+| Proxying third-party endpoints | `packages/core/src/endpoints.js` |
+| Restore points and the trash | `apps/api/src/services/history.js` |
 | The migration itself | `packages/core/src/ingest.js` + `apps/api/src/seed/seed.js` |
+| What must be true before the API serves | `apps/api/src/seed/bootstrap.js` |
+| The admin's component library | `apps/cms/src/components/ui/` |

@@ -5,7 +5,7 @@ import { composeParts } from '@rainbow/core/compose';
 import { getKey } from '@rainbow/core/html';
 import {
   catalogue as loadCatalogue, alternatesFor, baseUrlFrom, activeLocales, knownRoutes,
-  integrationMap,
+  integrationMap, linkMap,
 } from './site.js';
 import { navRuntime } from './nav.js';
 import { config } from './config.js';
@@ -56,13 +56,20 @@ function runtimeFor({ locale, locales, page, settings, navigation, variants }) {
  */
 export async function renderPage(astro, page, extra = {}) {
   const { locals, url } = astro;
-  const locale = locals.locale;
+  /*
+   * The middleware waves some paths through without resolving a locale — the
+   * API and CMS prefixes, which the gateway owns in production. If one of those
+   * reaches the 404 page here, `locals` is empty; falling back to the defaults
+   * renders a plain 404 instead of throwing a 500 at whoever asked.
+   */
+  const locale = locals.locale || config.defaultLocale;
   const settings = locals.settings || {};
   const locales = activeLocales(settings);
   const baseUrl = baseUrlFrom(settings, url);
-  const [catalogue, integrations] = await Promise.all([
+  const [catalogue, integrations, links] = await Promise.all([
     loadCatalogue(locale),
     integrationMap(),
+    linkMap(settings, locale),
   ]);
 
   const ctx = {
@@ -80,6 +87,10 @@ export async function renderPage(astro, page, extra = {}) {
     integrations,
     // Named images, resolved to the file each asset currently holds.
     assets: locals.assets || [],
+    // `page:<key>` references, resolved to this locale's path for that page —
+    // so a button follows a rename and a translated route rather than pointing
+    // at wherever the page was when somebody typed the path in.
+    links,
     // Copy is annotated for inline editing whenever a draft is being previewed;
     // the block overlay and its bridge script are added only in edit mode.
     editMode: !!locals.editMode,

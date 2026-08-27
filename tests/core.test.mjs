@@ -195,18 +195,42 @@ test('an A/B variant replaces only its own block', () => {
   assert.ok(variant.parts.some(p => p.html.includes('<footer>')), 'other blocks are untouched');
 });
 
-test('snippets land in their zones as markup', () => {
+test('snippets land in their zones as markup, per page and site-wide', () => {
   const page = ingestPage({ key: 'p', route: 'p', title: 'P' }, DOC, { fr: CATALOGUE }, ['fr']);
   page.snippets = { head: '<meta name="verify" content="1">', body: '<!-- body -->', footer: '<!-- foot -->' };
   const doc = composeDocument(page, {
-    locale: 'fr', catalogue: CATALOGUE, sourceLocale: 'fr',
-    baseUrl: 'https://example.test', settings: { globalHeadSnippet: '<!-- global -->' },
+    locale: 'fr',
+    catalogue: CATALOGUE,
+    sourceLocale: 'fr',
+    baseUrl: 'https://example.test',
+    settings: {},
     translations: [],
+    // Site-wide code is an add-in on the chrome document: named, switchable and
+    // filterable, rather than the three anonymous settings fields it replaced.
+    chrome: {
+      addIns: [{ key: 'analytics', zone: 'head', html: '<!-- global -->', enabled: true }],
+    },
   });
   assert.match(doc, /<!-- global -->/);
   assert.match(doc, /<meta name="verify" content="1">/);
   assert.ok(doc.indexOf('<!-- body -->') < doc.indexOf('<!-- foot -->'));
   assert.ok(doc.indexOf('<!-- foot -->') < doc.indexOf('</body>'));
+});
+
+test('a switched-off add-in is not emitted', () => {
+  const page = ingestPage({ key: 'p', route: 'p', title: 'P' }, DOC, { fr: CATALOGUE }, ['fr']);
+  const doc = composeDocument(page, {
+    locale: 'fr',
+    catalogue: CATALOGUE,
+    sourceLocale: 'fr',
+    baseUrl: 'https://example.test',
+    settings: {},
+    translations: [],
+    chrome: {
+      addIns: [{ key: 'chat', zone: 'bodyEnd', html: '<!-- chat widget -->', enabled: false }],
+    },
+  });
+  assert.ok(!doc.includes('<!-- chat widget -->'));
 });
 
 test('canonical is the current locale and hreflang omits missing translations', () => {

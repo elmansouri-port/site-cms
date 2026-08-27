@@ -44,6 +44,9 @@ jobs:
             exit 1
           fi
 
+      - name: Lint
+        run: npm run lint
+
       - name: Unit tests
         run: npm run test:core
 
@@ -54,7 +57,7 @@ jobs:
         run: npm run verify:assets
 
       - name: API integration tests
-        run: npm run test --workspace @rainbow/api
+        run: npm run test:api
         env:
           MONGODB_URI: mongodb://127.0.0.1:27017/rainbow_ci
           CACHE_ENABLED: 'false'
@@ -95,6 +98,21 @@ jobs:
       - name: Assets — everything the pages ask for loads
         run: node tools/verify-assets.mjs http://localhost:8080
 
+      - name: Every editing flow, driven by a real browser
+        run: |
+          npx playwright install --with-deps chromium
+          node tools/verify-ui.mjs http://localhost:8080 --site http://localhost:8080 --confirm
+        env:
+          ADMIN_PASSWORD: CiPassword!2026
+
+      - name: The editor, the URL model and A/B testing
+        run: node tools/verify-editor.mjs http://localhost:8080 --confirm
+        env:
+          ADMIN_PASSWORD: CiPassword!2026
+
+      - name: One header and one footer, in every language
+        run: node tools/verify-chrome.mjs http://localhost:8080
+
       - name: Smoke — the routes that must never 404
         run: |
           set -e
@@ -103,6 +121,20 @@ jobs:
             echo "$code $path"
             [ "$code" = "200" ] || exit 1
           done
+
+      - name: Photograph every admin screen
+        if: always()
+        run: node tools/ui-shots.mjs http://localhost:8080 --out artifacts/ui
+        env:
+          ADMIN_PASSWORD: CiPassword!2026
+        continue-on-error: true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: admin-screenshots
+          path: artifacts/
+          retention-days: 7
 
       - name: Logs on failure
         if: failure()

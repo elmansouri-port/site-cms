@@ -1,0 +1,250 @@
+---
+/*
+ * FormBlock — a lead-capture form an editor can build without a developer.
+ *
+ * The authored site posted its forms straight from the browser to an automation
+ * platform. That published the platform, the exact webhook path for every form,
+ * and an endpoint anybody could post to without visiting the site — which is
+ * what `routes/hooks.js` exists to end. This block only ever posts to this
+ * origin: either `/api/v1/forms/<type>`, which stores a lead, or
+ * `/api/v1/hooks/<slug>`, which stores it *and* forwards it server-side.
+ *
+ * Storing first is the point. A form whose automation is misconfigured still
+ * captures the lead, and the CMS says the integration is failing rather than
+ * losing enquiries quietly for a fortnight.
+ *
+ * The honeypot is not optional and not editable: a field a human never sees and
+ * a bot always fills. A tripped honeypot is accepted with a 202 so the bot
+ * learns nothing from the response.
+ */
+const { data = {} } = Astro.props;
+
+const fields = (Array.isArray(data.fields) ? data.fields : []).filter(f => f?.name);
+
+// `lead:demo` stores under that lead type; `hook:book-a-call` also forwards it.
+const target = String(data.submitTo || 'lead:contact');
+const [kind, name] = target.includes(':') ? target.split(':') : ['lead', target];
+const action = kind === 'hook' ? `/api/v1/hooks/${name}` : `/api/v1/forms/${name || 'contact'}`;
+
+const columns = data.columns === 2 ? 'sm:grid-cols-2' : 'grid-cols-1';
+const align = data.align === 'center' ? 'text-center' : '';
+
+// Stable per block, so two forms on one page cannot collide on element ids.
+const uid = `cms-form-${Astro.props.block?.key || Math.random().toString(36).slice(2, 8)}`;
+
+const submitLabel = data.submitLabel || 'Send';
+const successTitle = data.successTitle || 'Thank you';
+const successMessage = data.successMessage || 'We have received your message and will be in touch shortly.';
+
+const INPUT_CLASS = 'w-full rounded-btn border border-gray-300 bg-white px-4 py-3 text-gray-900 '
+  + 'transition-colors placeholder:text-gray-400 focus:border-brand-500 focus:outline-none '
+  + 'focus:ring-2 focus:ring-brand-500/20';
+
+/** Which HTML input a field type maps to, and what the browser should validate. */
+const INPUT_TYPE = {
+  text: 'text', email: 'email', tel: 'tel', number: 'number', url: 'url', date: 'date',
+};
+---
+
+<div class={`mx-auto w-full max-w-3xl px-6 ${align}`}>
+  {data.title && <h2 class="text-3xl font-bold text-gray-900 sm:text-4xl">{data.title}</h2>}
+  {data.subtitle && <p class="mt-3 text-lg text-gray-600">{data.subtitle}</p>}
+
+  <form
+    id={uid}
+    class="mt-8 text-left"
+    action={action}
+    method="post"
+    data-cms-form
+    data-redirect={data.redirectTo || ''}
+    novalidate
+  >
+    <div class={`grid gap-5 ${columns}`}>
+      {fields.map((field) => {
+        const id = `${uid}-${field.name}`;
+        const wide = field.type === 'textarea' || field.width === 'full';
+        return (
+          <div class={wide ? 'sm:col-span-2' : ''}>
+            {field.type !== 'checkbox' && (
+              <label class="mb-1.5 block text-sm font-medium text-gray-700" for={id}>
+                {field.label || field.name}
+                {field.required && <span class="ml-0.5 text-brand-500" aria-hidden="true">*</span>}
+              </label>
+            )}
+
+            {field.type === 'textarea' && (
+              <textarea
+                id={id}
+                name={field.name}
+                rows={field.rows || 4}
+                required={!!field.required}
+                placeholder={field.placeholder || ''}
+                class={INPUT_CLASS}
+              />
+            )}
+
+            {field.type === 'select' && (
+              <select id={id} name={field.name} required={!!field.required} class={INPUT_CLASS}>
+                <option value="">{field.placeholder || '—'}</option>
+                {String(field.options || '').split('\n').filter(Boolean).map(option => (
+                  <option value={option.trim()}>{option.trim()}</option>
+                ))}
+              </select>
+            )}
+
+            {field.type === 'checkbox' && (
+              <label class="flex items-start gap-2.5 text-sm text-gray-600" for={id}>
+                <input
+                  id={id}
+                  name={field.name}
+                  type="checkbox"
+                  required={!!field.required}
+                  class="mt-0.5 size-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500"
+                />
+                <span set:html={field.label || field.name} />
+              </label>
+            )}
+
+            {!['textarea', 'select', 'checkbox'].includes(field.type) && (
+              <input
+                id={id}
+                name={field.name}
+                type={INPUT_TYPE[field.type] || 'text'}
+                required={!!field.required}
+                placeholder={field.placeholder || ''}
+                autocomplete={field.autocomplete || undefined}
+                class={INPUT_CLASS}
+              />
+            )}
+
+            {field.hint && <p class="mt-1 text-xs text-gray-500">{field.hint}</p>}
+            <p class="mt-1 hidden text-xs text-red-600" data-error-for={field.name}></p>
+          </div>
+        );
+      })}
+    </div>
+
+    {/*
+      The honeypot. Hidden from sight and from assistive technology, and never
+      autofilled, so anything in it came from a script.
+    */}
+    <div class="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden="true">
+      <label for={`${uid}-website`}>Website</label>
+      <input id={`${uid}-website`} name="website" type="text" tabindex="-1" autocomplete="off" />
+    </div>
+
+    {data.consentText && (
+      <p class="mt-5 text-xs leading-relaxed text-gray-500" set:html={data.consentText} />
+    )}
+
+    <div class={`mt-7 ${data.align === 'center' ? 'text-center' : ''}`}>
+      <button
+        type="submit"
+        class="rounded-btn inline-flex items-center gap-2 bg-brand-500 px-7 py-3 font-semibold text-white transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        <span data-submit-label>{submitLabel}</span>
+      </button>
+    </div>
+
+    <p class="mt-4 hidden rounded-btn bg-red-50 px-4 py-3 text-sm text-red-700" data-form-error role="alert"></p>
+
+    <noscript>
+      <p class="mt-4 rounded-btn bg-amber-50 px-4 py-3 text-sm text-amber-800">
+        This form needs JavaScript. Please write to us instead if it is turned off.
+      </p>
+    </noscript>
+  </form>
+
+  <div
+    class="mt-8 hidden rounded-2xl border border-green-200 bg-green-50 px-6 py-8 text-center"
+    data-form-success
+    role="status"
+    aria-live="polite"
+  >
+    <h3 class="text-xl font-semibold text-green-900">{successTitle}</h3>
+    <p class="mt-2 text-green-800">{successMessage}</p>
+  </div>
+</div>
+
+{/*
+  One handler for every form block on the page, added once. It posts to this
+  origin, swaps the form for the success panel, and reports a field-level error
+  where the API named a field.
+*/}
+<script is:inline>
+  if (!window.__cmsFormsBound) {
+    window.__cmsFormsBound = true;
+    document.addEventListener('submit', async (event) => {
+      const form = event.target.closest('form[data-cms-form]');
+      if (!form) return;
+      event.preventDefault();
+
+      // The browser's own validation, run on demand because `novalidate` is set
+      // so that a failed submit shows our messages rather than a native bubble.
+      const invalid = [...form.elements].find(el => el.willValidate && !el.checkValidity());
+      if (invalid) {
+        showFieldError(form, invalid);
+        invalid.focus();
+        return;
+      }
+      clearErrors(form);
+
+      const button = form.querySelector('button[type="submit"]');
+      const label = form.querySelector('[data-submit-label]');
+      const original = label ? label.textContent : '';
+      if (button) button.disabled = true;
+      if (label) label.textContent = 'Sending…';
+
+      const payload = {};
+      for (const [key, value] of new FormData(form).entries()) payload[key] = value;
+      payload.page = location.pathname;
+      payload.locale = document.documentElement.lang || '';
+      if (window.__CMS__ && window.__CMS__.variants) payload.variant = JSON.stringify(window.__CMS__.variants);
+
+      try {
+        const res = await fetch(form.getAttribute('action'), {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) {
+          const body = await res.json().catch(() => null);
+          throw new Error((body && body.error) || 'Something went wrong. Please try again.');
+        }
+
+        const redirect = form.getAttribute('data-redirect');
+        if (redirect) { location.assign(redirect); return; }
+
+        const success = form.parentElement.querySelector('[data-form-success]');
+        form.classList.add('hidden');
+        if (success) {
+          success.classList.remove('hidden');
+          success.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      } catch (err) {
+        const box = form.querySelector('[data-form-error]');
+        if (box) {
+          box.textContent = err.message;
+          box.classList.remove('hidden');
+        }
+      } finally {
+        if (button) button.disabled = false;
+        if (label) label.textContent = original;
+      }
+    });
+
+    function showFieldError(form, element) {
+      const target = form.querySelector('[data-error-for="' + element.name + '"]');
+      if (!target) return;
+      target.textContent = element.validationMessage;
+      target.classList.remove('hidden');
+    }
+
+    function clearErrors(form) {
+      form.querySelectorAll('[data-error-for], [data-form-error]').forEach((node) => {
+        node.textContent = '';
+        node.classList.add('hidden');
+      });
+    }
+  }
+</script>

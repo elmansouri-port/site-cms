@@ -33,7 +33,7 @@ integrationsRouter.use(requireAuth);
  * way to walk off with the automation platform's credentials.
  */
 function publicView(row) {
-  let host = '';
+  let host;
   let pathHint = '';
   try {
     const url = new URL(row.url);

@@ -11,10 +11,15 @@
  * the moment somebody can be persuaded to name it.
  */
 import { useState } from 'react';
-import { useResource, useDebounced } from '../lib/hooks.js';
+import { ImageOff, Loader2, Upload } from 'lucide-react';
+import { useDebounced, useResource } from '../lib/hooks.js';
 import { api, qs } from '../lib/api.js';
 import { useToast } from '../lib/toast.jsx';
-import { Modal, Spinner, Empty, Badge, Icon, formatBytes } from './ui.jsx';
+import { cn } from '../lib/cn.js';
+import {
+  Badge, Button, Callout, Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader,
+  DialogTitle, Empty, SearchInput, Skeleton, formatBytes,
+} from './ui/index.js';
 
 export default function MediaPicker({ onSelect, onClose }) {
   const toast = useToast();
@@ -52,6 +57,7 @@ export default function MediaPicker({ onSelect, onClose }) {
 
   async function adopt(item, event) {
     event.stopPropagation();
+    event.preventDefault();
     try {
       const res = await api.post(`/media/${item._id}/adopt`);
       toast.success(res.note);
@@ -64,73 +70,107 @@ export default function MediaPicker({ onSelect, onClose }) {
   const items = data?.items || [];
 
   return (
-    <Modal wide title="Choose an image" onClose={onClose}>
-      <div className="inline" style={{ marginBottom: 14 }}>
-        <div className="search-field">
-          <Icon name="search" />
-          <input
-            type="search"
+    <Dialog open onOpenChange={(next) => { if (!next) onClose(); }}>
+      <DialogContent size="xl">
+        <DialogHeader>
+          <DialogTitle>Choose an image</DialogTitle>
+        </DialogHeader>
+
+        <div className="flex flex-wrap items-center gap-2 border-b px-5 py-3">
+          <SearchInput
+            autoFocus
             placeholder="Search by name, reference or filename…"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            autoFocus
+            className="w-full grow sm:w-auto"
           />
+          <Button variant="outline" size="sm" asChild className="cursor-pointer">
+            <label>
+              {busy ? <Loader2 className="animate-spin" /> : <Upload />}
+              {busy ? 'Uploading…' : 'Upload'}
+              <input
+                type="file"
+                multiple
+                hidden
+                onChange={e => { upload([...e.target.files]); e.target.value = ''; }}
+              />
+            </label>
+          </Button>
         </div>
-        <label className="btn btn--sm">
-          <Icon name="plus" /> {busy ? 'Uploading…' : 'Upload'}
-          <input
-            type="file"
-            multiple
-            hidden
-            onChange={e => { upload([...e.target.files]); e.target.value = ''; }}
-          />
-        </label>
-      </div>
 
-      {loading && <Spinner />}
-      {data && !items.length && <Empty title="Nothing found">Try a different search, or upload one.</Empty>}
+        <DialogBody>
+          {loading && (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
+              {Array.from({ length: 12 }, (_, i) => <Skeleton key={i} className="h-32" />)}
+            </div>
+          )}
 
-      {items.length > 0 && (
-        <div className="media-grid">
-          {items.map(item => (
-            <button key={item._id} type="button" className="media-card" onClick={() => choose(item)}>
-              <div
-                className="media-card__thumb"
-                style={item.mime?.startsWith('image/') ? { backgroundImage: `url("${item.url}")` } : undefined}
-              >
-                {!item.mime?.startsWith('image/') && (item.mime || '').split('/')[1]}
-              </div>
-              <div className="media-card__meta">
-                <div className="media-card__name" title={item.filename}>
-                  {item.name || item.originalName || item.filename}
-                </div>
-                {item.slug ? (
-                  <div className="media-card__ref mono">/media/a/{item.slug}</div>
-                ) : (
-                  <div className="media-card__size">
-                    <Badge tone="warn">not managed</Badge>
-                    <span
-                      role="button"
-                      tabIndex={0}
-                      className="linkish"
-                      onClick={e => adopt(item, e)}
-                      onKeyDown={e => { if (e.key === 'Enter') adopt(item, e); }}
-                    >
-                      name it
+          {data && !items.length && (
+            <Empty icon={ImageOff} title="Nothing found">
+              Try a different search, or upload one.
+            </Empty>
+          )}
+
+          {items.length > 0 && (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
+              {items.map(item => (
+                <button
+                  key={item._id}
+                  type="button"
+                  onClick={() => choose(item)}
+                  className="hover:border-primary/60 focus-visible:ring-ring/40 bg-card group grid overflow-hidden rounded-lg border text-left transition-colors outline-none focus-visible:ring-[3px]"
+                >
+                  <span
+                    className={cn(
+                      'bg-muted text-muted-foreground flex h-24 items-center justify-center',
+                      'bg-cover bg-center text-[11px] font-medium uppercase',
+                    )}
+                    style={item.mime?.startsWith('image/') ? { backgroundImage: `url("${item.url}")` } : undefined}
+                  >
+                    {!item.mime?.startsWith('image/') && (item.mime || '').split('/')[1]}
+                  </span>
+                  <span className="grid gap-1 p-2">
+                    <span className="truncate text-[12px] font-medium" title={item.filename}>
+                      {item.name || item.originalName || item.filename}
                     </span>
-                  </div>
-                )}
-                <div className="media-card__size">{formatBytes(item.size)}</div>
-              </div>
-            </button>
-          ))}
-        </div>
-      )}
+                    {item.slug ? (
+                      <span className="text-muted-foreground truncate font-mono text-[10.5px]">
+                        /media/a/{item.slug}
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1.5">
+                        <Badge variant="warning">not managed</Badge>
+                        <span
+                          role="button"
+                          tabIndex={0}
+                          className="text-primary text-[10.5px] underline underline-offset-2"
+                          onClick={e => adopt(item, e)}
+                          onKeyDown={e => { if (e.key === 'Enter') adopt(item, e); }}
+                        >
+                          name it
+                        </span>
+                      </span>
+                    )}
+                    <span className="text-muted-foreground text-[10.5px] tabular-nums">
+                      {formatBytes(item.size)}
+                    </span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
 
-      <p className="field__hint" style={{ marginTop: 12 }}>
-        Picking a managed image stores its reference, so replacing that image later updates this
-        page along with every other one using it.
-      </p>
-    </Modal>
+          <Callout className="mt-4">
+            Picking a <strong>managed</strong> image stores its reference, so replacing that image
+            later updates this page along with every other one using it. A file with no reference is
+            pinned to its filename — <em>name it</em> fixes that in one click.
+          </Callout>
+        </DialogBody>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

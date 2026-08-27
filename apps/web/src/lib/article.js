@@ -128,18 +128,6 @@ export async function renderArticle(article, locale, { blogSegment = 'blog', bas
     return { ...section, html, keys: [] };
   });
 
-  const componentBlocks = (post.blocks || [])
-    .filter(b => b.visible !== false)
-    .map((b, i) => ({
-      key: b.key || `post-block-${i}`,
-      type: 'component',
-      visible: true,
-      componentKey: b.componentKey,
-      data: b.data || {},
-      layout: b.layout || {},
-      anchorId: null,
-    }));
-
   const page = {
     ...template,
     key: `post:${post.slug}`,
@@ -148,7 +136,7 @@ export async function renderArticle(article, locale, { blogSegment = 'blog', bas
     pageKind: 'blogPost',
     locales: (article.translations || []).map(t => t.locale),
     noindex: post.status !== 'published',
-    sections: insertAfterArticle(sections, componentBlocks),
+    sections,
     seo: {
       ...(template.seo || {}),
       title: post.seo?.title || post.title,
@@ -309,9 +297,3 @@ const LABELS = {
 };
 const labelFor = (locale, key) => LABELS[locale]?.[key] || LABELS.en[key];
 
-function insertAfterArticle(sections, blocks) {
-  if (!blocks.length) return sections;
-  const at = sections.findIndex(s => s.type === 'html' && s.html.includes('itemprop="articleBody"'));
-  if (at < 0) return [...sections, ...blocks];
-  return [...sections.slice(0, at + 1), ...blocks, ...sections.slice(at + 1)];
-}

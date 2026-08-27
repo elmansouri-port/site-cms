@@ -20,7 +20,7 @@ import { fileURLToPath } from 'node:url';
 import { connectMongo, disconnectMongo } from '../lib/mongo.js';
 import { bumpRevision, closeRedis } from '../lib/redis.js';
 import { logger } from '../lib/log.js';
-import { ensureBootstrapUser } from './bootstrap.js';
+import { ensureBootstrapUser, migrateGlobalSnippets } from './bootstrap.js';
 import {
   Page, ContentString, Settings, Navigation, BlogPost, Media, Partner, Chrome, Integration,
 } from '../models/index.js';
@@ -69,6 +69,7 @@ async function main() {
   await seedStrings(catalogues, registry.locales, seoKeys);
   await seedNavigation();
   await seedChrome();
+  await migrateGlobalSnippets();
   await seedIntegrations();
   await seedBlog(registry, catalogues);
   await seedMedia();

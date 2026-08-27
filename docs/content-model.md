@@ -219,14 +219,38 @@ different menu layouts.
 
 | Collection | Holds |
 |---|---|
-| `settings` | One document: site identity, languages, the blog's segment per locale, default metadata, the three global snippets, analytics |
+| `settings` | One document: site identity, languages, the blog's segment per locale, default metadata, analytics. Site-wide code lives in `chromes.addIns`, not here |
 | `media` | Named image assets: `slug` is the reference pages point at, `aliases` the ones they used to, `history` the files replaced. See below |
 | `partners` | The 1 130-entry directory behind the locator map |
 | `leads` | Form submissions, stored before they are forwarded anywhere |
 | `redirects` | Old URL → new URL, applied in the frontend middleware |
 | `experiments` | A/B tests. `scope: 'block'` varies one section; `scope: 'page'` serves a whole alternative page at the control's URL |
-| `versions` | Snapshots taken before every destructive edit; the last 30 per item |
+| `versions` | Restore points. See below |
 | `auditlogs` | Who changed what, and when |
+
+### `versions`
+
+A restore point: the whole document as it was, plus a small `digest` describing
+it so the history list can be read without loading thirty snapshots.
+
+| Field | Meaning |
+|---|---|
+| `entity` | `page`, `post`, `chrome`, `navigation` or `settings` |
+| `entityId` | The page key, article id, or `default` / `main` / `global` |
+| `label` | What was about to happen — `before delete`, or a name an editor typed |
+| `kind` | `auto` (written by the API) or `manual` (asked for, and never trimmed) |
+| `digest` | Title, route, status, block count — the facts the history list shows |
+| `snapshot` | The document itself, restored verbatim minus its identity fields |
+
+Written before every edit, delete, conversion and publish. Automatic snapshots
+are debounced to one a minute, so editing three fields in a row leaves one
+restore point — except before a delete, which is forced, because there the
+snapshot is the only remaining copy. **Pages → Trash** is a projection of these:
+the newest snapshot of every page key that no longer exists.
+
+`apps/api/src/services/history.js` declares, per entity, how to load it, how to
+write a snapshot back, and how to describe it. Giving a new content type a
+history is one entry in that table.
 
 ## Adding a language
 
@@ -247,9 +271,21 @@ an incomplete translation stays invisible rather than advertising itself.
 2. Register it in `SectionRenderer.astro`.
 3. Describe it in `apps/cms/src/lib/blockSchemas.js`: its fields, plus the
    `category`, one-line `description` and `wireframe` the insert palette shows.
+4. If it is useless empty — a form with no fields is — give it a starting point
+   in `BLOCK_DEFAULTS`.
 
 The block is then available on every page, in the palette, and A/B testable by
 field override. No API change, no migration.
+
+Field types worth knowing about:
+
+| Type | Control |
+|---|---|
+| `link` | The link picker: a page, an article, an anchor on this page, a URL, an email or phone number, or a file. A page is stored as `page:<key>` and resolved per locale at render time |
+| `media` | The image library, storing the asset's reference rather than its filename |
+| `formTarget` | Where a form's submissions go: a lead type, or one of the configured integrations |
+| `code` | The code editor, with a line gutter and structural warnings |
+| `list` | A repeatable group of the above |
 
 ## Adding a language, URL side
 

@@ -16,7 +16,21 @@
  * fails part-way, delete those keys before running it again.
  */
 const args = process.argv.slice(2);
+const flag = (name, fallback) => {
+  const i = args.indexOf(`--${name}`);
+  return i >= 0 && args[i + 1] ? args[i + 1] : fallback;
+};
+
 const BASE = (args.find(a => !a.startsWith('-')) || 'http://localhost:8080').replace(/\/+$/, '');
+
+/*
+ * Behind the gateway one origin serves the API, the admin and the site, which is
+ * why `BASE` alone is enough in production. Running the three services on their
+ * own ports in development splits them, so both can be pointed at separately:
+ *
+ *   node tools/verify-editor.mjs http://localhost:4000 --site http://localhost:3000 --confirm
+ */
+const SITE = flag('site', BASE).replace(/\/+$/, '');
 const EMAIL = process.env.ADMIN_EMAIL || 'admin@rainbow.local';
 const PASSWORD = process.env.ADMIN_PASSWORD;
 
@@ -56,13 +70,13 @@ async function api(path, options = {}) {
     },
   });
   const text = await res.text();
-  let body = null;
+  let body;
   try { body = text ? JSON.parse(text) : null; } catch { body = { raw: text }; }
   return { status: res.status, body, headers: res.headers };
 }
 
 async function page(path, { cookie = null, redirect = 'manual' } = {}) {
-  const res = await fetch(`${BASE}${path}`, {
+  const res = await fetch(`${SITE}${path}`, {
     redirect,
     headers: cookie ? { cookie } : {},
   });
@@ -101,13 +115,13 @@ console.log('\nLocalized routes');
   const en = await page('/en/pricing');
   ok('/en/pricing serves the page', en.status === 200, `status ${en.status}`);
   ok('its canonical is the localized URL',
-    en.html.includes('rel="canonical" href="' + BASE + '/en/pricing/'),
+    en.html.includes('rel="canonical" href="' + SITE + '/en/pricing/'),
     (en.html.match(/rel="canonical"[^>]*/) || [''])[0]);
   ok('hreflang points de at /de/preise',
-    en.html.includes('hreflang="de" href="' + BASE + '/de/preise/'),
+    en.html.includes('hreflang="de" href="' + SITE + '/de/preise/'),
     (en.html.match(/hreflang="de"[^>]*/) || ['none'])[0]);
   ok('hreflang points fr at the base route',
-    en.html.includes(`hreflang="fr" href="${BASE}/fr/${baseRoute}/`),
+    en.html.includes(`hreflang="fr" href="${SITE}/fr/${baseRoute}/`),
     (en.html.match(/hreflang="fr"[^>]*/) || ['none'])[0]);
 
   const old = await page(`/en/${baseRoute}`);
@@ -124,9 +138,9 @@ console.log('\nLocalized routes');
     JSON.stringify(written || null));
 
   const map = await page('/sitemap.xml');
-  ok('the sitemap lists the localized URL', map.html.includes(`${BASE}/en/pricing/`));
+  ok('the sitemap lists the localized URL', map.html.includes(`${SITE}/en/pricing/`));
   ok('the sitemap does not list the old English URL',
-    !map.html.includes(`${BASE}/en/${baseRoute}/`));
+    !map.html.includes(`${SITE}/en/${baseRoute}/`));
 
   const de = await page('/de/preise');
   ok('/de/preise serves the page too', de.status === 200, `status ${de.status}`);
@@ -145,7 +159,7 @@ console.log('\nStructured data');
 
 /* ── 4. Custom block ─────────────────────────────────────────────────────── */
 console.log('\nCustom block');
-let testPage = null;
+let testPage;
 {
   const created = await api('/pages', {
     method: 'POST',
@@ -376,8 +390,6 @@ console.log('\nWhole-page variants');
 /* ── 9. Blog segment per locale ──────────────────────────────────────────── */
 console.log('\nBlog segment');
 {
-  const settings = await api('/settings');
-  const current = settings.body?.settings || {};
   const put = await api('/settings', {
     method: 'PUT',
     body: JSON.stringify({ blogSegment: { en: 'insights' } }),
@@ -617,7 +629,7 @@ console.log('\nRich copy protection');
 
 /* ── 16. Article sections and the contents list ──────────────────────────── */
 console.log('\nArticle sections');
-let articleId = null;
+let articleId;
 {
   const sections = [
     { type: 'keyPoints', data: { title: 'ZZ key points', items: ['One', 'Two'] } },
@@ -789,8 +801,10 @@ console.log('\nNamed image assets');
   await new Promise(r => setTimeout(r, 1500));
   ok('pages written against the old reference still work',
     (await page('/fr/blog/the-power-of-rainbow')).html.includes(newUrl));
-  ok('the old reference still resolves on its own',
-    (await page(`/media/a/${hero.slug}`)).status === 302);
+  // The fallback lives on the API — it is what catches a reference the render
+  // pass missed, wherever that reference ended up.
+  const alias = await fetch(`${BASE}/api/v1/site/asset/${hero.slug}`, { redirect: 'manual' });
+  ok('the old reference still resolves on its own', alias.status === 302, `status ${alias.status}`);
 
   // Deleting something in use has to be refused.
   const refused = await api(`/media/${hero._id}`, { method: 'DELETE' });

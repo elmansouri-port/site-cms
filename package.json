@@ -16,19 +16,37 @@
     "dev:api": "npm run dev --workspace @rainbow/api",
     "dev:web": "npm run dev --workspace @rainbow/web",
     "dev:cms": "npm run dev --workspace @rainbow/cms",
+
     "build": "npm run build --workspace @rainbow/web && npm run build --workspace @rainbow/cms",
     "seed": "npm run seed --workspace @rainbow/api",
     "seed:reset": "npm run seed:reset --workspace @rainbow/api",
-    "verify": "node tools/verify-fidelity.mjs",
-    "verify:live": "node tools/verify-live.mjs",
-    "verify:assets": "node tools/verify-assets.mjs",
-    "verify:menu": "node tools/verify-megamenu.mjs",
-    "test": "node --test tests/core.test.mjs && npm run verify && npm run verify:assets && npm run test --workspace @rainbow/api",
+
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+
+    "test": "npm run test:core && npm run verify && npm run verify:assets && npm run test:api",
     "test:core": "node --test tests/core.test.mjs",
-    "lint": "npm run lint --workspaces --if-present"
+    "test:api": "npm run test --workspace @rainbow/api",
+
+    "verify": "node tools/verify-fidelity.mjs",
+    "verify:assets": "node tools/verify-assets.mjs",
+    "verify:live": "node tools/verify-live.mjs",
+    "verify:menu": "node tools/verify-megamenu.mjs",
+    "verify:chrome": "node tools/verify-chrome.mjs",
+    "verify:editor": "node tools/verify-editor.mjs",
+
+    "verify:ui": "node tools/verify-ui.mjs",
+    "ui:shots": "node tools/ui-shots.mjs",
+
+    "check:dev": "node tools/verify-live.mjs http://localhost:3000 && node tools/verify-chrome.mjs http://localhost:3000 && node tools/verify-ui.mjs http://localhost:5173 --confirm"
   },
   "devDependencies": {
-    "concurrently": "^9.2.1"
+    "@eslint/js": "^10.0.1",
+    "concurrently": "^9.2.1",
+    "eslint": "^10.9.1",
+    "eslint-plugin-react-hooks": "^7.1.0",
+    "globals": "^17.2.0",
+    "playwright": "^1.62.1"
   },
   "license": "UNLICENSED"
 }

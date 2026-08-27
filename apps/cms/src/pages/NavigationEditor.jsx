@@ -5,15 +5,25 @@
  * megamenu has three zones; leaving `features` or `footer` empty is a real
  * choice, not an oversight, and the frontend renders no container for an empty
  * zone so `main` fills the width.
+ *
+ * Every link goes through the same picker the page blocks use, so a menu entry
+ * is stored as `page:<key>` and survives a URL rename in any language — the
+ * navigation being the one place where a stale link is seen on every page.
  */
 import { useEffect, useMemo, useState } from 'react';
-import { useResource } from '../lib/hooks.js';
+import { ChevronDown, GripVertical, Plus, Save, Trash2 } from 'lucide-react';
+import { useDirtyGuard, useResource } from '../lib/hooks.js';
 import { api } from '../lib/api.js';
 import { useToast } from '../lib/toast.jsx';
 import { useAuth } from '../lib/auth.jsx';
+import { cn } from '../lib/cn.js';
+import LinkPicker from '../components/LinkPicker.jsx';
+import HistoryPanel from '../components/HistoryPanel.jsx';
 import {
-  Panel, Spinner, ErrorBox, Icon, Field, LocalePills, Badge, Checkbox,
-} from '../components/ui.jsx';
+  Badge, Button, Callout, Card, CardContent, CardHeader, CardTitle, CheckboxField, Code,
+  ErrorBox, Field, FieldGroupLabel, FieldRow, Input, PageHeader, Segmented, Select, Spinner,
+  Tabs, TabsContent, TabsList, TabsTrigger,
+} from '../components/ui/index.js';
 
 export default function NavigationEditor() {
   const toast = useToast();
@@ -26,8 +36,10 @@ export default function NavigationEditor() {
   const [dragKey, setDragKey] = useState(null);
   const [dirty, setDirty] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [tab, setTab] = useState('menu');
 
   useEffect(() => { if (menu.data?.menu) setItems(menu.data.menu.items || []); }, [menu.data]);
+  useDirtyGuard(dirty);
 
   const locales = useMemo(
     () => (settings.data?.settings?.locales || []).filter(l => l.active).map(l => l.code),
@@ -43,7 +55,7 @@ export default function NavigationEditor() {
   };
 
   function move(fromKey, toKey) {
-    if (fromKey === toKey) return;
+    if (!fromKey || fromKey === toKey) return;
     const from = items.findIndex(i => i.key === fromKey);
     const to = items.findIndex(i => i.key === toKey);
     if (from < 0 || to < 0) return;
@@ -58,7 +70,7 @@ export default function NavigationEditor() {
     setBusy(true);
     try {
       await api.put('/navigation/main', { items });
-      toast.success('Navigation saved');
+      toast.success('Navigation saved — the live site is updating');
       setDirty(false);
       menu.reload();
     } catch (err) {
@@ -70,211 +82,302 @@ export default function NavigationEditor() {
 
   return (
     <>
-      <div className="page-head">
-        <div className="page-head__text">
-          <h1>Navigation</h1>
-          <p>Drag to reorder. The order here is the order visitors see.</p>
-        </div>
-        <div className="page-head__actions">
-          <LocalePills locales={locales.length ? locales : ['fr']} value={locale} onChange={setLocale} />
-          {can('editor') && (
-            <button className="btn btn--primary" onClick={save} disabled={!dirty || busy}>
-              <Icon name="save" /> {busy ? 'Saving…' : 'Save navigation'}
-            </button>
+      <PageHeader
+        title="Menus"
+        description="Drag to reorder. The order here is the order visitors see, on every page."
+      >
+        <Segmented
+          value={locale}
+          onChange={setLocale}
+          options={(locales.length ? locales : ['fr']).map(l => ({ value: l, label: l.toUpperCase() }))}
+        />
+        {can('editor') && (
+          <Button onClick={save} disabled={!dirty || busy}>
+            <Save /> {busy ? 'Saving…' : 'Save navigation'}
+          </Button>
+        )}
+      </PageHeader>
+
+      <Tabs value={tab} onValueChange={setTab}>
+        <TabsList className="mb-4">
+          <TabsTrigger value="menu" count={items.length}>Main menu</TabsTrigger>
+          <TabsTrigger value="history">History</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="menu">
+          {dirty && (
+            <Callout tone="warning" className="mb-3">
+              Unsaved changes. Nothing reaches the site until you save.
+            </Callout>
           )}
-        </div>
-      </div>
 
-      <div className="blocks">
-        {items.map(item => (
-          <div key={item.key}>
-            <div
-              className={`block ${dragKey === item.key ? 'is-dragging' : ''}`}
-              draggable={can('editor')}
-              onDragStart={() => setDragKey(item.key)}
-              onDragEnd={() => setDragKey(null)}
-              onDragOver={e => e.preventDefault()}
-              onDrop={() => move(dragKey, item.key)}
-            >
-              <span className="block__handle"><Icon name="drag" /></span>
-              <div className="block__body">
-                <div className="block__title">{item.label?.[locale] || item.key}</div>
-                <div className="block__meta">
-                  <span className="mono">{item.href || 'no link'}</span>
-                  {item.megamenu?.enabled && <Badge tone="brand">megamenu</Badge>}
-                  {!item.visible && <Badge tone="warn">hidden</Badge>}
-                </div>
-              </div>
-              <div className="block__actions">
-                <button className="btn btn--sm" onClick={() => setOpenKey(openKey === item.key ? null : item.key)}>
-                  {openKey === item.key ? 'Close' : 'Edit'}
-                </button>
-              </div>
-            </div>
-
-            {openKey === item.key && (
-              <div style={{ padding: '12px 0 4px 22px' }}>
-                <Panel>
-                  <div className="grid grid--2">
-                    <Field label={`Label (${locale.toUpperCase()})`}>
-                      <input
-                        value={item.label?.[locale] || ''}
-                        disabled={!can('editor')}
-                        onChange={e => update(item.key, i => ({ ...i, label: { ...i.label, [locale]: e.target.value } }))}
-                      />
-                    </Field>
-                    <Field label="Link">
-                      <input
-                        className="code"
-                        value={item.href || ''}
-                        disabled={!can('editor')}
-                        onChange={e => update(item.key, i => ({ ...i, href: e.target.value }))}
-                      />
-                    </Field>
-                  </div>
-                  <div className="inline">
-                    <Checkbox
-                      label="Visible"
-                      checked={item.visible !== false}
-                      disabled={!can('editor')}
-                      onChange={e => update(item.key, i => ({ ...i, visible: e.target.checked }))}
-                    />
-                    <Checkbox
-                      label="Has a megamenu"
-                      checked={!!item.megamenu?.enabled}
-                      disabled={!can('editor')}
-                      onChange={e => update(item.key, i => ({ ...i, megamenu: { ...i.megamenu, enabled: e.target.checked } }))}
-                    />
-                  </div>
-
-                  {item.megamenu?.enabled && (
-                    <>
-                      <Zone
-                        title="Main zone (always shown)"
-                        zone={item.megamenu.main}
-                        locale={locale}
-                        canEdit={can('editor')}
-                        withSeeAll
-                        onChange={(zone) => update(item.key, i => ({ ...i, megamenu: { ...i.megamenu, main: zone } }))}
-                      />
-                      <Zone
-                        title="Features zone (optional)"
-                        hint="Leave empty and the main zone expands to the full width — no empty container is rendered."
-                        zone={item.megamenu.features}
-                        locale={locale}
-                        canEdit={can('editor')}
-                        onChange={(zone) => update(item.key, i => ({ ...i, megamenu: { ...i.megamenu, features: zone } }))}
-                      />
-                      <FooterZone
-                        zone={item.megamenu.footer}
-                        locale={locale}
-                        canEdit={can('editor')}
-                        onChange={(zone) => update(item.key, i => ({ ...i, megamenu: { ...i.megamenu, footer: zone } }))}
-                      />
-                    </>
+          <div className="grid gap-2">
+            {items.map(item => (
+              <div key={item.key}>
+                <div
+                  className={cn(
+                    'bg-card flex items-center gap-2 rounded-lg border p-2.5 transition-opacity',
+                    dragKey === item.key && 'opacity-40',
                   )}
-                </Panel>
+                  draggable={can('editor')}
+                  onDragStart={() => setDragKey(item.key)}
+                  onDragEnd={() => setDragKey(null)}
+                  onDragOver={e => e.preventDefault()}
+                  onDrop={() => move(dragKey, item.key)}
+                >
+                  <span className={cn('text-muted-foreground shrink-0', can('editor') ? 'cursor-grab' : 'opacity-30')}>
+                    <GripVertical className="size-4" />
+                  </span>
+                  <div className="min-w-0 grow">
+                    <div className="truncate text-[13px] font-medium">
+                      {item.label?.[locale] || <span className="text-warning italic">Not translated to {locale.toUpperCase()}</span>}
+                    </div>
+                    <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+                      <Code>{item.href || 'no link'}</Code>
+                      {item.megamenu?.enabled && <Badge variant="primary">megamenu</Badge>}
+                      {item.visible === false && <Badge variant="warning">hidden</Badge>}
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setOpenKey(openKey === item.key ? null : item.key)}
+                  >
+                    <ChevronDown className={cn('transition-transform', openKey === item.key && 'rotate-180')} />
+                    {openKey === item.key ? 'Close' : 'Edit'}
+                  </Button>
+                </div>
+
+                {openKey === item.key && (
+                  <Card className="mt-2 ml-6">
+                    <CardContent className="grid gap-4">
+                      <FieldRow>
+                        <Field label={`Label (${locale.toUpperCase()})`}>
+                          {id => (
+                            <Input
+                              id={id}
+                              value={item.label?.[locale] || ''}
+                              disabled={!can('editor')}
+                              onChange={e => update(item.key, i => ({ ...i, label: { ...i.label, [locale]: e.target.value } }))}
+                            />
+                          )}
+                        </Field>
+                        <LinkPicker
+                          label="Goes to"
+                          value={item.href || ''}
+                          disabled={!can('editor')}
+                          onChange={href => update(item.key, i => ({ ...i, href }))}
+                        />
+                      </FieldRow>
+
+                      <div className="flex flex-wrap gap-5">
+                        <CheckboxField
+                          label="Visible"
+                          checked={item.visible !== false}
+                          disabled={!can('editor')}
+                          onChange={v => update(item.key, i => ({ ...i, visible: v }))}
+                        />
+                        <CheckboxField
+                          label="Has a megamenu"
+                          checked={!!item.megamenu?.enabled}
+                          disabled={!can('editor')}
+                          onChange={v => update(item.key, i => ({ ...i, megamenu: { ...i.megamenu, enabled: v } }))}
+                        />
+                      </div>
+
+                      {item.megamenu?.enabled && (
+                        <>
+                          <Zone
+                            title="Main zone"
+                            hint="Always shown."
+                            zone={item.megamenu.main}
+                            locale={locale}
+                            canEdit={can('editor')}
+                            withSeeAll
+                            onChange={(zone) => update(item.key, i => ({ ...i, megamenu: { ...i.megamenu, main: zone } }))}
+                          />
+                          <Zone
+                            title="Features zone"
+                            hint="Optional. Leave it empty and the main zone expands to the full width — no empty container is rendered."
+                            zone={item.megamenu.features}
+                            locale={locale}
+                            canEdit={can('editor')}
+                            onChange={(zone) => update(item.key, i => ({ ...i, megamenu: { ...i.megamenu, features: zone } }))}
+                          />
+                          <FooterZone
+                            zone={item.megamenu.footer}
+                            locale={locale}
+                            canEdit={can('editor')}
+                            onChange={(zone) => update(item.key, i => ({ ...i, megamenu: { ...i.megamenu, footer: zone } }))}
+                          />
+                        </>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
               </div>
-            )}
+            ))}
           </div>
-        ))}
-      </div>
+        </TabsContent>
+
+        <TabsContent value="history">
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
+            <HistoryPanel entity="navigation" entityId="main" name="the main menu" onRestored={menu.reload} />
+            <Card>
+              <CardHeader><CardTitle>Why the menu has a history</CardTitle></CardHeader>
+              <CardContent className="prose-sm">
+                <p>
+                  The navigation appears on every page, so a mistake in it is a mistake on the whole
+                  site at once — and it is edited by whoever is running a campaign, not by whoever
+                  built it.
+                </p>
+                <p>
+                  A restore point is written before each save. Restoring puts the whole menu back,
+                  including every megamenu zone and every translated label.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
     </>
   );
 }
 
 function Zone({ title, hint, zone = {}, locale, canEdit, withSeeAll, onChange }) {
   const links = zone.links || [];
-  const setLink = (i, updater) => onChange({ ...zone, links: links.map((l, idx) => (idx === i ? updater(l) : l)) });
+  const setLink = (i, updater) => onChange({
+    ...zone,
+    links: links.map((l, idx) => (idx === i ? updater(l) : l)),
+  });
 
   return (
-    <div style={{ marginTop: 18, borderTop: '1px solid var(--line)', paddingTop: 14 }}>
-      <h3>{title}</h3>
-      {hint && <p className="field__hint" style={{ marginBottom: 10 }}>{hint}</p>}
+    <div className="grid gap-4">
+      <FieldGroupLabel hint={hint}>{title}</FieldGroupLabel>
 
       <Field label={`Zone title (${locale.toUpperCase()})`}>
-        <input
-          value={zone.title?.[locale] || ''}
-          disabled={!canEdit}
-          onChange={e => onChange({ ...zone, title: { ...zone.title, [locale]: e.target.value } })}
-        />
+        {id => (
+          <Input
+            id={id}
+            value={zone.title?.[locale] || ''}
+            disabled={!canEdit}
+            onChange={e => onChange({ ...zone, title: { ...zone.title, [locale]: e.target.value } })}
+          />
+        )}
       </Field>
 
       {links.map((link, i) => (
-        <div key={i} className="block" style={{ flexDirection: 'column', alignItems: 'stretch', marginBottom: 8 }}>
-          <div className="grid grid--2">
+        <div key={i} className="grid gap-4 rounded-lg border p-3">
+          <FieldRow>
             <Field label="Label">
-              <input
-                value={link.label?.[locale] || ''}
-                disabled={!canEdit}
-                onChange={e => setLink(i, l => ({ ...l, label: { ...l.label, [locale]: e.target.value } }))}
-              />
+              {id => (
+                <Input
+                  id={id}
+                  value={link.label?.[locale] || ''}
+                  disabled={!canEdit}
+                  onChange={e => setLink(i, l => ({ ...l, label: { ...l.label, [locale]: e.target.value } }))}
+                />
+              )}
             </Field>
-            <Field label="Link">
-              <input
-                className="code"
-                value={link.href || ''}
-                disabled={!canEdit}
-                onChange={e => setLink(i, l => ({ ...l, href: e.target.value }))}
-              />
-            </Field>
-          </div>
-          <Field label="Description">
-            <input
-              value={link.description?.[locale] || ''}
+            <LinkPicker
+              label="Goes to"
+              value={link.href || ''}
               disabled={!canEdit}
-              onChange={e => setLink(i, l => ({ ...l, description: { ...l.description, [locale]: e.target.value } }))}
+              onChange={href => setLink(i, l => ({ ...l, href }))}
             />
+          </FieldRow>
+          <Field label="Description" hint="The line under the label in the megamenu.">
+            {id => (
+              <Input
+                id={id}
+                value={link.description?.[locale] || ''}
+                disabled={!canEdit}
+                onChange={e => setLink(i, l => ({ ...l, description: { ...l.description, [locale]: e.target.value } }))}
+              />
+            )}
           </Field>
-          <div className="inline">
+          <FieldRow cols={3}>
             <Field label="Icon">
-              <input className="code" value={link.icon || ''} disabled={!canEdit} onChange={e => setLink(i, l => ({ ...l, icon: e.target.value }))} />
+              {id => (
+                <Input
+                  id={id}
+                  mono
+                  value={link.icon || ''}
+                  disabled={!canEdit}
+                  onChange={e => setLink(i, l => ({ ...l, icon: e.target.value }))}
+                />
+              )}
             </Field>
             <Field label="Column">
-              <select value={link.column || 1} disabled={!canEdit} onChange={e => setLink(i, l => ({ ...l, column: Number(e.target.value) }))}>
-                <option value={1}>1</option>
-                <option value={2}>2</option>
-              </select>
+              {id => (
+                <Select
+                  id={id}
+                  value={link.column || 1}
+                  disabled={!canEdit}
+                  options={[{ value: 1, label: '1' }, { value: 2, label: '2' }]}
+                  onChange={e => setLink(i, l => ({ ...l, column: Number(e.target.value) }))}
+                />
+              )}
             </Field>
             <Field label="Style">
-              <select value={link.variant || 'item'} disabled={!canEdit} onChange={e => setLink(i, l => ({ ...l, variant: e.target.value }))}>
-                <option value="item">List item</option>
-                <option value="showcase">Showcase card</option>
-                <option value="cta">Side call to action</option>
-              </select>
+              {id => (
+                <Select
+                  id={id}
+                  value={link.variant || 'item'}
+                  disabled={!canEdit}
+                  onChange={e => setLink(i, l => ({ ...l, variant: e.target.value }))}
+                >
+                  <option value="item">List item</option>
+                  <option value="showcase">Showcase card</option>
+                  <option value="cta">Side call to action</option>
+                </Select>
+              )}
             </Field>
-            <button
-              className="btn btn--sm btn--danger"
-              disabled={!canEdit}
-              onClick={() => onChange({ ...zone, links: links.filter((_, idx) => idx !== i) })}
-            >
-              Remove
-            </button>
-          </div>
+          </FieldRow>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="hover:text-destructive justify-self-start"
+            disabled={!canEdit}
+            onClick={() => onChange({ ...zone, links: links.filter((_, idx) => idx !== i) })}
+          >
+            <Trash2 /> Remove this link
+          </Button>
         </div>
       ))}
 
-      <button
-        className="btn btn--sm"
+      <Button
+        variant="outline"
+        size="sm"
+        className="justify-self-start"
         disabled={!canEdit}
-        onClick={() => onChange({ ...zone, links: [...links, { label: {}, description: {}, href: '', icon: 'chat', column: 1, variant: 'item' }] })}
+        onClick={() => onChange({
+          ...zone,
+          links: [...links, { label: {}, description: {}, href: '', icon: 'chat', column: 1, variant: 'item' }],
+        })}
       >
-        <Icon name="plus" /> Add link
-      </button>
+        <Plus /> Add link
+      </Button>
 
       {withSeeAll && (
-        <div className="grid grid--2" style={{ marginTop: 12 }}>
-          <Field label={`"See all" label (${locale.toUpperCase()})`}>
-            <input
-              value={zone.seeAll?.[locale] || ''}
-              disabled={!canEdit}
-              onChange={e => onChange({ ...zone, seeAll: { ...zone.seeAll, [locale]: e.target.value } })}
-            />
+        <FieldRow>
+          <Field label={`“See all” label (${locale.toUpperCase()})`}>
+            {id => (
+              <Input
+                id={id}
+                value={zone.seeAll?.[locale] || ''}
+                disabled={!canEdit}
+                onChange={e => onChange({ ...zone, seeAll: { ...zone.seeAll, [locale]: e.target.value } })}
+              />
+            )}
           </Field>
-          <Field label={'"See all" link'}>
-            <input className="code" value={zone.seeAllHref || ''} disabled={!canEdit} onChange={e => onChange({ ...zone, seeAllHref: e.target.value })} />
-          </Field>
-        </div>
+          <LinkPicker
+            label="“See all” goes to"
+            value={zone.seeAllHref || ''}
+            disabled={!canEdit}
+            onChange={href => onChange({ ...zone, seeAllHref: href })}
+          />
+        </FieldRow>
       )}
     </div>
   );
@@ -282,40 +385,55 @@ function Zone({ title, hint, zone = {}, locale, canEdit, withSeeAll, onChange })
 
 function FooterZone({ zone = {}, locale, canEdit, onChange }) {
   return (
-    <div style={{ marginTop: 18, borderTop: '1px solid var(--line)', paddingTop: 14 }}>
-      <h3>Footer zone (optional)</h3>
-      <p className="field__hint" style={{ marginBottom: 10 }}>
-        Clear every field and the footer strip disappears entirely, with no leftover border or spacing.
-      </p>
+    <div className="grid gap-4">
+      <FieldGroupLabel hint="Clear every field and the footer strip disappears entirely, with no leftover border or spacing.">
+        Footer zone
+      </FieldGroupLabel>
+
       <Field label={`Text (${locale.toUpperCase()})`}>
-        <input
-          value={zone.text?.[locale] || ''}
-          disabled={!canEdit}
-          onChange={e => onChange({ ...zone, text: { ...zone.text, [locale]: e.target.value } })}
-        />
+        {id => (
+          <Input
+            id={id}
+            value={zone.text?.[locale] || ''}
+            disabled={!canEdit}
+            onChange={e => onChange({ ...zone, text: { ...zone.text, [locale]: e.target.value } })}
+          />
+        )}
       </Field>
-      <div className="grid grid--2">
+      <FieldRow>
         <Field label="Secondary button">
-          <input
-            value={zone.secondaryLabel?.[locale] || ''}
-            disabled={!canEdit}
-            onChange={e => onChange({ ...zone, secondaryLabel: { ...zone.secondaryLabel, [locale]: e.target.value } })}
-          />
+          {id => (
+            <Input
+              id={id}
+              value={zone.secondaryLabel?.[locale] || ''}
+              disabled={!canEdit}
+              onChange={e => onChange({ ...zone, secondaryLabel: { ...zone.secondaryLabel, [locale]: e.target.value } })}
+            />
+          )}
         </Field>
-        <Field label="Secondary link">
-          <input className="code" value={zone.secondaryHref || ''} disabled={!canEdit} onChange={e => onChange({ ...zone, secondaryHref: e.target.value })} />
-        </Field>
+        <LinkPicker
+          label="Secondary goes to"
+          value={zone.secondaryHref || ''}
+          disabled={!canEdit}
+          onChange={href => onChange({ ...zone, secondaryHref: href })}
+        />
         <Field label="Primary button">
-          <input
-            value={zone.primaryLabel?.[locale] || ''}
-            disabled={!canEdit}
-            onChange={e => onChange({ ...zone, primaryLabel: { ...zone.primaryLabel, [locale]: e.target.value } })}
-          />
+          {id => (
+            <Input
+              id={id}
+              value={zone.primaryLabel?.[locale] || ''}
+              disabled={!canEdit}
+              onChange={e => onChange({ ...zone, primaryLabel: { ...zone.primaryLabel, [locale]: e.target.value } })}
+            />
+          )}
         </Field>
-        <Field label="Primary link">
-          <input className="code" value={zone.primaryHref || ''} disabled={!canEdit} onChange={e => onChange({ ...zone, primaryHref: e.target.value })} />
-        </Field>
-      </div>
+        <LinkPicker
+          label="Primary goes to"
+          value={zone.primaryHref || ''}
+          disabled={!canEdit}
+          onChange={href => onChange({ ...zone, primaryHref: href })}
+        />
+      </FieldRow>
     </div>
   );
 }

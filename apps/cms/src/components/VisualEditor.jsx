@@ -17,12 +17,21 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import {
+  Copy, Eye, EyeOff, GripVertical, LayoutPanelTop, Loader2, Plus, RefreshCw, Trash2,
+} from 'lucide-react';
 import { api } from '../lib/api.js';
 import { useToast } from '../lib/toast.jsx';
-import { Icon, Badge, Spinner, plainText as readable } from './ui.jsx';
+import { cn } from '../lib/cn.js';
 import BlockInspector from './BlockInspector.jsx';
 import BlockPalette from './BlockPalette.jsx';
 import ScaledFrame from './ScaledFrame.jsx';
+import { anchorsOf } from './LinkPicker.jsx';
+import { blockLabel } from '../lib/blockLabel.js';
+import {
+  Badge, Button, Callout, CheckboxField, Empty, Segmented, Spinner, Tooltip,
+  useConfirm,
+} from './ui/index.js';
 
 /*
  * Real device widths, always. `null` used to mean "whatever the column is",
@@ -39,6 +48,7 @@ const DEVICES = [
 
 export default function VisualEditor({ page, locales, canEdit, onChanged }) {
   const toast = useToast();
+  const confirm = useConfirm();
   const frame = useRef(null);
   const [locale, setLocale] = useState(locales[0]);
   const [device, setDevice] = useState('desktop');
@@ -79,6 +89,8 @@ export default function VisualEditor({ page, locales, canEdit, onChanged }) {
     () => (page.sections || []).filter(s => s.role),
     [page.sections],
   );
+  // The anchors a link on this page can point at, offered by the link picker.
+  const anchors = useMemo(() => anchorsOf(page, blockLabel), [page]);
 
   /* ── Talking to the canvas ────────────────────────────────────────────── */
 
@@ -144,8 +156,8 @@ export default function VisualEditor({ page, locales, canEdit, onChanged }) {
         // in it. Editing them here would delete the markup, so the canvas
         // refused and we point at the tab that can express it.
         toast.error(new Error(
-          '“' + truncate(msg.text, 30) + '” contains inline markup (a link, an emphasis, a styled '
-          + 'span). Edit it from the Copy tab so the markup survives.',
+          `“${truncate(msg.text, 30)}” contains inline markup (a link, an emphasis, a styled span). `
+          + 'Edit it from the Copy tab so the markup survives.',
         ));
       }
     }
@@ -202,8 +214,14 @@ export default function VisualEditor({ page, locales, canEdit, onChanged }) {
     'Block duplicated',
   );
 
-  const remove = (block) => {
-    if (!confirm(`Delete “${block.label || block.key}”? The previous version stays in history.`)) return;
+  const remove = async (block) => {
+    const ok = await confirm({
+      title: `Delete “${blockLabel(block)}”?`,
+      body: 'A restore point is written first, so this is recoverable from the History tab.',
+      confirmLabel: 'Delete',
+      tone: 'danger',
+    });
+    if (!ok) return;
     mutate(() => api.del(`/pages/${page.key}/sections/${block.key}`), 'Block deleted');
   };
 
@@ -243,11 +261,8 @@ export default function VisualEditor({ page, locales, canEdit, onChanged }) {
     const rebuilt = [];
     let cursor = 0;
     for (const section of page.sections || []) {
-      if (bodyKeys.has(section.key)) {
-        rebuilt.push(order[cursor++]);
-      } else {
-        rebuilt.push(section.key);
-      }
+      if (bodyKeys.has(section.key)) rebuilt.push(order[cursor++]);
+      else rebuilt.push(section.key);
     }
     mutate(() => api.post(`/pages/${page.key}/sections/reorder`, { order: rebuilt }), 'Order saved');
   }
@@ -257,78 +272,73 @@ export default function VisualEditor({ page, locales, canEdit, onChanged }) {
   const deviceWidth = DEVICES.find(d => d.key === device)?.width || 1440;
 
   return (
-    <div className="ve">
+    <div className="bg-card overflow-hidden rounded-xl border shadow-xs">
       {/* ── Toolbar ─────────────────────────────────────────────────────── */}
-      <div className="ve__bar">
-        <div className="pill-group">
-          {locales.map(l => (
-            <button
-              key={l}
-              type="button"
-              className={`pill ${locale === l ? 'is-active' : ''}`}
-              onClick={() => setLocale(l)}
-            >
-              {l.toUpperCase()}
-            </button>
-          ))}
-        </div>
+      <div className="flex flex-wrap items-center gap-2.5 border-b p-2.5">
+        <Segmented
+          value={locale}
+          onChange={setLocale}
+          options={locales.map(l => ({ value: l, label: l.toUpperCase() }))}
+        />
+        <Segmented
+          value={device}
+          onChange={setDevice}
+          options={DEVICES.map(d => ({ value: d.key, label: d.label, title: `${d.width}px` }))}
+        />
 
-        <div className="pill-group">
-          {DEVICES.map(d => (
-            <button
-              key={d.key}
-              type="button"
-              className={`pill ${device === d.key ? 'is-active' : ''}`}
-              onClick={() => setDevice(d.key)}
-              title={d.width ? `${d.width}px` : 'Full width'}
-            >
-              {d.label}
-            </button>
-          ))}
-        </div>
+        <span className="grow" />
 
-        <span className="ve__bar-spacer" />
+        <CheckboxField
+          label="Edit text on the page"
+          checked={inlineOn}
+          onChange={setInlineOn}
+          className="items-center"
+        />
+        <CheckboxField
+          label="Show editable copy"
+          checked={showStrings}
+          onChange={setShowStrings}
+          className="items-center"
+        />
 
-        <label className="checkbox" style={{ marginBottom: 0 }}>
-          <input type="checkbox" checked={inlineOn} onChange={e => setInlineOn(e.target.checked)} />
-          <span>Edit text on the page</span>
-        </label>
-        <label className="checkbox" style={{ marginBottom: 0 }}>
-          <input type="checkbox" checked={showStrings} onChange={e => setShowStrings(e.target.checked)} />
-          <span>Show editable copy</span>
-        </label>
+        {saving && (
+          <span className="text-muted-foreground flex items-center gap-1.5 text-[12px]">
+            <Loader2 className="size-3.5 animate-spin" /> Saving…
+          </span>
+        )}
 
-        {saving && <span className="ve__saving"><span className="spinner" /> Saving…</span>}
-
-        <button className="btn btn--sm" onClick={refresh} title="Reload the canvas">
-          <Icon name="refresh" /> Refresh
-        </button>
+        <Tooltip content="Reload the canvas">
+          <Button variant="outline" size="sm" onClick={refresh}><RefreshCw /> Refresh</Button>
+        </Tooltip>
       </div>
 
-      <div className="ve__body">
+      <div className="grid min-h-[70vh] grid-cols-1 xl:grid-cols-[260px_minmax(0,1fr)_340px]">
         {/* ── Block list ────────────────────────────────────────────────── */}
-        <aside className="ve__rail">
-          <div className="ve__rail-head">
-            <span>Blocks</span>
+        <aside className="flex max-h-[75vh] flex-col border-b xl:border-r xl:border-b-0">
+          <div className="flex items-center gap-2 border-b px-3 py-2">
+            <span className="text-muted-foreground text-[11px] font-semibold tracking-wider uppercase">
+              Blocks
+            </span>
             {canEdit && (
-              <button className="btn btn--sm btn--primary" onClick={() => setAdding({ afterKey: null })}>
-                <Icon name="plus" /> Add
-              </button>
+              <Button size="sm" className="ml-auto" onClick={() => setAdding({ afterKey: null })}>
+                <Plus /> Add
+              </Button>
             )}
           </div>
 
-          <div className="ve__list">
+          <div className="min-h-0 grow overflow-y-auto p-2">
             {sections.map(block => (
               <div key={block.key}>
                 <div
-                  className={[
-                    've-item',
-                    selected === block.key ? 'is-selected' : '',
-                    hovered === block.key ? 'is-hovered' : '',
-                    block.visible === false ? 'is-hidden' : '',
-                    dragKey === block.key ? 'is-dragging' : '',
-                    overKey === block.key ? 'is-over' : '',
-                  ].filter(Boolean).join(' ')}
+                  className={cn(
+                    'group flex items-center gap-1 rounded-md border border-transparent p-1.5 transition-colors',
+                    selected === block.key
+                      ? 'border-primary/40 bg-accent'
+                      : hovered === block.key ? 'bg-muted' : 'hover:bg-muted',
+                    block.visible === false && 'opacity-55',
+                    dragKey === block.key && 'opacity-40',
+                    overKey === block.key && 'border-primary ring-primary/20 ring-2',
+                  )}
                   draggable={canEdit}
                   onDragStart={() => setDragKey(block.key)}
                   onDragEnd={() => { setDragKey(null); setOverKey(null); }}
@@ -338,82 +348,92 @@ export default function VisualEditor({ page, locales, canEdit, onChanged }) {
                   onMouseEnter={() => setHovered(block.key)}
                   onMouseLeave={() => setHovered(null)}
                 >
-                  <span className="ve-item__grip" title="Drag to reorder"><Icon name="drag" /></span>
+                  <span className={cn('text-muted-foreground shrink-0', canEdit ? 'cursor-grab active:cursor-grabbing' : 'opacity-30')}>
+                    <GripVertical className="size-3.5" />
+                  </span>
                   <button
                     type="button"
-                    className="ve-item__main"
+                    className="min-w-0 grow text-left"
                     onClick={() => { setSelected(block.key); post('select', { key: block.key, scroll: true }); }}
                   >
-                    <span className="ve-item__title">{readable(block.label) || block.key}</span>
-                    <span className="ve-item__meta">
+                    <span className="block truncate text-[12.5px] font-medium">
+                      {blockLabel(block)}
+                    </span>
+                    <span className="mt-0.5 flex flex-wrap items-center gap-1">
                       {block.type === 'component'
-                        ? <Badge tone="brand">{block.componentKey}</Badge>
-                        : <Badge>authored</Badge>}
-                      {block.convertedFrom && <Badge tone="warn">converted</Badge>}
-                      {block.experiment?.key && <Badge tone="warn">A/B</Badge>}
-                      {block.keyCount > 0 && <span className="muted">{block.keyCount} strings</span>}
+                        ? <Badge variant="primary">{block.componentKey}</Badge>
+                        : <Badge variant="outline">authored</Badge>}
+                      {block.convertedFrom && <Badge variant="warning">converted</Badge>}
+                      {block.experiment?.key && <Badge variant="warning">A/B</Badge>}
                     </span>
                   </button>
-                  <span className="ve-item__actions">
-                    <button
-                      className="btn btn--ghost btn--icon"
-                      title={block.visible === false ? 'Show' : 'Hide'}
+                  <span className="flex shrink-0 items-center opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
                       disabled={!canEdit}
+                      aria-label={block.visible === false ? 'Show this block' : 'Hide this block'}
                       onClick={() => toggleVisible(block)}
                     >
-                      <Icon name={block.visible === false ? 'eyeOff' : 'eye'} />
-                    </button>
-                    <button className="btn btn--ghost btn--icon" title="Duplicate" disabled={!canEdit} onClick={() => duplicate(block)}>
-                      <Icon name="copy" />
-                    </button>
-                    <button
-                      className="btn btn--ghost btn--icon"
-                      title={block.locked ? 'Structural blocks cannot be deleted' : 'Delete'}
+                      {block.visible === false ? <EyeOff /> : <Eye />}
+                    </Button>
+                    <Button variant="ghost" size="icon-sm" disabled={!canEdit} aria-label="Duplicate" onClick={() => duplicate(block)}>
+                      <Copy />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      className="hover:text-destructive"
                       disabled={!canEdit || block.locked}
+                      aria-label="Delete"
                       onClick={() => remove(block)}
                     >
-                      <Icon name="trash" />
-                    </button>
+                      <Trash2 />
+                    </Button>
                   </span>
                 </div>
+
                 {canEdit && (
                   <button
                     type="button"
-                    className="ve__insert"
                     title="Add a block here"
-                    onClick={() => setAdding({ afterKey: block.key, afterLabel: block.label })}
+                    aria-label={`Add a block after ${blockLabel(block)}`}
+                    className="text-muted-foreground hover:text-primary group/insert flex h-4 w-full items-center gap-1 px-2"
+                    onClick={() => setAdding({ afterKey: block.key, afterLabel: blockLabel(block) })}
                   >
-                    <span /><Icon name="plus" /><span />
+                    <span className="group-hover/insert:bg-primary/40 h-px grow bg-transparent transition-colors" />
+                    <Plus className="size-3 opacity-0 transition-opacity group-hover/insert:opacity-100" />
+                    <span className="group-hover/insert:bg-primary/40 h-px grow bg-transparent transition-colors" />
                   </button>
                 )}
               </div>
             ))}
 
             {chromeBlocks.length > 0 && (
-              <div className="ve__structural">
+              <Callout className="mt-3">
                 The site <strong>header and footer</strong> are on this page but edited in one place
-                for the whole site.{' '}
-                <Link to="/chrome">Open Header &amp; footer</Link>, or hide them on this page from
-                its Settings tab.
-              </div>
+                for the whole site. <Link to="/chrome">Open Header &amp; footer</Link>, or hide them
+                on this page from its Settings tab.
+              </Callout>
             )}
             {structural.length > 0 && (
-              <div className="ve__structural">
+              <Callout className="mt-2">
                 {structural.length} script block{structural.length === 1 ? '' : 's'} are fixed in
                 place: the markup around them depends on where they sit.
-              </div>
+              </Callout>
             )}
           </div>
         </aside>
 
         {/* ── Canvas ────────────────────────────────────────────────────── */}
-        <div className="ve__canvas">
+        <div className="bg-muted/40 relative flex min-h-[60vh] items-start justify-center overflow-hidden border-b xl:border-b-0">
           {srcError && (
-            <div className="empty">
-              <h3>The preview would not open</h3>
-              <p>{srcError.message}</p>
-              <button className="btn" onClick={refresh}>Try again</button>
-            </div>
+            <Empty
+              title="The preview would not open"
+              action={<Button variant="outline" onClick={refresh}>Try again</Button>}
+            >
+              {srcError.message}
+            </Empty>
           )}
           {!src && !srcError && <Spinner label="Opening the page…" />}
           {src && (
@@ -428,7 +448,7 @@ export default function VisualEditor({ page, locales, canEdit, onChanged }) {
             >
               {geometry && (
                 <div
-                  className="ve__marker"
+                  className="border-primary pointer-events-none absolute rounded-sm border-2"
                   style={{
                     // The frame is scaled, so a rectangle measured inside it has
                     // to be scaled too or the outline drifts down the page.
@@ -438,7 +458,9 @@ export default function VisualEditor({ page, locales, canEdit, onChanged }) {
                     height: geometry.rect.height * scale,
                   }}
                 >
-                  <span className="ve__marker-tag">{readable(selectedBlock?.label) || geometry.label}</span>
+                  <span className="bg-primary text-primary-foreground absolute -top-5 left-0 rounded px-1.5 py-0.5 text-[11px] font-medium whitespace-nowrap">
+                    {selectedBlock ? blockLabel(selectedBlock) : geometry.label}
+                  </span>
                 </div>
               )}
             </ScaledFrame>
@@ -446,61 +468,58 @@ export default function VisualEditor({ page, locales, canEdit, onChanged }) {
         </div>
 
         {/* ── Inspector ─────────────────────────────────────────────────── */}
-        <aside className="ve__inspector">
+        <aside className="max-h-[75vh] overflow-hidden xl:border-l">
           {selectedBlock ? (
             <BlockInspector
               pageKey={page.key}
               sectionKey={selectedBlock.key}
               locale={locale}
               canEdit={canEdit}
+              anchors={anchors}
               onSaved={async () => { await onChanged(); refresh(); }}
               onClose={() => { setSelected(null); post('select', { key: null }); }}
               onEditString={(key) => post('editString', { key })}
             />
           ) : chromeHint ? (
-            <div className="ve__hint">
-              <h3>That is the site {chromeHint}</h3>
-              <p>
+            <div className="grid gap-3 p-4">
+              <h3 className="text-[14px] font-semibold">That is the site {chromeHint}</h3>
+              <p className="text-muted-foreground text-[12.5px] leading-relaxed">
                 The {chromeHint} is the same on every page, so it is not edited from here — that is
                 what stops it being changed on one page and quietly changing on all of them.
               </p>
-              <p>
-                <Link className="btn btn--sm btn--primary" to="/chrome">
-                  <Icon name="layout" /> Open Header &amp; footer
-                </Link>
-              </p>
-              <p className="muted">
-                To hide it on this page only — a campaign landing page, say — use this page's
-                <strong> Settings</strong> tab.
-              </p>
-              <button type="button" className="btn btn--sm" onClick={() => setChromeHint(null)}>
+              <Button size="sm" asChild className="justify-self-start">
+                <Link to="/chrome"><LayoutPanelTop /> Open Header &amp; footer</Link>
+              </Button>
+              <Callout>
+                To hide it on this page only — a campaign landing page, say — use this page&apos;s{' '}
+                <strong>Settings</strong> tab.
+              </Callout>
+              <Button variant="outline" size="sm" className="justify-self-start" onClick={() => setChromeHint(null)}>
                 Back to the page
-              </button>
+              </Button>
             </div>
           ) : (
-            <div className="ve__hint">
-              <h3>Nothing selected</h3>
-              <p>Click a block on the page — or in the list — to edit it.</p>
-              <ul>
-                <li><strong>Double-click</strong> any text on the page to rewrite it in place.</li>
-                <li><strong>Drag</strong> a block in the list to move it.</li>
-                <li>The <strong>+</strong> between two blocks inserts exactly there.</li>
-              </ul>
-              <p className="muted">
-                You are editing the {locale.toUpperCase()} version. Copy is per language;
-                structure and styling are shared.
+            <div className="grid gap-3 p-4">
+              <h3 className="text-[14px] font-semibold">Nothing selected</h3>
+              <p className="text-muted-foreground text-[12.5px]">
+                Click a block on the page — or in the list — to edit it.
               </p>
+              <ul className="text-muted-foreground grid gap-1.5 text-[12.5px] leading-snug">
+                <li><strong className="text-foreground">Double-click</strong> any text on the page to rewrite it in place.</li>
+                <li><strong className="text-foreground">Drag</strong> a block in the list to move it.</li>
+                <li>The <strong className="text-foreground">+</strong> between two blocks inserts exactly there.</li>
+              </ul>
+              <Callout>
+                You are editing the <strong>{locale.toUpperCase()}</strong> version. Copy is per
+                language; structure and styling are shared.
+              </Callout>
             </div>
           )}
         </aside>
       </div>
 
       {adding && (
-        <BlockPalette
-          position={adding}
-          onClose={() => setAdding(null)}
-          onInsert={insert}
-        />
+        <BlockPalette position={adding} onClose={() => setAdding(null)} onInsert={insert} />
       )}
     </div>
   );

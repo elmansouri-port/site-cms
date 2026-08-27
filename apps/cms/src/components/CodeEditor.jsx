@@ -10,7 +10,10 @@
  * warning when the markup does not balance.
  */
 import { useMemo, useRef, useState } from 'react';
+import { ImagePlus } from 'lucide-react';
+import { cn } from '../lib/cn.js';
 import MediaPicker from './MediaPicker.jsx';
+import { Button } from './ui/index.js';
 
 export default function CodeEditor({
   value = '',
@@ -95,15 +98,39 @@ export default function CodeEditor({
   }
 
   return (
-    <div className={`code-editor ${disabled ? 'is-disabled' : ''}`}>
-      <div className="code-editor__gutter" style={{ transform: `translateY(${-scrollTop}px)` }} aria-hidden="true">
+    <div
+      className={cn(
+        'bg-card focus-within:border-ring focus-within:ring-ring/25 relative flex overflow-hidden',
+        'rounded-md border font-mono text-[12.5px] shadow-xs transition-shadow focus-within:ring-[3px]',
+        disabled && 'bg-muted opacity-70',
+      )}
+    >
+      {/*
+        The gutter scrolls with the textarea rather than being part of it: a
+        textarea cannot hold two colours, and a line number that drifts from its
+        line is worse than no line number at all.
+      */}
+      <div
+        className="bg-muted/60 text-muted-foreground shrink-0 border-r py-2 text-right leading-[1.55] select-none"
+        style={{ transform: `translateY(${-scrollTop}px)`, minWidth: '2.75rem' }}
+        aria-hidden="true"
+      >
         {Array.from({ length: lines }, (_, i) => (
-          <span key={i} className={problemLines.has(i + 1) ? 'is-problem' : ''}>{i + 1}</span>
+          <span
+            key={i}
+            className={cn(
+              'block px-2',
+              problemLines.has(i + 1) && 'bg-destructive/15 text-destructive font-semibold',
+            )}
+          >
+            {i + 1}
+          </span>
         ))}
       </div>
+
       <textarea
         ref={ref}
-        className="code-editor__area code"
+        className="grow resize-y bg-transparent px-3 py-2 leading-[1.55] outline-none"
         value={text}
         rows={rows}
         spellCheck={false}
@@ -116,14 +143,15 @@ export default function CodeEditor({
       />
 
       {language !== 'css' && !disabled && (
-        <button
-          type="button"
-          className="code-editor__insert"
+        <Button
+          variant="outline"
+          size="sm"
+          className="absolute right-3 bottom-3 font-sans opacity-70 shadow-sm transition-opacity hover:opacity-100"
           onClick={() => setPicking(true)}
-          title="Insert an image from the library"
+          title="Insert an image from the library, so the markup gets a managed reference"
         >
-          Insert image
-        </button>
+          <ImagePlus /> Insert image
+        </Button>
       )}
 
       {picking && <MediaPicker onClose={() => setPicking(false)} onSelect={insertImage} />}

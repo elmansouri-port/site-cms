@@ -208,7 +208,7 @@ export function extractHeadMeta(headRaw) {
     if (!m) continue;
     const tag = m[0];
     const value = field === 'title'
-      ? (/<title\b[^>]*>([\s\S]*?)<\/title>/i.exec(tag) || [, ''])[1].trim()
+      ? (/<title\b[^>]*>([\s\S]*?)<\/title>/i.exec(tag) || ['', ''])[1].trim()
       : (L.attr(tag, field === 'canonical' ? 'href' : 'content') || '').trim();
     const i18nKey = L.attr(tag, 'data-i18n')
       || (L.attr(tag, 'data-i18n-attr') || '').split(':').slice(1).join(':')

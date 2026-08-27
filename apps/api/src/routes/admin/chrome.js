@@ -134,7 +134,7 @@ chromeRouter.post('/:part/restore', requireRole('admin'), asyncHandler(async (re
   const doc = await load();
   if (!doc[part].authoredHtml) throw badRequest('There is no original recorded for this part');
 
-  await snapshot('chrome', 'default', asJson(doc), req.user, `before restoring the ${part}`);
+  await snapshot('chrome', 'default', asJson(doc), req.user, `before restoring the ${part}`, { force: true });
   doc[part].html = doc[part].authoredHtml;
   doc[part].css = '';
   doc[part].js = '';
@@ -193,7 +193,7 @@ chromeRouter.delete('/add-ins/:key', requireRole('admin'), asyncHandler(async (r
   const at = doc.addIns.findIndex(a => a.key === req.params.key);
   if (at < 0) throw notFoundError('No such add-in');
 
-  await snapshot('chrome', 'default', asJson(doc), req.user, 'before deleting an add-in');
+  await snapshot('chrome', 'default', asJson(doc), req.user, 'before deleting an add-in', { force: true });
   doc.addIns.splice(at, 1);
   doc.addIns.forEach((a, i) => { a.order = i; });
   doc.updatedBy = req.user._id;

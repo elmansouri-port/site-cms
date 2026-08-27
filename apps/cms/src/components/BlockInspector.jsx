@@ -17,12 +17,18 @@
  * typing in a textarea.
  */
 import { useEffect, useMemo, useState } from 'react';
+import { ChevronRight, Save, Trash2, X } from 'lucide-react';
 import { useResource } from '../lib/hooks.js';
 import { api } from '../lib/api.js';
 import { useToast } from '../lib/toast.jsx';
-import { Field, Icon, Checkbox, Spinner, Badge, Tabs, plainText as readable } from './ui.jsx';
+import { cn } from '../lib/cn.js';
 import BlockDataForm from './BlockDataForm.jsx';
 import { BLOCK_SCHEMAS } from '../lib/blockSchemas.js';
+import {
+  Badge, Button, Callout, CheckboxField, Field, FieldRow, Input, Select, Spinner, Tabs,
+  TabsContent, TabsList, TabsTrigger, Textarea, Tooltip, useConfirm,
+} from './ui/index.js';
+import { blockLabel } from '../lib/blockLabel.js';
 
 const SPACING = [
   { value: 'none', label: 'None' },
@@ -35,9 +41,10 @@ const SPACING = [
 ];
 
 export default function BlockInspector({
-  pageKey, sectionKey, locale, canEdit, onSaved, onClose, onEditString,
+  pageKey, sectionKey, locale, canEdit, anchors = [], onSaved, onClose, onEditString,
 }) {
   const toast = useToast();
+  const confirm = useConfirm();
   const { data, loading } = useResource(`/pages/${pageKey}/sections/${sectionKey}`);
   const experiments = useResource('/experiments');
   const [tab, setTab] = useState('content');
@@ -47,7 +54,7 @@ export default function BlockInspector({
   useEffect(() => { setDraft(data?.section ? { ...data.section } : null); }, [data]);
   useEffect(() => { setTab('content'); }, [sectionKey]);
 
-  if (loading || !draft) return <div className="ve__inspector-pad"><Spinner /></div>;
+  if (loading || !draft) return <div className="p-4"><Spinner /></div>;
 
   const isComponent = draft.type === 'component';
   const schema = isComponent ? BLOCK_SCHEMAS[draft.componentKey] : null;
@@ -76,15 +83,25 @@ export default function BlockInspector({
   }
 
   async function convert() {
-    const ok = confirm(
-      'Convert this section into an editable custom block?\n\n'
-      + 'The markup stays exactly as it is and becomes editable, with Tailwind, '
-      + 'A/B variants and spacing controls.\n\n'
-      + 'In exchange this section stops being covered by the byte-fidelity check: '
-      + 'it will render through the block wrapper rather than being spliced in verbatim. '
-      + 'The current version is kept in the page history.',
-    );
+    const ok = await confirm({
+      title: 'Convert this section into an editable custom block?',
+      body: (
+        <>
+          <p>
+            The markup stays exactly as it is and becomes editable, with Tailwind, A/B variants and
+            spacing controls.
+          </p>
+          <p>
+            In exchange this section stops being covered by the byte-fidelity check: it will render
+            through the block wrapper rather than being spliced in verbatim.
+          </p>
+          <p>A restore point is written first, so this is recoverable from History.</p>
+        </>
+      ),
+      confirmLabel: 'Convert it',
+    });
     if (!ok) return;
+
     setBusy(true);
     try {
       const res = await api.post(`/pages/${pageKey}/sections/${sectionKey}/convert`);
@@ -98,115 +115,139 @@ export default function BlockInspector({
   }
 
   return (
-    <div className="ve__inspector-inner">
-      <header className="ve__inspector-head">
-        <div style={{ minWidth: 0 }}>
-          <div className="ve__inspector-title">{readable(draft.label) || sectionKey}</div>
-          <div className="ve__inspector-sub">
+    <div className="flex h-full min-h-0 flex-col">
+      <header className="flex items-start gap-2 border-b p-3">
+        <div className="min-w-0 grow">
+          <div className="truncate text-[13px] font-semibold">{blockLabel(draft) || sectionKey}</div>
+          <div className="mt-1 flex flex-wrap items-center gap-1">
             {isComponent
-              ? <Badge tone="brand">{schema?.label || draft.componentKey}</Badge>
-              : <Badge>authored markup</Badge>}
-            {draft.convertedFrom && <Badge tone="warn">converted</Badge>}
-            {draft.locked && <Badge>structural</Badge>}
+              ? <Badge variant="primary">{schema?.label || draft.componentKey}</Badge>
+              : <Badge variant="outline">authored markup</Badge>}
+            {draft.convertedFrom && <Badge variant="warning">converted</Badge>}
+            {draft.locked && <Badge variant="outline">structural</Badge>}
           </div>
         </div>
-        <button className="btn btn--ghost btn--icon" onClick={onClose} aria-label="Close">
-          <Icon name="close" />
-        </button>
+        <Button variant="ghost" size="icon-sm" onClick={onClose} aria-label="Close the inspector">
+          <X />
+        </Button>
       </header>
 
-      <Tabs
-        active={tab}
-        onChange={setTab}
-        tabs={[
-          { value: 'content', label: 'Content' },
-          { value: 'layout', label: 'Layout' },
-          { value: 'test', label: 'A/B' },
-        ]}
-      />
+      <Tabs value={tab} onValueChange={setTab} className="flex min-h-0 grow flex-col">
+        <TabsList className="px-2">
+          <TabsTrigger value="content">Content</TabsTrigger>
+          <TabsTrigger value="layout">Layout</TabsTrigger>
+          <TabsTrigger value="test">A/B</TabsTrigger>
+        </TabsList>
 
-      <div className="ve__inspector-body">
-        {tab === 'content' && (isComponent ? (
-          <BlockDataForm
-            componentKey={draft.componentKey}
-            value={draft.data || {}}
-            onChange={(v) => setDraft(d => ({ ...d, data: v }))}
-          />
-        ) : (
-          <AuthoredContent
-            pageKey={pageKey}
-            section={draft}
-            locale={locale}
-            canEdit={canEdit}
-            onEditString={onEditString}
-            onConvert={convert}
-            busy={busy}
-          />
-        ))}
+        <div className="min-h-0 grow overflow-y-auto p-3.5">
+          <TabsContent value="content">
+            {isComponent ? (
+              <BlockDataForm
+                componentKey={draft.componentKey}
+                value={draft.data || {}}
+                anchors={anchors}
+                onChange={(v) => setDraft(d => ({ ...d, data: v }))}
+              />
+            ) : (
+              <AuthoredContent
+                pageKey={pageKey}
+                section={draft}
+                locale={locale}
+                canEdit={canEdit}
+                onEditString={onEditString}
+                onConvert={convert}
+                busy={busy}
+              />
+            )}
+          </TabsContent>
 
-        {tab === 'layout' && (
-          <>
-            <Field label="Name" hint="What this block is called in the list. Not shown on the site.">
-              <input value={draft.label || ''} disabled={!canEdit} onChange={e => setDraft(d => ({ ...d, label: e.target.value }))} />
+          <TabsContent value="layout" className="grid gap-4">
+            <Field label="Name" hint="What this block is called in the list. Never shown on the site.">
+              {id => (
+                <Input
+                  id={id}
+                  value={draft.label || ''}
+                  disabled={!canEdit}
+                  onChange={e => setDraft(d => ({ ...d, label: e.target.value }))}
+                />
+              )}
             </Field>
-            <Field label="Anchor" hint="Lets in-page links point here as #anchor.">
-              <input className="code" value={draft.anchorId || ''} disabled={!canEdit} onChange={e => setDraft(d => ({ ...d, anchorId: e.target.value }))} />
+            <Field label="Anchor" hint="Lets a link on this page point here, and appears in the link picker.">
+              {id => (
+                <Input
+                  id={id}
+                  mono
+                  value={draft.anchorId || ''}
+                  disabled={!canEdit}
+                  placeholder="pricing"
+                  onChange={e => setDraft(d => ({ ...d, anchorId: e.target.value }))}
+                />
+              )}
             </Field>
-            <Checkbox
+            <CheckboxField
               label="Visible on the site"
+              hint="Hidden blocks still show in the editor, greyed out."
               checked={draft.visible !== false}
               disabled={!canEdit}
-              onChange={e => setDraft(d => ({ ...d, visible: e.target.checked }))}
+              onChange={v => setDraft(d => ({ ...d, visible: v }))}
             />
+
             {isComponent ? (
-              <div className="grid grid--2">
+              <FieldRow>
                 <Field label="Space above">
-                  <select
-                    value={draft.layout?.spacingTop || 'lg'}
-                    disabled={!canEdit}
-                    onChange={e => setDraft(d => ({ ...d, layout: { ...d.layout, spacingTop: e.target.value } }))}
-                  >
-                    {SPACING.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-                  </select>
+                  {id => (
+                    <Select
+                      id={id}
+                      value={draft.layout?.spacingTop || 'lg'}
+                      disabled={!canEdit}
+                      options={SPACING}
+                      onChange={e => setDraft(d => ({ ...d, layout: { ...d.layout, spacingTop: e.target.value } }))}
+                    />
+                  )}
                 </Field>
                 <Field label="Space below">
-                  <select
-                    value={draft.layout?.spacingBottom || 'lg'}
-                    disabled={!canEdit}
-                    onChange={e => setDraft(d => ({ ...d, layout: { ...d.layout, spacingBottom: e.target.value } }))}
-                  >
-                    {SPACING.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-                  </select>
+                  {id => (
+                    <Select
+                      id={id}
+                      value={draft.layout?.spacingBottom || 'lg'}
+                      disabled={!canEdit}
+                      options={SPACING}
+                      onChange={e => setDraft(d => ({ ...d, layout: { ...d.layout, spacingBottom: e.target.value } }))}
+                    />
+                  )}
                 </Field>
-              </div>
+              </FieldRow>
             ) : (
-              <p className="field__hint">
+              <Callout>
                 This block carries its own spacing in its markup — which is exactly what keeps it
                 identical to the page it was imported from. Convert it to a custom block to control
                 spacing from here.
-              </p>
+              </Callout>
             )}
-          </>
-        )}
+          </TabsContent>
 
-        {tab === 'test' && (
-          <ExperimentPanel
-            draft={draft}
-            setDraft={setDraft}
-            isComponent={isComponent}
-            schema={schema}
-            experiments={experiments.data?.items || []}
-            canEdit={canEdit}
-          />
-        )}
-      </div>
+          <TabsContent value="test">
+            <ExperimentPanel
+              draft={draft}
+              setDraft={setDraft}
+              isComponent={isComponent}
+              schema={schema}
+              anchors={anchors}
+              experiments={experiments.data?.items || []}
+              canEdit={canEdit}
+            />
+          </TabsContent>
+        </div>
+      </Tabs>
 
       {canEdit && (
-        <footer className="ve__inspector-foot">
-          <span className="muted" style={{ fontSize: 12 }}>{dirty ? 'Unsaved changes' : 'Saved'}</span>
-          <button className="btn btn--primary btn--sm" onClick={save} disabled={busy || !dirty}>
-            <Icon name="save" /> {busy ? 'Saving…' : 'Save block'}
-          </button>
+        <footer className="bg-muted/40 flex items-center gap-2 border-t p-3">
+          <span className="text-muted-foreground text-[12px]">
+            {dirty ? 'Unsaved changes' : 'Saved'}
+          </span>
+          <Button size="sm" className="ml-auto" onClick={save} disabled={busy || !dirty}>
+            <Save /> {busy ? 'Saving…' : 'Save block'}
+          </Button>
         </footer>
       )}
     </div>
@@ -217,10 +258,10 @@ export default function BlockInspector({
  * The content panel for an imported block.
  *
  * Its copy lives in the translation catalogue, keyed, so this lists the keys and
- * hands each one to the canvas: clicking "Edit on page" scrolls to those words
- * and puts a caret in them. Editing the markup here would change the structure
- * for every language at once, so it is behind a disclosure rather than the
- * first thing you see.
+ * hands each one to the canvas: clicking a row scrolls to those words and puts a
+ * caret in them. Editing the markup here would change the structure for every
+ * language at once, so it is behind a disclosure rather than the first thing you
+ * see.
  */
 function AuthoredContent({ pageKey, section, locale, canEdit, onEditString, onConvert, busy }) {
   const strings = useResource(
@@ -240,59 +281,66 @@ function AuthoredContent({ pageKey, section, locale, canEdit, onEditString, onCo
   }, [strings.data, section.keys, locale]);
 
   return (
-    <>
-      <p className="field__hint" style={{ marginBottom: 12 }}>
+    <div className="grid gap-3">
+      <p className="text-muted-foreground text-[12px] leading-snug">
         Double-click any words on the page to rewrite them. This is the same copy, listed by key.
       </p>
 
       {!rows.length && (
-        <p className="muted" style={{ fontSize: 12.5 }}>
+        <p className="text-muted-foreground text-[12.5px]">
           This block holds no translatable copy — its text is inside the markup.
         </p>
       )}
 
-      <div className="ve__strings">
+      <ul className="grid gap-1">
         {rows.map(row => (
-          <button
-            key={row.key}
-            type="button"
-            className="ve__string"
-            onClick={() => onEditString(row.key)}
-            title="Scroll to it and edit on the page"
-          >
-            <span className="ve__string-key mono">{row.key}</span>
-            <span className={`ve__string-value ${row.missing ? 'is-missing' : ''}`}>
-              {row.missing ? `Not translated to ${locale.toUpperCase()}` : row.value}
-            </span>
-          </button>
+          <li key={row.key}>
+            <button
+              type="button"
+              onClick={() => onEditString(row.key)}
+              title="Scroll to it and edit on the page"
+              className="hover:bg-muted focus-visible:ring-ring/40 grid w-full gap-0.5 rounded-md border p-2 text-left transition-colors outline-none focus-visible:ring-[3px]"
+            >
+              <span className="text-muted-foreground truncate font-mono text-[11px]">{row.key}</span>
+              <span className={cn('truncate text-[12.5px]', row.missing && 'text-warning italic')}>
+                {row.missing ? `Not translated to ${locale.toUpperCase()}` : row.value}
+              </span>
+            </button>
+          </li>
         ))}
-      </div>
+      </ul>
 
-      <div className="ve__danger">
-        <button type="button" className="ve__disclose" onClick={() => setShowMarkup(v => !v)}>
-          <Icon name="chevron" /> Structure and styling
+      <div className="mt-2 rounded-lg border">
+        <button
+          type="button"
+          onClick={() => setShowMarkup(v => !v)}
+          aria-expanded={showMarkup}
+          className="hover:bg-muted flex w-full items-center gap-1.5 rounded-lg px-3 py-2 text-left text-[12.5px] font-medium transition-colors"
+        >
+          <ChevronRight className={cn('size-3.5 transition-transform', showMarkup && 'rotate-90')} />
+          Structure and styling
         </button>
         {showMarkup && (
-          <>
-            <p className="field__hint">
-              The markup below is the authored HTML, stored byte for byte. It renders identically to
+          <div className="grid gap-3 border-t p-3">
+            <p className="text-muted-foreground text-[12px] leading-relaxed">
+              The markup here is the authored HTML, stored byte for byte. It renders identically to
               the original site, and a verification tool proves it on every run. To edit the
               structure visually — and gain Tailwind, spacing controls and A/B variants — convert it
               to a custom block. That trade is explicit because it cannot be undone automatically.
             </p>
-            <div className="muted" style={{ fontSize: 12, margin: '8px 0' }}>
+            <p className="text-muted-foreground text-[12px]">
               {(section.keys || []).length} translatable strings ·{' '}
               {(section.html || '').length.toLocaleString()} bytes
-            </div>
+            </p>
             {canEdit && (
-              <button className="btn btn--sm" onClick={onConvert} disabled={busy}>
+              <Button variant="outline" size="sm" className="justify-self-start" onClick={onConvert} disabled={busy}>
                 Convert to a custom block…
-              </button>
+              </Button>
             )}
-          </>
+          </div>
         )}
       </div>
-    </>
+    </div>
   );
 }
 
@@ -305,7 +353,7 @@ function AuthoredContent({ pageKey, section, locale, canEdit, onEditString, onCo
  * markup. Both are assigned server-side before the page renders, so a visitor
  * never sees the control flash first.
  */
-function ExperimentPanel({ draft, setDraft, isComponent, schema, experiments, canEdit }) {
+function ExperimentPanel({ draft, setDraft, isComponent, schema, experiments, canEdit, anchors }) {
   const assigned = draft.experiment?.key || '';
   const variants = draft.experiment?.variants || [];
   const experiment = experiments.find(x => x.key === assigned);
@@ -341,94 +389,109 @@ function ExperimentPanel({ draft, setDraft, isComponent, schema, experiments, ca
   }));
 
   return (
-    <>
+    <div className="grid gap-4">
       <Field label="Experiment" hint="Create tests under A/B tests in the sidebar, then attach a block here.">
-        <select value={assigned} disabled={!canEdit} onChange={e => setExperiment(e.target.value)}>
-          <option value="">Not being tested</option>
-          {experiments.map(x => (
-            <option key={x.key} value={x.key}>{x.name} — {x.status}</option>
-          ))}
-        </select>
+        {id => (
+          <Select id={id} value={assigned} disabled={!canEdit} onChange={e => setExperiment(e.target.value)}>
+            <option value="">Not being tested</option>
+            {experiments.map(x => (
+              <option key={x.key} value={x.key}>{x.name} — {x.status}</option>
+            ))}
+          </Select>
+        )}
       </Field>
 
       {assigned && experiment?.status !== 'running' && (
-        <p className="field__hint">
+        <Callout tone="warning">
           This test is <strong>{experiment?.status || 'unknown'}</strong>, so every visitor sees the
           control. Start it from the A/B tests screen when the variants are ready.
-        </p>
+        </Callout>
       )}
 
       {assigned && (
         <>
-          <p className="field__hint" style={{ margin: '10px 0' }}>
+          <p className="text-muted-foreground text-[12px] leading-snug">
             The block as it stands is the control. Each variant below replaces it for the share of
             traffic assigned to that arm.
           </p>
 
           {variants.map((variant, i) => (
-            <div key={`${variant.key}-${i}`} className="ve__variant">
-              <div className="inline">
-                <Badge tone="warn">{variant.key}</Badge>
-                <input
-                  style={{ flex: 1 }}
+            <div key={`${variant.key}-${i}`} className="grid gap-3 rounded-lg border p-3">
+              <div className="flex items-center gap-2">
+                <Badge variant="warning">{variant.key}</Badge>
+                <Input
+                  className="grow"
                   value={variant.label || ''}
                   placeholder={`Variant ${variant.key}`}
                   disabled={!canEdit}
+                  aria-label={`Label for variant ${variant.key}`}
                   onChange={e => updateVariant(i, { label: e.target.value })}
                 />
                 {(experiment?.variants || []).every(v => v.key !== variant.key) && (
-                  <span title="The experiment does not declare this arm, so nothing will be assigned to it">
-                    <Badge tone="danger">unused</Badge>
-                  </span>
+                  <Tooltip content="The experiment does not declare this arm, so nothing will be assigned to it">
+                    <Badge variant="destructive">unused</Badge>
+                  </Tooltip>
                 )}
-                <button className="btn btn--ghost btn--icon" disabled={!canEdit} onClick={() => removeVariant(i)} title="Remove">
-                  <Icon name="trash" />
-                </button>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  className="hover:text-destructive"
+                  disabled={!canEdit}
+                  onClick={() => removeVariant(i)}
+                  aria-label={`Remove variant ${variant.key}`}
+                >
+                  <Trash2 />
+                </Button>
               </div>
 
               {isComponent ? (
                 schema ? (
-                  <div className="ve__variant-fields">
-                    <BlockDataForm
-                      componentKey={draft.componentKey}
-                      value={variant.data || {}}
-                      onChange={(v) => updateVariant(i, { data: v })}
-                    />
-                  </div>
+                  <BlockDataForm
+                    componentKey={draft.componentKey}
+                    value={variant.data || {}}
+                    anchors={anchors}
+                    onChange={(v) => updateVariant(i, { data: v })}
+                  />
                 ) : (
                   <Field label="Field overrides (JSON)">
-                    <textarea
-                      className="code"
-                      rows={6}
-                      value={JSON.stringify(variant.data ?? {}, null, 2)}
-                      disabled={!canEdit}
-                      onChange={(e) => {
-                        try { updateVariant(i, { data: JSON.parse(e.target.value) }); } catch { /* still typing */ }
-                      }}
-                    />
+                    {id => (
+                      <Textarea
+                        id={id}
+                        mono
+                        rows={6}
+                        defaultValue={JSON.stringify(variant.data ?? {}, null, 2)}
+                        disabled={!canEdit}
+                        onChange={(e) => {
+                          try { updateVariant(i, { data: JSON.parse(e.target.value) }); } catch { /* still typing */ }
+                        }}
+                      />
+                    )}
                   </Field>
                 )
               ) : (
                 <Field label="Markup for this variant">
-                  <textarea
-                    className="code"
-                    rows={10}
-                    value={variant.html || ''}
-                    disabled={!canEdit}
-                    onChange={e => updateVariant(i, { html: e.target.value })}
-                  />
+                  {id => (
+                    <Textarea
+                      id={id}
+                      mono
+                      rows={10}
+                      value={variant.html || ''}
+                      disabled={!canEdit}
+                      onChange={e => updateVariant(i, { html: e.target.value })}
+                    />
+                  )}
                 </Field>
               )}
             </div>
           ))}
 
           {canEdit && (
-            <button className="btn btn--sm" onClick={addVariant}>
-              <Icon name="plus" /> Add a variant
-            </button>
+            <Button variant="outline" size="sm" className="justify-self-start" onClick={addVariant}>
+              Add a variant
+            </Button>
           )}
         </>
       )}
-    </>
+    </div>
   );
 }

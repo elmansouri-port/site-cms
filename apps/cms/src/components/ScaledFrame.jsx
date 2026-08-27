@@ -58,9 +58,9 @@ export default function ScaledFrame({
   useEffect(() => { onOffset?.(offset); }, [offset, onOffset]);
 
   return (
-    <div className="scaled" ref={wrap}>
+    <div className="relative h-full w-full overflow-hidden" ref={wrap}>
       <div
-        className="scaled__inner"
+        className="absolute top-0 left-0"
         style={{
           width: frameWidth || '100%',
           // The frame is rendered tall enough that, once scaled, it fills the
@@ -76,12 +76,15 @@ export default function ScaledFrame({
           ref={frameRef}
           src={src}
           title={title}
-          className="scaled__frame"
+          className="h-full w-full border-0 bg-white"
         />
       </div>
       {children}
       {scale < 0.999 && (
-        <span className="scaled__zoom" aria-hidden="true">
+        <span
+          className="bg-foreground/70 text-background pointer-events-none absolute right-2 bottom-2 rounded px-1.5 py-0.5 font-mono text-[11px]"
+          aria-hidden="true"
+        >
           {logicalWidth}px · {Math.round(scale * 100)}%
         </span>
       )}

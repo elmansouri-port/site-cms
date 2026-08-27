@@ -1,18 +1,22 @@
 /*
- * Experiments — the A/B tests a section block can opt into.
+ * Experiments — the A/B tests a block, a page or the header can opt into.
  *
  * Two modes, as described in reco.md 3: a cookie-assigned split that persists
  * for a fortnight, and a URL-parameter variant for ad campaigns that is never
  * indexed and never remembered.
  */
 import { useState } from 'react';
+import { FlaskConical, Pause, Play, Plus, Trash2 } from 'lucide-react';
 import { useResource } from '../lib/hooks.js';
 import { api } from '../lib/api.js';
 import { useToast } from '../lib/toast.jsx';
 import { useAuth } from '../lib/auth.jsx';
 import {
-  Panel, Spinner, ErrorBox, Empty, Badge, Icon, Modal, Field, formatDate,
-} from '../components/ui.jsx';
+  Badge, Button, Callout, Card, Code, Dialog, DialogBody, DialogContent, DialogFooter,
+  DialogHeader, DialogTitle, Empty, ErrorBox, Field, FieldRow, Input, PageHeader, Select,
+  SkeletonRows, StatusBadge, TActions, TBody, THead, TRow, Table, Textarea, Tooltip, formatDate,
+  useConfirm,
+} from '../components/ui/index.js';
 
 export default function Experiments() {
   const { can } = useAuth();
@@ -23,7 +27,7 @@ export default function Experiments() {
   async function setStatus(experiment, status) {
     try {
       await api.patch(`/experiments/${experiment.key}`, { status });
-      toast.success(`"${experiment.name}" is now ${status}`);
+      toast.success(`“${experiment.name}” is now ${status}`);
       reload();
     } catch (err) {
       toast.error(err);
@@ -32,70 +36,77 @@ export default function Experiments() {
 
   return (
     <>
-      <div className="page-head">
-        <div className="page-head__text">
-          <h1>A/B tests</h1>
-          <p>Variants are chosen on the server before the page renders, so visitors never see a flash of the control.</p>
-        </div>
-        <div className="page-head__actions">
-          {can('editor') && (
-            <button className="btn btn--primary" onClick={() => setEditing({ isNew: true })}>
-              <Icon name="plus" /> New test
-            </button>
-          )}
-        </div>
-      </div>
+      <PageHeader
+        title="A/B tests"
+        description="Variants are chosen on the server before the page renders, so visitors never see a flash of the control and a crawler sees an ordinary page."
+      >
+        {can('editor') && <Button onClick={() => setEditing({ isNew: true })}><Plus /> New test</Button>}
+      </PageHeader>
 
-      <Panel>
-        {loading && <Spinner />}
+      <Card>
+        {loading && <SkeletonRows rows={4} cols={6} />}
         {error && <ErrorBox error={error} onRetry={reload} />}
         {data && !data.items.length && (
-          <Empty title="No tests yet">
-            Create one, then attach it to a block from a page's Design tab — or start a whole-page
-            test from that page's A/B tab, which creates the test for you.
+          <Empty icon={FlaskConical} title="No tests yet">
+            Create one, then attach it to a block from a page&apos;s Design tab — or start a
+            whole-page test from that page&apos;s A/B tab, which creates the test for you.
           </Empty>
         )}
         {data?.items?.length > 0 && (
-          <table className="table">
-            <thead>
-              <tr><th>Test</th><th>Varies</th><th>Mode</th><th>Variants</th><th>Status</th><th>Started</th><th /></tr>
-            </thead>
-            <tbody>
+          <Table>
+            <THead>
+              <tr><th>Test</th><th>Varies</th><th>Assignment</th><th>Split</th><th>Status</th><th>Started</th><th /></tr>
+            </THead>
+            <TBody>
               {data.items.map(x => (
-                <tr key={x.key}>
+                <TRow key={x.key} interactive>
                   <td>
-                    <div style={{ fontWeight: 600 }}>{x.name}</div>
-                    <div className="mono muted" style={{ fontSize: 12 }}>{x.key}</div>
+                    <div className="font-semibold">{x.name}</div>
+                    <div className="text-muted-foreground font-mono text-[11.5px]">{x.key}</div>
                   </td>
                   <td>
-                    <Badge tone={x.scope === 'page' ? 'brand' : ''}>
+                    <Badge variant={x.scope === 'page' ? 'primary' : 'default'}>
                       {x.scope === 'page' ? 'whole page' : 'a block'}
                     </Badge>
-                    {x.pageKey && <div className="mono muted" style={{ fontSize: 11 }}>{x.pageKey}</div>}
+                    {x.pageKey && <div className="text-muted-foreground mt-0.5 font-mono text-[11px]">{x.pageKey}</div>}
                   </td>
                   <td>
-                    <Badge>{x.mode === 'param' ? `?${x.paramName}=` : `cookie · ${x.cookieDays}d`}</Badge>
+                    <Tooltip content={x.mode === 'param'
+                      ? 'Assigned by a URL parameter. Never indexed and never remembered — for ad landings.'
+                      : `Assigned once and kept in a cookie for ${x.cookieDays} days, so a returning visitor is not counted twice.`}
+                    >
+                      <Badge variant="outline">
+                        {x.mode === 'param' ? `?${x.paramName}=` : `cookie · ${x.cookieDays}d`}
+                      </Badge>
+                    </Tooltip>
                   </td>
-                  <td className="muted">{x.variants.map(v => `${v.key} ${v.weight}%`).join(' · ')}</td>
-                  <td>
-                    <Badge tone={x.status === 'running' ? 'ok' : x.status === 'paused' ? 'warn' : ''}>{x.status}</Badge>
+                  <td className="text-muted-foreground whitespace-nowrap">
+                    {x.variants.map(v => `${v.key} ${v.weight}%`).join(' · ')}
                   </td>
-                  <td className="muted nowrap">{formatDate(x.startedAt)}</td>
-                  <td className="shrink">
+                  <td><StatusBadge status={x.status} /></td>
+                  <td className="text-muted-foreground whitespace-nowrap">{formatDate(x.startedAt)}</td>
+                  <TActions>
                     {can('editor') && (
-                      <div className="inline">
-                        {x.status !== 'running' && <button className="btn btn--sm" onClick={() => setStatus(x, 'running')}>Start</button>}
-                        {x.status === 'running' && <button className="btn btn--sm" onClick={() => setStatus(x, 'paused')}>Pause</button>}
-                        <button className="btn btn--sm" onClick={() => setEditing(x)}>Edit</button>
+                      <div className="flex justify-end gap-1.5">
+                        {x.status === 'running' ? (
+                          <Button variant="outline" size="sm" onClick={() => setStatus(x, 'paused')}>
+                            <Pause /> Pause
+                          </Button>
+                        ) : (
+                          <Button variant="outline" size="sm" onClick={() => setStatus(x, 'running')}>
+                            <Play /> Start
+                          </Button>
+                        )}
+                        <Button variant="outline" size="sm" onClick={() => setEditing(x)}>Edit</Button>
                       </div>
                     )}
-                  </td>
-                </tr>
+                  </TActions>
+                </TRow>
               ))}
-            </tbody>
-          </table>
+            </TBody>
+          </Table>
         )}
-      </Panel>
+      </Card>
 
       {editing && (
         <ExperimentDialog
@@ -110,6 +121,7 @@ export default function Experiments() {
 
 function ExperimentDialog({ experiment, onClose, onSaved }) {
   const toast = useToast();
+  const confirm = useConfirm();
   const [form, setForm] = useState(() => experiment || {
     key: '',
     name: '',
@@ -123,18 +135,27 @@ function ExperimentDialog({ experiment, onClose, onSaved }) {
   const [busy, setBusy] = useState(false);
   const set = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }));
 
-  async function submit() {
+  const setVariant = (i, patch) => setForm((f) => {
+    const variants = f.variants.slice();
+    variants[i] = { ...variants[i], ...patch };
+    return { ...f, variants };
+  });
+
+  const totalWeight = form.variants.reduce((sum, v) => sum + Number(v.weight || 0), 0);
+
+  async function submit(e) {
+    e?.preventDefault();
     setBusy(true);
     try {
       const payload = {
         key: form.key,
         name: form.name,
-        description: form.description,
+        description: form.description || '',
         mode: form.mode,
         paramName: form.paramName,
         cookieDays: Number(form.cookieDays),
         status: form.status,
-        variants: form.variants.map(v => ({ key: v.key, label: v.label, weight: Number(v.weight) })),
+        variants: form.variants.map(v => ({ key: v.key, label: v.label || '', weight: Number(v.weight) })),
       };
       if (experiment) await api.patch(`/experiments/${experiment.key}`, payload);
       else await api.post('/experiments', payload);
@@ -148,7 +169,13 @@ function ExperimentDialog({ experiment, onClose, onSaved }) {
   }
 
   async function remove() {
-    if (!confirm('Delete this test? Blocks assigned to it fall back to their control markup.')) return;
+    const ok = await confirm({
+      title: 'Delete this test?',
+      body: 'Blocks assigned to it fall back to their control markup, so nothing breaks — but the split stops being recorded.',
+      confirmLabel: 'Delete',
+      tone: 'danger',
+    });
+    if (!ok) return;
     try {
       await api.del(`/experiments/${experiment.key}`);
       onSaved();
@@ -158,82 +185,121 @@ function ExperimentDialog({ experiment, onClose, onSaved }) {
   }
 
   return (
-    <Modal
-      title={experiment ? 'Edit test' : 'New A/B test'}
-      onClose={onClose}
-      footer={
-        <>
-          {experiment && <button className="btn btn--danger" onClick={remove}>Delete</button>}
-          <span style={{ flex: 1 }} />
-          <button className="btn" onClick={onClose}>Cancel</button>
-          <button className="btn btn--primary" onClick={submit} disabled={busy || !form.key || !form.name}>Save</button>
-        </>
-      }
-    >
-      <div className="grid grid--2">
-        <Field label="Name"><input value={form.name} onChange={set('name')} /></Field>
-        <Field label="Key" hint="Lowercase, used in cookies and reports.">
-          <input className="code" value={form.key} onChange={set('key')} disabled={!!experiment} />
-        </Field>
-      </div>
-      <Field label="What is being tested"><textarea rows={2} value={form.description || ''} onChange={set('description')} /></Field>
-      <div className="grid grid--2">
-        <Field label="Mode">
-          <select value={form.mode} onChange={set('mode')}>
-            <option value="cookie">Cookie — split traffic, persists per visitor</option>
-            <option value="param">URL parameter — campaign landing, noindex</option>
-          </select>
-        </Field>
-        {form.mode === 'cookie'
-          ? <Field label="Cookie lifetime (days)"><input type="number" value={form.cookieDays} onChange={set('cookieDays')} /></Field>
-          : <Field label="Parameter name"><input className="code" value={form.paramName} onChange={set('paramName')} /></Field>}
-      </div>
+    <Dialog open onOpenChange={(next) => { if (!next) onClose(); }}>
+      <DialogContent size="lg">
+        <DialogHeader>
+          <DialogTitle>{experiment ? 'Edit test' : 'New A/B test'}</DialogTitle>
+        </DialogHeader>
+        <DialogBody>
+          <form onSubmit={submit} className="grid gap-4">
+            <FieldRow>
+              <Field label="Name">
+                {id => <Input id={id} value={form.name} onChange={set('name')} autoFocus />}
+              </Field>
+              <Field label="Key" hint="Lowercase. Used in cookies and reports, so it cannot change later.">
+                {id => <Input id={id} mono value={form.key} onChange={set('key')} disabled={!!experiment} />}
+              </Field>
+            </FieldRow>
 
-      <Field label="Variants">
-        {form.variants.map((v, i) => (
-          <div key={i} className="inline" style={{ marginBottom: 6 }}>
-            <input
-              className="code" style={{ width: 70 }} value={v.key}
-              onChange={e => setForm(f => {
-                const variants = f.variants.slice();
-                variants[i] = { ...variants[i], key: e.target.value };
-                return { ...f, variants };
-              })}
-            />
-            <input
-              style={{ flex: 1 }} value={v.label || ''} placeholder="Label"
-              onChange={e => setForm(f => {
-                const variants = f.variants.slice();
-                variants[i] = { ...variants[i], label: e.target.value };
-                return { ...f, variants };
-              })}
-            />
-            <input
-              type="number" style={{ width: 90 }} value={v.weight}
-              onChange={e => setForm(f => {
-                const variants = f.variants.slice();
-                variants[i] = { ...variants[i], weight: e.target.value };
-                return { ...f, variants };
-              })}
-            />
-            <span className="muted">%</span>
-            {form.variants.length > 2 && (
-              <button className="btn btn--sm btn--ghost" onClick={() => setForm(f => ({ ...f, variants: f.variants.filter((_, idx) => idx !== i) }))}>
-                <Icon name="trash" />
-              </button>
+            <Field label="What is being tested" hint="The hypothesis, so whoever reads the result knows what it means.">
+              {id => <Textarea id={id} rows={2} value={form.description || ''} onChange={set('description')} />}
+            </Field>
+
+            <FieldRow>
+              <Field label="Assignment">
+                {id => (
+                  <Select id={id} value={form.mode} onChange={set('mode')}>
+                    <option value="cookie">Cookie — split traffic, persists per visitor</option>
+                    <option value="param">URL parameter — campaign landing, noindex</option>
+                  </Select>
+                )}
+              </Field>
+              {form.mode === 'cookie' ? (
+                <Field label="Cookie lifetime" hint="Days. A returning visitor stays in the same arm.">
+                  {id => <Input id={id} type="number" min="1" value={form.cookieDays} onChange={set('cookieDays')} />}
+                </Field>
+              ) : (
+                <Field label="Parameter name" hint={`Entry points become ?${form.paramName}=B`}>
+                  {id => <Input id={id} mono value={form.paramName} onChange={set('paramName')} />}
+                </Field>
+              )}
+            </FieldRow>
+
+            <Field
+              label="Variants"
+              hint={totalWeight === 100 ? 'Weights add up to 100%.' : `Weights add up to ${totalWeight}% — traffic is shared out in proportion either way.`}
+            >
+              <div className="grid gap-2">
+                {form.variants.map((v, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <Input
+                      mono
+                      className="w-16"
+                      value={v.key}
+                      aria-label={`Variant ${i + 1} key`}
+                      onChange={e => setVariant(i, { key: e.target.value })}
+                    />
+                    <Input
+                      className="grow"
+                      value={v.label || ''}
+                      placeholder="Label"
+                      aria-label={`Variant ${i + 1} label`}
+                      onChange={e => setVariant(i, { label: e.target.value })}
+                    />
+                    <div className="relative w-24">
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        className="pr-6"
+                        value={v.weight}
+                        aria-label={`Variant ${i + 1} weight`}
+                        onChange={e => setVariant(i, { weight: e.target.value })}
+                      />
+                      <span className="text-muted-foreground absolute top-1/2 right-2.5 -translate-y-1/2 text-[12px]">%</span>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      disabled={form.variants.length <= 2}
+                      aria-label={`Remove variant ${v.key}`}
+                      onClick={() => setForm(f => ({ ...f, variants: f.variants.filter((_, idx) => idx !== i) }))}
+                    >
+                      <Trash2 />
+                    </Button>
+                  </div>
+                ))}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="justify-self-start"
+                  onClick={() => setForm(f => ({
+                    ...f,
+                    variants: [...f.variants, { key: String.fromCharCode(65 + f.variants.length), label: '', weight: 0 }],
+                  }))}
+                >
+                  <Plus /> Add variant
+                </Button>
+              </div>
+            </Field>
+
+            {form.mode === 'cookie' && (
+              <Callout>
+                A test on the <strong>header or footer</strong> runs on every page, so it reaches a
+                usable sample far faster than one page&apos;s traffic would — and for the same reason
+                it makes the whole site uncacheable while it runs. Attach one under{' '}
+                <Code>Header &amp; footer</Code>.
+              </Callout>
             )}
-          </div>
-        ))}
-        <button
-          className="btn btn--sm"
-          onClick={() => setForm(f => ({
-            ...f,
-            variants: [...f.variants, { key: String.fromCharCode(65 + f.variants.length), label: '', weight: 0 }],
-          }))}
-        >
-          <Icon name="plus" /> Add variant
-        </button>
-      </Field>
-    </Modal>
+          </form>
+        </DialogBody>
+        <DialogFooter>
+          {experiment && <Button variant="destructive" onClick={remove}>Delete</Button>}
+          <span className="grow" />
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button onClick={submit} disabled={busy || !form.key || !form.name}>Save</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

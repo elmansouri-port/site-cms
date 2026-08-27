@@ -38,7 +38,7 @@ blogRouter.get('/', validate(listQuery, 'query'), asyncHandler(async (req, res) 
   if (search) filter.title = { $regex: String(search).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), $options: 'i' };
 
   const [items, total] = await Promise.all([
-    BlogPost.find(filter, { bodyHtml: 0, blocks: 0, sections: 0 }).sort({ publishedAt: -1, updatedAt: -1 }).skip(offset).limit(limit).lean(),
+    BlogPost.find(filter, { bodyHtml: 0, sections: 0 }).sort({ publishedAt: -1, updatedAt: -1 }).skip(offset).limit(limit).lean(),
     BlogPost.countDocuments(filter),
   ]);
   res.json({ items, total });
@@ -78,16 +78,6 @@ const postBody = z.object({
     visible: z.boolean().default(true),
     order: z.number().int().min(0).max(999).optional(),
   })).max(200).optional(),
-  blocks: z.array(z.object({
-    key: z.string().max(80).optional(),
-    componentKey: z.string().max(80),
-    data: z.record(z.string(), z.any()).default({}),
-    visible: z.boolean().default(true),
-    layout: z.object({
-      spacingTop: z.string().max(10).nullable().optional(),
-      spacingBottom: z.string().max(10).nullable().optional(),
-    }).optional(),
-  })).optional(),
   status: z.enum(['published', 'draft', 'scheduled']).optional(),
   publishedAt: z.coerce.date().nullable().optional(),
   seo: z.record(z.string(), z.any()).optional(),
@@ -223,7 +213,8 @@ blogRouter.post('/:id/translate/:locale', requireRole('editor'), asyncHandler(as
 blogRouter.delete('/:id', requireRole('admin'), asyncHandler(async (req, res) => {
   const post = await BlogPost.findById(req.params.id);
   if (!post) throw notFoundError('No such article');
-  await snapshot('post', post._id, post.toObject(), req.user, 'before delete');
+  // Forced: after this the article exists nowhere else. See pages.js.
+  await snapshot('post', post._id, post.toObject(), req.user, 'before delete', { force: true });
   await post.deleteOne();
   await audit(req, 'post.delete', 'post', req.params.id);
   await publishChanged('article deleted');

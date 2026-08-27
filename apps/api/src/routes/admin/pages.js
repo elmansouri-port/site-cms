@@ -14,8 +14,9 @@ import { asyncHandler, notFoundError, badRequest, conflict } from '../../middlew
 import { validate, q } from '../../middleware/validate.js';
 import { requireAuth, requireRole } from '../../middleware/auth.js';
 import { snapshot, audit, publishChanged } from '../../services/publish.js';
+import { deletedPages, recoverPage } from '../../services/history.js';
 import { keysIn } from '@rainbow/core/ingest';
-import { slugify } from '@rainbow/core/html';
+import { firstHeading, slugify } from '@rainbow/core/html';
 import { routeFor } from '@rainbow/core/seo';
 import { config } from '../../config.js';
 
@@ -76,6 +77,33 @@ pagesRouter.get('/', validate(listQuery, 'query'), asyncHandler(async (req, res)
   res.json({ items: pages });
 }));
 
+/* ── Trash ────────────────────────────────────────────────────────────────── */
+
+/**
+ * Pages that were deleted and can still be brought back.
+ *
+ * Declared before `/:key` so the literal path is not read as a page key.
+ *
+ * There is no separate bin collection: a delete always writes a restore point
+ * first, so that snapshot *is* the bin. One source of truth, and no way for the
+ * two to disagree about what exists.
+ */
+pagesRouter.get('/trash', requireRole('editor'), asyncHandler(async (_req, res) => {
+  res.json({ items: await deletedPages() });
+}));
+
+pagesRouter.post('/trash/:key/recover', requireRole('editor'), asyncHandler(async (req, res) => {
+  const result = await recoverPage(req.params.key, req.user);
+  if (result.error === 'notFound') throw notFoundError('Nothing in the trash under that key');
+  if (result.error === 'exists') throw conflict('A page with that key already exists');
+
+  await audit(req, 'page.recover', 'page', req.params.key);
+  await publishChanged('page recovered');
+  res.json({ ok: true, key: req.params.key });
+}));
+
+/* ── One page ─────────────────────────────────────────────────────────────── */
+
 pagesRouter.get('/:key', asyncHandler(async (req, res) => {
   const page = await Page.findOne({ key: req.params.key }).lean();
   if (!page) throw notFoundError('No such page');
@@ -104,6 +132,9 @@ pagesRouter.get('/:key/sections', asyncHandler(async (req, res) => {
       experiment: s.experiment,
       keyCount: (s.keys || []).length,
       bytes: (s.html || '').length,
+      // The block's own first heading. Sent because the migrated labels name a
+      // CSS class rather than the content; the CMS prefers this when they do.
+      heading: firstHeading(s.html),
     })),
   });
 }));
@@ -489,7 +520,8 @@ pagesRouter.delete('/:key/sections/:sectionKey', requireRole('editor'), asyncHan
   if (at < 0) throw notFoundError('No such section');
   if (page.sections[at].locked) throw badRequest('This block is structural and cannot be deleted');
 
-  await snapshot('page', page.key, page.toObject(), req.user, `before deleting "${page.sections[at].label}"`);
+  await snapshot('page', page.key, page.toObject(), req.user,
+    `before deleting "${page.sections[at].label}"`, { force: true });
   page.sections.splice(at, 1);
   page.sections.forEach((s, i) => { s.order = i; });
   page.editedInCms = true;
@@ -548,10 +580,22 @@ async function siteChrome() {
 
 const createPage = z.object({
   key: z.string().min(1).max(80).regex(/^[a-z0-9-]+$/),
-  route: z.string().max(300),
+  route: routeSegment,
   title: z.string().min(1).max(200),
   pageKind: z.enum(['home', 'product', 'pricing', 'blogIndex', 'blogPost', 'page', 'form', 'error']).default('page'),
   type: z.enum(['static', 'hybrid', 'dynamic']).default('hybrid'),
+  /**
+   * Whether the new page shows the shared header and footer.
+   *
+   * Settable here because a landing page is a *kind of page*, not a page
+   * somebody afterwards remembers to strip: paid traffic arrives before anybody
+   * checks, and a navigation bar on a landing page is a way to leave before
+   * converting.
+   */
+  chrome: z.object({
+    navbar: z.boolean().optional(),
+    footer: z.boolean().optional(),
+  }).optional(),
   copyFrom: z.string().max(80).optional(),
 });
 
@@ -594,12 +638,19 @@ pagesRouter.post('/', requireRole('editor'), validate(createPage), asyncHandler(
     title: req.body.title,
     pageKind: req.body.pageKind,
     type: req.body.type,
+    chrome: {
+      navbar: req.body.chrome?.navbar !== false,
+      footer: req.body.chrome?.footer !== false,
+    },
     status: 'draft',
     editedInCms: true,
     updatedBy: req.user._id,
   });
 
-  await audit(req, 'page.create', 'page', page.key, { copiedFrom: req.body.copyFrom || null });
+  await audit(req, 'page.create', 'page', page.key, {
+    copiedFrom: req.body.copyFrom || null,
+    ...(req.body.chrome ? { chrome: req.body.chrome } : {}),
+  });
   res.status(201).json({ page: asJson(page) });
 }));
 
@@ -724,7 +775,9 @@ pagesRouter.post('/:key/variants', requireRole('editor'), validate(newVariant), 
 pagesRouter.delete('/:key', requireRole('admin'), asyncHandler(async (req, res) => {
   const page = await Page.findOne({ key: req.params.key });
   if (!page) throw notFoundError('No such page');
-  await snapshot('page', page.key, page.toObject(), req.user, 'before delete');
+  // Forced: this snapshot is the page's only remaining copy, and the delete
+  // usually follows an edit — exactly when the debounce would drop it.
+  await snapshot('page', page.key, page.toObject(), req.user, 'before delete', { force: true });
   await page.deleteOne();
   await audit(req, 'page.delete', 'page', req.params.key);
   await publishChanged('page deleted');
@@ -734,6 +787,15 @@ pagesRouter.delete('/:key', requireRole('admin'), asyncHandler(async (req, res) 
 pagesRouter.post('/:key/publish', requireRole('editor'), asyncHandler(async (req, res) => {
   const page = await Page.findOne({ key: req.params.key });
   if (!page) throw notFoundError('No such page');
+
+  // The last published state, kept deliberately: "put back what was live before
+  // I published this" is the request that arrives when a publish goes wrong, and
+  // an automatic snapshot from the edit before it is not the same thing.
+  if (page.publishedAt) {
+    await snapshot('page', page.key, page.toObject(), req.user,
+      'the version that was live before this publish', { force: true });
+  }
+
   page.status = 'published';
   page.publishedAt = new Date();
   page.updatedBy = req.user._id;

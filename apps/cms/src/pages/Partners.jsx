@@ -5,11 +5,16 @@
  * data changed, so editing a partner here updates the map with no deploy.
  */
 import { useState } from 'react';
-import { useResource, useDebounced } from '../lib/hooks.js';
+import { MapPin, Plus } from 'lucide-react';
+import { useDebounced, useResource } from '../lib/hooks.js';
 import { api, qs } from '../lib/api.js';
 import { useToast } from '../lib/toast.jsx';
 import { useAuth } from '../lib/auth.jsx';
-import { Panel, Spinner, ErrorBox, Empty, Icon, Modal, Field, Badge, Checkbox } from '../components/ui.jsx';
+import {
+  Badge, Button, Card, CheckboxField, Dialog, DialogBody, DialogContent, DialogFooter,
+  DialogHeader, DialogTitle, Empty, ErrorBox, Field, FieldRow, Input, PageHeader, SearchInput,
+  Select, SkeletonRows, TActions, TBody, THead, TRow, Table, Toolbar, useConfirm,
+} from '../components/ui/index.js';
 
 export default function Partners() {
   const { can } = useAuth();
@@ -22,54 +27,75 @@ export default function Partners() {
 
   return (
     <>
-      <div className="page-head">
-        <div className="page-head__text">
-          <h1>Partner directory</h1>
-          <p>{data ? `${data.total} partners across ${data.countries.length} countries.` : 'Loading the directory…'}</p>
-        </div>
-        <div className="page-head__actions">
-          {can('editor') && (
-            <button className="btn btn--primary" onClick={() => setEditing({ isNew: true })}>
-              <Icon name="plus" /> Add partner
-            </button>
-          )}
-        </div>
-      </div>
-
-      <Panel
-        actions={
-          <>
-            <input type="search" placeholder="Search by name…" value={search} onChange={e => setSearch(e.target.value)} style={{ width: 240 }} />
-            <select value={country} onChange={e => setCountry(e.target.value)} style={{ width: 180 }}>
-              <option value="">All countries</option>
-              {(data?.countries || []).map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-          </>
-        }
+      <PageHeader
+        title="Partner directory"
+        description={data
+          ? `${data.total.toLocaleString()} partners across ${data.countries.length} countries, served to the locator map from here.`
+          : 'Loading the directory…'}
       >
-        {loading && <Spinner />}
+        {can('editor') && <Button onClick={() => setEditing({ isNew: true })}><Plus /> Add partner</Button>}
+      </PageHeader>
+
+      <Card>
+        <Toolbar className="border-b p-3">
+          <SearchInput
+            placeholder="Search by name…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="w-full sm:w-64"
+          />
+          <Select
+            value={country}
+            onChange={e => setCountry(e.target.value)}
+            className="w-auto"
+            placeholder="All countries"
+            options={data?.countries || []}
+          />
+          {data && (
+            <span className="text-muted-foreground ml-auto text-[12px] tabular-nums">
+              showing {data.items.length}
+            </span>
+          )}
+        </Toolbar>
+
+        {loading && <SkeletonRows rows={6} cols={5} />}
         {error && <ErrorBox error={error} onRetry={reload} />}
-        {data && !data.items.length && <Empty title="No partners found">Try another search.</Empty>}
-        {data?.items?.length > 0 && (
-          <table className="table">
-            <thead><tr><th>Name</th><th>Country</th><th>City</th><th>Contact</th><th>Status</th><th /></tr></thead>
-            <tbody>
-              {data.items.map(p => (
-                <tr key={p._id}>
-                  <td style={{ fontWeight: 600 }}>{p.name}</td>
-                  <td>{p.country || '—'}</td>
-                  <td className="muted">{p.city || '—'}</td>
-                  <td className="muted">{p.website || p.phone || '—'}</td>
-                  <td>{p.active ? <Badge tone="ok">listed</Badge> : <Badge tone="warn">hidden</Badge>}</td>
-                  <td className="shrink">
-                    {can('editor') && <button className="btn btn--sm" onClick={() => setEditing(p)}>Edit</button>}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        {data && !data.items.length && (
+          <Empty icon={MapPin} title="No partners found">Try another name or country.</Empty>
         )}
-      </Panel>
+        {data?.items?.length > 0 && (
+          <Table>
+            <THead>
+              <tr><th>Name</th><th>Country</th><th>City</th><th>Contact</th><th>Map pin</th><th>State</th><th /></tr>
+            </THead>
+            <TBody>
+              {data.items.map(p => (
+                <TRow key={p._id} interactive>
+                  <td className="font-semibold">{p.name}</td>
+                  <td>{p.country || '—'}</td>
+                  <td className="text-muted-foreground">{p.city || '—'}</td>
+                  <td className="text-muted-foreground max-w-56 truncate">{p.website || p.phone || '—'}</td>
+                  <td>
+                    {p.lat != null && p.lng != null
+                      ? <Badge variant="outline">placed</Badge>
+                      : <Badge variant="warning">no coordinates</Badge>}
+                  </td>
+                  <td>
+                    {p.active
+                      ? <Badge variant="success">listed</Badge>
+                      : <Badge variant="warning">hidden</Badge>}
+                  </td>
+                  <TActions>
+                    {can('editor') && (
+                      <Button variant="outline" size="sm" onClick={() => setEditing(p)}>Edit</Button>
+                    )}
+                  </TActions>
+                </TRow>
+              ))}
+            </TBody>
+          </Table>
+        )}
+      </Card>
 
       {editing && (
         <PartnerDialog
@@ -84,26 +110,25 @@ export default function Partners() {
 
 function PartnerDialog({ partner, onClose, onSaved }) {
   const toast = useToast();
+  const confirm = useConfirm();
   const [form, setForm] = useState(() => partner || { name: '', country: '', city: '', active: true });
   const [busy, setBusy] = useState(false);
-  const set = (field) => (e) => setForm(f => ({
-    ...f,
-    [field]: e.target.type === 'checkbox' ? e.target.checked : e.target.value,
-  }));
+  const set = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }));
 
-  async function submit() {
+  async function submit(e) {
+    e?.preventDefault();
     setBusy(true);
     try {
       const payload = {
         name: form.name,
-        country: form.country,
-        city: form.city,
-        address: form.address,
-        postalCode: form.postalCode,
-        website: form.website,
-        phone: form.phone,
-        email: form.email,
-        level: form.level,
+        country: form.country || '',
+        city: form.city || '',
+        address: form.address || '',
+        postalCode: form.postalCode || '',
+        website: form.website || '',
+        phone: form.phone || '',
+        email: form.email || '',
+        level: form.level || '',
         lat: form.lat === '' || form.lat === undefined ? null : Number(form.lat),
         lng: form.lng === '' || form.lng === undefined ? null : Number(form.lng),
         active: form.active !== false,
@@ -120,7 +145,13 @@ function PartnerDialog({ partner, onClose, onSaved }) {
   }
 
   async function remove() {
-    if (!confirm(`Remove ${partner.name} from the directory?`)) return;
+    const ok = await confirm({
+      title: `Remove ${partner.name} from the directory?`,
+      body: 'They disappear from the public locator immediately.',
+      confirmLabel: 'Remove',
+      tone: 'danger',
+    });
+    if (!ok) return;
     try {
       await api.del(`/partners/${partner._id}`);
       onSaved();
@@ -130,34 +161,51 @@ function PartnerDialog({ partner, onClose, onSaved }) {
   }
 
   return (
-    <Modal
-      wide
-      title={partner ? partner.name : 'Add a partner'}
-      onClose={onClose}
-      footer={
-        <>
-          {partner && <button className="btn btn--danger" onClick={remove}>Remove</button>}
-          <span style={{ flex: 1 }} />
-          <button className="btn" onClick={onClose}>Cancel</button>
-          <button className="btn btn--primary" onClick={submit} disabled={busy || !form.name}>Save</button>
-        </>
-      }
-    >
-      <div className="grid grid--2">
-        <Field label="Name"><input value={form.name || ''} onChange={set('name')} /></Field>
-        <Field label="Country"><input value={form.country || ''} onChange={set('country')} /></Field>
-        <Field label="City"><input value={form.city || ''} onChange={set('city')} /></Field>
-        <Field label="Postal code"><input value={form.postalCode || ''} onChange={set('postalCode')} /></Field>
-        <Field label="Address"><input value={form.address || ''} onChange={set('address')} /></Field>
-        <Field label="Website"><input className="code" value={form.website || ''} onChange={set('website')} /></Field>
-        <Field label="Phone"><input value={form.phone || ''} onChange={set('phone')} /></Field>
-        <Field label="Email"><input value={form.email || ''} onChange={set('email')} /></Field>
-        <Field label="Latitude" hint="Needed to place the pin on the map.">
-          <input value={form.lat ?? ''} onChange={set('lat')} />
-        </Field>
-        <Field label="Longitude"><input value={form.lng ?? ''} onChange={set('lng')} /></Field>
-      </div>
-      <Checkbox label="Show in the public locator" checked={form.active !== false} onChange={set('active')} />
-    </Modal>
+    <Dialog open onOpenChange={(next) => { if (!next) onClose(); }}>
+      <DialogContent size="lg">
+        <DialogHeader>
+          <DialogTitle>{partner ? partner.name : 'Add a partner'}</DialogTitle>
+        </DialogHeader>
+        <DialogBody>
+          <form onSubmit={submit} className="grid gap-4">
+            <FieldRow>
+              <Field label="Name">{id => <Input id={id} value={form.name || ''} onChange={set('name')} autoFocus />}</Field>
+              <Field label="Country">{id => <Input id={id} value={form.country || ''} onChange={set('country')} />}</Field>
+              <Field label="City">{id => <Input id={id} value={form.city || ''} onChange={set('city')} />}</Field>
+              <Field label="Postal code">{id => <Input id={id} value={form.postalCode || ''} onChange={set('postalCode')} />}</Field>
+            </FieldRow>
+            <Field label="Address">{id => <Input id={id} value={form.address || ''} onChange={set('address')} />}</Field>
+            <FieldRow>
+              <Field label="Website">{id => <Input id={id} mono value={form.website || ''} onChange={set('website')} />}</Field>
+              <Field label="Phone">{id => <Input id={id} value={form.phone || ''} onChange={set('phone')} />}</Field>
+              <Field label="Email">{id => <Input id={id} type="email" value={form.email || ''} onChange={set('email')} />}</Field>
+              <Field label="Level" hint="Gold, silver — whatever the programme calls it.">
+                {id => <Input id={id} value={form.level || ''} onChange={set('level')} />}
+              </Field>
+            </FieldRow>
+            <FieldRow>
+              <Field label="Latitude" hint="Both are needed to place the pin on the map.">
+                {id => <Input id={id} value={form.lat ?? ''} onChange={set('lat')} placeholder="48.8566" />}
+              </Field>
+              <Field label="Longitude">
+                {id => <Input id={id} value={form.lng ?? ''} onChange={set('lng')} placeholder="2.3522" />}
+              </Field>
+            </FieldRow>
+            <CheckboxField
+              label="Show in the public locator"
+              hint="Off keeps the record without listing it."
+              checked={form.active !== false}
+              onChange={v => setForm(f => ({ ...f, active: v }))}
+            />
+          </form>
+        </DialogBody>
+        <DialogFooter>
+          {partner && <Button variant="destructive" onClick={remove}>Remove</Button>}
+          <span className="grow" />
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button onClick={submit} disabled={busy || !form.name}>Save</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

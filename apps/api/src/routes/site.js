@@ -42,9 +42,6 @@ function publicSettings(s) {
     organizationName: s.organizationName,
     organizationLogo: s.organizationLogo,
     socialProfiles: s.socialProfiles,
-    globalHeadSnippet: s.globalHeadSnippet,
-    globalBodySnippet: s.globalBodySnippet,
-    globalFooterSnippet: s.globalFooterSnippet,
     analytics: s.analytics,
     robotsExtra: s.robotsExtra,
     maintenanceMode: s.maintenanceMode,
@@ -170,7 +167,7 @@ siteRouter.get('/blog', validate(listQuery, 'query'), asyncHandler(async (req, r
   ];
 
   const [items, total] = await Promise.all([
-    BlogPost.find(filter, { bodyHtml: 0, blocks: 0, sections: 0 })
+    BlogPost.find(filter, { bodyHtml: 0, sections: 0 })
       .sort({ featured: -1, publishedAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
@@ -198,7 +195,7 @@ siteRouter.get('/blog/:slug', asyncHandler(async (req, res) => {
 
   // Related articles: same category first — that is what "related" means to a
   // reader — then the most recent, so the section is never short of cards.
-  const exclude = { bodyHtml: 0, blocks: 0, sections: 0 };
+  const exclude = { bodyHtml: 0, sections: 0 };
   const sameCategory = post.category
     ? await BlogPost.find(
       { locale, status: 'published', category: post.category, _id: { $ne: post._id } },

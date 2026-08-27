@@ -12,15 +12,21 @@
  * inside a 3,000-word textarea.
  */
 import { useMemo, useState } from 'react';
+import { ChevronDown, ChevronUp, Copy, Eye, EyeOff, GripVertical, Plus, Trash2 } from 'lucide-react';
 import { ARTICLE_SECTIONS } from '@rainbow/core/article';
-import { Field, Icon, Badge, Checkbox, Empty, Modal } from './ui.jsx';
-import CodeEditor, { inspectHtml, inspectCss } from './CodeEditor.jsx';
+import { cn } from '../lib/cn.js';
+import CodeEditor, { inspectCss, inspectHtml } from './CodeEditor.jsx';
 import MediaPicker from './MediaPicker.jsx';
+import {
+  Badge, Button, Code, Dialog, DialogBody, DialogContent, DialogDescription, DialogHeader,
+  DialogTitle, Empty, Field, Input, Label, Select, Textarea, useConfirm,
+} from './ui/index.js';
 
 /** The order the palette offers them in: most-used first, escape hatch last. */
 const PALETTE = ['heading', 'rich', 'keyPoints', 'image', 'quote', 'callout', 'embed', 'custom'];
 
-export default function ArticleSections({ sections, onChange, canEdit, contents }) {
+export default function ArticleSections({ sections, onChange, canEdit }) {
+  const confirm = useConfirm();
   const [open, setOpen] = useState(null);
   const [adding, setAdding] = useState(null);
   const [dragKey, setDragKey] = useState(null);
@@ -56,32 +62,35 @@ export default function ArticleSections({ sections, onChange, canEdit, contents 
     move(list.findIndex(s => s.key === dragKey), list.findIndex(s => s.key === targetKey));
   }
 
+  async function remove(i) {
+    const ok = await confirm({ title: 'Delete this section?', confirmLabel: 'Delete', tone: 'danger' });
+    if (ok) onChange(list.filter((_, idx) => idx !== i));
+  }
+
   return (
-    <div className="artsec">
+    <div className="grid gap-1.5">
       {!list.length && (
         <Empty title="Nothing written yet">
-          Add a heading and some text. Headings become the article's contents list automatically.
+          Add a heading and some text. Headings become the article&apos;s contents list automatically.
         </Empty>
       )}
 
       {list.map((section, i) => {
         const schema = ARTICLE_SECTIONS[section.type] || { label: section.type, fields: [] };
         const isOpen = open === section.key;
-        const inToc = section.inToc === null || section.inToc === undefined
-          ? !!schema.toc
-          : section.inToc;
+        const inToc = section.inToc == null ? !!schema.toc : section.inToc;
         const label = section.tocLabel || section.data?.text || section.data?.title || '';
 
         return (
           <div key={section.key}>
             <div
-              className={[
-                'artsec__row',
-                isOpen ? 'is-open' : '',
-                section.visible === false ? 'is-hidden' : '',
-                dragKey === section.key ? 'is-dragging' : '',
-                overKey === section.key ? 'is-over' : '',
-              ].filter(Boolean).join(' ')}
+              className={cn(
+                'group bg-card flex items-center gap-2 rounded-lg border p-2 transition-all',
+                isOpen && 'border-primary/40 rounded-b-none',
+                section.visible === false && 'opacity-55',
+                dragKey === section.key && 'opacity-40',
+                overKey === section.key && 'border-primary ring-primary/20 ring-2',
+              )}
               draggable={canEdit}
               onDragStart={() => setDragKey(section.key)}
               onDragEnd={() => { setDragKey(null); setOverKey(null); }}
@@ -89,35 +98,53 @@ export default function ArticleSections({ sections, onChange, canEdit, contents 
               onDragLeave={() => setOverKey(k => (k === section.key ? null : k))}
               onDrop={() => onDrop(section.key)}
             >
-              <span className="artsec__grip" title="Drag to reorder"><Icon name="drag" /></span>
+              <span className={cn('text-muted-foreground shrink-0', canEdit ? 'cursor-grab' : 'opacity-30')}>
+                <GripVertical className="size-4" />
+              </span>
 
-              <button type="button" className="artsec__head" onClick={() => setOpen(isOpen ? null : section.key)}>
-                <span className="artsec__type">
+              <button
+                type="button"
+                className="flex min-w-0 grow items-center gap-2 text-left"
+                onClick={() => setOpen(isOpen ? null : section.key)}
+              >
+                <span className="bg-muted text-muted-foreground shrink-0 rounded px-1.5 py-0.5 text-[10.5px] font-semibold">
                   {section.type === 'heading'
                     ? `H${Number(section.data?.level) === 3 ? 3 : 2}`
                     : schema.label}
                 </span>
-                <span className="artsec__label">
-                  {label || summarise(section) || <em className="muted">Empty</em>}
+                <span className="min-w-0 grow truncate text-[13px]">
+                  {label || summarise(section) || <em className="text-muted-foreground">Empty</em>}
                 </span>
-                {inToc && label && <Badge tone="brand">contents</Badge>}
-                {section.visible === false && <Badge>hidden</Badge>}
+                {inToc && label && <Badge variant="primary">contents</Badge>}
+                {section.visible === false && <Badge variant="outline">hidden</Badge>}
               </button>
 
-              <span className="artsec__actions">
-                <button className="btn btn--ghost btn--icon" title="Move up" disabled={!canEdit || i === 0} onClick={() => move(i, i - 1)}>↑</button>
-                <button className="btn btn--ghost btn--icon" title="Move down" disabled={!canEdit || i === list.length - 1} onClick={() => move(i, i + 1)}>↓</button>
-                <button
-                  className="btn btn--ghost btn--icon"
-                  title={section.visible === false ? 'Show' : 'Hide'}
+              <span className="flex shrink-0 items-center opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+                <Button variant="ghost" size="icon-sm" aria-label="Move up" disabled={!canEdit || i === 0} onClick={() => move(i, i - 1)}>
+                  <ChevronUp />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label="Move down"
+                  disabled={!canEdit || i === list.length - 1}
+                  onClick={() => move(i, i + 1)}
+                >
+                  <ChevronDown />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label={section.visible === false ? 'Show' : 'Hide'}
                   disabled={!canEdit}
                   onClick={() => update(i, { visible: section.visible === false })}
                 >
-                  <Icon name={section.visible === false ? 'eyeOff' : 'eye'} />
-                </button>
-                <button
-                  className="btn btn--ghost btn--icon"
-                  title="Duplicate"
+                  {section.visible === false ? <EyeOff /> : <Eye />}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label="Duplicate"
                   disabled={!canEdit}
                   onClick={() => {
                     const copy = { ...section, key: `${section.type}-${Date.now().toString(36)}`, anchorId: null };
@@ -126,22 +153,26 @@ export default function ArticleSections({ sections, onChange, canEdit, contents 
                     onChange(next);
                   }}
                 >
-                  <Icon name="copy" />
-                </button>
-                <button
-                  className="btn btn--ghost btn--icon"
-                  title="Delete"
+                  <Copy />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  className="hover:text-destructive"
+                  aria-label="Delete"
                   disabled={!canEdit}
-                  onClick={() => { if (confirm('Delete this section?')) onChange(list.filter((_, idx) => idx !== i)); }}
+                  onClick={() => remove(i)}
                 >
-                  <Icon name="trash" />
-                </button>
+                  <Trash2 />
+                </Button>
               </span>
             </div>
 
             {isOpen && (
-              <div className="artsec__body">
-                {schema.description && <p className="field__hint" style={{ marginBottom: 12 }}>{schema.description}</p>}
+              <div className="border-primary/40 grid gap-4 rounded-b-lg border border-t-0 p-3">
+                {schema.description && (
+                  <p className="text-muted-foreground text-[12px]">{schema.description}</p>
+                )}
 
                 {schema.fields.map(field => (
                   <SectionField
@@ -154,36 +185,46 @@ export default function ArticleSections({ sections, onChange, canEdit, contents 
                   />
                 ))}
 
-                <div className="artsec__toc">
-                  <Checkbox
-                    label="Show in the contents list"
-                    checked={inToc}
-                    disabled={!canEdit || !label}
-                    onChange={e => update(i, { inToc: e.target.checked })}
-                  />
+                <div className="bg-muted/40 grid gap-3 rounded-lg p-3">
+                  <label className="flex items-center gap-2.5 text-[13px] font-medium">
+                    <input
+                      type="checkbox"
+                      className="accent-primary size-4"
+                      checked={inToc}
+                      disabled={!canEdit || !label}
+                      onChange={e => update(i, { inToc: e.target.checked })}
+                    />
+                    Show in the contents list
+                  </label>
                   {!label && (
-                    <p className="field__hint">
+                    <p className="text-muted-foreground text-[12px]">
                       A section needs a heading or a title before it can appear in the contents.
                     </p>
                   )}
                   {inToc && label && (
-                    <div className="grid grid--2">
+                    <div className="grid gap-4 sm:grid-cols-2">
                       <Field label="Contents label" hint="Leave empty to use the heading.">
-                        <input
-                          value={section.tocLabel || ''}
-                          placeholder={label}
-                          disabled={!canEdit}
-                          onChange={e => update(i, { tocLabel: e.target.value })}
-                        />
+                        {id => (
+                          <Input
+                            id={id}
+                            value={section.tocLabel || ''}
+                            placeholder={label}
+                            disabled={!canEdit}
+                            onChange={e => update(i, { tocLabel: e.target.value })}
+                          />
+                        )}
                       </Field>
                       <Field label="Anchor" hint="The #link. Generated from the heading if empty.">
-                        <input
-                          className="code"
-                          value={section.anchorId || ''}
-                          placeholder={slugify(label)}
-                          disabled={!canEdit}
-                          onChange={e => update(i, { anchorId: e.target.value })}
-                        />
+                        {id => (
+                          <Input
+                            id={id}
+                            mono
+                            value={section.anchorId || ''}
+                            placeholder={slugify(label)}
+                            disabled={!canEdit}
+                            onChange={e => update(i, { anchorId: e.target.value })}
+                          />
+                        )}
                       </Field>
                     </div>
                   )}
@@ -192,8 +233,16 @@ export default function ArticleSections({ sections, onChange, canEdit, contents 
             )}
 
             {canEdit && (
-              <button type="button" className="ve__insert" title="Insert a section here" onClick={() => setAdding(i + 1)}>
-                <span /><Icon name="plus" /><span />
+              <button
+                type="button"
+                title="Insert a section here"
+                aria-label="Insert a section here"
+                className="text-muted-foreground hover:text-primary group/insert flex h-4 w-full items-center gap-1 px-2"
+                onClick={() => setAdding(i + 1)}
+              >
+                <span className="group-hover/insert:bg-primary/40 h-px grow bg-transparent transition-colors" />
+                <Plus className="size-3 opacity-0 transition-opacity group-hover/insert:opacity-100" />
+                <span className="group-hover/insert:bg-primary/40 h-px grow bg-transparent transition-colors" />
               </button>
             )}
           </div>
@@ -201,30 +250,52 @@ export default function ArticleSections({ sections, onChange, canEdit, contents 
       })}
 
       {canEdit && (
-        <button className="btn btn--primary" style={{ marginTop: 10 }} onClick={() => setAdding(list.length)}>
-          <Icon name="plus" /> Add a section
-        </button>
+        <Button className="mt-2 justify-self-start" onClick={() => setAdding(list.length)}>
+          <Plus /> Add a section
+        </Button>
       )}
 
       {adding !== null && (
-        <Modal title="Add a section" onClose={() => setAdding(null)} wide>
-          <div className="palette">
-            {PALETTE.map(type => {
-              const schema = ARTICLE_SECTIONS[type];
-              return (
-                <button key={type} type="button" className="palette__card" onClick={() => insert(type, adding)}>
-                  <span className="artsec__wire" aria-hidden="true">{WIRE[type]}</span>
-                  <span className="palette__name">
-                    {schema.label}
-                    {schema.advanced && <Badge tone="brand">advanced</Badge>}
-                    {schema.toc && <Badge>contents</Badge>}
-                  </span>
-                  <span className="palette__desc">{schema.description}</span>
-                </button>
-              );
-            })}
-          </div>
-        </Modal>
+        <Dialog open onOpenChange={() => setAdding(null)}>
+          <DialogContent size="lg">
+            <DialogHeader>
+              <DialogTitle>Add a section</DialogTitle>
+              <DialogDescription>
+                Each kind says whether it belongs in the contents list by default.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogBody>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {PALETTE.map((type) => {
+                  const schema = ARTICLE_SECTIONS[type];
+                  return (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => insert(type, adding)}
+                      className="hover:border-primary/50 focus-visible:ring-ring/40 bg-card grid gap-2 rounded-lg border p-3 text-left transition-colors outline-none focus-visible:ring-[3px]"
+                    >
+                      <span
+                        className="bg-muted/60 text-muted-foreground flex h-12 items-center justify-center rounded-md border text-[18px] font-semibold"
+                        aria-hidden="true"
+                      >
+                        {WIRE[type]}
+                      </span>
+                      <span className="flex flex-wrap items-center gap-1.5 text-[13px] font-semibold">
+                        {schema.label}
+                        {schema.advanced && <Badge variant="primary">advanced</Badge>}
+                        {schema.toc && <Badge variant="outline">contents</Badge>}
+                      </span>
+                      <span className="text-muted-foreground text-[12px] leading-snug">
+                        {schema.description}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </DialogBody>
+          </DialogContent>
+        </Dialog>
       )}
 
       {picking && (
@@ -250,20 +321,23 @@ export default function ArticleSections({ sections, onChange, canEdit, contents 
 export function ContentsPreview({ contents }) {
   if (!contents?.length) {
     return (
-      <p className="muted" style={{ fontSize: 12.5 }}>
-        No contents list yet. Add a heading, or tick “Show in the contents list” on a section.
-        With none, the Sommaire box is left off the article entirely rather than shown empty.
+      <p className="text-muted-foreground text-[12.5px] leading-relaxed">
+        No contents list yet. Add a heading, or tick “Show in the contents list” on a section. With
+        none, the Sommaire box is left off the article entirely rather than shown empty.
       </p>
     );
   }
   return (
-    <div className="toc-preview">
-      <div className="toc-preview__head">Sommaire</div>
-      <ol>
+    <div className="bg-accent/40 border-primary/20 rounded-lg border p-3">
+      <div className="mb-2 text-[12px] font-semibold tracking-wide uppercase">Sommaire</div>
+      <ol className="grid gap-1.5">
         {contents.map(entry => (
-          <li key={entry.id} className={entry.level === 3 ? 'is-sub' : ''}>
-            {entry.label}
-            <span className="mono muted">#{entry.id}</span>
+          <li
+            key={entry.id}
+            className={cn('flex items-baseline justify-between gap-2 text-[12.5px]', entry.level === 3 && 'pl-4')}
+          >
+            <span className="min-w-0 truncate">{entry.label}</span>
+            <Code className="shrink-0 text-[10.5px]">#{entry.id}</Code>
           </li>
         ))}
       </ol>
@@ -275,11 +349,22 @@ function SectionField({ field, value, onChange, onPick, disabled }) {
   if (field.type === 'media') {
     return (
       <Field label={field.label} hint={field.hint}>
-        <div className="inline">
-          <input className="code" style={{ flex: 1 }} value={value || ''} disabled={disabled} onChange={e => onChange(e.target.value)} />
-          <button type="button" className="btn btn--sm" onClick={onPick} disabled={disabled}>Browse</button>
-        </div>
-        {value && <img src={value} alt="" className="artsec__thumb" onError={(e) => { e.currentTarget.style.display = 'none'; }} />}
+        {id => (
+          <>
+            <div className="flex items-center gap-2">
+              <Input id={id} mono value={value || ''} disabled={disabled} onChange={e => onChange(e.target.value)} />
+              <Button variant="outline" size="sm" onClick={onPick} disabled={disabled}>Browse…</Button>
+            </div>
+            {value && (
+              <img
+                src={value}
+                alt=""
+                className="bg-muted mt-1 h-20 w-auto rounded border object-cover"
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              />
+            )}
+          </>
+        )}
       </Field>
     );
   }
@@ -287,49 +372,59 @@ function SectionField({ field, value, onChange, onPick, disabled }) {
   if (field.type === 'select') {
     return (
       <Field label={field.label} hint={field.hint}>
-        <select
-          value={value ?? field.options[0]}
-          disabled={disabled}
-          onChange={e => onChange(typeof field.options[0] === 'number' ? Number(e.target.value) : e.target.value)}
-        >
-          {field.options.map(o => <option key={o} value={o}>{String(o)}</option>)}
-        </select>
+        {id => (
+          <Select
+            id={id}
+            value={value ?? field.options[0]}
+            disabled={disabled}
+            options={field.options.map(o => ({ value: o, label: String(o) }))}
+            onChange={e => onChange(typeof field.options[0] === 'number' ? Number(e.target.value) : e.target.value)}
+          />
+        )}
       </Field>
     );
   }
 
   if (field.type === 'lines') {
     return (
-      <Field label={field.label} hint={field.hint}>
-        <textarea
-          rows={5}
-          value={Array.isArray(value) ? value.join('\n') : (value || '')}
-          disabled={disabled}
-          onChange={e => onChange(e.target.value.split('\n'))}
-        />
+      <Field label={field.label} hint={field.hint || 'One per line.'}>
+        {id => (
+          <Textarea
+            id={id}
+            rows={5}
+            value={Array.isArray(value) ? value.join('\n') : (value || '')}
+            disabled={disabled}
+            onChange={e => onChange(e.target.value.split('\n'))}
+          />
+        )}
       </Field>
     );
   }
 
-  if (field.type === 'code') return <CodeField field={field} value={value || ''} onChange={onChange} disabled={disabled} />;
+  if (field.type === 'code') {
+    return <CodeField field={field} value={value || ''} onChange={onChange} disabled={disabled} />;
+  }
 
   if (field.type === 'html' || field.type === 'textarea') {
     return (
       <Field label={field.label} hint={field.hint}>
-        <textarea
-          rows={field.rows || 4}
-          className={field.type === 'html' ? 'code' : undefined}
-          value={value || ''}
-          disabled={disabled}
-          onChange={e => onChange(e.target.value)}
-        />
+        {id => (
+          <Textarea
+            id={id}
+            rows={field.rows || 4}
+            mono={field.type === 'html'}
+            value={value || ''}
+            disabled={disabled}
+            onChange={e => onChange(e.target.value)}
+          />
+        )}
       </Field>
     );
   }
 
   return (
     <Field label={field.label} hint={field.hint}>
-      <input value={value || ''} disabled={disabled} onChange={e => onChange(e.target.value)} />
+      {id => <Input id={id} value={value || ''} disabled={disabled} onChange={e => onChange(e.target.value)} />}
     </Field>
   );
 }
@@ -340,13 +435,22 @@ function CodeField({ field, value, onChange, disabled }) {
     [value, field.language],
   );
   return (
-    <div className="field">
-      <span className="field__label">{field.label}</span>
-      <CodeEditor value={value} onChange={onChange} rows={field.rows || 10} language={field.language} disabled={disabled} problems={problems} />
-      {field.hint && <span className="field__hint">{field.hint}</span>}
+    <div className="grid gap-1.5">
+      <Label>{field.label}</Label>
+      <CodeEditor
+        value={value}
+        onChange={onChange}
+        rows={field.rows || 10}
+        language={field.language}
+        disabled={disabled}
+        problems={problems}
+      />
+      {field.hint && <p className="text-muted-foreground text-[12px]">{field.hint}</p>}
       {problems.length > 0 && (
-        <ul className="code-problems">
-          {problems.slice(0, 4).map((p, i) => <li key={i}><span className="mono">line {p.line}</span> {p.message}</li>)}
+        <ul className="text-destructive grid gap-0.5 text-[12px]">
+          {problems.slice(0, 4).map((p, i) => (
+            <li key={i}><Code>line {p.line}</Code> {p.message}</li>
+          ))}
         </ul>
       )}
     </div>

@@ -40,7 +40,7 @@ export function resolveExperiments(experiments, { cookies, url }) {
   for (const exp of experiments || []) {
     if (exp.mode === 'param') paramNames.add(exp.paramName || 'version');
   }
-  let paramActive = [...paramNames].some(name => url.searchParams.has(name));
+  const paramActive = [...paramNames].some(name => url.searchParams.has(name));
 
   for (const exp of experiments || []) {
     if (exp.mode === 'param') {

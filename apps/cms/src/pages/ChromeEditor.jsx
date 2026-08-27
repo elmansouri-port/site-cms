@@ -9,16 +9,21 @@
  * the header as it renders. The right-hand column is the markup, its add-in
  * slots, and whether it is being tested.
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { LayoutPanelTop, Plug, Plus, RefreshCw, Save, Trash2 } from 'lucide-react';
 import { useResource } from '../lib/hooks.js';
 import { api } from '../lib/api.js';
 import { useToast } from '../lib/toast.jsx';
 import { useAuth } from '../lib/auth.jsx';
-import {
-  Panel, Spinner, ErrorBox, Badge, Icon, Field, Tabs, Modal, Checkbox, Empty, formatDate,
-} from '../components/ui.jsx';
-import CodeEditor, { inspectHtml, inspectCss } from '../components/CodeEditor.jsx';
+import CodeEditor, { inspectCss, inspectHtml } from '../components/CodeEditor.jsx';
 import ScaledFrame from '../components/ScaledFrame.jsx';
+import HistoryPanel from '../components/HistoryPanel.jsx';
+import {
+  Badge, Button, Callout, Card, CardContent, CardHeader, CardTitle, CheckboxField, Code, Dialog,
+  DialogBody, DialogContent, DialogFooter, DialogHeader, DialogTitle, Empty, ErrorBox, Field,
+  FieldRow, Input, PageHeader, Segmented, Select, Spinner, TActions, TBody, THead, TRow, Table,
+  Tabs, TabsContent, TabsList, TabsTrigger, formatDate, useConfirm,
+} from '../components/ui/index.js';
 
 /*
  * The header has three quite different designs across the breakpoints, and the
@@ -40,8 +45,9 @@ const ZONES = [
   { value: 'bodyEnd', label: 'End of the page', hint: 'Analytics, chat widgets, anything that can wait. The usual choice.' },
 ];
 
+const LOCALES = ['fr', 'en', 'de'];
+
 export default function ChromeEditor() {
-  const toast = useToast();
   const { can } = useAuth();
   const { data, loading, error, reload } = useResource('/chrome');
   const [part, setPart] = useState('navbar');
@@ -52,48 +58,74 @@ export default function ChromeEditor() {
   if (error) return <ErrorBox error={error} onRetry={reload} />;
   if (!chrome) {
     return (
-      <Empty title="The header and footer have not been set up yet">
-        Run <span className="mono">npm run seed</span> to consolidate them from the homepage.
+      <Empty icon={LayoutPanelTop} title="The header and footer have not been set up yet">
+        The API creates them from the homepage on boot. If this persists, run{' '}
+        <Code>npm run seed</Code> to consolidate them.
       </Empty>
     );
   }
 
   return (
     <>
-      <div className="page-head">
-        <div className="page-head__text">
-          <h1>Header &amp; footer</h1>
-          <p>
-            One header and one footer for the whole site. Change them here and every page
-            follows — no page-by-page editing, and no page left behind.
-          </p>
-        </div>
-        <div className="page-head__actions">
-          <span className="muted" style={{ fontSize: 12 }}>
-            Last changed {formatDate(chrome.updatedAt, true)}
-          </span>
-        </div>
-      </div>
+      <PageHeader
+        title="Header &amp; footer"
+        description="One header and one footer for the whole site. Change them here and every page follows — no page-by-page editing, and no page left behind."
+      >
+        <span className="text-muted-foreground text-[12px]">
+          Last changed {formatDate(chrome.updatedAt, true)}
+        </span>
+      </PageHeader>
 
-      <Tabs
-        active={part}
-        onChange={setPart}
-        tabs={[
-          { value: 'navbar', label: 'Header' },
-          { value: 'footer', label: 'Footer' },
-          { value: 'addIns', label: 'Add-ins', count: (chrome.addIns || []).length },
-        ]}
-      />
+      <Tabs value={part} onValueChange={setPart}>
+        <TabsList className="mb-4">
+          <TabsTrigger value="navbar">Header</TabsTrigger>
+          <TabsTrigger value="footer">Footer</TabsTrigger>
+          <TabsTrigger value="addIns" count={(chrome.addIns || []).length}>Add-ins</TabsTrigger>
+          <TabsTrigger value="history">History</TabsTrigger>
+        </TabsList>
 
-      {part === 'addIns'
-        ? <AddIns chrome={chrome} canEdit={can('admin')} onChanged={reload} />
-        : <ChromePart key={part} part={part} chrome={chrome} canEdit={can('admin')} onChanged={reload} />}
+        <TabsContent value="navbar">
+          <ChromePart key="navbar" part="navbar" chrome={chrome} canEdit={can('admin')} onChanged={reload} />
+        </TabsContent>
+        <TabsContent value="footer">
+          <ChromePart key="footer" part="footer" chrome={chrome} canEdit={can('admin')} onChanged={reload} />
+        </TabsContent>
+        <TabsContent value="addIns">
+          <AddIns chrome={chrome} canEdit={can('admin')} onChanged={reload} />
+        </TabsContent>
+        <TabsContent value="history">
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
+            <HistoryPanel
+              entity="chrome"
+              entityId={chrome.key || 'default'}
+              name="the header and footer"
+              onRestored={reload}
+            />
+            <Card>
+              <CardHeader><CardTitle>Two ways back</CardTitle></CardHeader>
+              <CardContent className="prose-sm">
+                <p>
+                  <strong>Restore original</strong>, on the Header and Footer tabs, puts one part back
+                  to the markup the site was migrated with. That is the one to reach for when an edit
+                  has gone badly wrong and you want the known-good version.
+                </p>
+                <p>
+                  <strong>History</strong>, here, goes back to any earlier saved state — including
+                  edits somebody made and liked. It covers the header, the footer and every add-in
+                  together, because they are one document.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
     </>
   );
 }
 
 function ChromePart({ part, chrome, canEdit, onChanged }) {
   const toast = useToast();
+  const confirm = useConfirm();
   const frame = useRef(null);
   const experiments = useResource('/experiments');
   const slot = chrome[part] || {};
@@ -127,7 +159,7 @@ function ChromePart({ part, chrome, canEdit, onChanged }) {
     || draft.visible !== (slot.visible !== false)
     || JSON.stringify(draft.experiment) !== JSON.stringify(slot.experiment || { key: null, variants: [] });
 
-  const problems = useMemo(() => inspectHtml(draft.html), [draft.html]);
+  const problems = useMemo(() => inspectHtml(draft.html).filter(p => p.level !== 'info'), [draft.html]);
   const cssProblems = useMemo(() => inspectCss(draft.css), [draft.css]);
 
   async function save() {
@@ -145,11 +177,19 @@ function ChromePart({ part, chrome, canEdit, onChanged }) {
   }
 
   async function restore() {
-    if (!confirm(
-      `Put the ${label} back to the markup the site was migrated with?\n\n`
-      + 'Your CSS and JavaScript add-ins for it are cleared too. The current version stays '
-      + 'in history.',
-    )) return;
+    const ok = await confirm({
+      title: `Put the ${label} back to the original?`,
+      body: (
+        <>
+          <p>It goes back to the markup the site was migrated with, and its CSS and JavaScript are cleared.</p>
+          <p>The current version is written to History first, so this is reversible.</p>
+        </>
+      ),
+      confirmLabel: 'Restore the original',
+      tone: 'danger',
+    });
+    if (!ok) return;
+
     setBusy(true);
     try {
       const res = await api.post(`/chrome/${part}/restore`);
@@ -172,107 +212,78 @@ function ChromePart({ part, chrome, canEdit, onChanged }) {
   }
 
   return (
-    <div className="chrome-layout">
-      <div className="chrome-canvas">
-        <div className="chrome-canvas__bar">
-          <div className="pill-group">
-            {WIDTHS.map(w => (
-              <button
-                key={w.key}
-                type="button"
-                className={`pill ${width === w.key ? 'is-active' : ''}`}
-                onClick={() => setWidth(w.key)}
-                title={`${w.width}px`}
-              >
-                {w.label}
-              </button>
-            ))}
-          </div>
-          <div className="pill-group">
-            {['fr', 'en', 'de'].map(l => (
-              <button
-                key={l}
-                type="button"
-                className={`pill ${locale === l ? 'is-active' : ''}`}
-                onClick={() => setLocale(l)}
-              >
-                {l.toUpperCase()}
-              </button>
-            ))}
-          </div>
-          <span style={{ flex: 1 }} />
-          <span className="muted" style={{ fontSize: 12 }}>
-            The homepage — the {label} here is the one you are editing
-          </span>
-          <button className="btn btn--sm" onClick={() => setFrameKey(k => k + 1)}>
-            <Icon name="refresh" /> Refresh
-          </button>
-        </div>
-        {src
-          ? (
-            <ScaledFrame
-              src={src}
-              logicalWidth={WIDTHS.find(w => w.key === width)?.width || 1440}
-              frameRef={frame}
-              frameKey={`${frameKey}-${locale}`}
-              title={`${label} preview`}
-            />
-          )
-          : <Spinner label="Opening the homepage…" />}
-      </div>
-
-      <div className="chrome-side">
-        <Panel
-          title={part === 'navbar' ? 'Site header' : 'Site footer'}
-          actions={(
-            <>
-              {slot.edited && <Badge tone="warn">edited</Badge>}
-              {draft.experiment?.key && <Badge tone="brand">A/B</Badge>}
-            </>
-          )}
-          footer={canEdit && (
-            <>
-              <button className="btn btn--primary" onClick={save} disabled={busy || !dirty}>
-                <Icon name="save" /> {busy ? 'Saving…' : 'Save & publish'}
-              </button>
-              <span style={{ flex: 1 }} />
-              {slot.authoredHtml && (
-                <button className="btn btn--danger btn--sm" onClick={restore} disabled={busy}>
-                  Restore original
-                </button>
-              )}
-            </>
-          )}
-        >
-          {!canEdit && (
-            <p className="field__hint" style={{ marginBottom: 12 }}>
-              The header and footer appear on every page, so only an administrator can change them.
-            </p>
-          )}
-
-          <div className="callout">
-            <strong>This applies to all {(chrome.pageCount ?? null) || 'the site\'s'} pages at once.</strong>{' '}
-            A page can opt out of showing it under that page's Settings — useful for campaign
-            landing pages, where every link in a header is a way to leave before converting.
-          </div>
-
-          <Tabs
-            active={tab}
-            onChange={setTab}
-            tabs={[
-              { value: 'markup', label: 'Markup' },
-              { value: 'addin', label: 'CSS & JS' },
-              { value: 'test', label: 'A/B' },
-            ]}
+    <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_440px]">
+      <Card className="overflow-hidden">
+        <CardHeader className="flex-wrap gap-2">
+          <Segmented
+            value={width}
+            onChange={setWidth}
+            options={WIDTHS.map(w => ({ value: w.key, label: w.label, title: `${w.width}px` }))}
           />
+          <Segmented
+            value={locale}
+            onChange={setLocale}
+            options={LOCALES.map(l => ({ value: l, label: l.toUpperCase() }))}
+          />
+          <div data-slot="card-actions">
+            <span className="text-muted-foreground hidden text-[12px] lg:inline">
+              The homepage — the {label} here is the one you are editing
+            </span>
+            <Button variant="outline" size="sm" onClick={() => setFrameKey(k => k + 1)}>
+              <RefreshCw /> Refresh
+            </Button>
+          </div>
+        </CardHeader>
+        <div className="bg-muted/40 h-[70vh]">
+          {src
+            ? (
+              <ScaledFrame
+                src={src}
+                logicalWidth={WIDTHS.find(w => w.key === width)?.width || 1440}
+                frameRef={frame}
+                frameKey={`${frameKey}-${locale}`}
+                title={`${label} preview`}
+              />
+            )
+            : <Spinner label="Opening the homepage…" />}
+        </div>
+      </Card>
 
-          {tab === 'markup' && (
-            <>
-              <Checkbox
+      <Card className="self-start">
+        <CardHeader>
+          <CardTitle>{part === 'navbar' ? 'Site header' : 'Site footer'}</CardTitle>
+          <div data-slot="card-actions">
+            {slot.edited && <Badge variant="warning">edited</Badge>}
+            {draft.experiment?.key && <Badge variant="primary">A/B</Badge>}
+          </div>
+        </CardHeader>
+
+        <CardContent className="grid gap-4">
+          {!canEdit && (
+            <Callout>
+              The header and footer appear on every page, so only an administrator can change them.
+            </Callout>
+          )}
+
+          <Callout tone="primary">
+            <strong>This applies to every page at once.</strong> A page can opt out of showing it
+            under that page&apos;s Settings — useful for campaign landing pages, where every link in
+            a header is a way to leave before converting.
+          </Callout>
+
+          <Tabs value={tab} onValueChange={setTab}>
+            <TabsList>
+              <TabsTrigger value="markup">Markup</TabsTrigger>
+              <TabsTrigger value="addin">CSS &amp; JS</TabsTrigger>
+              <TabsTrigger value="test">A/B</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="markup" className="grid gap-4 pt-4">
+              <CheckboxField
                 label={`Show the ${label} on the site`}
                 checked={draft.visible}
                 disabled={!canEdit}
-                onChange={e => setDraft(d => ({ ...d, visible: e.target.checked }))}
+                onChange={v => setDraft(d => ({ ...d, visible: v }))}
               />
               <Field
                 label="HTML"
@@ -284,21 +295,13 @@ function ChromePart({ part, chrome, canEdit, onChanged }) {
                   rows={22}
                   language="html"
                   disabled={!canEdit}
-                  problems={problems.filter(p => p.level !== 'info')}
+                  problems={problems}
                 />
               </Field>
-              {problems.filter(p => p.level !== 'info').length > 0 && (
-                <ul className="code-problems">
-                  {problems.filter(p => p.level !== 'info').slice(0, 5).map((p, i) => (
-                    <li key={i}><span className="mono">line {p.line}</span> {p.message}</li>
-                  ))}
-                </ul>
-              )}
-            </>
-          )}
+              <ProblemList problems={problems} />
+            </TabsContent>
 
-          {tab === 'addin' && (
-            <>
+            <TabsContent value="addin" className="grid gap-4 pt-4">
               <Field
                 label="CSS"
                 hint="Emitted before the markup, unscoped — a header's styling reaches the page around it, so it is not sandboxed. Keep the selectors specific."
@@ -312,13 +315,7 @@ function ChromePart({ part, chrome, canEdit, onChanged }) {
                   problems={cssProblems}
                 />
               </Field>
-              {cssProblems.length > 0 && (
-                <ul className="code-problems">
-                  {cssProblems.slice(0, 5).map((p, i) => (
-                    <li key={i}><span className="mono">line {p.line}</span> {p.message}</li>
-                  ))}
-                </ul>
-              )}
+              <ProblemList problems={cssProblems} />
               <Field
                 label="JavaScript"
                 hint={`Runs on every page, right after the ${label}. No <script> tag needed.`}
@@ -331,21 +328,46 @@ function ChromePart({ part, chrome, canEdit, onChanged }) {
                   disabled={!canEdit}
                 />
               </Field>
-            </>
-          )}
+            </TabsContent>
 
-          {tab === 'test' && (
-            <ChromeExperiment
-              draft={draft}
-              setDraft={setDraft}
-              label={label}
-              experiments={experiments.data?.items || []}
-              canEdit={canEdit}
-            />
-          )}
-        </Panel>
-      </div>
+            <TabsContent value="test" className="pt-4">
+              <ChromeExperiment
+                draft={draft}
+                setDraft={setDraft}
+                label={label}
+                experiments={experiments.data?.items || []}
+                canEdit={canEdit}
+              />
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+
+        {canEdit && (
+          <div className="bg-muted/40 flex flex-wrap items-center gap-2 border-t px-4 py-3">
+            <Button onClick={save} disabled={busy || !dirty}>
+              <Save /> {busy ? 'Saving…' : 'Save & publish'}
+            </Button>
+            <span className="grow" />
+            {slot.authoredHtml && (
+              <Button variant="outline" size="sm" onClick={restore} disabled={busy}>
+                Restore original
+              </Button>
+            )}
+          </div>
+        )}
+      </Card>
     </div>
+  );
+}
+
+function ProblemList({ problems }) {
+  if (!problems?.length) return null;
+  return (
+    <ul className="text-destructive grid gap-0.5 text-[12px]">
+      {problems.slice(0, 5).map((p, i) => (
+        <li key={i}><Code>line {p.line}</Code> {p.message}</li>
+      ))}
+    </ul>
   );
 }
 
@@ -369,50 +391,57 @@ function ChromeExperiment({ draft, setDraft, label, experiments, canEdit }) {
   });
 
   return (
-    <>
+    <div className="grid gap-4">
       <Field label="Experiment" hint="Create the test under A/B tests, then attach it here.">
-        <select
-          value={assigned}
-          disabled={!canEdit}
-          onChange={e => setDraft(d => ({
-            ...d,
-            experiment: { key: e.target.value || null, variants: e.target.value ? variants : [] },
-          }))}
-        >
-          <option value="">Not being tested</option>
-          {experiments.map(x => <option key={x.key} value={x.key}>{x.name} — {x.status}</option>)}
-        </select>
+        {id => (
+          <Select
+            id={id}
+            value={assigned}
+            disabled={!canEdit}
+            onChange={e => setDraft(d => ({
+              ...d,
+              experiment: { key: e.target.value || null, variants: e.target.value ? variants : [] },
+            }))}
+          >
+            <option value="">Not being tested</option>
+            {experiments.map(x => <option key={x.key} value={x.key}>{x.name} — {x.status}</option>)}
+          </Select>
+        )}
       </Field>
 
       {assigned && (
         <>
-          <div className="callout callout--warn">
-            A {label} test runs on <strong>every page</strong>. That is the appeal — it reaches
-            full traffic quickly — but while it runs, every page is specific to one visitor and
-            cannot be served from a shared cache. Finish it rather than leaving it on.
-          </div>
+          <Callout tone="warning">
+            A {label} test runs on <strong>every page</strong>. That is the appeal — it reaches full
+            traffic quickly — but while it runs, every page is specific to one visitor and cannot be
+            served from a shared cache. Finish it rather than leaving it on.
+          </Callout>
 
           {experiment?.status !== 'running' && (
-            <p className="field__hint">
-              This test is <strong>{experiment?.status || 'not set up'}</strong>, so everyone sees
-              the version above.
+            <p className="text-muted-foreground text-[12px]">
+              This test is <strong>{experiment?.status || 'not set up'}</strong>, so everyone sees the
+              version above.
             </p>
           )}
 
           {variants.map((variant, i) => (
-            <div key={i} className="ve__variant">
-              <div className="inline">
-                <Badge tone="warn">{variant.key}</Badge>
-                <input
-                  style={{ flex: 1 }}
+            <div key={i} className="grid gap-3 rounded-lg border p-3">
+              <div className="flex items-center gap-2">
+                <Badge variant="warning">{variant.key}</Badge>
+                <Input
+                  className="grow"
                   value={variant.label || ''}
                   placeholder={`Variant ${variant.key}`}
                   disabled={!canEdit}
+                  aria-label={`Label for variant ${variant.key}`}
                   onChange={e => update(i, { label: e.target.value })}
                 />
-                <button
-                  className="btn btn--ghost btn--icon"
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  className="hover:text-destructive"
                   disabled={!canEdit}
+                  aria-label={`Remove variant ${variant.key}`}
                   onClick={() => setDraft(d => ({
                     ...d,
                     experiment: {
@@ -421,8 +450,8 @@ function ChromeExperiment({ draft, setDraft, label, experiments, canEdit }) {
                     },
                   }))}
                 >
-                  <Icon name="trash" />
-                </button>
+                  <Trash2 />
+                </Button>
               </div>
               <Field label="HTML for this variant">
                 <CodeEditor
@@ -436,9 +465,11 @@ function ChromeExperiment({ draft, setDraft, label, experiments, canEdit }) {
           ))}
 
           {canEdit && (
-            <button
-              className="btn btn--sm"
-              onClick={() => setDraft(d => {
+            <Button
+              variant="outline"
+              size="sm"
+              className="justify-self-start"
+              onClick={() => setDraft((d) => {
                 const used = new Set((d.experiment.variants || []).map(v => v.key));
                 const declared = (experiment?.variants || []).map(v => v.key).filter(k => k !== 'A');
                 const key = declared.find(k => !used.has(k))
@@ -452,32 +483,33 @@ function ChromeExperiment({ draft, setDraft, label, experiments, canEdit }) {
                 };
               })}
             >
-              <Icon name="plus" /> Add a variant
-            </button>
+              <Plus /> Add a variant
+            </Button>
           )}
         </>
       )}
-    </>
+    </div>
   );
 }
 
 /**
  * Add-ins: named snippets injected on every page.
  *
- * Settings already had three anonymous "global snippet" textareas. Nobody dared
+ * Settings used to have three anonymous "global snippet" textareas. Nobody dared
  * touch them and nobody knew what was in them. An add-in has a name, a note, a
  * switch and its own A/B key, which is what makes it survivable to have a dozen
  * of them after a few years of campaigns.
  */
 function AddIns({ chrome, canEdit, onChanged }) {
   const toast = useToast();
+  const confirm = useConfirm();
   const [editing, setEditing] = useState(null);
   const addIns = chrome.addIns || [];
 
   async function toggle(addIn) {
     try {
       await api.patch(`/chrome/add-ins/${addIn.key}`, { enabled: !addIn.enabled });
-      toast.success(addIn.enabled ? `"${addIn.label}" switched off` : `"${addIn.label}" is live`);
+      toast.success(addIn.enabled ? `“${addIn.label}” switched off` : `“${addIn.label}” is live`);
       onChanged();
     } catch (err) {
       toast.error(err);
@@ -485,7 +517,13 @@ function AddIns({ chrome, canEdit, onChanged }) {
   }
 
   async function remove(addIn) {
-    if (!confirm(`Delete "${addIn.label}"? The previous version stays in history.`)) return;
+    const ok = await confirm({
+      title: `Delete “${addIn.label}”?`,
+      body: 'A restore point is written first, so the header and footer History can bring it back.',
+      confirmLabel: 'Delete',
+      tone: 'danger',
+    });
+    if (!ok) return;
     try {
       await api.del(`/chrome/add-ins/${addIn.key}`);
       toast.success('Deleted');
@@ -496,17 +534,19 @@ function AddIns({ chrome, canEdit, onChanged }) {
   }
 
   return (
-    <div className="split">
-      <Panel
-        title="Add-ins"
-        actions={canEdit && (
-          <button className="btn btn--sm btn--primary" onClick={() => setEditing({ isNew: true })}>
-            <Icon name="plus" /> New add-in
-          </button>
-        )}
-      >
+    <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
+      <Card>
+        <CardHeader>
+          <CardTitle>Add-ins</CardTitle>
+          {canEdit && (
+            <div data-slot="card-actions">
+              <Button size="sm" onClick={() => setEditing({ isNew: true })}><Plus /> New add-in</Button>
+            </div>
+          )}
+        </CardHeader>
+
         {!addIns.length && (
-          <Empty title="No add-ins yet">
+          <Empty icon={Plug} title="No add-ins yet">
             An add-in is a named piece of code that runs on every page — a chat widget, a consent
             banner, a campaign pixel. Naming them is the point: in two years somebody will need to
             know what this one was for.
@@ -514,59 +554,70 @@ function AddIns({ chrome, canEdit, onChanged }) {
         )}
 
         {addIns.length > 0 && (
-          <table className="table">
-            <thead>
+          <Table>
+            <THead>
               <tr><th>Add-in</th><th>Where</th><th>Pages</th><th>Live</th><th /></tr>
-            </thead>
-            <tbody>
+            </THead>
+            <TBody>
               {addIns.map(addIn => (
-                <tr key={addIn.key}>
+                <TRow key={addIn.key} interactive>
                   <td>
-                    <div style={{ fontWeight: 600 }}>{addIn.label}</div>
-                    {addIn.note && <div className="muted" style={{ fontSize: 12 }}>{addIn.note}</div>}
-                    {addIn.experiment?.key && <Badge tone="brand">A/B: {addIn.experiment.key}</Badge>}
+                    <div className="font-semibold">{addIn.label}</div>
+                    {addIn.note && <div className="text-muted-foreground text-[12px]">{addIn.note}</div>}
+                    {addIn.experiment?.key && (
+                      <Badge variant="primary" className="mt-1">A/B: {addIn.experiment.key}</Badge>
+                    )}
                   </td>
-                  <td className="muted">{ZONES.find(z => z.value === addIn.zone)?.label || addIn.zone}</td>
-                  <td className="muted">
+                  <td className="text-muted-foreground">
+                    {ZONES.find(z => z.value === addIn.zone)?.label || addIn.zone}
+                  </td>
+                  <td className="text-muted-foreground">
                     {addIn.pages?.length ? `${addIn.pages.length} selected` : 'Every page'}
                   </td>
                   <td>
-                    <Badge tone={addIn.enabled ? 'ok' : ''}>{addIn.enabled ? 'live' : 'off'}</Badge>
+                    <Badge variant={addIn.enabled ? 'success' : 'outline'}>
+                      {addIn.enabled ? 'live' : 'off'}
+                    </Badge>
                   </td>
-                  <td className="shrink">
+                  <TActions>
                     {canEdit && (
-                      <div className="inline">
-                        <button className="btn btn--sm" onClick={() => toggle(addIn)}>
+                      <div className="flex justify-end gap-1.5">
+                        <Button variant="outline" size="sm" onClick={() => toggle(addIn)}>
                           {addIn.enabled ? 'Switch off' : 'Switch on'}
-                        </button>
-                        <button className="btn btn--sm" onClick={() => setEditing(addIn)}>Edit</button>
-                        <button className="btn btn--ghost btn--icon" onClick={() => remove(addIn)}>
-                          <Icon name="trash" />
-                        </button>
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => setEditing(addIn)}>Edit</Button>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          className="hover:text-destructive"
+                          aria-label={`Delete ${addIn.label}`}
+                          onClick={() => remove(addIn)}
+                        >
+                          <Trash2 />
+                        </Button>
                       </div>
                     )}
-                  </td>
-                </tr>
+                  </TActions>
+                </TRow>
               ))}
-            </tbody>
-          </table>
+            </TBody>
+          </Table>
         )}
-      </Panel>
+      </Card>
 
-      <Panel title="Where they go">
-        <ul className="prose-list">
+      <Card>
+        <CardHeader><CardTitle>Where they go</CardTitle></CardHeader>
+        <CardContent className="prose-sm">
           {ZONES.map(zone => (
-            <li key={zone.value}>
-              <strong>{zone.label}.</strong> {zone.hint}
-            </li>
+            <p key={zone.value}><strong>{zone.label}.</strong> {zone.hint}</p>
           ))}
-        </ul>
-        <p className="field__hint">
-          An add-in is raw markup, so a <span className="mono">&lt;script&gt;</span> in one runs on
-          every page it applies to. That is why only administrators can create them, and why the
-          switch exists: turning one off is faster than editing it out under pressure.
-        </p>
-      </Panel>
+          <p>
+            An add-in is raw markup, so a <code>&lt;script&gt;</code> in one runs on every page it
+            applies to. That is why only administrators can create them, and why the switch exists:
+            turning one off is faster than editing it out under pressure.
+          </p>
+        </CardContent>
+      </Card>
 
       {editing && (
         <AddInDialog
@@ -593,14 +644,15 @@ function AddInDialog({ addIn, onClose, onSaved }) {
   const [busy, setBusy] = useState(false);
   const [scoped, setScoped] = useState(() => !!addIn?.pages?.length);
 
-  async function submit() {
+  async function submit(e) {
+    e?.preventDefault();
     setBusy(true);
     try {
       const payload = {
         label: form.label,
-        note: form.note,
+        note: form.note || '',
         zone: form.zone,
-        html: form.html,
+        html: form.html || '',
         enabled: !!form.enabled,
         pages: scoped ? (form.pages || []) : [],
       };
@@ -616,75 +668,75 @@ function AddInDialog({ addIn, onClose, onSaved }) {
   }
 
   return (
-    <Modal
-      wide
-      title={addIn ? `Edit “${addIn.label}”` : 'New add-in'}
-      onClose={onClose}
-      footer={(
-        <>
-          <button className="btn" onClick={onClose}>Cancel</button>
-          <button className="btn btn--primary" onClick={submit} disabled={busy || !form.label}>
-            Save add-in
-          </button>
-        </>
-      )}
-    >
-      <div className="grid grid--2">
-        <Field label="Name" hint="What this is, in the words you would use to a colleague.">
-          <input value={form.label} onChange={e => setForm(f => ({ ...f, label: e.target.value }))} />
-        </Field>
-        <Field label="Where it goes">
-          <select value={form.zone} onChange={e => setForm(f => ({ ...f, zone: e.target.value }))}>
-            {ZONES.map(z => <option key={z.value} value={z.value}>{z.label}</option>)}
-          </select>
-        </Field>
-      </div>
-      <Field label="Note" hint="Why it exists, and who asked for it. Your successor will thank you.">
-        <input value={form.note || ''} onChange={e => setForm(f => ({ ...f, note: e.target.value }))} />
-      </Field>
-      <Field label="Code" hint="Raw markup, injected as-is. Include the <script> or <style> tag.">
-        <CodeEditor
-          value={form.html}
-          onChange={v => setForm(f => ({ ...f, html: v }))}
-          rows={12}
-        />
-      </Field>
+    <Dialog open onOpenChange={(next) => { if (!next) onClose(); }}>
+      <DialogContent size="lg">
+        <DialogHeader>
+          <DialogTitle>{addIn ? `Edit “${addIn.label}”` : 'New add-in'}</DialogTitle>
+        </DialogHeader>
+        <DialogBody>
+          <form onSubmit={submit} className="grid gap-4">
+            <FieldRow>
+              <Field label="Name" hint="What this is, in the words you would use to a colleague.">
+                {id => (
+                  <Input id={id} value={form.label} autoFocus onChange={e => setForm(f => ({ ...f, label: e.target.value }))} />
+                )}
+              </Field>
+              <Field label="Where it goes" hint={ZONES.find(z => z.value === form.zone)?.hint}>
+                {id => (
+                  <Select
+                    id={id}
+                    value={form.zone}
+                    options={ZONES}
+                    onChange={e => setForm(f => ({ ...f, zone: e.target.value }))}
+                  />
+                )}
+              </Field>
+            </FieldRow>
 
-      <Checkbox
-        label="Only on some pages"
-        checked={scoped}
-        onChange={e => setScoped(e.target.checked)}
-      />
-      {scoped && (
-        <Field label="Pages" hint="Nothing selected means every page.">
-          <div className="checklist">
-            {(pages.data?.items || []).map(p => (
-              <label key={p.key} className="checkbox" style={{ marginBottom: 4 }}>
-                <input
-                  type="checkbox"
-                  checked={(form.pages || []).includes(p.key)}
-                  onChange={() => setForm(f => ({
-                    ...f,
-                    pages: (f.pages || []).includes(p.key)
-                      ? f.pages.filter(k => k !== p.key)
-                      : [...(f.pages || []), p.key],
-                  }))}
-                />
-                <span>{p.title} <span className="mono muted">/{p.route}</span></span>
-              </label>
-            ))}
-          </div>
-        </Field>
-      )}
+            <Field label="Note" hint="Why it exists, and who asked for it. Your successor will thank you.">
+              {id => (
+                <Input id={id} value={form.note || ''} onChange={e => setForm(f => ({ ...f, note: e.target.value }))} />
+              )}
+            </Field>
 
-      <Checkbox
-        label="Live on the site"
-        checked={!!form.enabled}
-        onChange={e => setForm(f => ({ ...f, enabled: e.target.checked }))}
-      />
-      <p className="field__hint">
-        New add-ins start switched off. Save it, look at the site, then switch it on.
-      </p>
-    </Modal>
+            <Field label="Code" hint="Raw markup, injected as-is. Include the <script> or <style> tag.">
+              <CodeEditor value={form.html} onChange={v => setForm(f => ({ ...f, html: v }))} rows={12} />
+            </Field>
+
+            <CheckboxField label="Only on some pages" checked={scoped} onChange={setScoped} />
+            {scoped && (
+              <Field label="Pages" hint="Nothing selected means every page.">
+                <div className="grid max-h-56 gap-2 overflow-y-auto rounded-md border p-3">
+                  {(pages.data?.items || []).map(p => (
+                    <CheckboxField
+                      key={p.key}
+                      label={<>{p.title} <Code>/{p.route}</Code></>}
+                      checked={(form.pages || []).includes(p.key)}
+                      onChange={() => setForm(f => ({
+                        ...f,
+                        pages: (f.pages || []).includes(p.key)
+                          ? f.pages.filter(k => k !== p.key)
+                          : [...(f.pages || []), p.key],
+                      }))}
+                    />
+                  ))}
+                </div>
+              </Field>
+            )}
+
+            <CheckboxField
+              label="Live on the site"
+              hint="New add-ins start switched off. Save it, look at the site, then switch it on."
+              checked={!!form.enabled}
+              onChange={v => setForm(f => ({ ...f, enabled: v }))}
+            />
+          </form>
+        </DialogBody>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button onClick={submit} disabled={busy || !form.label}>Save add-in</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

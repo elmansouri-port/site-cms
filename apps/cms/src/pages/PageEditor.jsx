@@ -1,32 +1,42 @@
 /*
- * PageEditor — one page, two ways to work on it.
+ * PageEditor — one page, in the order the work happens.
  *
  * `Design` is the visual builder: the real page in an iframe, clickable blocks,
  * copy edited in place. It is the default because it is what somebody who edits
  * marketing pages for a living actually wants.
  *
- * The remaining tabs are the technical surface that was always here — the block
- * list, the copy table, SEO, snippets, URLs, settings. Nothing was removed to
- * make room for the builder; the builder is a better door into the same rooms.
+ * The remaining tabs are the technical surface — the block list, the copy table,
+ * SEO, URLs, snippets, settings — plus `History`, which is the way back out of a
+ * mistake and therefore the tab that makes the rest safe to use.
  */
 import { useEffect, useMemo, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
+import { Check, ExternalLink, Eye, Plus, Save } from 'lucide-react';
 import { useResource } from '../lib/hooks.js';
 import { api } from '../lib/api.js';
 import { useToast } from '../lib/toast.jsx';
 import { useAuth } from '../lib/auth.jsx';
-import {
-  Panel, Spinner, ErrorBox, StatusBadge, Badge, Icon, Field, Tabs, LocalePills,
-  Checkbox, formatDate,
-} from '../components/ui.jsx';
 import SectionList from '../components/SectionList.jsx';
-import SectionEditor from '../components/SectionEditor.jsx';
 import PageStrings from '../components/PageStrings.jsx';
 import VisualEditor from '../components/VisualEditor.jsx';
 import BlockPalette from '../components/BlockPalette.jsx';
+import BlockInspector from '../components/BlockInspector.jsx';
 import PageVariants from '../components/PageVariants.jsx';
 import SeoChecklist from '../components/SeoChecklist.jsx';
 import SharePreview from '../components/SharePreview.jsx';
+import HistoryPanel from '../components/HistoryPanel.jsx';
+import { anchorsOf } from '../components/LinkPicker.jsx';
+import {
+  Badge, Button, Callout, Card, CardContent, CardHeader, CardTitle, CheckboxField, Code,
+  DataList, DataRow, Dialog, DialogContent, DialogTitle, ErrorBox,
+  Field, FieldGroupLabel, FieldRow, Input, Meter, PageHeader, Segmented, Select, Spinner,
+  StatusBadge, Tabs, TabsContent, TabsList, TabsTrigger, Textarea, Tooltip,
+  formatDate,
+} from '../components/ui/index.js';
+import { blockLabel } from '../lib/blockLabel.js';
+
+const ALL_LOCALES = ['fr', 'en', 'de', 'es', 'it'];
+const PAGE_KINDS = ['home', 'product', 'pricing', 'blogIndex', 'blogPost', 'page', 'form', 'error'];
 
 export default function PageEditor() {
   const { key } = useParams();
@@ -39,6 +49,9 @@ export default function PageEditor() {
 
   const page = data?.page;
   const locales = page?.locales?.length ? page.locales : ['fr'];
+
+  // Moving to another page should not leave the SEO tab open on it.
+  useEffect(() => { setTab('design'); }, [key]);
 
   if (loading) return <Spinner />;
   if (error) return <ErrorBox error={error} onRetry={reload} />;
@@ -68,129 +81,197 @@ export default function PageEditor() {
   // The count has to match the list: body blocks only, no chrome and no scripts.
   const bodyCount = (page.sections || [])
     .filter(s => !s.role && s.type !== 'script' && s.type !== 'style').length;
+  const noChrome = page.chrome?.navbar === false || page.chrome?.footer === false;
 
   return (
     <>
-      <div className="page-head">
-        <div className="page-head__text">
-          <div className="inline" style={{ marginBottom: 4 }}>
-            <Link to="/pages" className="muted">Pages</Link>
-            <span className="muted">/</span>
+      <PageHeader
+        title={page.title}
+        breadcrumb={(
+          <>
+            <Link to="/pages" className="text-muted-foreground hover:underline">Pages</Link>
+            <span className="text-muted-foreground">/</span>
             <StatusBadge status={page.status} />
-            {page.noindex && <Badge tone="warn">noindex</Badge>}
-            {page.experiment?.key && <Badge tone="brand">A/B: {page.experiment.key}</Badge>}
-          </div>
-          <h1>{page.title}</h1>
-          <p className="mono">
+            {page.noindex && <Badge variant="warning">noindex</Badge>}
+            {noChrome && (
+              <Tooltip content="This page renders without the site header or footer">
+                <Badge variant="primary">landing page</Badge>
+              </Tooltip>
+            )}
+            {page.experiment?.key && <Badge variant="primary">A/B: {page.experiment.key}</Badge>}
+          </>
+        )}
+        description={(
+          <span className="font-mono text-[12.5px]">
             /{'{lang}'}/{page.route}
             {localised.length > 0 && (
-              <span className="muted"> · {localised.map(l => `/${l}/${page.routes[l]}`).join('  ')}</span>
+              <span className="text-muted-foreground">
+                {' '}· {localised.map(l => `/${l}/${page.routes[l]}`).join('  ')}
+              </span>
             )}
-          </p>
-        </div>
-        <div className="page-head__actions">
-          <a className="btn" href={`/${locales[0]}/${page.route}`} target="_blank" rel="noreferrer">
-            <Icon name="external" /> View
+          </span>
+        )}
+      >
+        <Button variant="outline" asChild>
+          <a href={`/${locales[0]}/${page.route}`} target="_blank" rel="noreferrer">
+            <ExternalLink /> View
           </a>
-          <button className="btn" onClick={preview}>
-            <Icon name="eye" /> Preview draft
-          </button>
-          {can('editor') && (
-            page.status === 'published'
-              ? <button className="btn" onClick={() => publish(false)}>Unpublish</button>
-              : <button className="btn btn--primary" onClick={() => publish(true)}><Icon name="check" /> Publish</button>
-          )}
-        </div>
-      </div>
+        </Button>
+        <Button variant="outline" onClick={preview}><Eye /> Preview draft</Button>
+        {can('editor') && (
+          page.status === 'published'
+            ? <Button variant="outline" onClick={() => publish(false)}>Unpublish</Button>
+            : <Button onClick={() => publish(true)}><Check /> Publish</Button>
+        )}
+      </PageHeader>
 
-      <Tabs
-        active={tab}
-        onChange={setTab}
-        tabs={[
-          { value: 'design', label: 'Design' },
-          { value: 'sections', label: 'Blocks', count: bodyCount },
-          { value: 'copy', label: 'Copy' },
-          { value: 'seo', label: 'SEO' },
-          { value: 'urls', label: 'URLs' },
-          { value: 'test', label: 'A/B' },
-          { value: 'snippets', label: 'Code' },
-          { value: 'settings', label: 'Settings' },
-        ]}
-      />
+      <Tabs value={tab} onValueChange={setTab}>
+        <TabsList className="mb-4">
+          <TabsTrigger value="design">Design</TabsTrigger>
+          <TabsTrigger value="sections" count={bodyCount}>Blocks</TabsTrigger>
+          <TabsTrigger value="copy">Copy</TabsTrigger>
+          <TabsTrigger value="seo">SEO</TabsTrigger>
+          <TabsTrigger value="urls">URLs</TabsTrigger>
+          <TabsTrigger value="test">A/B</TabsTrigger>
+          <TabsTrigger value="snippets">Code</TabsTrigger>
+          <TabsTrigger value="settings">Settings</TabsTrigger>
+          <TabsTrigger value="history">History</TabsTrigger>
+        </TabsList>
 
-      {tab === 'design' && (
-        <VisualEditor
-          page={page}
-          locales={locales}
-          canEdit={can('editor')}
-          onChanged={reload}
-        />
-      )}
+        <TabsContent value="design">
+          <VisualEditor page={page} locales={locales} canEdit={can('editor')} onChanged={reload} />
+        </TabsContent>
 
-      {tab === 'sections' && (
-        <div className="split">
-          <Panel
-            title="Section blocks"
-            actions={can('editor') && (
-              <button className="btn btn--sm btn--primary" onClick={() => setAdding(true)}>
-                <Icon name="plus" /> Add block
-              </button>
-            )}
-          >
-            <SectionList
-              pageKey={key}
-              sections={page.sections}
-              canEdit={can('editor')}
-              onOpen={setEditingSection}
-              onChanged={reload}
-            />
-          </Panel>
+        <TabsContent value="sections">
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
+            <Card>
+              <CardHeader>
+                <CardTitle>Section blocks</CardTitle>
+                {can('editor') && (
+                  <div data-slot="card-actions">
+                    <Button size="sm" onClick={() => setAdding(true)}><Plus /> Add block</Button>
+                  </div>
+                )}
+              </CardHeader>
+              <CardContent>
+                <SectionList
+                  pageKey={key}
+                  sections={page.sections}
+                  canEdit={can('editor')}
+                  onOpen={setEditingSection}
+                  onChanged={reload}
+                />
+              </CardContent>
+            </Card>
 
-          <Panel title="About this page">
-            <dl style={{ margin: 0 }}>
-              <Row label="Content model" value={<Badge>{page.type}</Badge>} />
-              <Row label="Kind" value={page.pageKind} />
-              <Row label="Languages" value={locales.join(', ')} />
-              <Row label="Last updated" value={formatDate(page.updatedAt, true)} />
-              <Row label="Source template" value={page.sourceFile || '—'} />
-            </dl>
-            <p className="field__hint" style={{ marginTop: 12 }}>
-              Blocks marked <em>structural</em> hold the page's inline scripts. They can be hidden
-              but not reordered, because the markup around them depends on where they sit.
-            </p>
-          </Panel>
-        </div>
-      )}
+            <Card>
+              <CardHeader><CardTitle>About this page</CardTitle></CardHeader>
+              <CardContent>
+                <DataList>
+                  <DataRow label="Content model"><Badge variant="outline">{page.type}</Badge></DataRow>
+                  <DataRow label="Kind">{page.pageKind}</DataRow>
+                  <DataRow label="Languages">{locales.join(', ').toUpperCase()}</DataRow>
+                  <DataRow label="Last updated">{formatDate(page.updatedAt, true)}</DataRow>
+                  <DataRow label="Source template">
+                    {page.sourceFile ? <Code>{page.sourceFile}</Code> : '—'}
+                  </DataRow>
+                </DataList>
+                <Callout className="mt-3">
+                  Blocks marked <strong>structural</strong> hold the page&apos;s inline scripts. They
+                  can be hidden but not reordered, because the markup around them depends on where
+                  they sit.
+                </Callout>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
 
-      {tab === 'copy' && <PageStrings pageKey={key} locales={locales} sections={page.sections} />}
+        <TabsContent value="copy">
+          <PageStrings pageKey={key} locales={locales} sections={page.sections} />
+        </TabsContent>
 
-      {tab === 'seo' && <SeoTab page={page} locales={locales} onSaved={reload} canEdit={can('editor')} />}
+        <TabsContent value="seo">
+          <SeoTab page={page} locales={locales} onSaved={reload} canEdit={can('editor')} />
+        </TabsContent>
 
-      {tab === 'urls' && <UrlsTab page={page} locales={locales} onSaved={reload} canEdit={can('editor')} />}
+        <TabsContent value="urls">
+          <UrlsTab page={page} locales={locales} onSaved={reload} canEdit={can('editor')} />
+        </TabsContent>
 
-      {tab === 'test' && <PageVariants page={page} canEdit={can('editor')} onChanged={reload} />}
+        <TabsContent value="test">
+          <PageVariants page={page} canEdit={can('editor')} onChanged={reload} />
+        </TabsContent>
 
-      {tab === 'snippets' && <SnippetsTab page={page} onSaved={reload} canEdit={can('editor')} />}
+        <TabsContent value="snippets">
+          <SnippetsTab page={page} onSaved={reload} canEdit={can('editor')} />
+        </TabsContent>
 
-      {tab === 'settings' && <SettingsTab page={page} onSaved={reload} canEdit={can('editor')} />}
+        <TabsContent value="settings">
+          <SettingsTab page={page} onSaved={reload} canEdit={can('editor')} />
+        </TabsContent>
+
+        <TabsContent value="history">
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
+            <HistoryPanel entity="page" entityId={key} name={page.title} onRestored={reload} />
+            <Card>
+              <CardHeader><CardTitle>What is recorded</CardTitle></CardHeader>
+              <CardContent className="prose-sm">
+                <p>
+                  A restore point is written <strong>before</strong> every edit, every block delete,
+                  every conversion and every publish — by the API, not by remembering to make one.
+                </p>
+                <p>
+                  <strong>Restoring is undoable.</strong> The state being replaced is snapshotted
+                  first, so restoring the wrong version costs one more click.
+                </p>
+                <p>
+                  <strong>Deleting the page is recoverable</strong> from the same history: the trash
+                  on the Pages screen is these snapshots, not a second copy that could disagree with
+                  them.
+                </p>
+                <p>
+                  Restoring replaces the page&apos;s content, blocks, SEO and settings. It does not
+                  touch the copy catalogue — translated text is shared between pages, so rolling one
+                  page back must not rewrite words another page is using.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
 
       {editingSection && (
-        <SectionEditor
-          pageKey={key}
-          sectionKey={editingSection}
-          onClose={() => setEditingSection(null)}
-          onSaved={reload}
-        />
+        <Dialog open onOpenChange={(next) => { if (!next) setEditingSection(null); }}>
+          <DialogContent size="lg" hideClose className="max-h-[85dvh] p-0">
+            <DialogTitle className="sr-only">Edit block</DialogTitle>
+            <div className="min-h-0 grow overflow-hidden">
+              <BlockInspector
+                pageKey={key}
+                sectionKey={editingSection}
+                locale={locales[0]}
+                canEdit={can('editor')}
+                anchors={anchorsOf(page, blockLabel)}
+                onSaved={reload}
+                onClose={() => setEditingSection(null)}
+                onEditString={() => {
+                  // The canvas is not on screen here, so send the editor to it.
+                  setEditingSection(null);
+                  setTab('design');
+                }}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
 
       {adding && (
         <BlockPalette
           onClose={() => setAdding(false)}
-          onInsert={async ({ componentKey, label, data, layout }) => {
+          onInsert={async ({ componentKey, label, data: blockData, layout }) => {
             setAdding(false);
             try {
               const body = { type: 'component', componentKey, label };
-              if (data) body.data = data;
+              if (blockData) body.data = blockData;
               const created = await api.post(`/pages/${key}/sections`, body);
               if (layout && created?.section?.key) {
                 await api.patch(`/pages/${key}/sections/${created.section.key}`, { layout });
@@ -207,15 +288,6 @@ export default function PageEditor() {
   );
 }
 
-function Row({ label, value }) {
-  return (
-    <div className="inline" style={{ justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid var(--line)' }}>
-      <dt className="muted">{label}</dt>
-      <dd style={{ margin: 0, fontWeight: 550 }}>{value}</dd>
-    </div>
-  );
-}
-
 /**
  * Per-locale URLs.
  *
@@ -228,17 +300,13 @@ function Row({ label, value }) {
  */
 function UrlsTab({ page, locales, onSaved, canEdit }) {
   const toast = useToast();
-  const [routes, setRoutes] = useState(() => {
-    const out = {};
-    for (const l of locales) out[l] = page.routes?.[l] || '';
-    return out;
-  });
+  const [routes, setRoutes] = useState(() => Object.fromEntries(
+    locales.map(l => [l, page.routes?.[l] || '']),
+  ));
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    const out = {};
-    for (const l of locales) out[l] = page.routes?.[l] || '';
-    setRoutes(out);
+    setRoutes(Object.fromEntries(locales.map(l => [l, page.routes?.[l] || ''])));
   }, [page, locales]);
 
   const changed = locales.some(l => (routes[l] || '') !== (page.routes?.[l] || ''));
@@ -260,67 +328,71 @@ function UrlsTab({ page, locales, onSaved, canEdit }) {
   }
 
   return (
-    <div className="split">
-      <Panel
-        title="Address per language"
-        footer={canEdit && (
-          <button className="btn btn--primary" onClick={save} disabled={busy || !changed}>
-            <Icon name="save" /> Save URLs
-          </button>
-        )}
-      >
-        <p className="field__hint" style={{ marginBottom: 14 }}>
-          Leave a language empty to keep it on the shared path below. Changing a URL writes a
-          permanent redirect from the old one automatically — nothing that links to this page breaks.
-        </p>
+    <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+      <Card>
+        <CardHeader><CardTitle>Address per language</CardTitle></CardHeader>
+        <CardContent className="grid gap-4">
+          <Callout>
+            Leave a language empty to keep it on the shared path. Changing a URL writes a permanent
+            redirect from the old one automatically — nothing that links to this page breaks.
+          </Callout>
 
-        <Field label="Shared path" hint="Used by any language with no address of its own. Edit it under Settings.">
-          <input className="code" value={page.route} disabled readOnly />
-        </Field>
-
-        {locales.map(locale => (
-          <Field
-            key={locale}
-            label={locale.toUpperCase()}
-            hint={`/${locale}/${routes[locale] || page.route}`}
-          >
-            <div className="inline">
-              <span className="muted mono" style={{ flex: 'none' }}>/{locale}/</span>
-              <input
-                className="code"
-                style={{ flex: 1 }}
-                value={routes[locale]}
-                placeholder={page.route}
-                disabled={!canEdit}
-                onChange={e => setRoutes(r => ({ ...r, [locale]: e.target.value }))}
-              />
-            </div>
+          <Field label="Shared path" hint="Used by any language with no address of its own. Edit it under Settings.">
+            {id => <Input id={id} mono value={page.route} disabled readOnly />}
           </Field>
-        ))}
-      </Panel>
 
-      <Panel title="Why this matters">
-        <ul className="prose-list">
-          <li>
+          {locales.map(locale => (
+            <Field
+              key={locale}
+              label={locale.toUpperCase()}
+              hint={`/${locale}/${routes[locale] || page.route}`}
+            >
+              {id => (
+                <div className="flex items-center gap-2">
+                  <span className="text-muted-foreground shrink-0 font-mono text-[12.5px]">/{locale}/</span>
+                  <Input
+                    id={id}
+                    mono
+                    value={routes[locale]}
+                    placeholder={page.route}
+                    disabled={!canEdit}
+                    onChange={e => setRoutes(r => ({ ...r, [locale]: e.target.value }))}
+                  />
+                </div>
+              )}
+            </Field>
+          ))}
+        </CardContent>
+        {canEdit && (
+          <div className="bg-muted/40 flex items-center gap-2 border-t px-4 py-3">
+            <Button onClick={save} disabled={busy || !changed}><Save /> Save URLs</Button>
+          </div>
+        )}
+      </Card>
+
+      <Card>
+        <CardHeader><CardTitle>Why this matters</CardTitle></CardHeader>
+        <CardContent className="prose-sm">
+          <p>
             <strong>Search.</strong> The words in a URL are a ranking signal and, more importantly,
-            what somebody sees before they click. <span className="mono">/de/preise</span> reads as
-            German; <span className="mono">/de/tarifs</span> reads as a mistake.
-          </li>
-          <li>
+            what somebody sees before they click. <code>/de/preise</code> reads as German;
+            <code>/de/tarifs</code> reads as a mistake.
+          </p>
+          <p>
             <strong>One page, one URL.</strong> Once a language has its own path, the shared path
             redirects to it. Two URLs serving the same page split their own ranking.
-          </li>
-          <li>
+          </p>
+          <p>
             <strong>hreflang follows automatically.</strong> Each language is advertised at its own
             address, so Google sends the German result to the German page rather than through a
             redirect.
-          </li>
-          <li>
-            <strong>Ads.</strong> A landing page's URL appears in the ad itself. A readable path in
-            the visitor's language measurably lifts click-through.
-          </li>
-        </ul>
-      </Panel>
+          </p>
+          <p>
+            <strong>Ads.</strong> A landing page&apos;s URL appears in the ad itself. A readable path
+            in the visitor&apos;s language measurably lifts click-through.
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 }
@@ -356,81 +428,95 @@ function SeoTab({ page, locales, onSaved, canEdit }) {
   const route = page.routes?.[locale] || page.route;
 
   return (
-    <div className="split">
-      <Panel
-        title="Search & social"
-        actions={<LocalePills locales={locales} value={locale} onChange={setLocale} />}
-        footer={canEdit && <button className="btn btn--primary" onClick={save} disabled={busy}><Icon name="save" /> Save</button>}
-      >
-        <Field label="Title" hint={`${titleLen} characters — around 60 shows in full`}>
-          <input value={values.title || ''} onChange={set('title')} disabled={!canEdit} />
-        </Field>
-        <Meter value={titleLen} good={[30, 60]} max={75} />
-        <Field label="Meta description" hint={`${descLen} characters — around 155 shows in full`}>
-          <textarea rows={3} value={values.description || ''} onChange={set('description')} disabled={!canEdit} />
-        </Field>
-        <Meter value={descLen} good={[70, 155]} max={180} />
-        <Field label="Keywords">
-          <input value={values.keywords || ''} onChange={set('keywords')} disabled={!canEdit} />
-        </Field>
+    <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_400px]">
+      <Card>
+        <CardHeader>
+          <CardTitle>Search &amp; social</CardTitle>
+          <div data-slot="card-actions">
+            <Segmented
+              value={locale}
+              onChange={setLocale}
+              options={locales.map(l => ({ value: l, label: l.toUpperCase() }))}
+            />
+          </div>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <Field label="Title" hint={`${titleLen} characters — around 60 shows in full`}>
+            {id => <Input id={id} value={values.title || ''} onChange={set('title')} disabled={!canEdit} />}
+          </Field>
+          <Meter value={titleLen} good={[30, 60]} max={75} className="-mt-2" />
 
-        <h3 style={{ margin: '18px 0 10px' }}>Open Graph</h3>
-        <p className="field__hint" style={{ marginBottom: 12 }}>
-          Empty fields fall back to the site defaults in Settings — nothing is emitted as an empty tag.
-        </p>
-        <Field label="OG title"><input value={values.ogTitle || ''} onChange={set('ogTitle')} disabled={!canEdit} /></Field>
-        <Field label="OG description">
-          <textarea rows={2} value={values.ogDescription || ''} onChange={set('ogDescription')} disabled={!canEdit} />
-        </Field>
-        <Field label="OG image" hint="Path or absolute URL. Served as an absolute URL in the tag.">
-          <input value={values.ogImage || ''} onChange={set('ogImage')} disabled={!canEdit} className="code" />
-        </Field>
+          <Field label="Meta description" hint={`${descLen} characters — around 155 shows in full`}>
+            {id => (
+              <Textarea id={id} rows={3} value={values.description || ''} onChange={set('description')} disabled={!canEdit} />
+            )}
+          </Field>
+          <Meter value={descLen} good={[70, 155]} max={180} className="-mt-2" />
 
-        <h3 style={{ margin: '18px 0 10px' }}>Structured data</h3>
-        <Field label="JSON-LD override" hint="Injected alongside the automatic structured data.">
-          <textarea rows={8} className="code" value={values.jsonLdOverride || ''} onChange={set('jsonLdOverride')} disabled={!canEdit} />
-        </Field>
-        <Checkbox
-          label="Replace the automatic JSON-LD entirely"
-          checked={!!values.replaceAutoLd}
-          onChange={set('replaceAutoLd')}
-          disabled={!canEdit}
-        />
-      </Panel>
+          <Field label="Keywords">
+            {id => <Input id={id} value={values.keywords || ''} onChange={set('keywords')} disabled={!canEdit} />}
+          </Field>
 
-      <div style={{ display: 'grid', gap: 16 }}>
-        <Panel title="Before you publish">
-          <p className="field__hint" style={{ marginBottom: 12 }}>
-            What a person sees before they decide to click. Switch between the places this page's
-            link will actually appear.
-          </p>
-          <SharePreview
-            title={values.title}
-            description={values.description}
-            image={values.ogImage}
-            url={`/${locale}${route ? `/${route}` : ''}`}
-            fallbackTitle={page.title}
+          <FieldGroupLabel hint="Empty fields fall back to the site defaults in Settings — nothing is emitted as an empty tag.">
+            Open Graph
+          </FieldGroupLabel>
+          <Field label="OG title">
+            {id => <Input id={id} value={values.ogTitle || ''} onChange={set('ogTitle')} disabled={!canEdit} />}
+          </Field>
+          <Field label="OG description">
+            {id => (
+              <Textarea id={id} rows={2} value={values.ogDescription || ''} onChange={set('ogDescription')} disabled={!canEdit} />
+            )}
+          </Field>
+          <Field label="OG image" hint="Path or absolute URL. Served as an absolute URL in the tag.">
+            {id => <Input id={id} mono value={values.ogImage || ''} onChange={set('ogImage')} disabled={!canEdit} />}
+          </Field>
+
+          <FieldGroupLabel>Structured data</FieldGroupLabel>
+          <Field label="JSON-LD override" hint="Injected alongside the automatic structured data.">
+            {id => (
+              <Textarea id={id} mono rows={8} value={values.jsonLdOverride || ''} onChange={set('jsonLdOverride')} disabled={!canEdit} />
+            )}
+          </Field>
+          <CheckboxField
+            label="Replace the automatic JSON-LD entirely"
+            hint="Only when you are supplying every type the page needs, breadcrumbs included."
+            checked={!!values.replaceAutoLd}
+            disabled={!canEdit}
+            onChange={v => setValues(s => ({ ...s, replaceAutoLd: v }))}
           />
-          <p className="field__hint" style={{ marginTop: 12 }}>
-            The canonical URL and hreflang links are generated for you: the canonical always points at
-            this locale's own path, and only languages this page exists in are listed.
-          </p>
-        </Panel>
+        </CardContent>
+        {canEdit && (
+          <div className="bg-muted/40 flex items-center gap-2 border-t px-4 py-3">
+            <Button onClick={save} disabled={busy}><Save /> Save</Button>
+          </div>
+        )}
+      </Card>
+
+      <div className="grid content-start gap-4">
+        <Card>
+          <CardHeader><CardTitle>Before you publish</CardTitle></CardHeader>
+          <CardContent className="grid gap-3">
+            <p className="text-muted-foreground text-[12px] leading-snug">
+              What a person sees before they decide to click. Switch between the places this
+              page&apos;s link will actually appear.
+            </p>
+            <SharePreview
+              title={values.title}
+              description={values.description}
+              image={values.ogImage}
+              url={`/${locale}${route ? `/${route}` : ''}`}
+              fallbackTitle={page.title}
+            />
+            <Callout>
+              The canonical URL and hreflang links are generated for you: the canonical always points
+              at this locale&apos;s own path, and only languages this page exists in are listed.
+            </Callout>
+          </CardContent>
+        </Card>
 
         <SeoChecklist page={page} locale={locale} seo={values} />
       </div>
-    </div>
-  );
-}
-
-/** A length gauge that turns green inside the range search results actually show. */
-function Meter({ value, good, max }) {
-  const pct = Math.min(100, (value / max) * 100);
-  const tone = value === 0 ? 'empty' : value < good[0] ? 'short' : value <= good[1] ? 'ok' : 'long';
-  return (
-    <div className="meter" style={{ marginTop: -8, marginBottom: 14 }}>
-      <div className={`meter__fill is-${tone}`} style={{ width: `${pct}%` }} />
-      <span className="meter__mark" style={{ left: `${(good[1] / max) * 100}%` }} />
     </div>
   );
 }
@@ -456,18 +542,29 @@ function SnippetsTab({ page, onSaved, canEdit }) {
   const set = (zone) => (e) => setSnippets(s => ({ ...s, [zone]: e.target.value }));
 
   return (
-    <Panel
-      title="Page code snippets"
-      footer={canEdit && <button className="btn btn--primary" onClick={save} disabled={busy}><Icon name="save" /> Save</button>}
-    >
-      <p className="field__hint" style={{ marginBottom: 14 }}>
-        Raw HTML, injected as markup on this page only, after the site-wide snippets from Settings.
-        Use it for a campaign pixel, an extra meta tag or page-specific structured data.
-      </p>
-      <Field label="Head" hint="Inside <head>."><textarea rows={6} className="code" value={snippets.head} onChange={set('head')} disabled={!canEdit} /></Field>
-      <Field label="Body" hint="Before </body>."><textarea rows={5} className="code" value={snippets.body} onChange={set('body')} disabled={!canEdit} /></Field>
-      <Field label="Footer" hint="At the very end of the body."><textarea rows={5} className="code" value={snippets.footer} onChange={set('footer')} disabled={!canEdit} /></Field>
-    </Panel>
+    <Card className="max-w-3xl">
+      <CardHeader><CardTitle>Page code snippets</CardTitle></CardHeader>
+      <CardContent className="grid gap-4">
+        <Callout>
+          Raw HTML, injected as markup on this page only, after the site-wide add-ins. Use it for a
+          campaign pixel, an extra meta tag, or page-specific structured data.
+        </Callout>
+        <Field label="Head" hint="Inside <head>.">
+          {id => <Textarea id={id} mono rows={6} value={snippets.head} onChange={set('head')} disabled={!canEdit} />}
+        </Field>
+        <Field label="Body" hint="Before </body>.">
+          {id => <Textarea id={id} mono rows={5} value={snippets.body} onChange={set('body')} disabled={!canEdit} />}
+        </Field>
+        <Field label="Footer" hint="At the very end of the body.">
+          {id => <Textarea id={id} mono rows={5} value={snippets.footer} onChange={set('footer')} disabled={!canEdit} />}
+        </Field>
+      </CardContent>
+      {canEdit && (
+        <div className="bg-muted/40 flex items-center gap-2 border-t px-4 py-3">
+          <Button onClick={save} disabled={busy}><Save /> Save</Button>
+        </div>
+      )}
+    </Card>
   );
 }
 
@@ -485,7 +582,7 @@ function SettingsTab({ page, onSaved, canEdit }) {
   }));
   const [busy, setBusy] = useState(false);
 
-  const allLocales = useMemo(() => ['fr', 'en', 'de', 'es', 'it'], []);
+  const allLocales = useMemo(() => ALL_LOCALES, []);
 
   async function save() {
     setBusy(true);
@@ -517,36 +614,57 @@ function SettingsTab({ page, onSaved, canEdit }) {
   }
 
   return (
-    <div className="split">
-      <Panel
-        title="Page settings"
-        footer={canEdit && <button className="btn btn--primary" onClick={save} disabled={busy}><Icon name="save" /> Save</button>}
-      >
-        <Field label="Title"><input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} disabled={!canEdit} /></Field>
-        <Field label="Shared path" hint="Without the language prefix. Per-language addresses live under URLs. Changing this writes a redirect.">
-          <input className="code" value={form.route} onChange={e => setForm(f => ({ ...f, route: e.target.value }))} disabled={!canEdit} />
-        </Field>
-        <div className="grid grid--2">
-          <Field label="Kind">
-            <select value={form.pageKind} onChange={e => setForm(f => ({ ...f, pageKind: e.target.value }))} disabled={!canEdit}>
-              {['home', 'product', 'pricing', 'blogIndex', 'blogPost', 'page', 'form', 'error'].map(k => <option key={k}>{k}</option>)}
-            </select>
+    <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+      <Card>
+        <CardHeader><CardTitle>Page settings</CardTitle></CardHeader>
+        <CardContent className="grid gap-4">
+          <Field label="Title">
+            {id => (
+              <Input id={id} value={form.title} disabled={!canEdit} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
+            )}
           </Field>
-          <Field label="Content model">
-            <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))} disabled={!canEdit}>
-              <option value="static">Static</option>
-              <option value="hybrid">Hybrid</option>
-              <option value="dynamic">Dynamic</option>
-            </select>
+          <Field
+            label="Shared path"
+            hint="Without the language prefix. Per-language addresses live under URLs. Changing this writes a redirect."
+          >
+            {id => (
+              <Input id={id} mono value={form.route} disabled={!canEdit} onChange={e => setForm(f => ({ ...f, route: e.target.value }))} />
+            )}
           </Field>
-        </div>
+          <FieldRow>
+            <Field label="Kind">
+              {id => (
+                <Select
+                  id={id}
+                  value={form.pageKind}
+                  disabled={!canEdit}
+                  options={PAGE_KINDS}
+                  onChange={e => setForm(f => ({ ...f, pageKind: e.target.value }))}
+                />
+              )}
+            </Field>
+            <Field label="Content model" hint="Static: coded. Hybrid: coded layout, editable slots.">
+              {id => (
+                <Select
+                  id={id}
+                  value={form.type}
+                  disabled={!canEdit}
+                  onChange={e => setForm(f => ({ ...f, type: e.target.value }))}
+                >
+                  <option value="static">Static</option>
+                  <option value="hybrid">Hybrid</option>
+                  <option value="dynamic">Dynamic</option>
+                </Select>
+              )}
+            </Field>
+          </FieldRow>
 
-        <Field label="Languages" hint="Only the languages listed here are routed, indexed and given an hreflang entry.">
-          <div className="inline">
-            {allLocales.map(l => (
-              <label key={l} className="checkbox" style={{ marginBottom: 0 }}>
-                <input
-                  type="checkbox"
+          <Field label="Languages" hint="Only the languages listed here are routed, indexed and given an hreflang entry.">
+            <div className="flex flex-wrap gap-4">
+              {allLocales.map(l => (
+                <CheckboxField
+                  key={l}
+                  label={l.toUpperCase()}
                   checked={form.locales.includes(l)}
                   disabled={!canEdit}
                   onChange={() => setForm(f => ({
@@ -554,71 +672,92 @@ function SettingsTab({ page, onSaved, canEdit }) {
                     locales: f.locales.includes(l) ? f.locales.filter(x => x !== l) : [...f.locales, l],
                   }))}
                 />
-                <span>{l.toUpperCase()}</span>
-              </label>
-            ))}
-          </div>
-        </Field>
-      </Panel>
-
-      <div style={{ display: 'grid', gap: 16 }}>
-      <Panel title="Header & footer">
-        <p className="field__hint" style={{ marginBottom: 12 }}>
-          Both come from <strong>Header &amp; footer</strong> and are the same on every page. Turn
-          one off here for this page only.
-        </p>
-        <Checkbox
-          label="Show the site header"
-          checked={form.chrome.navbar}
-          disabled={!canEdit}
-          onChange={e => setForm(f => ({ ...f, chrome: { ...f.chrome, navbar: e.target.checked } }))}
-        />
-        <Checkbox
-          label="Show the site footer"
-          checked={form.chrome.footer}
-          disabled={!canEdit}
-          onChange={e => setForm(f => ({ ...f, chrome: { ...f.chrome, footer: e.target.checked } }))}
-        />
-        {(!form.chrome.navbar || !form.chrome.footer) && (
-          <div className="callout">
-            A page with no header is a <strong>landing page</strong>: every link in a navigation bar
-            is a way to leave before converting, which is why paid-traffic pages routinely drop it.
-            Make sure the page has its own way back to the site.
+              ))}
+            </div>
+          </Field>
+        </CardContent>
+        {canEdit && (
+          <div className="bg-muted/40 flex items-center gap-2 border-t px-4 py-3">
+            <Button onClick={save} disabled={busy}><Save /> Save</Button>
           </div>
         )}
-      </Panel>
+      </Card>
 
-      <Panel title="Indexing">
-        <Checkbox
-          label="Hide from search engines (noindex, nofollow)"
-          checked={form.noindex}
-          disabled={!canEdit}
-          onChange={e => setForm(f => ({ ...f, noindex: e.target.checked }))}
-        />
-        <Checkbox
-          label="Include in the sitemap"
-          checked={form.sitemap.include}
-          disabled={!canEdit}
-          onChange={e => setForm(f => ({ ...f, sitemap: { ...f.sitemap, include: e.target.checked } }))}
-        />
-        <Field label="Sitemap priority">
-          <input
-            type="number" min="0" max="1" step="0.1"
-            value={form.sitemap.priority}
-            disabled={!canEdit}
-            onChange={e => setForm(f => ({ ...f, sitemap: { ...f.sitemap, priority: e.target.value } }))}
-          />
-        </Field>
-        <Field label="Change frequency">
-          <select
-            value={form.sitemap.changefreq}
-            disabled={!canEdit}
-            onChange={e => setForm(f => ({ ...f, sitemap: { ...f.sitemap, changefreq: e.target.value } }))}
-          >
-            {['always', 'hourly', 'daily', 'weekly', 'monthly', 'yearly', 'never'].map(v => <option key={v}>{v}</option>)}
-          </select>
-        </Field>
-      </Panel>
+      <div className="grid content-start gap-4">
+        <Card>
+          <CardHeader><CardTitle>Header &amp; footer</CardTitle></CardHeader>
+          <CardContent className="grid gap-3">
+            <p className="text-muted-foreground text-[12px] leading-snug">
+              Both come from <strong>Header &amp; footer</strong> and are the same on every page.
+              Turn one off here for this page only.
+            </p>
+            <CheckboxField
+              label="Show the site header"
+              checked={form.chrome.navbar}
+              disabled={!canEdit}
+              onChange={v => setForm(f => ({ ...f, chrome: { ...f.chrome, navbar: v } }))}
+            />
+            <CheckboxField
+              label="Show the site footer"
+              checked={form.chrome.footer}
+              disabled={!canEdit}
+              onChange={v => setForm(f => ({ ...f, chrome: { ...f.chrome, footer: v } }))}
+            />
+            {(!form.chrome.navbar || !form.chrome.footer) && (
+              <Callout tone="primary" title="This is a landing page">
+                Every link in a navigation bar is a way to leave before converting, which is why
+                paid-traffic pages routinely drop it. Make sure the page has its own way back to the
+                site — a logo that links home, or a link in the form&apos;s small print.
+              </Callout>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle>Indexing</CardTitle></CardHeader>
+          <CardContent className="grid gap-3">
+            <CheckboxField
+              label="Hide from search engines"
+              hint="Emits noindex, nofollow."
+              checked={form.noindex}
+              disabled={!canEdit}
+              onChange={v => setForm(f => ({ ...f, noindex: v }))}
+            />
+            <CheckboxField
+              label="Include in the sitemap"
+              checked={form.sitemap.include}
+              disabled={!canEdit}
+              onChange={v => setForm(f => ({ ...f, sitemap: { ...f.sitemap, include: v } }))}
+            />
+            <FieldRow>
+              <Field label="Sitemap priority">
+                {id => (
+                  <Input
+                    id={id}
+                    type="number"
+                    min="0"
+                    max="1"
+                    step="0.1"
+                    value={form.sitemap.priority}
+                    disabled={!canEdit}
+                    onChange={e => setForm(f => ({ ...f, sitemap: { ...f.sitemap, priority: e.target.value } }))}
+                  />
+                )}
+              </Field>
+              <Field label="Change frequency">
+                {id => (
+                  <Select
+                    id={id}
+                    value={form.sitemap.changefreq}
+                    disabled={!canEdit}
+                    options={['always', 'hourly', 'daily', 'weekly', 'monthly', 'yearly', 'never']}
+                    onChange={e => setForm(f => ({ ...f, sitemap: { ...f.sitemap, changefreq: e.target.value } }))}
+                  />
+                )}
+              </Field>
+            </FieldRow>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

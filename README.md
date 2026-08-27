@@ -18,7 +18,19 @@ $ node tools/verify-live.mjs http://localhost:8080
 
 $ node tools/verify-chrome.mjs http://localhost:8080
 one header and one footer across 13 pages × 3 languages, 0 upstream URLs exposed
+
+$ node tools/verify-editor.mjs http://localhost:8080 --confirm
+158 passed, 0 failed
+
+$ node tools/verify-ui.mjs http://localhost:8080 --confirm
+43 checks, 0 failure(s)
 ```
+
+The last one is a real browser. It signs in, builds a landing page with no header
+or footer, drops a form on it, submits that form as a visitor, finds the
+submission under Leads, points a button at a page and checks the link resolves
+differently in French and German, then breaks the page, restores it from history,
+undoes the restore, deletes the page and recovers it from the trash.
 
 `verify-live` distinguishes a page whose **markup** has drifted from one whose
 **copy** was edited in the CMS: on a difference it re-renders against the
@@ -39,7 +51,7 @@ Tailwind. None of which costs the guarantee above.
 |---|---|
 | **Frontend** | Astro 7, SSR on the Node adapter — one route file serves every page in every language |
 | **Content API** | Express 5 + Mongoose 9, JWT auth, role-based access, Redis read-through cache |
-| **CMS** | React 19 + Vite 8 single-page admin: pages, blocks, copy, media, blog, navigation, leads, A/B tests |
+| **CMS** | React 19 + Vite 8 single-page admin, built on Tailwind 4 and shadcn/ui primitives: pages, blocks, copy, media, blog, navigation, leads, A/B tests, restore points |
 | **Data** | MongoDB 8 |
 | **Cache** | Redis 7, invalidated by a site-wide revision counter on publish |
 | **Delivery** | Docker Compose with an nginx gateway; one origin for site, admin and API |
@@ -120,7 +132,9 @@ Three things make that round trip lossless:
 | The URL of every page, per language | How a URL is resolved to a page |
 | Navigation labels, links, megamenu zones | The megamenu's layout and behaviour |
 | Blog posts, media, partner directory | The article template's shape |
-| Global and per-page code snippets | |
+| Site-wide and per-page code (add-ins) | |
+| Which page a link points at | Where that page lives, per language |
+| Lead-capture forms and where they send | The proxy that makes the call |
 | A/B experiments and their variants | |
 | Custom blocks: their HTML, Tailwind and scoped CSS | |
 
@@ -154,6 +168,76 @@ Desktop/Tablet/Mobile  resize the canvas
 
 Blocks come from a palette that shows each one's shape and says when to use it,
 grouped as openers, content, proof, conversion and advanced.
+
+### Getting out of trouble
+
+Every page, article, menu, the header and footer, and the site settings carry a
+**History** tab. Not a changelog — a list of moments this thing can be returned
+to, what changed at each, and a button.
+
+```
+before the autumn campaign rewrite     saved by hand · 2 hours ago · Aïcha
+  published · 11 blocks · /tarifs
+  Restoring this changes: title, 2 blocks removed
+```
+
+Three things make it an undo rather than a museum piece:
+
+- **The API takes the snapshot, not you.** Before every edit, every block
+  delete, every conversion and every publish. A history that depends on somebody
+  remembering to press "back up first" is empty on the day it is needed.
+- **You can name one.** *Save a restore point* records the current state under a
+  name — "before the autumn campaign rewrite" — and named points are never
+  trimmed, however much editing happens afterwards. Automatic snapshots cover
+  the accidents; this covers the deliberate risk.
+- **Restoring is undoable.** The state being replaced is snapshotted first, so
+  restoring the wrong version costs one more click rather than a second panic.
+
+A **deleted page** comes back from **Pages → Trash**, as a draft, with its blocks
+and its SEO. The trash is those same restore points rather than a second copy
+that could disagree with them — and the snapshot before a delete is written
+unconditionally, because that is precisely the moment it is the only copy left.
+
+### Forms
+
+A **Form** block captures an enquiry: fields you choose, a consent line, a
+thank-you message or a redirect to a page.
+
+Where a submission goes is one dropdown:
+
+| | |
+|---|---|
+| **Leads → demo** | Stored under Leads, filed as a demo request |
+| **An integration** | Stored *and* forwarded, server-side, to whatever runs the follow-up |
+
+Stored first, always. A form whose automation is misconfigured still captures
+the lead, and the CMS says the integration is failing instead of losing enquiries
+quietly for a fortnight. The browser only ever posts to this origin, so the
+automation platform stays out of the page source — see **Integrations** below.
+
+The honeypot is not optional and not editable: a field a human never sees and a
+bot always fills, answered with a 202 so the bot learns nothing.
+
+### Links that follow a rename
+
+Every button, link and menu entry is chosen rather than typed:
+
+```
+Page          → page:tarifs        resolved to /fr/tarifs, /de/preise, per render
+Article       → post:the-slug
+On this page  → #pricing           the anchors that actually exist on this page
+Web address   → https://…
+Email, phone  → mailto:, tel:
+File          → the media library's reference
+```
+
+A page is stored **by name**, not by path. One stored value is therefore correct
+in every language, and stays correct when the URL changes — which matters because
+renaming a URL is a thing this CMS actively encourages (it writes the redirect
+for you), and a hand-typed path would quietly start costing a redirect hop on
+every click.
+
+A path typed by hand still works. It just says so, underneath the field.
 
 ### The custom block
 
@@ -239,9 +323,13 @@ Named snippets injected on every page: a chat widget, a consent banner, a
 campaign pixel. Each has a name, a note, an on/off switch, an optional page
 filter and its own A/B key.
 
-Settings already had three anonymous "global snippet" textareas. Nobody dared
+Settings used to have three anonymous "global snippet" textareas. Nobody dared
 touch them and nobody knew what was in them. The difference is not the
 capability, it is that in two years somebody can tell what this one was for.
+
+Those three fields are gone. Anything in them is migrated into named add-ins on
+first boot — switched **on**, because they were running, and a migration that
+silently disabled a consent banner would be a worse bug than the one it fixed.
 
 ### Blog articles
 
@@ -338,6 +426,37 @@ show, H1 count, heading order, missing alt text, canonical, hreflang coverage,
 JSON-LD validity, social image, thin copy. Every check is one you would act on.
 
 ---
+
+### The admin itself
+
+| | |
+|---|---|
+| ![Overview](docs/screenshots/01-overview.png) | ![Pages](docs/screenshots/02-pages.png) |
+| The overview: what is broken, what is unpublished, what came in | Every route, with landing pages and drafts marked |
+| ![The visual editor](docs/screenshots/03-page-design.png) | ![History](docs/screenshots/20-page-history.png) |
+| The builder — the canvas is the real page in an iframe | History: the way back out of a mistake |
+| ![Header and footer](docs/screenshots/06-chrome.png) | ![Dark](docs/screenshots/01-overview-dark.png) |
+| One header and one footer, at a real device width | And the same thing in dark |
+
+
+Built on Tailwind 4 and the shadcn/ui contract — Radix primitives for behaviour,
+semantic colour tokens for the skin — in `apps/cms/src/components/ui/`. Every
+screen imports from there and nothing else, which is what keeps twenty screens
+looking like one product rather than twenty.
+
+What that buys, concretely:
+
+| | |
+|---|---|
+| **Light and dark** | Every colour is a token pair, so the theme switch is one class on the root. Follows the operating system by default |
+| **⌘K** | Jump to any screen, page or article by name |
+| **Real dialogues** | Confirmations say what will happen — "a restore point is written first, so this is recoverable" — rather than `localhost:8080 says:` |
+| **Keyboard and screen readers** | Radix handles focus trapping, `aria-*` and roll-your-own-listbox bugs, which is most of what hand-built admin widgets get wrong |
+| **No layout jump on save** | A refetch keeps the previous data on screen instead of unmounting behind a spinner |
+
+`npm run ui:shots` photographs every screen in both themes into `artifacts/ui/`,
+and CI keeps them as a build artefact — a visual regression is much easier to see
+than to describe.
 
 ## Page types
 
@@ -497,10 +616,16 @@ beats a missing one.
 ```
 apps/
   api/          content API and CMS backend
+    src/routes/admin/    one router per thing it manages
+    src/services/        history (restore points), publishing, content, catalogue
   web/          Astro frontend  (public/ holds css, js, images, video)
+    src/components/blocks/   one Astro component per block type
   cms/          React admin
+    src/components/ui/       the shadcn/ui component library every screen uses
+    src/pages/               one file per screen
 packages/
-  core/         the shared scanner, renderer, slicer and SEO builders
+  core/         the shared scanner, renderer, slicer, SEO builders and the three
+                indirections: assets.js, links.js, endpoints.js
 content-source/ the authored templates, catalogues and seed data
 tools/          verification and migration scripts
 infra/nginx/    gateway configuration
@@ -509,14 +634,31 @@ docs/           architecture, operations and content-model notes
 
 ## Tools
 
+Read-only. Safe anywhere, including production:
+
+| Command | What it proves |
+|---|---|
+| `npm run lint` | No unused imports, no accidental globals, no half-finished refactor |
+| `npm test` | Unit tests, fidelity, assets and the API integration suite |
+| `npm run verify` | Slicing and composition reproduce every page body, offline |
+| `npm run verify:live -- [url]` | A running server still ships the authored bytes |
+| `npm run verify:chrome -- [url]` | One header and one footer on every page in every language, and no automation endpoint in the browser |
+| `npm run verify:assets -- [url]` | Every referenced image, script and link resolves |
+| `npm run verify:menu -- [url]` | The CMS-driven megamenu renders identically to the shipped one |
+| `npm run ui:shots -- [url]` | Photographs every admin screen, light and dark, into `artifacts/ui/` |
+
+Writes to the database, and undoes it. Development and staging only — both refuse
+to run without `--confirm`:
+
+| Command | What it proves |
+|---|---|
+| `npm run verify:editor -- [url] --confirm` | The builder, localized URLs, A/B testing, the header and footer, the integration proxy and article sections — 158 checks |
+| `npm run verify:ui -- [url] --confirm` | Every editing flow, driven by a real browser: landing pages, forms, the blog on a page, link references, restore, undo, trash — 43 checks |
+
+Content:
+
 | Command | What it does |
 |---|---|
-| `npm run verify` | Proves slicing and composition reproduce every page body |
-| `node tools/verify-live.mjs [url]` | Diffs a running server against the authored source |
-| `node tools/verify-megamenu.mjs` | Proves the CMS-driven menu renders identically |
-| `node tools/verify-chrome.mjs [url]` | Proves one header and one footer render on every page in every language, and that no automation endpoint reaches the browser |
-| `node tools/verify-assets.mjs [url]` | Proves every referenced asset exists and loads |
-| `node tools/verify-editor.mjs [url] --confirm` | Exercises the builder, localized URLs, A/B testing, the header and footer, the integration proxy and article sections. **Writes to the database** and undoes it — dev and staging only |
 | `npm run seed` | Loads the authored site into MongoDB (re-runnable) |
 | `npm run seed:reset` | Drops the content collections first |
 | `node tools/build-nav-seed.mjs` | Regenerates the navigation seed from the shipped menu |
@@ -524,6 +666,17 @@ docs/           architecture, operations and content-model notes
 
 `npm run seed` is safe to re-run: it updates templates whose source file
 changed and leaves anything edited in the CMS alone. `--force` overrides that.
+
+Against a local `npm run dev` the three services are on separate ports, so the
+tools take both:
+
+```bash
+npm run verify:live   -- http://localhost:3000
+npm run verify:ui     -- http://localhost:5173 --confirm
+npm run verify:editor -- http://localhost:4000 --site http://localhost:3000 --confirm
+```
+
+Behind the gateway one origin serves everything, and one URL is enough.
 
 ---
 

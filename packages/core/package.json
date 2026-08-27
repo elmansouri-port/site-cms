@@ -13,6 +13,7 @@
     "./seo": "./src/seo.js",
     "./endpoints": "./src/endpoints.js",
     "./assets": "./src/assets.js",
+    "./links": "./src/links.js",
     "./article": "./src/article.js",
     "./compose": "./src/compose.js",
     "./ingest": "./src/ingest.js",

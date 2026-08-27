@@ -1,7 +1,7 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from './lib/auth.jsx';
 import Shell from './components/Shell.jsx';
-import { Spinner } from './components/ui.jsx';
+import { Spinner } from './components/ui/index.js';
 
 import Login from './pages/Login.jsx';
 import Dashboard from './pages/Dashboard.jsx';
@@ -26,7 +26,11 @@ export default function App() {
   const { user, ready } = useAuth();
 
   if (!ready) {
-    return <div className="login"><Spinner label="Signing you in…" /></div>;
+    return (
+      <div className="flex min-h-full items-center justify-center">
+        <Spinner label="Signing you in…" />
+      </div>
+    );
   }
   if (!user) return <Login />;
 

@@ -1,47 +1,27 @@
 /*
- * publish.js — what happens when an editor hits Publish.
+ * publish.js — what happens around a change reaching the site.
  *
- * Three things, in order: snapshot the previous state so it can be restored,
- * retire the cache generation, and tell the frontend to drop its own copy
- * (reco.md 7: webhook on publish, secret header, {locale, slug} payload).
- * The webhook is best-effort — a frontend that is down must not make the
- * publish fail; its cache expires on its own.
+ * Three concerns, in the order they occur: record who did it, retire the cache
+ * generation, and tell the frontend to drop its own copy (reco.md 7: webhook on
+ * publish, secret header, {locale, slug} payload). The webhook is best-effort —
+ * a frontend that is down must not make the publish fail; its cache expires on
+ * its own.
+ *
+ * Snapshots live in `services/history.js`; `snapshot` is re-exported here
+ * because every route that mutates content wants both and importing from one
+ * place keeps the call sites short.
  */
-import { Version, AuditLog } from '../models/index.js';
+import { AuditLog } from '../models/index.js';
 import { bumpRevision } from '../lib/redis.js';
 import { config } from '../config.js';
 import { logger } from '../lib/log.js';
 
-/** How close two snapshots of the same item can be before the second is skipped. */
-const SNAPSHOT_DEBOUNCE_MS = 60_000;
+export { snapshot } from './history.js';
 
-export async function snapshot(entity, entityId, doc, user, label = '') {
-  try {
-    // A page document carries every block's markup — a few hundred kilobytes.
-    // Editing three fields in a row should leave one restore point, not three,
-    // so a snapshot taken moments ago stands for this one too.
-    const recent = await Version.findOne(
-      { entity, entityId: String(entityId), createdAt: { $gt: new Date(Date.now() - SNAPSHOT_DEBOUNCE_MS) } },
-      { _id: 1 },
-    ).lean();
-    if (recent) return;
-
-    await Version.create({
-      entity,
-      entityId: String(entityId),
-      label,
-      snapshot: doc,
-      createdBy: user?._id || null,
-    });
-    // Keep the history readable: the last 30 versions per entity.
-    const old = await Version.find({ entity, entityId: String(entityId) })
-      .sort({ createdAt: -1 }).skip(30).select('_id').lean();
-    if (old.length) await Version.deleteMany({ _id: { $in: old.map(o => o._id) } });
-  } catch (err) {
-    logger.warn({ err: err.message, entity, entityId }, 'could not store version snapshot');
-  }
-}
-
+/**
+ * Record a change. Never throws: an audit write failing must not fail the
+ * change it was describing.
+ */
 export async function audit(req, action, entity, entityId, detail = {}) {
   try {
     await AuditLog.create({

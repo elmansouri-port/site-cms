@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { Loader2 } from 'lucide-react';
 import { useAuth } from '../lib/auth.jsx';
-import { Panel, Field } from '../components/ui.jsx';
+import { Button, Card, CardContent, Field, Input } from '../components/ui/index.js';
 
 export default function Login() {
   const { login } = useAuth();
@@ -23,39 +24,58 @@ export default function Login() {
   }
 
   return (
-    <div className="login">
-      <div className="login__card">
-        <div className="login__brand">
-          <span className="sidebar__mark" aria-hidden="true" />
-          Rainbow CMS
+    <div
+      className="from-background to-accent/40 flex min-h-full items-center justify-center bg-gradient-to-br p-6"
+      data-testid="login"
+    >
+      <div className="w-full max-w-sm">
+        <div className="mb-5 flex items-center justify-center gap-2.5">
+          <span className="bg-primary flex size-8 items-center justify-center rounded-lg">
+            <svg viewBox="0 0 24 24" className="size-4.5" aria-hidden="true">
+              <path d="M4 18a8 8 0 0 1 16 0" fill="none" stroke="white" strokeWidth="2.6" strokeLinecap="round" />
+            </svg>
+          </span>
+          <span className="text-[16px] font-semibold tracking-tight">Rainbow CMS</span>
         </div>
-        <Panel>
-          <form onSubmit={submit}>
-            <Field label="Email">
-              <input
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                autoComplete="username"
-                required
-                autoFocus
-              />
-            </Field>
-            <Field label="Password" error={error}>
-              <input
-                type="password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                autoComplete="current-password"
-                required
-              />
-            </Field>
-            <button className="btn btn--primary" style={{ width: '100%' }} disabled={busy}>
-              {busy ? 'Signing in…' : 'Sign in'}
-            </button>
-          </form>
-        </Panel>
-        <p className="muted" style={{ textAlign: 'center', marginTop: 14, fontSize: 12.5 }}>
+
+        <Card>
+          <CardContent>
+            <form onSubmit={submit} className="grid gap-4">
+              <Field label="Email">
+                {id => (
+                  <Input
+                    id={id}
+                    type="email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    autoComplete="username"
+                    required
+                    autoFocus
+                  />
+                )}
+              </Field>
+              <Field label="Password" error={error}>
+                {id => (
+                  <Input
+                    id={id}
+                    type="password"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    autoComplete="current-password"
+                    required
+                    aria-invalid={!!error}
+                  />
+                )}
+              </Field>
+              <Button type="submit" disabled={busy} className="w-full">
+                {busy && <Loader2 className="animate-spin" />}
+                {busy ? 'Signing in…' : 'Sign in'}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+
+        <p className="text-muted-foreground mt-4 text-center text-[12px]">
           Editor access to the Rainbow marketing site.
         </p>
       </div>
