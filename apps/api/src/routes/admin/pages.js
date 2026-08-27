@@ -450,10 +450,11 @@ pagesRouter.patch(
       // keeps the key list honest if a splice ever touched a marked element.
       section.keys = keysIn(html);
     } else {
-      // Mongoose does not see a mutation inside a Mixed field, so the whole
-      // object is reassigned rather than one property written.
+      // `data` is Mixed, so a mutation inside it would go unnoticed. Reassigning
+      // the whole object is what Mongoose does see; the markModified is the
+      // belt to that braces, and names the field rather than its parent.
       section.data = { ...(section.data || {}), html };
-      section.markModified('sections');
+      section.markModified('data');
     }
     page.editedInCms = true;
     page.updatedBy = req.user._id;
