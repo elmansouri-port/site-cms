@@ -8,6 +8,7 @@ import {
   integrationMap, linkMap,
 } from './site.js';
 import { navRuntime } from './nav.js';
+import { runtimeExperiments } from './experiments.js';
 import { config } from './config.js';
 
 /**
@@ -25,7 +26,7 @@ function resolveJsonLd(page, catalogue) {
 }
 
 /** The object the browser reads as window.__CMS__. */
-function runtimeFor({ locale, locales, page, settings, navigation, variants }) {
+function runtimeFor({ locale, locales, page, settings, navigation, variants, experiments }) {
   return {
     locale,
     locales,
@@ -38,6 +39,13 @@ function runtimeFor({ locale, locales, page, settings, navigation, variants }) {
       variant: page.variantKey || null,
     },
     variants,
+    /*
+     * Only the tests this page actually used, each with the arm shown and the
+     * goals to watch for. The beacon script reports exposure from this list, so
+     * it cannot report a test the visitor was never shown — which is the one
+     * way a denominator gets quietly inflated.
+     */
+    experiments,
     // Reshaped into what the shipped megamenu script expects, so the menu is
     // CMS-driven without its markup changing.
     nav: navRuntime(navigation, locale),
@@ -105,6 +113,12 @@ export async function renderPage(astro, page, extra = {}) {
       settings,
       navigation: locals.navigation,
       variants: locals.variants || {},
+      experiments: runtimeExperiments(
+        locals.experiments || [],
+        locals.variants || {},
+        locals.usedExperiments || new Set(),
+        locals.variantReasons || {},
+      ),
     }),
     ...extra,
   };

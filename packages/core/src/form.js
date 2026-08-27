@@ -226,6 +226,14 @@ export function renderForm(form, opts = {}) {
 
     `<form id="${escapeAttr(uid)}" class="mt-8 text-left" action="${escapeAttr(action)}" method="post"`,
     ` data-cms-form data-redirect="${escapeAttr(redirect || form.success?.redirect || '')}"`,
+    /*
+     * The form's own key, so an experiment can have a goal of "this form was
+     * submitted" rather than "some form was". Without it a test on the pricing
+     * page would count the newsletter sign-up in the footer as a conversion,
+     * which is the sort of measurement error that survives a review because the
+     * number looks plausible.
+     */
+    ` data-form-key="${escapeAttr(form.key || '')}"`,
     ` data-sending="${escapeAttr(sendingLabel)}" novalidate>`,
 
     `<div class="grid gap-5 ${columns}">`,

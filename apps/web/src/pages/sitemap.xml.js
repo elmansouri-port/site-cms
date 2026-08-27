@@ -12,6 +12,20 @@ import { pageUrl, pageUrlFor, blogSegmentFor } from '@rainbow/core/seo';
 
 const escape = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
+/**
+ * The entry a visitor gets when none of the languages match them.
+ *
+ * `<head>` has emitted this since the beginning and the sitemap did not, so the
+ * two disagreed about a page's default — and Google reads both. English where
+ * it exists, otherwise the first listed language, so a page that was never
+ * translated still declares a default rather than leaving one implied.
+ */
+function xDefault(alternates) {
+  if (!alternates.length) return '';
+  const pick = alternates.find(a => a.locale === 'en') || alternates[0];
+  return `\n    <xhtml:link rel="alternate" hreflang="x-default" href="${escape(pick.href)}"/>`;
+}
+
 export async function GET({ url }) {
   const [boot, index] = await Promise.all([bootstrap(), routeIndex()]);
   const settings = boot?.settings || {};
@@ -68,7 +82,7 @@ ${entries.map(e => `  <url>
     <lastmod>${new Date(e.lastmod).toISOString().slice(0, 10)}</lastmod>` : ''}
     <changefreq>${e.changefreq}</changefreq>
     <priority>${Number(e.priority).toFixed(1)}</priority>
-${e.alternates.map(a => `    <xhtml:link rel="alternate" hreflang="${a.locale}" href="${escape(a.href)}"/>`).join('\n')}
+${e.alternates.map(a => `    <xhtml:link rel="alternate" hreflang="${a.locale}" href="${escape(a.href)}"/>`).join('\n')}${xDefault(e.alternates)}
   </url>`).join('\n')}
 </urlset>
 `;

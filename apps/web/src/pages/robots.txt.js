@@ -22,6 +22,11 @@ export async function GET({ url }) {
       'Disallow: /*?version=*',
       '',
       `Sitemap: ${baseUrl}/sitemap.xml`,
+      '',
+      // Not part of the robots.txt standard, and no crawler is obliged to read
+      // it. It costs one line and it is where an assistant that does look for a
+      // site summary expects to be told the file exists.
+      `# llms.txt: ${baseUrl}/llms.txt`,
     ];
 
   if (settings.robotsExtra) lines.push('', settings.robotsExtra.trim());

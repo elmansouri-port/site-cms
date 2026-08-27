@@ -17,6 +17,7 @@ import SettingsPage from './pages/Settings.jsx';
 import Leads from './pages/Leads.jsx';
 import Redirects from './pages/Redirects.jsx';
 import Experiments from './pages/Experiments.jsx';
+import ExperimentDetail from './pages/ExperimentDetail.jsx';
 import Users from './pages/Users.jsx';
 import Partners from './pages/Partners.jsx';
 import ChromeEditor from './pages/ChromeEditor.jsx';
@@ -56,6 +57,7 @@ export default function App() {
           <Route path="/leads" element={<Leads />} />
           <Route path="/partners" element={<Partners />} />
           <Route path="/experiments" element={<Experiments />} />
+          <Route path="/experiments/:key" element={<ExperimentDetail />} />
           <Route path="/redirects" element={<Redirects />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/users" element={<Users />} />

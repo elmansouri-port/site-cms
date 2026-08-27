@@ -1,90 +1,141 @@
 /*
- * experiments.js — A/B variant assignment (reco.md 3).
+ * experiments.js — A/B variant assignment, in server middleware.
  *
- * Assignment happens in server middleware, before anything renders, and the
- * chosen variant is written to a cookie. That is the whole point: the HTML the
- * visitor receives already is their variant, so there is no flash, no layout
- * shift and no hydration mismatch — and a crawler sees a normal page.
+ * Assignment happens before anything renders, so the HTML the visitor receives
+ * already is their variant: no flash, no layout shift, no hydration mismatch,
+ * and a crawler sees a normal page.
  *
- * URL-parameter variants are a separate mode for ad campaigns: session-scoped,
- * never persisted, and always noindex.
+ * What changed, and why it matters more than it looks:
+ *
+ * Assignment used to be `Math.random()` per experiment, remembered in a cookie
+ * per experiment. That is unreadable after the fact — asked why a session saw
+ * B, nobody could answer — it re-rolled whenever a cookie was lost, so one
+ * person could be counted in both arms, and it had no way to express "ramp this
+ * to 10% of traffic first".
+ *
+ * Now there is one visitor id, and the arm is a pure function of it:
+ * `assign()` in `@rainbow/core/experiments`, the same function the API uses to
+ * check the split it is being told about. One cookie for the whole site instead
+ * of one per test, an assignment that survives a cleared per-test cookie, and a
+ * result that can be recomputed from the visitor id when somebody asks.
+ *
+ * URL-parameter variants remain a separate mode for ad campaigns: never
+ * persisted, never counted, always noindex.
  */
 import { config } from './config.js';
+import { assign, variantFromParam, controlOf } from '@rainbow/core/experiments';
 
-const cookieName = (key) => `${config.abCookiePrefix}${key}`;
+/**
+ * A visitor id, minted on first sight.
+ *
+ * Not an identity and not linked to anything: a random value whose only job is
+ * to make bucketing stable and countable. It is the reason a returning visitor
+ * stays in the arm they were shown, which is a correctness property of the
+ * measurement rather than a convenience — a person who flips arms between
+ * visits pollutes both.
+ */
+export function visitorId(cookies) {
+  const existing = cookies.get(config.visitorCookie)?.value;
+  /*
+   * Validated for shape, not for format.
+   *
+   * The check exists to stop an arbitrary cookie value reaching the hash and
+   * the logs, not to enforce how the id was generated. An earlier version
+   * allowed only `[a-z0-9]`, which rejects a hyphenated UUID — the single most
+   * likely id anyone would ever set here — and a rejected id is re-minted,
+   * which silently moves that visitor to a different arm on every request. An
+   * id that survives is worth more to the measurement than an id that matches
+   * a preferred format.
+   */
+  if (existing && /^[A-Za-z0-9_-]{8,64}$/.test(existing)) return { id: existing, fresh: false };
+  const id = randomId();
+  return { id, fresh: true };
+}
 
-function pickWeighted(variants) {
-  const total = variants.reduce((sum, v) => sum + (v.weight ?? 0), 0);
-  if (total <= 0) return variants[0]?.key ?? null;
-  let roll = Math.random() * total;
-  for (const v of variants) {
-    roll -= v.weight ?? 0;
-    if (roll <= 0) return v.key;
+function randomId() {
+  // crypto.randomUUID exists in Node 19+ and in every runtime this ships on;
+  // the fallback keeps `astro dev` working on an older local Node.
+  try {
+    return globalThis.crypto.randomUUID().replace(/-/g, '');
+  } catch {
+    return Math.random().toString(36).slice(2) + Date.now().toString(36);
   }
-  return variants[variants.length - 1].key;
 }
 
 /**
  * Resolve every running experiment for this request.
- * Returns { variants: {key: variantKey}, assignments: [...], paramActive: bool }
+ *
+ * Returns the arm per experiment, plus the two facts the middleware needs
+ * afterwards: whether a campaign parameter was used (never index that URL) and
+ * which experiments are cookie-scoped (those responses cannot be shared-cached).
  */
-export function resolveExperiments(experiments, { cookies, url }) {
+export function resolveExperiments(experiments, { url, locale, visitor }) {
   const variants = {};
-  const assignments = [];
+  const reasons = {};
 
-  // A `?version=` URL is a campaign entry point and must not be indexed
-  // (reco.md 3.2 and 5.1) — whether or not it names a variant that exists.
-  // Judging that on the parameter alone means a typo in a campaign link cannot
-  // accidentally put a duplicate page into the index.
+  /*
+   * A `?version=` URL is a campaign entry point and must not be indexed —
+   * whether or not it names a variant that exists. Judging that on the
+   * parameter alone means a typo in a campaign link cannot put a duplicate page
+   * into the index.
+   */
   const paramNames = new Set(['version']);
   for (const exp of experiments || []) {
     if (exp.mode === 'param') paramNames.add(exp.paramName || 'version');
   }
   const paramActive = [...paramNames].some(name => url.searchParams.has(name));
 
+  /*
+   * A forced arm, for QA. Deliberately separate from the campaign parameter:
+   * `?ab_preview=key:B` shows an arm without entering the visitor into the test,
+   * so checking a variant before launch does not put a fake exposure into the
+   * results — which is exactly what happens when the only way to see B is to
+   * keep reloading until you are assigned it.
+   */
+  const forced = {};
+  for (const pair of (url.searchParams.get('ab_preview') || '').split(',')) {
+    const [key, value] = pair.split(':');
+    if (key && value) forced[key.trim()] = value.trim();
+  }
+
   for (const exp of experiments || []) {
-    if (exp.mode === 'param') {
-      const value = url.searchParams.get(exp.paramName || 'version');
-      if (!value) continue;
-      const match = (exp.variants || []).find(v => v.key === value);
-      if (!match) continue;
-      // Campaign entry points are never remembered: no cookie is written.
-      variants[exp.key] = match.key;
+    if (forced[exp.key] && variantFromParam(exp, forced[exp.key])) {
+      variants[exp.key] = forced[exp.key];
+      reasons[exp.key] = 'forced';
       continue;
     }
 
-    const existing = cookies.get(cookieName(exp.key))?.value;
-    const known = (exp.variants || []).some(v => v.key === existing);
-    if (known) {
-      variants[exp.key] = existing;
+    if (exp.mode === 'param') {
+      const value = url.searchParams.get(exp.paramName || 'version');
+      const match = value ? variantFromParam(exp, value) : null;
+      if (!match) continue;
+      variants[exp.key] = match;
+      reasons[exp.key] = 'param';
       continue;
     }
-    const chosen = pickWeighted(exp.variants || []);
-    if (!chosen) continue;
-    variants[exp.key] = chosen;
-    assignments.push({
-      experiment: exp.key,
-      name: cookieName(exp.key),
-      value: chosen,
-      days: exp.cookieDays || 14,
-    });
+
+    const { variant, reason } = assign(exp, visitor, { locale });
+    reasons[exp.key] = reason;
+    // Held back by the allocation means the visitor is not in the test at all
+    // and must see the control — not nothing, and not a blank block.
+    variants[exp.key] = variant || controlOf(exp);
+    if (!variant) reasons[exp.key] = reason;
   }
 
   const modes = Object.fromEntries((experiments || []).map(e => [e.key, e.mode || 'cookie']));
 
-  return { variants, assignments, paramActive, modes };
+  return { variants, reasons, paramActive, modes, forced };
 }
 
 /**
  * Which running experiments actually decided anything about this page.
  *
- * Assignment happens for every running experiment on every request, because the
- * middleware does not know yet which page will be served. Acting on all of them
- * would be wrong twice over: a visitor would collect cookies for tests they
- * never saw, and — far more expensive — every response on the site would have to
- * be marked private, because any one of them *might* have depended on an
- * assignment. So the page records what it really used, and only that is
- * persisted and only that suppresses shared caching.
+ * Assignment is computed for every running test on every request, because the
+ * middleware does not yet know which page will be served. Acting on all of them
+ * would make every response on the site visitor-specific, because any one of
+ * them *might* have depended on an assignment. So the page records what it
+ * really used, and only that suppresses shared caching and is reported as an
+ * exposure.
  */
 export function usedExperiments(page, variants, chrome = null) {
   const used = new Set();
@@ -116,19 +167,51 @@ export function usedExperiments(page, variants, chrome = null) {
 }
 
 /**
- * Persist newly assigned variants for the configured window.
+ * Persist the visitor id.
  *
- * `only` restricts the write to the experiments the page actually used, so a
- * visitor is not tagged for a test they have not been shown.
+ * One cookie for the whole site, written on first sight rather than on first
+ * assignment. Writing it lazily was the old behaviour's other flaw: the id has
+ * to exist *before* the first test starts, or every visitor already on the site
+ * is minted fresh the day a test launches and the first day's split is drawn
+ * from a different population than the rest.
  */
-export function writeAssignments(cookies, assignments, only = null) {
-  for (const a of assignments) {
-    if (only && !only.has(a.experiment)) continue;
-    cookies.set(a.name, a.value, {
-      path: '/',
-      sameSite: 'lax',
-      httpOnly: false, // analytics reads it client-side to tag the session
-      maxAge: a.days * 24 * 3600,
+export function writeVisitor(cookies, { id, fresh }, days = 365) {
+  if (!fresh) return;
+  cookies.set(config.visitorCookie, id, {
+    path: '/',
+    sameSite: 'lax',
+    httpOnly: false, // the browser reports exposure and goals with it
+    maxAge: days * 24 * 3600,
+  });
+}
+
+/**
+ * What the browser needs to report this page's experiments.
+ *
+ * Only the tests the page actually used, so the beacon script cannot report an
+ * exposure for a test the visitor never saw.
+ */
+export function runtimeExperiments(experiments, variants, used, reasons = {}) {
+  const out = [];
+  for (const exp of experiments || []) {
+    if (!used.has(exp.key)) continue;
+    const variant = variants[exp.key];
+    if (!variant) continue;
+    out.push({
+      key: exp.key,
+      variant,
+      // A forced or campaign arm is shown but never counted: QA and ad traffic
+      // are not the population the test is measuring.
+      count: reasons[exp.key] === 'assigned',
+      goals: (exp.goals || []).map(g => ({
+        key: g.key,
+        type: g.type,
+        formKey: g.formKey || '',
+        selector: g.selector || '',
+        urlPattern: g.urlPattern || '',
+        eventName: g.eventName || '',
+      })),
     });
   }
+  return out;
 }

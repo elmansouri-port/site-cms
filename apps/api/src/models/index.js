@@ -357,37 +357,173 @@ export const Redirect = mongoose.model('Redirect', RedirectSchema);
 
 /* ── A/B experiments ──────────────────────────────────────────────────────── */
 
+/**
+ * One goal an experiment is trying to move.
+ *
+ * A test without a declared metric is not an experiment, it is a coin toss with
+ * extra steps: whoever reads the numbers afterwards picks whichever of six
+ * plausible measures happens to favour the arm they liked. Naming the primary
+ * goal *before* traffic is split is the whole discipline, so `primary` is a
+ * property of the record and the results screen ranks arms by nothing else.
+ */
+const GoalSchema = new Schema({
+  key: { type: String, required: true },
+  name: { type: String, default: '' },
+  /**
+   * How the goal is observed in the browser.
+   *
+   *   form      a form the CMS renders is submitted successfully (by form key)
+   *   click     an element matching a CSS selector is clicked
+   *   pageview  the visitor reaches a path — a thank-you page, typically
+   *   custom    the site calls window.rainbowAB.track('<event>') itself
+   */
+  type: { type: String, enum: ['form', 'click', 'pageview', 'custom'], default: 'form' },
+  formKey: { type: String, default: '' },
+  selector: { type: String, default: '' },
+  urlPattern: { type: String, default: '' },
+  eventName: { type: String, default: '' },
+  /**
+   * Exactly one goal decides the test. The rest are read to notice damage: an
+   * arm that lifts newsletter sign-ups and halves demo requests has not won.
+   */
+  primary: { type: Boolean, default: false },
+}, { _id: false });
+
 const ExperimentSchema = new Schema({
   key: { type: String, required: true, unique: true, index: true },
   name: { type: String, required: true },
   description: { type: String, default: '' },
+
+  /**
+   * What you expect to happen and why, written before the test runs.
+   *
+   * Kept because the value of an experimentation programme is the accumulated
+   * record of what turned out to be true, and a finished test whose reasoning
+   * nobody wrote down teaches nothing the next time the same idea comes round.
+   */
+  hypothesis: { type: String, default: '' },
+
   status: { type: String, enum: ['draft', 'running', 'paused', 'finished'], default: 'draft' },
+
   // Which page the experiment lives on; sections opt in by naming the key.
   pageKey: { type: String, default: null },
+
   /**
    * What the experiment varies. `block` swaps one section's content; `page`
-   * serves a whole alternative page document at the control's URL. The
-   * assignment mechanism is identical — only what reads it differs.
+   * serves a whole alternative page document at the control's URL; `chrome`
+   * varies the header or footer and therefore applies to every page.
    */
-  scope: { type: String, enum: ['block', 'page'], default: 'block' },
+  scope: { type: String, enum: ['block', 'page', 'chrome'], default: 'block' },
+
+  /**
+   * Who is eligible.
+   *
+   * `allocation` is the share of visitors admitted to the test at all — the
+   * rest never see a variant and are never counted. Ramping a risky change to
+   * 10% first is the difference between a bad idea costing a tenth of a week's
+   * conversions and costing all of them.
+   */
+  targeting: {
+    locales: { type: [String], default: [] },   // empty = every locale
+    allocation: { type: Number, default: 100, min: 1, max: 100 },
+  },
+
+  /**
+   * The salt that fixes the bucketing.
+   *
+   * Assignment is `hash(visitorId + salt)`, not a coin flip, so a visitor lands
+   * in the same arm on every request and every page, whether or not a
+   * per-test cookie survived — and the assignment is reproducible offline when
+   * somebody asks why one session saw what it saw. Re-salting deliberately
+   * reshuffles everybody, which is why it is stored rather than derived from
+   * the key.
+   */
+  salt: { type: String, default: '' },
+
   variants: {
     type: [{
       _id: false,
       key: { type: String, required: true },
       label: { type: String, default: '' },
       weight: { type: Number, default: 50 },
+      // Exactly one arm is the baseline the others are measured against.
+      isControl: { type: Boolean, default: false },
     }],
-    default: [{ key: 'A', label: 'Control', weight: 50 }, { key: 'B', label: 'Variant B', weight: 50 }],
+    default: [
+      { key: 'A', label: 'Control', weight: 50, isControl: true },
+      { key: 'B', label: 'Variant B', weight: 50, isControl: false },
+    ],
   },
+
+  goals: { type: [GoalSchema], default: [] },
+
+  /**
+   * The conditions under which the result may be believed.
+   *
+   * Calling a winner at forty conversions because the numbers looked good on a
+   * Tuesday is the most common way an experimentation programme produces
+   * confident nonsense. Stored per test so the results screen can say "not yet"
+   * with a reason, instead of showing a p-value nobody should act on.
+   */
+  guardrails: {
+    minExposuresPerArm: { type: Number, default: 1000 },
+    // A full week: weekday traffic does not behave like weekend traffic, and a
+    // test that ran Monday to Thursday has measured Monday to Thursday.
+    minRuntimeHours: { type: Number, default: 168 },
+    confidenceTarget: { type: Number, default: 95 },
+  },
+
   // Cookie-assigned (persistent) or URL-parameter (ad campaigns, never indexed).
   mode: { type: String, enum: ['cookie', 'param'], default: 'cookie' },
   paramName: { type: String, default: 'version' },
-  cookieDays: { type: Number, default: 14 },
+  cookieDays: { type: Number, default: 90 },
+
   startedAt: { type: Date, default: null },
   endedAt: { type: Date, default: null },
+
+  /** Set when a winner is declared, so a finished test still says what it found. */
+  winner: { type: String, default: null },
+  conclusion: { type: String, default: '' },
 }, { timestamps: true });
 
 export const Experiment = mongoose.model('Experiment', ExperimentSchema);
+
+/* ── Experiment results ───────────────────────────────────────────────────── */
+
+/**
+ * Aggregated counters: one row per experiment × arm × goal × day × locale.
+ *
+ * Deliberately not one row per event. A marketing site's traffic would make an
+ * event log the largest collection in this database inside a month, and every
+ * question anybody actually asks of an A/B test — how many saw it, how many
+ * converted, split by arm — is answered by counters. Keeping the day and the
+ * locale means the two questions that *do* need more detail (did the effect
+ * hold all week, is it the same in German) stay answerable.
+ *
+ * `goal` is the goal key, or `__exposure__` for the denominator: the visitors
+ * actually shown that arm. Counting exposure at render time rather than at
+ * assignment time is what stops a test on one page inflating its own
+ * denominator with visitors who never reached that page.
+ */
+const ExperimentStatSchema = new Schema({
+  experiment: { type: String, required: true, index: true },
+  variant: { type: String, required: true },
+  goal: { type: String, required: true },
+  // `YYYY-MM-DD`, UTC. A string, so one day is one exact value to group on.
+  day: { type: String, required: true },
+  locale: { type: String, default: '' },
+  count: { type: Number, default: 0 },
+}, { timestamps: true });
+
+/* One counter per bucket, and the upsert that increments it matches on exactly
+ * this. Without the unique index a burst of concurrent hits creates duplicate
+ * rows and every total afterwards is quietly wrong. */
+ExperimentStatSchema.index(
+  { experiment: 1, variant: 1, goal: 1, day: 1, locale: 1 },
+  { unique: true },
+);
+
+export const ExperimentStat = mongoose.model('ExperimentStat', ExperimentStatSchema);
 
 /* ── Versions (content history) ───────────────────────────────────────────── */
 

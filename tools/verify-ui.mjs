@@ -181,7 +181,7 @@ async function createLandingPage(page, shot) {
   heading('Creating a landing page with no header or footer');
 
   await page.goto(`${BASE}/admin/pages`, { waitUntil: 'networkidle' });
-  await page.getByRole('button', { name: 'New page' }).click();
+  await page.getByRole('button', { name: 'New page', exact: true }).click();
   await page.waitForSelector('[role="dialog"]');
 
   await page.getByLabel('Title').fill('ZZ UI landing');
@@ -212,7 +212,22 @@ async function addFormBlock(page, shot) {
   await page.waitForSelector('[role="dialog"]');
   await shot('02-block-palette');
 
-  await page.getByRole('button', { name: /^Form\b/ }).first().click();
+  /*
+   * Wait for the save, not for the dialogue.
+   *
+   * The palette closes optimistically the moment a block is chosen, so
+   * `waitForSelector('[role=dialog]', 'detached')` returns while the POST that
+   * creates the block is still in flight. The three checks below then read the
+   * page back before it has one and fail — intermittently, and in a way that
+   * looks like a broken palette rather than a test racing the network. The
+   * request itself is the event worth waiting for, and it is the pattern the
+   * rest of this file already uses.
+   */
+  await Promise.all([
+    page.waitForResponse(r => /\/api\/v1\/pages\/[^/]+\/sections$/.test(r.url())
+      && r.request().method() === 'POST'),
+    page.getByRole('button', { name: /^Form\b/ }).first().click(),
+  ]);
   await page.waitForSelector('[role="dialog"]', { state: 'detached' });
 
   const withForm = await api(`/pages/${KEY}`);

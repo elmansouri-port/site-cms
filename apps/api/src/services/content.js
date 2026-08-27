@@ -98,13 +98,34 @@ export function routeIndexCached() {
     const pages = await Page.find({ status: 'published' },
       {
         key: 1, route: 1, routes: 1, locales: 1, noindex: 1, sitemap: 1, pageKind: 1,
-        updatedAt: 1, experiment: 1, _id: 0,
+        updatedAt: 1, experiment: 1, title: 1, seo: 1, _id: 0,
       }).lean();
     const posts = await BlogPost.find({ status: 'published' },
       { slug: 1, locale: 1, groupId: 1, updatedAt: 1, publishedAt: 1, pageKey: 1, _id: 0 }).lean();
     // A page serving as somebody else's variant arm is not a URL of its own.
     const routable = pages.filter(p => !p.experiment?.variantOf);
-    return { pages: routable, posts };
+    /*
+     * The public title and description per locale, and only those two fields.
+     *
+     * The whole `seo` map is projected out of Mongo because a Map cannot be
+     * projected by sub-field, then reduced here before it is cached: the map
+     * also holds `jsonLdOverride`, which is allowed to be twenty kilobytes, and
+     * shipping that to every consumer of the route index — the sitemap, the
+     * link resolver, llms.txt — would make a small shared payload large for the
+     * benefit of nobody.
+     */
+    return {
+      pages: routable.map(({ seo, ...page }) => ({
+        ...page,
+        meta: Object.fromEntries(
+          Object.entries(seo || {}).map(([locale, values]) => [
+            locale,
+            { title: values?.title || '', description: values?.description || '' },
+          ]),
+        ),
+      })),
+      posts,
+    };
   });
 }
 
@@ -344,6 +365,25 @@ export function experimentsCached() {
       paramName: e.paramName,
       cookieDays: e.cookieDays,
       variants: e.variants,
+      // Assignment is `hash(visitorId + salt)`, computed in the frontend
+      // middleware by the same function the API validates beacons with. The
+      // salt and the targeting therefore have to travel with the record, or
+      // the two sides would bucket the same visitor differently.
+      salt: e.salt || e.key,
+      status: e.status,
+      targeting: {
+        locales: e.targeting?.locales || [],
+        allocation: e.targeting?.allocation ?? 100,
+      },
+      // The browser needs these to know what to watch for and report.
+      goals: (e.goals || []).map(g => ({
+        key: g.key,
+        type: g.type,
+        formKey: g.formKey || '',
+        selector: g.selector || '',
+        urlPattern: g.urlPattern || '',
+        eventName: g.eventName || '',
+      })),
     }));
   });
 }

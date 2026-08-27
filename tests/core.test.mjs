@@ -12,6 +12,7 @@ import { collectUnits, stripMarkers } from '../packages/core/src/units.js';
 import { render } from '../packages/core/src/render.js';
 import { sliceBody, sliceDocument, extractHeadMeta, uniqueKeys } from '../packages/core/src/slice.js';
 import { buildHead, buildJsonLd, pageUrl } from '../packages/core/src/seo.js';
+import { assign, controlOf } from '../packages/core/src/experiments.js';
 import { composeParts, composeDocument } from '../packages/core/src/compose.js';
 import { ingestPage, keysIn } from '../packages/core/src/ingest.js';
 
@@ -241,13 +242,13 @@ test('canonical is the current locale and hreflang omits missing translations', 
       baseUrl: 'https://example.test',
       settings: { siteName: 'Rainbow' },
       translations: [
-        { locale: 'en', url: 'https://example.test/en/tarifs/' },
-        { locale: 'fr', url: 'https://example.test/fr/tarifs/' },
+        { locale: 'en', url: 'https://example.test/en/tarifs' },
+        { locale: 'fr', url: 'https://example.test/fr/tarifs' },
       ],
     },
   );
-  assert.match(head, /<link rel="canonical" href="https:\/\/example\.test\/en\/tarifs\/">/);
-  assert.match(head, /hreflang="x-default" href="https:\/\/example\.test\/en\/tarifs\/"/);
+  assert.match(head, /<link rel="canonical" href="https:\/\/example\.test\/en\/tarifs">/);
+  assert.match(head, /hreflang="x-default" href="https:\/\/example\.test\/en\/tarifs"/);
   assert.ok(!head.includes('hreflang="de"'), 'a locale with no translation gets no entry');
 });
 
@@ -293,7 +294,9 @@ test('replaceAutoLd swaps the generated data out entirely', () => {
 
 test('page URLs always carry their locale', () => {
   assert.equal(pageUrl('https://example.test/', 'fr', ''), 'https://example.test/fr/');
-  assert.equal(pageUrl('https://example.test', 'de', '/products/'), 'https://example.test/de/products/');
+  assert.equal(pageUrl('https://example.test', 'de', '/products/'), 'https://example.test/de/products');
+  // A locale root keeps its slash; nothing else has one.
+  assert.equal(pageUrl('https://example.test', 'en', ''), 'https://example.test/en/');
 });
 
 test('replaceElementInner replaces a whole nested container', () => {
@@ -321,4 +324,121 @@ test('replaceElementInner leaves markup alone when it cannot match safely', () =
 test('attr reads a value off a raw tag', () => {
   assert.equal(attr('<div id="x" class=\'y\'>', 'class'), 'y');
   assert.equal(attr('<div>', 'id'), null);
+});
+
+/* ── A/B assignment ───────────────────────────────────────────────────────── */
+
+/*
+ * These assert the four properties the old `Math.random()` assignment could not
+ * offer, and each one is a measurement bug rather than a behaviour preference:
+ * an unstable arm counts one person twice, a correlated allocation unbalances
+ * the split the moment traffic is ramped, and a test that ignores its locale
+ * targeting has diluted itself rather than run.
+ */
+
+const testExperiment = (over = {}) => ({
+  key: 'headline',
+  status: 'running',
+  salt: 'fixed-salt',
+  targeting: { allocation: 100, locales: [] },
+  variants: [
+    { key: 'A', label: 'Control', weight: 50, isControl: true },
+    { key: 'B', label: 'Variant', weight: 50, isControl: false },
+  ],
+  ...over,
+});
+
+test('the same visitor always lands in the same arm', () => {
+  const exp = testExperiment();
+  const first = assign(exp, 'visitor-123', {}).variant;
+  for (let i = 0; i < 50; i++) {
+    assert.equal(assign(exp, 'visitor-123', {}).variant, first);
+  }
+});
+
+test('a 50/50 split lands within a percentage point over 20 000 visitors', () => {
+  const exp = testExperiment();
+  const counts = { A: 0, B: 0 };
+  for (let i = 0; i < 20_000; i++) counts[assign(exp, `v${i}`, {}).variant]++;
+  const share = (counts.A / 20_000) * 100;
+  assert.ok(Math.abs(share - 50) < 1, `control got ${share.toFixed(2)}%, expected ~50%`);
+});
+
+test('weights move the boundary between arms', () => {
+  const exp = testExperiment({
+    variants: [
+      { key: 'A', weight: 80, isControl: true },
+      { key: 'B', weight: 20, isControl: false },
+    ],
+  });
+  let a = 0;
+  for (let i = 0; i < 20_000; i++) if (assign(exp, `v${i}`, {}).variant === 'A') a++;
+  const share = (a / 20_000) * 100;
+  assert.ok(Math.abs(share - 80) < 1.5, `control got ${share.toFixed(2)}%, expected ~80%`);
+});
+
+test('allocation holds traffic back without unbalancing the arms', () => {
+  const exp = testExperiment({ targeting: { allocation: 10, locales: [] } });
+  const counts = { A: 0, B: 0 };
+  let held = 0;
+  for (let i = 0; i < 50_000; i++) {
+    const { variant, reason } = assign(exp, `v${i}`, {});
+    if (variant) counts[variant]++;
+    else { held++; assert.equal(reason, 'held-back'); }
+  }
+  const entered = counts.A + counts.B;
+  assert.ok(Math.abs((entered / 50_000) * 100 - 10) < 1, `${entered} of 50 000 entered, expected ~10%`);
+  assert.ok(Math.abs((counts.A / entered) * 100 - 50) < 2, 'the arms stay balanced inside the held-back share');
+  assert.equal(held + entered, 50_000);
+});
+
+test('ramping the allocation never moves an already-enrolled visitor', () => {
+  // The property that makes ramping safe: raise the share and the people
+  // already in the test keep the arm they were shown. Without it, going from
+  // 10% to 20% would rewrite half the population's experience mid-test.
+  const at10 = testExperiment({ targeting: { allocation: 10, locales: [] } });
+  const at20 = testExperiment({ targeting: { allocation: 20, locales: [] } });
+  let moved = 0;
+  for (let i = 0; i < 20_000; i++) {
+    const before = assign(at10, `v${i}`, {}).variant;
+    if (!before) continue;
+    if (assign(at20, `v${i}`, {}).variant !== before) moved++;
+  }
+  assert.equal(moved, 0);
+});
+
+test('locale targeting keeps a test out of the languages it does not run in', () => {
+  const exp = testExperiment({ targeting: { allocation: 100, locales: ['de'] } });
+  assert.equal(assign(exp, 'v1', { locale: 'fr' }).variant, null);
+  assert.equal(assign(exp, 'v1', { locale: 'fr' }).reason, 'not-targeted');
+  assert.ok(assign(exp, 'v1', { locale: 'de' }).variant);
+});
+
+test('a test that is not running assigns nobody', () => {
+  for (const status of ['draft', 'paused', 'finished']) {
+    assert.equal(assign(testExperiment({ status }), 'v1', {}).variant, null);
+  }
+});
+
+test('re-salting reshuffles the population', () => {
+  const a = testExperiment({ salt: 'one' });
+  const b = testExperiment({ salt: 'two' });
+  let differ = 0;
+  for (let i = 0; i < 2000; i++) {
+    if (assign(a, `v${i}`, {}).variant !== assign(b, `v${i}`, {}).variant) differ++;
+  }
+  // Two independent 50/50 draws disagree about half the time.
+  assert.ok(differ > 800 && differ < 1200, `${differ} of 2000 changed arm`);
+});
+
+test('the control is the arm marked as such, not the first one', () => {
+  assert.equal(controlOf(testExperiment()), 'A');
+  assert.equal(controlOf(testExperiment({
+    variants: [{ key: 'A', weight: 50 }, { key: 'B', weight: 50, isControl: true }],
+  })), 'B');
+  // No arm marked at all: fall back to the first rather than returning nothing,
+  // so an older record still has a baseline.
+  assert.equal(controlOf(testExperiment({
+    variants: [{ key: 'X', weight: 50 }, { key: 'Y', weight: 50 }],
+  })), 'X');
 });

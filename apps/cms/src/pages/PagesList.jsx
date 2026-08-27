@@ -8,17 +8,17 @@
  * does not mention it.
  */
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { FileText, Layers, PanelTop, Plus, Trash2, Undo2 } from 'lucide-react';
 import { useDebounced, useResource } from '../lib/hooks.js';
+import PageTree from '../components/PageTree.jsx';
 import { api, qs } from '../lib/api.js';
 import { useToast } from '../lib/toast.jsx';
 import { useAuth } from '../lib/auth.jsx';
 import {
   Badge, Button, Callout, Card, CheckboxField, Code, Dialog, DialogBody, DialogContent,
   DialogDescription, DialogFooter, DialogHeader, DialogTitle, Empty, ErrorBox, Field, FieldRow,
-  Input, PageHeader, SearchInput, Select, SkeletonRows, StatusBadge, TActions, TBody,
-  THead, TRow, Table, Toolbar, Tooltip, formatDate, formatRelative, useConfirm,
+  Input, PageHeader, SearchInput, Select, SkeletonRows, TActions, TBody,
+  THead, TRow, Table, Toolbar, formatRelative, useConfirm,
 } from '../components/ui/index.js';
 
 /** How a new page starts out. The choice is the kind of page, not two checkboxes. */
@@ -48,6 +48,60 @@ export default function PagesList() {
   const { can } = useAuth();
 
   const { data, loading, error, reload } = useResource(`/pages${qs({ q: debounced, status })}`);
+  const settings = useResource('/settings');
+  const locales = (settings.data?.settings?.locales || [])
+    .filter(l => l.active)
+    .map(l => l.code);
+  const confirm = useConfirm();
+  const toast = useToast();
+
+  /**
+   * Delete a page.
+   *
+   * The endpoint existed from the beginning and nothing in the admin called it,
+   * so the only way to remove a page was through the API by hand. The reason to
+   * be relaxed about offering it here is the reason the Trash below exists: a
+   * restore point is written *before* the delete, forced past the debounce that
+   * would otherwise collapse it into the edit that came before — so this is
+   * undoable, and the dialog says so rather than trying to sound frightening.
+   *
+   * What it does warn about is the part that is not undoable by itself: the
+   * pages nested underneath keep their routes and become orphans, with
+   * breadcrumbs pointing at a path that no longer answers.
+   */
+  async function remove(page, children = []) {
+    const ok = await confirm({
+      title: `Delete “${page.title}”?`,
+      body: (
+        <>
+          <p>
+            It stops answering at <Code>/{page.route || ''}</Code> in every language, immediately.
+          </p>
+          {children.length > 0 && (
+            <p className="mt-2">
+              <strong>{children.length} page{children.length === 1 ? '' : 's'} sit under it</strong>
+              {' '}({children.map(c => c.title).join(', ')}). They are not deleted, but their URLs
+              keep the missing path as a parent — check their breadcrumbs afterwards.
+            </p>
+          )}
+          <p className="mt-2 text-muted-foreground">
+            Recoverable from <strong>Trash</strong>: a restore point is taken before the delete.
+          </p>
+        </>
+      ),
+      confirmLabel: 'Delete page',
+      tone: 'danger',
+    });
+    if (!ok) return;
+    try {
+      await api.del(`/pages/${page.key}`);
+      toast.success(`“${page.title}” deleted — it is in the Trash if you need it back`);
+      reload();
+      trash.reload();
+    } catch (err) {
+      toast.error(err);
+    }
+  }
   const trash = useResource('/pages/trash', [], { skip: !can('editor') });
   const recoverable = trash.data?.items?.length || 0;
 
@@ -103,44 +157,22 @@ export default function PagesList() {
         )}
 
         {data?.items?.length > 0 && (
-          <Table>
-            <THead>
-              <tr>
-                <th>Page</th><th>Route</th><th>Model</th><th>Languages</th>
-                <th>Blocks</th><th>Status</th><th>Updated</th>
-              </tr>
-            </THead>
-            <TBody>
-              {data.items.map(page => (
-                <TRow key={page.key} interactive>
-                  <td>
-                    <Link to={`/pages/${page.key}`} className="font-semibold hover:underline">
-                      {page.title}
-                    </Link>
-                    {page.editedInCms && (
-                      <span className="text-muted-foreground text-[12px]"> · edited here</span>
-                    )}
-                  </td>
-                  <td className="text-muted-foreground font-mono text-[12.5px]">/{page.route || ''}</td>
-                  <td><Badge variant="outline">{page.type}</Badge></td>
-                  <td className="text-muted-foreground uppercase">{(page.locales || []).join(' ')}</td>
-                  <td className="text-muted-foreground tabular-nums">{page.sectionCount}</td>
-                  <td>
-                    <div className="flex flex-wrap items-center gap-1">
-                      <StatusBadge status={page.status} />
-                      {page.noindex && <Badge variant="warning">noindex</Badge>}
-                      {isLanding(page) && (
-                        <Tooltip content={chromeNote(page)}>
-                          <Badge variant="primary"><PanelTop /> landing</Badge>
-                        </Tooltip>
-                      )}
-                    </div>
-                  </td>
-                  <td className="text-muted-foreground whitespace-nowrap">{formatDate(page.updatedAt)}</td>
-                </TRow>
-              ))}
-            </TBody>
-          </Table>
+          <>
+            <div className="text-muted-foreground flex items-center gap-2 border-b px-3 py-1.5 text-[11.5px] uppercase tracking-wide">
+              <span className="grow pl-6">Page &amp; route</span>
+              <span className="w-24 text-right">Languages</span>
+              <span className="w-10 text-right">Blocks</span>
+              <span className="w-20 text-right">Status</span>
+              <span className="w-20 text-right">Updated</span>
+              {can('admin') && <span className="w-8" />}
+            </div>
+            <PageTree
+              pages={data.items}
+              locales={locales}
+              canDelete={can('admin')}
+              onDelete={remove}
+            />
+          </>
         )}
       </Card>
 
@@ -160,16 +192,6 @@ export default function PagesList() {
       )}
     </>
   );
-}
-
-const isLanding = (page) => page.chrome && (page.chrome.navbar === false || page.chrome.footer === false);
-
-function chromeNote(page) {
-  const off = [
-    page.chrome?.navbar === false && 'header',
-    page.chrome?.footer === false && 'footer',
-  ].filter(Boolean);
-  return `This page renders without the site ${off.join(' or ')}.`;
 }
 
 function CreatePage({ pages, onClose, onCreated }) {

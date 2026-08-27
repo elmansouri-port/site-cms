@@ -116,7 +116,23 @@ const post = (path, body, opts = {}) => fetch(url(path), {
 });
 const auth = () => ({ authorization: `Bearer ${token}` });
 
-const maybe = (name, fn) => test(name, { skip: !reachable && 'no MongoDB reachable' }, fn);
+/*
+ * Skip at run time, not at registration time.
+ *
+ * `test(name, { skip })` reads the option when the test is *registered*, which
+ * is while this module is still being evaluated — before `before()` has had a
+ * chance to try the connection. So the flag was always still `true` and the
+ * suite never skipped: with no database answering, every case ran anyway and
+ * failed against `undefined/api/v1/...`, which reads as thirty broken endpoints
+ * rather than one absent service.
+ *
+ * `t.skip()` inside the body is evaluated when the test runs, which is after
+ * `before()` has set the flag.
+ */
+const maybe = (name, fn) => test(name, async (t) => {
+  if (!reachable) return t.skip('no MongoDB reachable');
+  return fn(t);
+});
 
 describe('health', () => {
   maybe('healthz answers without touching the database', async () => {

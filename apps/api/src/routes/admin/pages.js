@@ -71,7 +71,13 @@ pagesRouter.get('/', validate(listQuery, 'query'), asyncHandler(async (req, res)
 
   const pages = await Page.find(filter, {
     key: 1, route: 1, title: 1, pageKind: 1, type: 1, status: 1, locales: 1,
-    noindex: 1, updatedAt: 1, publishedAt: 1, editedInCms: 1,
+    noindex: 1, updatedAt: 1, publishedAt: 1, editedInCms: 1, chrome: 1,
+    // Per-locale paths, so the list can show a page's real address in each
+    // language rather than implying every language shares the French one.
+    routes: 1,
+    // A variant arm has no URL and is not a page in its own right; the list
+    // shows it under its control rather than as a sibling.
+    experiment: 1,
     sectionCount: { $size: '$sections' },
   }).sort({ route: 1 }).lean();
 

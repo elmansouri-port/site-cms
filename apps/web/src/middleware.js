@@ -12,13 +12,18 @@
 import { defineMiddleware } from 'astro:middleware';
 import { bootstrap, activeLocales } from './lib/site.js';
 import { config } from './lib/config.js';
-import { resolveExperiments, writeAssignments } from './lib/experiments.js';
+import { resolveExperiments, writeVisitor, visitorId } from './lib/experiments.js';
 
 const STATIC_PREFIX = /^\/(css|js|images|img|media|assets|favicon|_astro|_image)\b/;
 
 // Routes that live at the root by definition: giving them a locale prefix
 // would break every crawler that looks for them where the standard says.
-const ROOT_ROUTES = new Set(['/robots.txt', '/sitemap.xml', '/sitemap-index.xml', '/favicon.ico', '/healthz']);
+const ROOT_ROUTES = new Set([
+  '/robots.txt', '/sitemap.xml', '/sitemap-index.xml', '/favicon.ico', '/healthz',
+  // Conventionally at the root, like the two above it: an assistant looks for
+  // `/llms.txt` and will not follow a redirect into `/fr/llms.txt`.
+  '/llms.txt',
+]);
 
 function detectLocale(request, cookies, locales) {
   const cookie = cookies.get(config.localeCookie)?.value;
@@ -69,15 +74,40 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
   const locale = first;
 
-  // 3. Experiments: assigned once, then stable for the cookie's lifetime.
+  /*
+   * 2b. One page, one URL: `/fr/tarifs/` and `/fr/tarifs` may not both answer.
+   *
+   * Astro's `trailingSlash: 'ignore'` serves both, which is convenient and is
+   * duplicate content: two URLs, identical bytes, and every internal link in
+   * the authored pages pointing at one of them while the canonical tag named
+   * the other. The canonical form is the one without the slash, because the
+   * authored `href="/fr/tarifs"` bytes are under the fidelity guarantee and
+   * cannot be changed to agree with anything else.
+   *
+   * A locale root keeps its slash — `/fr/` is the language's home, and
+   * `/fr` redirecting to it is the wrong way round.
+   */
+  if (url.pathname.endsWith('/') && segments.length > 1) {
+    return context.redirect(`/${segments.join('/')}${url.search}`, 301);
+  }
+
+  // 3. Experiments.
   //
-  // The assignment is made here, before anything renders, but it is not
-  // persisted until the page has said which experiments it actually used —
-  // otherwise every response on the site would have to be treated as
-  // visitor-specific because any of them might have been.
-  const { variants, assignments, paramActive, modes } = resolveExperiments(boot?.experiments || [], {
-    cookies,
+  // The visitor id is minted here and written unconditionally, before any test
+  // needs it. Writing it lazily — only once a test was assigned — meant every
+  // visitor already on the site was minted fresh on the day a test launched, so
+  // its first day was drawn from a different population than the rest of it.
+  //
+  // Assignment itself is a pure function of that id and the test's salt, so it
+  // costs nothing to compute for every running test on every request and there
+  // is no per-test cookie to write afterwards.
+  const visitor = visitorId(cookies);
+  writeVisitor(cookies, visitor);
+
+  const { variants, reasons, paramActive, modes } = resolveExperiments(boot?.experiments || [], {
     url,
+    locale,
+    visitor: visitor.id,
   });
 
   // 4. Preview: the CMS sets this cookie through /cms/preview.
@@ -97,6 +127,10 @@ export const onRequest = defineMiddleware(async (context, next) => {
   locals.assets = boot?.assets || [];
   locals.experiments = boot?.experiments || [];
   locals.variants = variants;
+  // Why each arm was chosen — assigned, forced for QA, or held back by the
+  // allocation. The page reports only genuinely assigned arms as exposures.
+  locals.variantReasons = reasons;
+  locals.visitorId = visitor.id;
   locals.preview = preview;
   locals.editMode = editMode;
   // The page route fills this in with the experiments its content depended on.
@@ -107,7 +141,6 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const response = await next();
 
   const used = locals.usedExperiments;
-  writeAssignments(cookies, assignments, used);
 
   if (paramActive) response.headers.set('x-robots-tag', 'noindex, nofollow');
 

@@ -70,11 +70,43 @@ Nothing in the page render happens in the browser. The middleware resolves the
 locale and the A/B variant before anything is fetched, so the HTML that leaves
 the server already is the visitor's variant, in the visitor's language.
 
-Variant *assignment* happens in the middleware, but it is only *persisted* after
-the page has reported which experiments it actually used. Without that, a test
-running on one page would set a cookie on every page of the site and — much more
-expensively — force every response to be marked `private`, because any of them
-might have depended on an assignment.
+Variant assignment is a **pure function of the visitor**, not a coin toss:
+`assign()` in `packages/core/src/experiments.js` hashes one visitor id against
+the test's stored salt. That buys three things a random draw could not:
+
+- **It is reproducible.** Asked why a session saw B, the answer can be
+  recomputed from the visitor id. A random assignment makes every support
+  question about a variant unfalsifiable.
+- **One person is counted once.** A re-roll on a lost cookie put the same
+  visitor in both arms and quietly inflated the denominator.
+- **Traffic can be ramped.** `targeting.allocation` admits a share of visitors
+  to the test at all, from an independent draw — so raising 10% to 20% keeps
+  every already-enrolled visitor in the arm they were shown, rather than
+  reshuffling half the population mid-test. `tests/core.test.mjs` asserts
+  exactly that.
+
+One cookie (`rbw_vid`) serves the whole site instead of one per test, and it is
+written on first sight rather than on first assignment: minting it lazily meant
+every visitor already on the site was new on the day a test launched, so its
+first day was drawn from a different population than the rest of it.
+
+The page still reports which experiments it actually *used*, because that is
+what decides two separate things: which responses lose shared caching, and what
+may be reported as an exposure. A test running on one page must not make every
+response on the site `private`, nor count visitors who never reached it.
+
+Measurement is the browser's half, and both halves are counted on the same
+basis — once per visitor. `apps/web/public/js/ab.js` reports exposure and goals
+to `/api/v1/ab`, deduplicating in local storage. Counting exposure server-side
+per render and conversions per visitor would produce a ratio that is neither,
+and the error does not cancel between arms because how often people reload is a
+property of the page rather than of the split.
+
+`apps/api/src/services/experimentStats.js` turns the counters into a verdict —
+and, more usefully, into a refusal to give one. Every result carries the
+conditions under which it may be believed (sample, runtime, confidence) and a
+sample-ratio-mismatch check, which is the test that catches a *broken*
+experiment rather than a losing one.
 
 ## URLs
 
@@ -413,6 +445,8 @@ migration.
 | Resolving page references in links | `packages/core/src/links.js` |
 | Proxying third-party endpoints | `packages/core/src/endpoints.js` |
 | Restore points and the trash | `apps/api/src/services/history.js` |
+| Who sees which A/B arm | `packages/core/src/experiments.js` |
+| Whether a result may be believed | `apps/api/src/services/experimentStats.js` |
 | The migration itself | `packages/core/src/ingest.js` + `apps/api/src/seed/seed.js` |
 | What must be true before the API serves | `apps/api/src/seed/bootstrap.js` |
 | The admin's component library | `apps/cms/src/components/ui/` |

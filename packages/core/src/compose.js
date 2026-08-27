@@ -521,6 +521,16 @@ export function composeParts(page, ctx) {
   // carries it, so there is nothing to strip and nothing to leak.
   if (ctx.editMode) raw('<script src="/js/cms-editor.js" defer></script>');
 
+  /*
+   * The experiment beacon, and only on a page that is actually running one.
+   *
+   * Conditioning it on the page's own tests rather than emitting it everywhere
+   * keeps two promises at once: a page with no experiment ships exactly the
+   * bytes it was authored with — which is what `verify-live` asserts — and the
+   * site does not pay for a script that would have nothing to report.
+   */
+  if (ctx.runtime?.experiments?.length) raw('<script src="/js/ab.js" defer></script>');
+
   if (page.snippets && page.snippets.body) raw(page.snippets.body);
   if (page.snippets && page.snippets.footer) raw(page.snippets.footer);
   for (const addIn of addInsFor(ctx.chrome, 'bodyEnd', addInCtx)) raw(addIn.html);

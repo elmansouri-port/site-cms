@@ -12,6 +12,7 @@ import { notFoundHandler, errorHandler } from './middleware/error.js';
 import { siteRouter } from './routes/site.js';
 import { formsRouter } from './routes/forms.js';
 import { hooksRouter } from './routes/hooks.js';
+import { abRouter } from './routes/ab.js';
 import { adminRouter } from './routes/admin/index.js';
 
 export function createApp() {
@@ -83,6 +84,11 @@ export function createApp() {
 
   // Outbound integrations, proxied so the automation host stays server-side.
   app.use('/api/v1/hooks', hooksRouter);
+
+  // Experiment telemetry: the browser reporting which arm it saw and whether
+  // the visitor converted. Public, rate limited, and it validates every field
+  // against a running test before it writes a counter.
+  app.use('/api/v1/ab', abRouter);
   app.use('/api/v1', adminRouter);
 
   app.use(notFoundHandler);

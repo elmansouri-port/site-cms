@@ -1,0 +1,32 @@
+{
+  "_comment": [
+    "Per-locale URL slugs. The base `route` in pages.registry.json stays the",
+    "identity; this file is the localized address each page answers to.",
+    "",
+    "Applied by tools/apply-routes.mjs, which writes page.routes{} and creates a",
+    "301 from every path a page used to answer to. Empty string = share the base",
+    "route. Edit here, re-run the tool: it is idempotent."
+  ],
+  "sourceLocale": "fr",
+  "routes": {
+    "index":                               { "fr": "",                      "en": "",                     "de": "" },
+    "products":                            { "fr": "produits",              "en": "products",             "de": "produkte" },
+    "collaboration":                       { "fr": "produits/collaboration","en": "products/collaboration","de": "produkte/collaboration" },
+    "webinar":                             { "fr": "produits/webinar",      "en": "products/webinar",     "de": "produkte/webinar" },
+    "tarifs":                              { "fr": "tarifs",                "en": "pricing",              "de": "preise" },
+    "blog":                                { "fr": "blog",                  "en": "blog",                 "de": "blog" },
+    "faq":                                 { "fr": "faq",                   "en": "faq",                  "de": "faq" },
+    "partenaires":                         { "fr": "devenir-partenaire",    "en": "become-a-partner",     "de": "partner-werden" },
+    "trouver-un-partenaire":               { "fr": "trouver-un-partenaire", "en": "find-a-partner",       "de": "partner-finden" },
+    "a-propos-de-rainbow":                 { "fr": "a-propos",              "en": "about-rainbow",        "de": "ueber-rainbow" },
+    "rainbow-donnees-hebergees-en-france": { "fr": "donnees-hebergees-en-france", "en": "data-hosted-in-france", "de": "daten-gehostet-in-frankreich" },
+    "centre-aide-rainbow":                 { "fr": "centre-aide",           "en": "help-center",          "de": "hilfecenter" },
+    "telecharger-application-rainbow":     { "fr": "telecharger",           "en": "download",             "de": "herunterladen" },
+    "form-al":                             { "fr": "reservation",           "en": "booking",              "de": "termin-buchen" },
+    "confirmer-rendez-vous":               { "fr": "confirmer-rendez-vous", "en": "confirm-booking",      "de": "termin-bestaetigen" },
+    "modifier-rendez-vous":                { "fr": "modifier-rendez-vous",  "en": "reschedule-booking",   "de": "termin-aendern" },
+    "desinscription":                      { "fr": "desinscription",        "en": "unsubscribe",          "de": "abmelden" },
+    "not-found":                           { "fr": "404",                   "en": "404",                  "de": "404" }
+  },
+  "blogSegment": { "fr": "blog", "en": "blog", "de": "blog" }
+}

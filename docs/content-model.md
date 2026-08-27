@@ -278,7 +278,8 @@ comment naming it rather than as a blank space.
 | `forms` | The forms an editor built: fields, wording per language, and where submissions go. See above |
 | `leads` | Form submissions, stored before they are forwarded anywhere |
 | `redirects` | Old URL → new URL, applied in the frontend middleware |
-| `experiments` | A/B tests. `scope: 'block'` varies one section; `scope: 'page'` serves a whole alternative page at the control's URL |
+| `experiments` | A/B tests: the hypothesis, the split, the goals and the guardrails. `scope: 'block'` varies one section; `'page'` serves a whole alternative page at the control's URL; `'chrome'` varies the header or footer and so applies to every page |
+| `experimentstats` | Aggregated counters, one row per test × arm × goal × day × locale. `goal` is `__exposure__` for the denominator. Not an event log: counters answer every question asked of a marketing A/B test, and a row per impression would be the largest collection here inside a month |
 | `versions` | Restore points. See below |
 | `auditlogs` | Who changed what, and when |
 

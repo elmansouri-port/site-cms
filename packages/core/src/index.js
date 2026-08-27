@@ -16,3 +16,6 @@ export {
   ARTICLE_SECTIONS, renderArticleBody, contentsOf, withHeadingIds, sectionLabel, inContents, textOf,
 } from './article.js';
 export { LOCALES, DEFAULT_LOCALE, SOURCE_LOCALE, activeLocales } from './locales.js';
+export {
+  assign, isEligible, bucketOf, hash32, controlOf, variantFromParam, dayKey, primaryGoal,
+} from './experiments.js';

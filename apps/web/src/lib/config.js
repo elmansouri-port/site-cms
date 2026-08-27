@@ -21,7 +21,9 @@ export const config = {
   cacheTtl: Number(env('WEB_CACHE_TTL', 30)),
   defaultLocale: env('DEFAULT_LOCALE', 'fr'),
   sourceLocale: env('SOURCE_LOCALE', 'fr'),
-  abCookiePrefix: 'rbw_ab_',
+  // One id for the whole site. Assignment is a pure function of it, so there
+  // is no longer a cookie per test.
+  visitorCookie: 'rbw_vid',
   localeCookie: 'lang',
   previewCookie: 'rbw_preview',
   // Preview plus the visual editor's block annotations and bridge script.

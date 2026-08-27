@@ -166,6 +166,24 @@
           throw new Error(body.error || 'Something went wrong. Please try again.');
         }
 
+        /*
+         * Announce the success before anything else happens.
+         *
+         * Emitted here rather than on submit because this is the point at which
+         * the endpoint accepted it: a goal wired to a click on the button would
+         * count every failed validation as a conversion. Dispatched before the
+         * redirect below, because after `location.assign` this page is gone and
+         * anything listening never runs.
+         */
+        try {
+          document.dispatchEvent(new CustomEvent('rainbow:form-success', {
+            detail: {
+              formKey: form.getAttribute('data-form-key') || '',
+              formId: form.id || '',
+            },
+          }));
+        } catch (e) { /* a listener throwing must not break the confirmation */ }
+
         var redirect = form.getAttribute('data-redirect');
         if (redirect) { window.location.assign(redirect); return; }
 

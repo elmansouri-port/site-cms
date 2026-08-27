@@ -19,7 +19,8 @@
     "./article": "./src/article.js",
     "./compose": "./src/compose.js",
     "./ingest": "./src/ingest.js",
-    "./locales": "./src/locales.js"
+    "./locales": "./src/locales.js",
+    "./experiments": "./src/experiments.js"
   },
   "license": "UNLICENSED"
 }
