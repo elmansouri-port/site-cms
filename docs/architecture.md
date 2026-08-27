@@ -181,7 +181,11 @@ Three cases, three different backends:
 |---|---|
 | A component block's field | `PATCH /pages/:key/sections/:key` with the block's `data` |
 | A label-only field | The same, but the panel says why the destination is fixed |
-| An authored section's own markup | `PATCH /pages/:key/sections/:key/anchors/:index` |
+| Markup the block holds itself — an authored section's `html`, or a custom block's `data.html` | `PATCH /pages/:key/sections/:key/anchors/:index` |
+
+`markupSlot` in the pages router resolves which of those two fields a section
+keeps its markup in, so the endpoint does not care whether the link was written
+in an imported page or in a custom block somebody added this morning.
 
 That last endpoint is why `packages/core/src/anchors.js` exists. The authored
 pages are stored as the bytes they were written with, and `verify-live.mjs`

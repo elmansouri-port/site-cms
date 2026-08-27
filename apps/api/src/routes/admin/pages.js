@@ -365,13 +365,35 @@ pagesRouter.patch('/:key/sections/:sectionKey', requireRole('editor'), validate(
  * among that block's anchors — which is exactly what the canvas reports when
  * somebody clicks a button on the page.
  */
+/**
+ * Where a section keeps its markup.
+ *
+ * An authored section keeps it in `html`. A component block that *is* markup —
+ * the custom block, rich text, raw HTML — keeps it in `data.html`. Both hold
+ * links an editor will click on the page, and both are addressable the same way,
+ * so the difference is resolved here rather than in the two handlers below.
+ */
+function markupSlot(section) {
+  if (section.type === 'component') {
+    return typeof section.data?.html === 'string'
+      ? { html: section.data.html, field: 'data.html' }
+      : null;
+  }
+  return { html: section.html || '', field: 'html' };
+}
+
 pagesRouter.get('/:key/sections/:sectionKey/anchors', asyncHandler(async (req, res) => {
   const page = await Page.findOne({ key: req.params.key }, { sections: 1 }).lean();
   if (!page) throw notFoundError('No such page');
   const section = (page.sections || []).find(s => s.key === req.params.sectionKey);
   if (!section) throw notFoundError('No such section');
 
-  const html = section.html || '';
+  const slot = markupSlot(section);
+  // A component block built from fields holds no markup of its own — its links
+  // are fields, and the editor addresses them as fields.
+  if (!slot) return res.json({ items: [], fieldBacked: true });
+
+  const html = slot.html;
   res.json({
     items: anchorsIn(html).map(a => ({
       index: a.index,
@@ -406,8 +428,11 @@ pagesRouter.patch(
     const section = page.sections.find(s => s.key === req.params.sectionKey);
     if (!section) throw notFoundError('No such section');
 
+    const slot = markupSlot(section);
+    if (!slot) throw badRequest('That block builds its links from fields — edit the field instead');
+
     const index = Number.parseInt(req.params.index, 10);
-    const anchors = anchorsIn(section.html || '');
+    const anchors = anchorsIn(slot.html);
     if (!Number.isInteger(index) || !anchors[index]) throw notFoundError('No such link in that block');
     if (req.body.href !== undefined && anchors[index].hrefStart < 0) {
       throw badRequest('That link carries no href to change');
@@ -415,14 +440,21 @@ pagesRouter.patch(
 
     await snapshot('page', page.key, page.toObject(), req.user, `before editing a link in "${section.label}"`);
 
-    let html = section.html || '';
+    let html = slot.html;
     if (req.body.href !== undefined) html = setAnchorHref(html, index, req.body.href);
     if (req.body.target !== undefined) html = setAnchorTarget(html, index, req.body.target);
 
-    section.html = html;
-    // The copy inside the block did not move, but re-deriving is cheap and keeps
-    // the key list honest if a splice ever touched a marked element.
-    section.keys = keysIn(html);
+    if (slot.field === 'html') {
+      section.html = html;
+      // The copy inside the block did not move, but re-deriving is cheap and
+      // keeps the key list honest if a splice ever touched a marked element.
+      section.keys = keysIn(html);
+    } else {
+      // Mongoose does not see a mutation inside a Mixed field, so the whole
+      // object is reassigned rather than one property written.
+      section.data = { ...(section.data || {}), html };
+      section.markModified('sections');
+    }
     page.editedInCms = true;
     page.updatedBy = req.user._id;
     await page.save();

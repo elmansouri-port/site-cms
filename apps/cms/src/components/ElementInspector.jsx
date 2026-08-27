@@ -138,7 +138,7 @@ export default function ElementInspector({
     let alive = true;
     setLoading(true);
     api.get(`/pages/${pageKey}/sections/${section.key}/anchors`)
-      .then(({ items }) => {
+      .then(({ items, fieldBacked }) => {
         if (!alive) return;
         const found = (items || [])[authoredIndex];
         const next = {
@@ -147,6 +147,10 @@ export default function ElementInspector({
           newTab: found?.target === '_blank',
           editable: found ? found.editable : false,
           missing: !found,
+          // The block holds no markup: its links come from fields, and this one
+          // is from a field the block does not annotate. Worth saying, because
+          // the answer — open the block — is different from "not editable".
+          fieldBacked: !!fieldBacked,
         };
         setDraft(next);
         setStored(next);
@@ -228,13 +232,17 @@ export default function ElementInspector({
     return (
       <Panel element={element} onClose={onClose} onOpenBlock={onOpenBlock} title={titleFor(element)}>
         <Callout tone="warning">
-          {draft.editable === false
-            ? 'That link has no address of its own — it is handled by the page’s own script.'
-            : 'This element is not one the CMS can edit on its own.'}
+          {draft.fieldBacked
+            ? 'This block builds its links from its own fields, and this one is not a field you can point somewhere else.'
+            : draft.editable === false
+              ? 'That link has no address of its own — it is handled by the page’s own script.'
+              : 'This element is not one the CMS can edit on its own.'}
         </Callout>
         <p className="text-muted-foreground text-[12px] leading-relaxed">
-          Open the block to edit its markup directly. Everything inside an authored section is stored
-          as it was written, so what you see in the editor is what the page ships.
+          {draft.fieldBacked
+            ? 'Open the block to see everything it does expose.'
+            : 'Open the block to edit its markup directly. Everything inside an authored section is '
+              + 'stored as it was written, so what you see in the editor is what the page ships.'}
         </p>
         <Button variant="outline" size="sm" className="justify-self-start" onClick={onOpenBlock}>
           <PanelRightClose /> Open the whole block
@@ -294,10 +302,10 @@ export default function ElementInspector({
             onChange={value => setDraft(d => ({ ...d, newTab: value }))}
           />
 
-          {!isComponent && (
+          {!element.field && (
             <Callout>
-              This link is written in the section&apos;s own markup. Only the address changes — the
-              rest of the section stays byte-for-byte as it was authored.
+              This link is written in the block&apos;s own markup. Only the address changes — the
+              rest of it stays byte-for-byte as it was written.
             </Callout>
           )}
         </>

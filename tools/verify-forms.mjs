@@ -139,6 +139,25 @@ async function main() {
   });
   ok('the hero block was added', hero.status === 201);
 
+  /*
+   * A custom block, whose links live in `data.html` rather than in fields.
+   * Clicking one has to reach the anchor endpoint and splice the markup — the
+   * path an authored page uses, exercised here on a block anybody can create.
+   */
+  const custom = await api(`/pages/${PAGE_KEY}/sections`, {
+    method: 'POST',
+    body: {
+      type: 'component',
+      componentKey: 'custom_html',
+      label: 'Hand-written markup',
+      data: {
+        html: '<div class="py-10 text-center"><a href="/fr/old-path" '
+          + 'class="text-brand-500 underline">A link written by hand</a></div>',
+      },
+    },
+  });
+  ok('a custom block was added', custom.status === 201, custom.body?.error || '');
+
   const formBlock = await api(`/pages/${PAGE_KEY}/sections`, {
     method: 'POST',
     body: {
@@ -309,6 +328,33 @@ async function main() {
     live.includes('target="_blank"') && live.includes('noopener'));
   ok('and no editing annotations reached the published page',
     !live.includes('data-cms-field') && !live.includes('data-cms-block'));
+
+  /* ── 3b. A link inside hand-written markup ───────────────────────────── */
+
+  console.log('\nA link inside a custom block');
+  const handWritten = canvas.getByRole('link', { name: 'A link written by hand' });
+  if (await handWritten.count()) {
+    await handWritten.click();
+    await page.waitForTimeout(1200);
+    ok('the panel opens for a link the CMS did not generate',
+      await page.locator('input[value="/fr/old-path"]').count() > 0);
+    ok('and says the change touches only the address',
+      await page.getByText(/byte-for-byte/).count() > 0);
+
+    await page.locator('input[value="/fr/old-path"]').fill('page:tarifs');
+    await page.getByRole('button', { name: /^Save/ }).first().click();
+    await page.waitForTimeout(2500);
+
+    const block = await api(`/pages/${PAGE_KEY}/sections/${custom.body.section.key}`);
+    const markup = block.body?.section?.data?.html || '';
+    ok('the markup was spliced, not rewritten', markup.includes('href="page:tarifs"'), markup.slice(0, 80));
+    ok('everything around the link is untouched',
+      markup.includes('class="py-10 text-center"')
+      && markup.includes('class="text-brand-500 underline"'));
+    await page.screenshot({ path: path.join(SHOTS, '06b-authored-link.png') });
+  } else {
+    ok('the panel opens for a link the CMS did not generate', false, 'the custom block did not render');
+  }
 
   /* ── 4. Folding rails ────────────────────────────────────────────────── */
 

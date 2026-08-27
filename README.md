@@ -787,7 +787,7 @@ to run without `--confirm`:
 |---|---|
 | `npm run verify:editor -- [url] --confirm` | The builder, localized URLs, A/B testing, the header and footer, the integration proxy and article sections — 160 checks |
 | `npm run verify:ui -- [url] --confirm` | Every editing flow, driven by a real browser: landing pages, forms, the blog on a page, link references, restore, undo, trash — 43 checks |
-| `npm run verify:forms -- [url] --confirm` | The form builder and the link inspector, in a real browser: that the preview is styled by the site rather than the admin, that a clashing field name is refused before a save, that clicking a button on the page repoints it, that a folded panel stays folded — 35 checks |
+| `npm run verify:forms -- [url] --confirm` | The form builder and the link inspector, in a real browser: that the preview is styled by the site rather than the admin, that a clashing field name is refused before a save, that clicking a button on the page repoints it, that a folded panel stays folded, and that a link inside hand-written markup is spliced rather than re-serialised — 40 checks |
 
 Content:
 
