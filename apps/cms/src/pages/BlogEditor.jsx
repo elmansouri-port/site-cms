@@ -245,14 +245,18 @@ export default function BlogEditor() {
               </Field>
 
               <FieldGroupLabel
-                hint={(draft.sections || []).length
-                  ? `${draft.sections.length} section${draft.sections.length === 1 ? '' : 's'}`
-                  : 'Written as one block of HTML'}
+                hint={draft.pageKey
+                  ? 'An authored page, edited under Pages'
+                  : (draft.sections || []).length
+                    ? `${draft.sections.length} section${draft.sections.length === 1 ? '' : 's'}`
+                    : 'Written as one block of HTML'}
               >
                 Body
               </FieldGroupLabel>
 
-              {(draft.sections || []).length === 0 && (draft.bodyHtml || '').trim() ? (
+              {draft.pageKey ? (
+                <PageBackedBody pageKey={draft.pageKey} />
+              ) : (draft.sections || []).length === 0 && (draft.bodyHtml || '').trim() ? (
                 <LegacyBody
                   draft={draft}
                   canEdit={canEdit}
@@ -284,21 +288,27 @@ export default function BlogEditor() {
           </Card>
 
           <div className="grid content-start gap-4">
-            <Card>
-              <CardHeader><CardTitle>Contents list</CardTitle></CardHeader>
-              <CardContent><ContentsPreview contents={body.contents} /></CardContent>
-            </Card>
+            {/* An authored page builds its own contents list; there is nothing
+                for this one to project. */}
+            {!draft.pageKey && (
+              <Card>
+                <CardHeader><CardTitle>Contents list</CardTitle></CardHeader>
+                <CardContent><ContentsPreview contents={body.contents} /></CardContent>
+              </Card>
+            )}
             <Card>
               <CardHeader><CardTitle>Reading</CardTitle></CardHeader>
               <CardContent>
                 <DataList>
-                  <DataRow label="Words">{words.toLocaleString()}</DataRow>
+                  {!draft.pageKey && <DataRow label="Words">{words.toLocaleString()}</DataRow>}
                   <DataRow label="Reading time">
                     {draft.readingMinutes || Math.max(1, Math.round(words / 200))} min
                   </DataRow>
                 </DataList>
                 <p className="text-muted-foreground mt-3 text-[12px] leading-snug">
-                  Calculated at 200 words a minute unless you set a figure under Configure.
+                  {draft.pageKey
+                    ? 'Shown on the card and in the article header. Set it under Configure — it cannot be counted from an authored page here.'
+                    : 'Calculated at 200 words a minute unless you set a figure under Configure.'}
                 </p>
               </CardContent>
             </Card>
@@ -636,6 +646,33 @@ export default function BlogEditor() {
 }
 
 /**
+ * An article whose body is an authored page.
+ *
+ * Three of the imported articles are this: the migration kept the hand-built
+ * page and pointed the article record at it, so the site serves those bytes and
+ * the article template is never used. The editor's job here is to say so and
+ * point at the page — offering a section editor would let somebody write a body
+ * that renders nowhere.
+ */
+function PageBackedBody({ pageKey }) {
+  return (
+    <Callout title="This article is an authored page">
+      <p>
+        It was migrated as a hand-built page, and the site serves those bytes rather than the article
+        template. Its copy, its blocks and its layout are edited under <strong>Pages</strong>.
+      </p>
+      <p>
+        Everything on this screen still applies: the card on the blog index, the excerpt, the
+        category, the sharing image and the search metadata all come from here.
+      </p>
+      <Button variant="outline" size="sm" asChild className="mt-1">
+        <Link to={`/pages/${pageKey}`}>Open the page</Link>
+      </Button>
+    </Callout>
+  );
+}
+
+/**
  * An article still written as one block of HTML.
  *
  * Left editable rather than forced through a migration — the imported articles
@@ -678,15 +715,23 @@ function auditPost(post, body) {
   const add = (step, level, text) => out.push({ step, level, text });
 
   if (!post.title?.trim()) add('write', 'fail', 'The article has no title.');
-  const words = countWords(body.html);
-  if (!words) add('write', 'fail', 'The article has no body yet.');
-  else if (words < 300) add('write', 'warn', `Only ${words} words — short articles rarely rank for anything competitive.`);
+
+  // An article whose body is an authored page has nothing to count here, and
+  // saying "no body yet" about a page with 3,000 words on it is worse than
+  // saying nothing.
+  if (!post.pageKey) {
+    const words = countWords(body.html);
+    if (!words) add('write', 'fail', 'The article has no body yet.');
+    else if (words < 300) {
+      add('write', 'warn', `Only ${words} words — short articles rarely rank for anything competitive.`);
+    }
+    if (!body.contents?.length && words > 600) {
+      add('write', 'warn', 'No contents list. Add headings so long articles are skimmable.');
+    }
+  }
 
   if (!post.excerpt?.trim()) {
     add('write', 'warn', 'No excerpt. It is what appears on the blog cards and, by default, in Google.');
-  }
-  if (!body.contents?.length && words > 600) {
-    add('write', 'warn', 'No contents list. Add headings so long articles are skimmable.');
   }
 
   if (!post.category?.trim()) {

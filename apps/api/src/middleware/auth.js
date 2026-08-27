@@ -21,13 +21,30 @@ export function signRefreshToken(user) {
   );
 }
 
+/**
+ * Read a `7d` / `12h` / `30m` duration as milliseconds.
+ *
+ * The cookie's lifetime has to match the token's, or the browser drops it at a
+ * different moment from when the token stops being accepted — which reads to an
+ * editor as being signed out at random.
+ */
+function durationMs(value, fallback = 7 * 24 * 3600 * 1000) {
+  const match = /^(\d+)\s*([smhd])$/.exec(String(value || '').trim());
+  if (!match) return fallback;
+  const scale = { s: 1000, m: 60_000, h: 3_600_000, d: 86_400_000 };
+  return Number(match[1]) * scale[match[2]];
+}
+
 export function setRefreshCookie(res, token) {
   res.cookie(config.jwt.cookieName, token, {
     httpOnly: true,
+    // The refresh endpoint is POST-only, and `lax` withholds the cookie from
+    // cross-site POSTs — so this is already CSRF-proof without breaking the
+    // top-level navigation an editor uses to reach the admin.
     sameSite: 'lax',
     secure: config.jwt.secureCookies,
     path: '/api/v1/auth',
-    maxAge: 7 * 24 * 3600 * 1000,
+    maxAge: durationMs(config.jwt.refreshTtl),
   });
 }
 
