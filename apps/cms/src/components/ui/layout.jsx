@@ -65,12 +65,12 @@ export function Meter({ value, good, max, className }) {
 
 /** A label/value list — the "about this page" panels. */
 export function DataList({ className, ...props }) {
-  return <dl className={cn('grid gap-0', className)} {...props} />;
+  return <dl className={cn('grid min-w-0 gap-0', className)} {...props} />;
 }
 
 export function DataRow({ label, children, className }) {
   return (
-    <div className={cn('flex items-center justify-between gap-4 border-b py-2 last:border-0', className)}>
+    <div className={cn('flex min-w-0 items-center justify-between gap-4 border-b py-2 last:border-0', className)}>
       <dt className="text-muted-foreground text-[12.5px]">{label}</dt>
       <dd className="min-w-0 truncate text-right text-[12.5px] font-medium">{children}</dd>
     </div>

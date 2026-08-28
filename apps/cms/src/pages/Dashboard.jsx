@@ -293,7 +293,7 @@ function Shortcut({ to, icon: IconComponent, title, children }) {
   return (
     <Link
       to={to}
-      className="hover:bg-muted focus-visible:ring-ring/40 flex items-start gap-3 rounded-lg border p-2.5 transition-colors outline-none focus-visible:ring-[3px]"
+      className="hover:bg-muted focus-visible:ring-ring/40 flex min-w-0 items-start gap-3 rounded-lg border p-2.5 transition-colors outline-none focus-visible:ring-[3px]"
     >
       <span className="bg-accent text-accent-foreground mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md">
         <IconComponent className="size-3.5" />

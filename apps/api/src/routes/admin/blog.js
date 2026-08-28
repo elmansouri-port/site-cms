@@ -169,9 +169,21 @@ blogRouter.get('/:id/preview-url', asyncHandler(async (req, res) => {
   const settings = await settingsCached();
   const segment = blogSegmentFor(settings, post.locale);
   const target = `/${post.locale}/${segment}/${post.slug}`;
-  const url = `${config.siteUrl}/cms/preview?secret=${encodeURIComponent(config.previewSecret)}`
+  const query = `secret=${encodeURIComponent(config.previewSecret)}`
     + `&redirect=${encodeURIComponent(target)}`;
-  res.json({ url, target });
+
+  /*
+   * A path as well as an absolute URL, for the same reason the page route gives
+   * both: the editor's canvas needs the cookie planted on whichever origin is
+   * serving the admin, and a relative path is that origin behind the gateway and
+   * behind the admin's dev server alike. The absolute URL stays for the "open in
+   * a new tab" link, which wants somewhere a person can navigate to.
+   */
+  res.json({
+    path: `/cms/preview?${query}`,
+    url: `${config.siteUrl}/cms/preview?${query}`,
+    target,
+  });
 }));
 
 blogRouter.post('/:id/publish', requireRole('editor'), asyncHandler(async (req, res) => {

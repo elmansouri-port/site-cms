@@ -50,8 +50,8 @@
     "clientPortal": "Portal del cliente",
     "admin": "Administración",
     "rainbow": "Rainbow",
-    "copyright": "&copy; 2026 Rainbow de Alcatel-Lucent. Todos los derechos reservados.",
-    "copyrightShort": "&copy; 2026 Rainbow de ALE. Todos los derechos reservados."
+    "copyright": "© 2026 Rainbow de Alcatel-Lucent. Todos los derechos reservados.",
+    "copyrightShort": "© 2026 Rainbow de ALE. Todos los derechos reservados."
   },
   "products": {
     "heroTag": "Nuestras soluciones",
@@ -351,7 +351,7 @@
     "expiry": "Vencimiento",
     "cvc": "CVC",
     "submitBtn": "Suscribirse y pagar",
-    "processing": "Procesando\u2026",
+    "processing": "Procesando…",
     "stripeNote": "Protegido por Stripe. Los datos de la tarjeta nunca pasan por nuestros servidores.",
     "successTitle": "¡Suscripción activa!",
     "successDescription": "Su pago se ha procesado correctamente.",
@@ -362,30 +362,56 @@
     "paymentFailed": "El pago ha fallado. Por favor, inténtelo de nuevo."
   },
   "offers": {
-    "collaborationDesc": "Plataforma de comunicaci\u00f3n unificada \u2014 mensajer\u00eda, v\u00eddeo, telefon\u00eda.",
-    "webinarDesc": "Organice eventos en l\u00ednea a gran escala con hasta 10.000 participantes.",
-    "smartHotelDesc": "Experiencia del hu\u00e9sped y operaciones hoteleras impulsadas por IA.",
-    "plansComing": "Planes disponibles pr\u00f3ximamente.",
+    "collaborationDesc": "Plataforma de comunicación unificada — mensajería, vídeo, telefonía.",
+    "webinarDesc": "Organice eventos en línea a gran escala con hasta 10.000 participantes.",
+    "smartHotelDesc": "Experiencia del huésped y operaciones hoteleras impulsadas por IA.",
+    "plansComing": "Planes disponibles próximamente.",
     "essential": {
       "name": "Essential",
       "subtitle": "Para empezar",
       "priceNote": "hasta 15 usuarios",
       "ctaText": "Empezar gratis",
-      "features": ["Audio y v\u00eddeo HD (1:1)", "Mensajer\u00eda instant\u00e1nea", "Compartir archivos (1 GB)", "Integraci\u00f3n de calendario", "App m\u00f3vil iOS y Android", "Soporte comunitario"]
+      "features": [
+        "Audio y vídeo HD (1:1)",
+        "Mensajería instantánea",
+        "Compartir archivos (1 GB)",
+        "Integración de calendario",
+        "App móvil iOS y Android",
+        "Soporte comunitario"
+      ]
     },
     "business": {
       "name": "Business",
-      "subtitle": "El m\u00e1s popular",
+      "subtitle": "El más popular",
       "priceNote": "/usuario/mes",
-      "ctaText": "Prueba gratuita 30 d\u00edas",
-      "features": ["Todo de Essential +", "Conferencia hasta 100 participantes", "Grabaci\u00f3n de reuniones", "Pantalla compartida avanzada", "10 GB almacenamiento/usuario", "Integraci\u00f3n CRM y Office 365", "Soporte prioritario 24/7", "Administraci\u00f3n centralizada"]
+      "ctaText": "Prueba gratuita 30 días",
+      "features": [
+        "Todo de Essential +",
+        "Conferencia hasta 100 participantes",
+        "Grabación de reuniones",
+        "Pantalla compartida avanzada",
+        "10 GB almacenamiento/usuario",
+        "Integración CRM y Office 365",
+        "Soporte prioritario 24/7",
+        "Administración centralizada"
+      ]
     },
     "enterprise": {
       "name": "Enterprise",
       "subtitle": "A medida",
       "priceNote": "/usuario/mes",
-      "ctaText": "Prueba gratuita 30 d\u00edas",
-      "features": ["Todo de Business +", "Conferencia hasta 1000 participantes", "Webinars y eventos", "Telefon\u00eda cloud (SIP/PSTN)", "Almacenamiento ilimitado", "API y SDK para desarrolladores", "SLA 99,99% garantizado", "Customer Success Manager dedicado", "SSO y seguridad avanzada"]
+      "ctaText": "Prueba gratuita 30 días",
+      "features": [
+        "Todo de Business +",
+        "Conferencia hasta 1000 participantes",
+        "Webinars y eventos",
+        "Telefonía cloud (SIP/PSTN)",
+        "Almacenamiento ilimitado",
+        "API y SDK para desarrolladores",
+        "SLA 99,99% garantizado",
+        "Customer Success Manager dedicado",
+        "SSO y seguridad avanzada"
+      ]
     }
   },
   "lang": {

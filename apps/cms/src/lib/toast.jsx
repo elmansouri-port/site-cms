@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { CheckCircle2, Info, X, XCircle } from 'lucide-react';
 import { cn } from './cn.js';
+import { describeError } from './apiErrors.js';
 
 const ToastContext = createContext(null);
 
@@ -28,16 +29,12 @@ export function ToastProvider({ children }) {
     push,
     success: (m) => push(m, 'success'),
     /**
-     * Errors take an `ApiError` as often as a string, and its `details` array is
-     * where a validation failure says which field it means — dropping it leaves
-     * an editor with "Invalid submission" and nothing to act on.
+     * Errors take an `ApiError` as often as a string, and its `details` is where
+     * a validation failure says which field it means — dropping it leaves an
+     * editor with "Validation failed" and nothing to act on, and rendering it
+     * naively left them with "[object Object]". See lib/apiErrors.js.
      */
-    error: (err) => {
-      if (typeof err === 'string') return push(err, 'error', 7000);
-      const details = err?.details ? [].concat(err.details).filter(Boolean) : [];
-      const message = err?.message || 'Something went wrong';
-      return push(details.length ? `${message} — ${details.join(', ')}` : message, 'error', 7000);
-    },
+    error: (err) => push(describeError(err), 'error', 7000),
     info: (m) => push(m, 'info'),
     dismiss,
   }), [push, dismiss]);

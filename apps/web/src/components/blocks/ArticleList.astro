@@ -6,6 +6,7 @@
  * this list comes from the database and updates the moment an article is
  * published.
  */
+import { resolveAssetsDeep } from '@rainbow/core/assets';
 import { blogList, blogSegment } from '../../lib/site.js';
 
 const { data = {}, locale, editMode = false } = Astro.props;
@@ -26,6 +27,14 @@ let items = [];
 try {
   const result = await blogList(locale, { limit: String(limit), ...(category ? { category } : {}) });
   items = result?.items || [];
+  /*
+   * A cover image may be a managed reference, and these rows come straight from
+   * the API, so nothing has resolved it. Same note as BlogIndex.astro: the
+   * renderer resolves references inside markup, and a block that fetches its own
+   * data has to ask.
+   */
+  const assets = Astro.locals.assets || [];
+  if (assets.length) items = resolveAssetsDeep(items, assets);
 } catch (err) {
   console.warn('[article_list] could not load articles:', err.message);
 }

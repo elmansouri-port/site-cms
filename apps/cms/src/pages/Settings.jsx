@@ -47,6 +47,8 @@ export default function SettingsPage() {
   };
   const setAnalytics = (field) => (e) =>
     setForm(f => ({ ...f, analytics: { ...(f.analytics || {}), [field]: e.target.value } }));
+  const setLeads = (field) => (value) =>
+    setForm(f => ({ ...f, leads: { ...(f.leads || {}), [field]: value } }));
   const setLocale = (i, patch) => setForm((f) => {
     const locales = f.locales.slice();
     locales[i] = { ...locales[i], ...patch };
@@ -56,7 +58,7 @@ export default function SettingsPage() {
   async function save() {
     setBusy(true);
     try {
-      await api.put('/settings', {
+      const res = await api.put('/settings', {
         siteName: form.siteName,
         baseUrl: form.baseUrl,
         defaultLocale: form.defaultLocale,
@@ -76,8 +78,21 @@ export default function SettingsPage() {
         analytics: form.analytics || {},
         robotsExtra: form.robotsExtra,
         maintenanceMode: !!form.maintenanceMode,
+        leads: {
+          store: form.leads?.store !== false,
+          retentionDays: Number(form.leads?.retentionDays) || 0,
+        },
       });
-      toast.success('Settings saved');
+      /*
+       * If a retention period just deleted submissions, say how many.
+       *
+       * Setting "keep for 90 days" on two years of leads is a destructive act,
+       * and "Settings saved" is not an adequate description of it.
+       */
+      const deleted = res?.retention?.deleted;
+      toast.success(deleted
+        ? `Settings saved — ${deleted} submission${deleted === 1 ? '' : 's'} past the retention period were deleted`
+        : 'Settings saved');
       reload();
     } catch (err) {
       toast.error(err);
@@ -102,6 +117,7 @@ export default function SettingsPage() {
           <TabsTrigger value="locales">Languages</TabsTrigger>
           <TabsTrigger value="seo">Default metadata</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="leads">Leads</TabsTrigger>
           <TabsTrigger value="history">History</TabsTrigger>
         </TabsList>
 
@@ -364,6 +380,76 @@ export default function SettingsPage() {
               <Callout>
                 The assigned A/B variant is exposed to the page as <Code>window.__CMS__.variants</Code>,
                 so recordings and funnels can be filtered by variant without extra tooling.
+              </Callout>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/*
+          Whether submissions are stored at all.
+
+          The site stores every submission before forwarding it, so an automation
+          platform being down does not cost a lead. That is the right default and
+          it is not always the right answer — a deployment whose forms feed a CRM
+          that is already the system of record does not want a second copy of
+          every enquiry here, and one that does not need the data should not be
+          holding names, addresses and IP addresses at all.
+
+          The switch says what it does in those terms rather than as an option,
+          because "off" is a promise about what the site holds, not a display
+          preference.
+        */}
+        <TabsContent value="leads">
+          <Card className="max-w-3xl">
+            <CardHeader><CardTitle>Form submissions</CardTitle></CardHeader>
+            <CardContent className="grid gap-4">
+              <CheckboxField
+                label="Keep a copy of every submission"
+                hint={'Stored here before it is forwarded, so a lead is not lost when the automation '
+                  + 'platform is down. Turn it off and submissions are never written — they are still '
+                  + 'accepted and still forwarded, there is simply nothing kept.'}
+                checked={form.leads?.store !== false}
+                disabled={!can('admin')}
+                onChange={setLeads('store')}
+              />
+
+              {form.leads?.store === false ? (
+                <Callout tone="warning">
+                  <strong>Nothing is being stored.</strong> Submissions still reach whichever
+                  integration a form points at, and the <Link to="/leads" className="underline">Leads</Link>{' '}
+                  screen will only ever show what was captured before this was switched off. Check
+                  that every form does point somewhere — under{' '}
+                  <Link to="/forms" className="underline">Forms</Link> — because with storage off an
+                  unconfigured form loses the enquiry entirely.
+                </Callout>
+              ) : (
+                <Field
+                  label="Delete stored submissions after"
+                  hint={'0 keeps them indefinitely. Saving a period deletes anything already older '
+                    + 'than it, and the confirmation says how many.'}
+                >
+                  {id => (
+                    <div className="flex items-center gap-2">
+                      <Input
+                        id={id}
+                        type="number"
+                        min="0"
+                        max="3650"
+                        className="max-w-32"
+                        value={form.leads?.retentionDays ?? 0}
+                        disabled={!can('admin')}
+                        onChange={e => setLeads('retentionDays')(Number(e.target.value) || 0)}
+                      />
+                      <span className="text-muted-foreground text-[13px]">days</span>
+                    </div>
+                  )}
+                </Field>
+              )}
+
+              <Callout>
+                A submission is stored with the visitor's IP address and browser, which is what makes
+                a spam complaint answerable. It is also personal data: if you have no use for it,
+                turning storage off is a better answer than a retention period.
               </Callout>
             </CardContent>
           </Card>

@@ -9,6 +9,7 @@
  */
 import { render } from './render.js';
 import { resolveAssetsDeep } from './assets.js';
+import { localiseData } from './i18nData.js';
 import { resolveLinksDeep } from './links.js';
 import { buildHead, buildJsonLd } from './seo.js';
 
@@ -259,13 +260,16 @@ function renderChrome(role, page, ctx, opts = {}) {
 /**
  * A component block with its references resolved.
  *
- * Both indirections resolve here rather than inside each block template: a
- * block should render the data it is handed, and "which file is this image" and
- * "where is this page in this language" are questions about the site, not about
- * the block.
+ * Three indirections resolve here rather than inside each block template: a
+ * block should render the data it is handed, and "which file is this image",
+ * "where is this page in this language" and "which language am I" are questions
+ * about the request, not about the block.
+ *
+ * Translations first, because the other two operate on the resolved value: a
+ * German heading may carry a different image reference from the French one.
  */
 function withResolvedData(block, ctx) {
-  let data = block.data;
+  let data = localiseData(block.data, ctx.locale, ctx.sourceLocale);
   if (ctx.assets?.length) data = resolveAssetsDeep(data, ctx.assets);
   if (ctx.links?.size) data = resolveLinksDeep(data, ctx.links);
   return data === block.data ? block : { ...block, data };

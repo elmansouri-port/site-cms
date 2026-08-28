@@ -63,9 +63,10 @@
       "route": "blog",
       "title": "Blog",
       "pageKind": "blogIndex",
-      "type": "hybrid",
+      "type": "dynamic",
       "priority": 0.8,
-      "changefreq": "daily"
+      "changefreq": "daily",
+      "dynamicSince": "the blog index reads the articles that exist, so its body cannot match a template with twelve hard-coded cards in it"
     },
     {
       "key": "faq",

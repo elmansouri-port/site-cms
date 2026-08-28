@@ -1,0 +1,159 @@
+---
+/*
+ * /cms/article-preview — the article you are writing, as the page it will be.
+ *
+ * The article editor was a list of forms. Adding a "Key points" section gave you
+ * a form with three fields and no idea what the blue box would look like, where
+ * the heading would land, or whether the contents list picked it up — so writing
+ * an article meant saving, publishing or hunting for the preview link, looking,
+ * and coming back. The page builder has had a live canvas since the beginning
+ * and the article editor did not.
+ *
+ * This is that canvas. It renders an **unsaved** draft through exactly the same
+ * path a published article takes — `renderArticle` pours the post into the
+ * authored article template, `renderPage` composes the document with the real
+ * header, footer, stylesheet and scripts — so what an editor sees is the page,
+ * not an impression of it. There is no second rendering path to drift.
+ *
+ * It is a POST carrying the draft as JSON, and nothing is written anywhere: the
+ * draft travels in the request and is gone with the response, so previewing
+ * cannot publish by accident and there is no scratch record to clean up.
+ *
+ * JSON rather than a form post, for a reason worth writing down. Submitting a
+ * hidden form into the iframe would be neater — the frame would land on a real
+ * URL — but Astro's CSRF check compares the `origin` header with the host, and
+ * in development the admin is its own dev server proxying the site. Same origin
+ * behind the gateway, different origin on a laptop: the preview would work in
+ * production and 403 for whoever was building it. A JSON body is not a form
+ * submission, so the check does not apply, and the CMS renders the response into
+ * the frame itself.
+ *
+ * Every URL the article template emits is root-relative, so they resolve against
+ * the admin's own origin — which behind the gateway is this origin, and in
+ * development is the dev server that proxies it.
+ *
+ * Gated on the preview cookie, like every other draft surface here.
+ */
+export const prerender = false;
+
+import PageDocument from '../../components/PageDocument.astro';
+import { config } from '../../lib/config.js';
+import { blogPost, blogSegment, baseUrlFrom, bootstrap, activeLocales } from '../../lib/site.js';
+import { renderPage } from '../../lib/render.js';
+import { renderArticle } from '../../lib/article.js';
+
+const { request, cookies, url } = Astro;
+
+function refuse(status, message) {
+  return new Response(message, {
+    status,
+    headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store' },
+  });
+}
+
+if (cookies.get(config.previewCookie)?.value !== config.previewSecret) {
+  return refuse(403, 'Preview mode is not on for this browser.');
+}
+if (request.method !== 'POST') {
+  return refuse(405, 'Post a draft to this URL.');
+}
+
+let draft;
+try {
+  draft = await request.json();
+  if (!draft || typeof draft !== 'object') throw new Error('not an object');
+} catch {
+  return refuse(400, 'Expected the article draft as a JSON body.');
+}
+
+const locale = typeof draft.locale === 'string' && /^[a-z]{2}$/.test(draft.locale)
+  ? draft.locale
+  : config.defaultLocale;
+
+/*
+ * The middleware never runs for this path — `/cms/*` is waved through, because
+ * behind the gateway it belongs to the API — so the locals a page render needs
+ * are assembled here. Same source, same bootstrap call, same cache.
+ */
+const boot = await bootstrap().catch(() => null);
+if (!boot) return refuse(503, 'The content API is not answering.');
+
+Astro.locals.locale = locale;
+Astro.locals.locales = activeLocales(boot.settings);
+Astro.locals.settings = boot.settings || {};
+Astro.locals.navigation = boot.navigation || { items: [] };
+Astro.locals.chrome = boot.chrome || null;
+Astro.locals.assets = boot.assets || [];
+Astro.locals.experiments = [];
+Astro.locals.variants = {};
+Astro.locals.preview = true;
+// Never the visual editor's overlay: the canvas here selects sections through
+// the list beside it, and the block bridge would offer to edit page blocks that
+// this document does not own.
+Astro.locals.editMode = false;
+Astro.locals.usedExperiments = new Set();
+
+const segment = blogSegment(boot.settings, locale);
+
+/*
+ * The neighbours a saved article would have.
+ *
+ * Related cards and the language switcher are part of what the page looks like,
+ * so a preview without them is misleadingly short. They are fetched for the
+ * saved version of this article when there is one; a brand-new article has no
+ * siblings yet and simply shows none, which is also what it will look like.
+ */
+let related = [];
+let translations = [];
+if (draft.slug) {
+  const saved = await blogPost(draft.slug, locale, true).catch(() => null);
+  if (saved) {
+    related = saved.related || [];
+    translations = saved.translations || [];
+  }
+}
+
+const post = {
+  slug: draft.slug || 'preview',
+  locale,
+  title: draft.title || 'Untitled article',
+  excerpt: draft.excerpt || '',
+  category: draft.category || '',
+  tags: Array.isArray(draft.tags) ? draft.tags : [],
+  coverImage: draft.coverImage || '',
+  coverAlt: draft.coverAlt || '',
+  authorName: draft.authorName || '',
+  authorRole: draft.authorRole || '',
+  authorAvatar: draft.authorAvatar || '',
+  readingMinutes: Number(draft.readingMinutes) || 0,
+  bodyHtml: typeof draft.bodyHtml === 'string' ? draft.bodyHtml : '',
+  sections: Array.isArray(draft.sections) ? draft.sections : [],
+  // A preview is never indexed whatever the draft says its status is.
+  status: 'draft',
+  publishedAt: draft.publishedAt || new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  seo: draft.seo || {},
+  snippets: draft.snippets || {},
+};
+
+const built = await renderArticle(
+  { post, forms: draft.forms || {}, related, translations },
+  locale,
+  { blogSegment: segment, baseUrl: baseUrlFrom(boot.settings, url), annotate: true },
+);
+
+if (!built.page) {
+  return refuse(500, 'The article template could not be loaded, so there is nothing to pour the draft into.');
+}
+
+const document = await renderPage(Astro, { ...built.page, noindex: true }, {
+  ...built.extra,
+  blogSegment: segment,
+});
+
+Astro.response.headers.set('content-type', 'text/html; charset=utf-8');
+Astro.response.headers.set('cache-control', 'no-store');
+Astro.response.headers.set('x-robots-tag', 'noindex, nofollow');
+---
+
+<PageDocument document={document} locale={locale} editMode={false} />

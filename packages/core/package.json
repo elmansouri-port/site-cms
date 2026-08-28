@@ -8,6 +8,8 @@
     ".": "./src/index.js",
     "./html": "./src/html.js",
     "./units": "./src/units.js",
+    "./copy": "./src/copy.js",
+    "./i18nData": "./src/i18nData.js",
     "./render": "./src/render.js",
     "./slice": "./src/slice.js",
     "./seo": "./src/seo.js",

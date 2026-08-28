@@ -28,8 +28,23 @@ export function errorHandler(err, req, res, _next) {
   const badInput = err.name === 'ValidationError' || err.name === 'CastError';
   const status = err.status || (badInput ? 400 : 500);
 
+  /*
+   * A unique-index collision, said in words.
+   *
+   * It used to answer `{error: 'Duplicate value', details: {slug: 'tarifs'}}` and
+   * leave the interface to render an object — which it did, as
+   * "[object Object]". The field and the value belong in the message: the caller
+   * already knows something is duplicated, what it needs is *which*.
+   */
   if (err.code === 11000) {
-    return res.status(409).json({ error: 'Duplicate value', details: err.keyValue });
+    const pairs = Object.entries(err.keyValue || {});
+    const named = pairs.map(([field, value]) => `${field} "${value}"`).join(' and ');
+    return res.status(409).json({
+      error: named
+        ? `Something already uses that ${named}`
+        : 'That value is already in use',
+      details: pairs.map(([field, value]) => ({ path: field, message: `"${value}" is already taken` })),
+    });
   }
   if (err.name === 'CastError') {
     return res.status(400).json({ error: `"${err.value}" is not a valid ${err.kind}` });

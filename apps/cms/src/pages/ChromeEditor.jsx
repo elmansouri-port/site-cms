@@ -6,11 +6,32 @@
  * times and hope. Now there is one of each, and this screen is where they live.
  *
  * The canvas is the real homepage in edit mode, so the header being edited is
- * the header as it renders. The right-hand column is the markup, its add-in
- * slots, and whether it is being tested.
+ * the header as it renders.
+ *
+ * ── Why this screen has a Text tab now ───────────────────────────────────────
+ *
+ * It used to open on the markup, with the French words plainly visible inside
+ * it. So people changed the words there, saved, looked at the site, and found it
+ * unchanged — because every string in the header is marked with a translation
+ * key and the renderer splices the catalogue over the marked range on the way
+ * out. The markup's copy is a default that is overridden on every request.
+ *
+ * Two things follow, and both are here:
+ *
+ *   - editing the markup now writes the catalogue as well, for the language the
+ *     canvas is showing, so the change does what it appears to do;
+ *   - and the words are not edited through the markup at all any more. **Text**
+ *     lists every string, in every language. **Links** lists every href. Markup
+ *     is for structure, which is what it was always for.
+ *
+ * The dropdown panels and the mobile drawer are not here either, and cannot be:
+ * they are built in the browser by /js/mega-menu.js from the CMS navigation, so
+ * the markup for them in this part is a placeholder the script hides. The screen
+ * says so rather than letting somebody edit markup that never renders.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { LayoutPanelTop, Plug, Plus, RefreshCw, Save, Trash2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useResource } from '../lib/hooks.js';
 import { api } from '../lib/api.js';
 import { useToast } from '../lib/toast.jsx';
@@ -18,6 +39,8 @@ import { useAuth } from '../lib/auth.jsx';
 import CodeEditor, { inspectCss, inspectHtml } from '../components/CodeEditor.jsx';
 import ScaledFrame from '../components/ScaledFrame.jsx';
 import HistoryPanel from '../components/HistoryPanel.jsx';
+import ChromeCopyPanel from '../components/ChromeCopyPanel.jsx';
+import ChromeLinksPanel from '../components/ChromeLinksPanel.jsx';
 import {
   Badge, Button, Callout, Card, CardContent, CardHeader, CardTitle, CheckboxField, Code, Dialog,
   DialogBody, DialogContent, DialogFooter, DialogHeader, DialogTitle, Empty, ErrorBox, Field,
@@ -136,9 +159,12 @@ function ChromePart({ part, chrome, canEdit, onChanged }) {
     visible: slot.visible !== false,
     experiment: slot.experiment || { key: null, variants: [] },
   }));
-  const [tab, setTab] = useState('markup');
+  const [tab, setTab] = useState('text');
   const [busy, setBusy] = useState(false);
   const [frameKey, setFrameKey] = useState(0);
+  // Bumped when a markup save wrote copy, so the Text tab is not showing values
+  // the save has just replaced.
+  const [copyNonce, setCopyNonce] = useState(0);
   const [src, setSrc] = useState(null);
   const [width, setWidth] = useState('desktop');
   const [locale, setLocale] = useState('fr');
@@ -166,10 +192,35 @@ function ChromePart({ part, chrome, canEdit, onChanged }) {
   async function save() {
     setBusy(true);
     try {
-      await api.patch(`/chrome/${part}`, draft);
-      toast.success(`The ${label} is live on every page`);
+      /*
+       * The language the canvas is showing travels with the markup.
+       *
+       * The words in the markup belong to one language, so a change to them is a
+       * change to that language's copy. Without saying which, the API would have
+       * to guess, and guessing wrong writes French over German.
+       */
+      const res = await api.patch(`/chrome/${part}`, { ...draft, locale });
+      const written = res?.copy?.written?.length || 0;
+      const refused = res?.copy?.refused || [];
+      if (written) {
+        // Said explicitly, because it is the behaviour that used to be missing:
+        // the editor needs to know their words went somewhere, and where.
+        toast.success(
+          `The ${label} is live on every page — ${written} text${written === 1 ? '' : 's'} `
+          + `updated in ${locale.toUpperCase()}`,
+        );
+      } else {
+        toast.success(`The ${label} is live on every page`);
+      }
+      if (refused.length) {
+        toast.error(
+          `${refused.length} string(s) were not changed: they contain a link or a styled word, `
+          + 'so they are edited on the Text tab.',
+        );
+      }
       await onChanged();
       setFrameKey(k => k + 1);
+      setCopyNonce(n => n + 1);
     } catch (err) {
       toast.error(err);
     } finally {
@@ -213,7 +264,7 @@ function ChromePart({ part, chrome, canEdit, onChanged }) {
   }
 
   return (
-    <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_440px]">
+    <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,460px)]">
       <Card className="overflow-hidden">
         <CardHeader className="flex-wrap gap-2">
           <Segmented
@@ -250,7 +301,7 @@ function ChromePart({ part, chrome, canEdit, onChanged }) {
         </div>
       </Card>
 
-      <Card className="self-start">
+      <Card className="min-w-0 self-start">
         <CardHeader>
           <CardTitle>{part === 'navbar' ? 'Site header' : 'Site footer'}</CardTitle>
           <div data-slot="card-actions">
@@ -274,10 +325,38 @@ function ChromePart({ part, chrome, canEdit, onChanged }) {
 
           <Tabs value={tab} onValueChange={setTab}>
             <TabsList>
+              <TabsTrigger value="text">Text</TabsTrigger>
+              <TabsTrigger value="links">Links</TabsTrigger>
               <TabsTrigger value="markup">Markup</TabsTrigger>
               <TabsTrigger value="addin">CSS &amp; JS</TabsTrigger>
               <TabsTrigger value="test">A/B</TabsTrigger>
             </TabsList>
+
+            {/*
+              Text first, and the tab this screen opens on.
+
+              It is what people come here for, and it is the only place changing a
+              word reliably works: the markup's copy is a default the catalogue
+              overrides on every render.
+            */}
+            <TabsContent value="text" className="pt-4">
+              <ChromeCopyPanel
+                key={`${part}-${copyNonce}`}
+                part={part}
+                locales={LOCALES}
+                canEdit={canEdit}
+                onSaved={() => setFrameKey(k => k + 1)}
+              />
+            </TabsContent>
+
+            <TabsContent value="links" className="pt-4">
+              <ChromeLinksPanel
+                key={`${part}-${copyNonce}`}
+                part={part}
+                canEdit={canEdit}
+                onSaved={async () => { await onChanged(); setFrameKey(k => k + 1); }}
+              />
+            </TabsContent>
 
             <TabsContent value="markup" className="grid gap-4 pt-4">
               <CheckboxField
@@ -286,9 +365,37 @@ function ChromePart({ part, chrome, canEdit, onChanged }) {
                 disabled={!canEdit}
                 onChange={v => setDraft(d => ({ ...d, visible: v }))}
               />
+
+              {/*
+                Stated before the editor, not after it.
+
+                This is the sentence whose absence made the header look broken: the
+                words in this box are overridden by the catalogue on every render.
+                They are no longer *discarded* — saving writes them to the language
+                the canvas is showing — but the Text tab is still the right place to
+                change a word, and this says why.
+              */}
+              <Callout tone="warning">
+                <strong>The words here are the fallback, not the source.</strong> Anything wrapped in
+                a <Code>data-i18n</Code> marker is replaced by the copy for the language being
+                served. Editing text here now saves it as the{' '}
+                <strong>{locale.toUpperCase()}</strong> copy — the language the canvas is set to —
+                but the <strong>Text</strong> tab is where to change a word, and the only place to
+                change the other languages.
+              </Callout>
+
+              {part === 'navbar' && (
+                <Callout>
+                  The <strong>dropdown panels and the mobile drawer</strong> are not in this markup.
+                  They are built in the browser from the CMS navigation, so the placeholders here
+                  are hidden on the live page. Edit those under{' '}
+                  <Link to="/navigation" className="underline">Navigation</Link>.
+                </Callout>
+              )}
+
               <Field
                 label="HTML"
-                hint="Tailwind classes work here. Text wrapped in a data-i18n marker is translated from Copy & languages."
+                hint="Tailwind classes work here. This is for structure — layout, classes, which elements exist."
               >
                 <CodeEditor
                   value={draft.html}

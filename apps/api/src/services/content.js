@@ -101,11 +101,15 @@ export function routeIndexCached() {
         updatedAt: 1, experiment: 1, title: 1, seo: 1, _id: 0,
       }).lean();
     const posts = await BlogPost.find({ status: 'published' },
-      { slug: 1, locale: 1, groupId: 1, updatedAt: 1, publishedAt: 1, pageKey: 1, _id: 0 }).lean();
+      {
+        slug: 1, locale: 1, groupId: 1, updatedAt: 1, publishedAt: 1, pageKey: 1,
+        coverImage: 1, _id: 0,
+      }).lean();
     // A page serving as somebody else's variant arm is not a URL of its own.
     const routable = pages.filter(p => !p.experiment?.variantOf);
     /*
-     * The public title and description per locale, and only those two fields.
+     * The public title, description and share image per locale, and only those
+     * fields.
      *
      * The whole `seo` map is projected out of Mongo because a Map cannot be
      * projected by sub-field, then reduced here before it is cached: the map
@@ -120,7 +124,7 @@ export function routeIndexCached() {
         meta: Object.fromEntries(
           Object.entries(seo || {}).map(([locale, values]) => [
             locale,
-            { title: values?.title || '', description: values?.description || '' },
+            { title: values?.title || '', description: values?.description || '', image: values?.ogImage || '' },
           ]),
         ),
       })),

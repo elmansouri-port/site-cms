@@ -129,7 +129,7 @@ function Readiness({ results, experiment }) {
       </CardHeader>
       <CardContent className="grid gap-3">
         {r.blockers.map(b => (
-          <div key={b.kind} className="grid gap-1.5">
+          <div key={b.kind} className="grid min-w-0 gap-1.5">
             <div className="flex items-baseline justify-between gap-4">
               <span className="text-[12.5px] font-medium">{BLOCKER_LABEL[b.kind] || b.kind}</span>
               <span className="text-muted-foreground text-[12px] tabular-nums">{b.message}</span>

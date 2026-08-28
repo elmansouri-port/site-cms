@@ -625,6 +625,7 @@ export default function VisualEditor({ page, locales, canEdit, onChanged }) {
               pageKey={page.key}
               sectionKey={selectedBlock.key}
               locale={locale}
+              locales={locales}
               canEdit={canEdit}
               anchors={anchors}
               onSaved={async () => { await onChanged(); refresh(); }}

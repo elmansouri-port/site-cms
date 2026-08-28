@@ -16,6 +16,8 @@
  */
 import { chromium } from 'playwright';
 import { mkdir } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import { loadEnv } from './lib/env.mjs';
 import path from 'node:path';
 
 const args = process.argv.slice(2);
@@ -25,8 +27,19 @@ const flag = (name, fallback) => {
 };
 const BASE = (args.find(a => !a.startsWith('--')) || 'http://localhost:5173').replace(/\/+$/, '');
 const SHOTS = path.resolve(flag('shots', 'artifacts/forms'));
-const EMAIL = process.env.ADMIN_EMAIL || 'admin@rainbow.local';
-const PASSWORD = process.env.ADMIN_PASSWORD || 'Rainbow!Admin2026';
+const ENV_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+
+/*
+ * Credentials from .env, not only from the environment.
+ *
+ * Every tool here used to read `process.env` directly, so running one meant
+ * prefixing the command with ADMIN_PASSWORD= even though the password is sitting
+ * in .env at the repository root. Real environment variables still win, so CI and
+ * `docker compose` override the file rather than the other way round.
+ */
+const env = loadEnv(ENV_ROOT);
+const EMAIL = env.ADMIN_EMAIL || 'admin@rainbow.local';
+const PASSWORD = env.ADMIN_PASSWORD;
 
 if (!args.includes('--confirm')) {
   console.error(

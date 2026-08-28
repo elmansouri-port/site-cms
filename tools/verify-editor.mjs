@@ -10,11 +10,14 @@
  * content has been changed, but it means this belongs on a development or
  * staging stack, never against production data.
  *
- *   ADMIN_PASSWORD=… node tools/verify-editor.mjs http://localhost:8080 --confirm
+ *   node tools/verify-editor.mjs http://localhost:8080 --confirm
  *
  * Everything it creates is keyed `zz-check-*` and removed at the end. If a run
  * fails part-way, delete those keys before running it again.
  */
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { loadEnv } from './lib/env.mjs';
 const args = process.argv.slice(2);
 const flag = (name, fallback) => {
   const i = args.indexOf(`--${name}`);
@@ -31,15 +34,26 @@ const BASE = (args.find(a => !a.startsWith('-')) || 'http://localhost:8080').rep
  *   node tools/verify-editor.mjs http://localhost:4000 --site http://localhost:3000 --confirm
  */
 const SITE = flag('site', BASE).replace(/\/+$/, '');
-const EMAIL = process.env.ADMIN_EMAIL || 'admin@rainbow.local';
-const PASSWORD = process.env.ADMIN_PASSWORD;
+const ENV_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+
+/*
+ * Credentials from .env, not only from the environment.
+ *
+ * Every tool here used to read `process.env` directly, so running one meant
+ * prefixing the command with ADMIN_PASSWORD= even though the password is sitting
+ * in .env at the repository root. Real environment variables still win, so CI and
+ * `docker compose` override the file rather than the other way round.
+ */
+const env = loadEnv(ENV_ROOT);
+const EMAIL = env.ADMIN_EMAIL || 'admin@rainbow.local';
+const PASSWORD = env.ADMIN_PASSWORD;
 
 if (!args.includes('--confirm')) {
   console.error(
     'This tool writes to the database: it creates scratch pages, changes the\n'
     + 'pricing page\'s URLs and attaches experiments, then undoes all of it.\n'
     + 'Re-run with --confirm once you are sure this is not production data.\n\n'
-    + `  ADMIN_PASSWORD=… node tools/verify-editor.mjs ${BASE} --confirm`,
+    + `  node tools/verify-editor.mjs ${BASE} --confirm`,
   );
   process.exit(2);
 }
@@ -114,14 +128,28 @@ console.log('\nLocalized routes');
 
   const en = await page('/en/pricing');
   ok('/en/pricing serves the page', en.status === 200, `status ${en.status}`);
-  ok('its canonical is the localized URL',
-    en.html.includes('rel="canonical" href="' + SITE + '/en/pricing/'),
+  /*
+   * No trailing slash, and that is the assertion.
+   *
+   * These three checks used to expect `/en/pricing/`, and failed — because the
+   * middleware 301s `/en/pricing/` to `/en/pricing`, deliberately: the authored
+   * pages link `href="/fr/tarifs"` and those bytes are under the fidelity
+   * guarantee, so the slash-less form is the canonical one and everything else has
+   * to agree with it.
+   *
+   * Worth being explicit about, because the failure pointed the wrong way. Anyone
+   * "fixing" the code to satisfy the old assertion would have made every canonical
+   * URL on the site point at a redirect, which is the exact duplicate-content bug
+   * the canonical tag exists to prevent.
+   */
+  ok('its canonical is the localized URL, with no trailing slash',
+    en.html.includes('rel="canonical" href="' + SITE + '/en/pricing"'),
     (en.html.match(/rel="canonical"[^>]*/) || [''])[0]);
   ok('hreflang points de at /de/preise',
-    en.html.includes('hreflang="de" href="' + SITE + '/de/preise/'),
+    en.html.includes('hreflang="de" href="' + SITE + '/de/preise"'),
     (en.html.match(/hreflang="de"[^>]*/) || ['none'])[0]);
   ok('hreflang points fr at the base route',
-    en.html.includes(`hreflang="fr" href="${SITE}/fr/${baseRoute}/`),
+    en.html.includes(`hreflang="fr" href="${SITE}/fr/${baseRoute}"`),
     (en.html.match(/hreflang="fr"[^>]*/) || ['none'])[0]);
 
   const old = await page(`/en/${baseRoute}`);
@@ -138,9 +166,11 @@ console.log('\nLocalized routes');
     JSON.stringify(written || null));
 
   const map = await page('/sitemap.xml');
-  ok('the sitemap lists the localized URL', map.html.includes(`${SITE}/en/pricing/`));
+  // `<loc>` and `</loc>` around it, so `/en/pricing` cannot be satisfied by
+  // `/en/pricing-archive` and the old-URL check cannot be satisfied by a prefix.
+  ok('the sitemap lists the localized URL', map.html.includes(`<loc>${SITE}/en/pricing</loc>`));
   ok('the sitemap does not list the old English URL',
-    !map.html.includes(`${SITE}/en/${baseRoute}/`));
+    !map.html.includes(`<loc>${SITE}/en/${baseRoute}</loc>`));
 
   const de = await page('/de/preise');
   ok('/de/preise serves the page too', de.status === 200, `status ${de.status}`);
@@ -875,9 +905,21 @@ console.log('\nCleanup');
   for (const key of ['zz-check-block', 'zz-check-page-test', 'zz-check-cookie']) {
     await api(`/experiments/${key}`, { method: 'DELETE' });
   }
+  /*
+   * Both directions, and both locales.
+   *
+   * Setting the localized routes writes `/en/tarifs → /en/pricing`; clearing
+   * them again writes the reverse, `/en/pricing → /en/tarifs`, plus the German
+   * pair. This deleted only the first kind, so every run left two redirects
+   * behind — pointing at URLs that were never public, on a screen where nobody
+   * could tell whether they mattered. Which is precisely the confusion the
+   * Redirects screen now exists to prevent, so a verification tool should not be
+   * manufacturing it.
+   */
+  const scratch = new Set(['/en/pricing', '/de/preise', `/en/${baseRoute}`, `/de/${baseRoute}`]);
   const redirects = await api('/redirects');
   for (const r of redirects.body?.items || []) {
-    if (r.from?.startsWith('/en/') && r.to === '/en/pricing') {
+    if (scratch.has(r.from) || scratch.has(r.to)) {
       await api(`/redirects/${r._id}`, { method: 'DELETE' });
     }
   }

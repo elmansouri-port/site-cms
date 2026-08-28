@@ -12,13 +12,14 @@ import { formIndex, formsFor } from '../services/forms.js';
 import { validate, q } from '../middleware/validate.js';
 import { allowPreview } from '../middleware/auth.js';
 import { catalogueFor } from '../services/catalogue.js';
+import { countryNames } from '../services/countries.js';
 import {
   settingsCached, navigationCached, routeIndexCached, getPagePayload, getPageByKey,
   redirectsCached, experimentsCached, activeLocaleCodes, chromeCached, integrationsCached,
   assetsCached,
 } from '../services/content.js';
 import { config } from '../config.js';
-import { BlogPost, Partner } from '../models/index.js';
+import { BlogPost, Partner, Redirect } from '../models/index.js';
 
 export const siteRouter = Router();
 
@@ -46,6 +47,15 @@ function publicSettings(s) {
     analytics: s.analytics,
     robotsExtra: s.robotsExtra,
     maintenanceMode: s.maintenanceMode,
+    /*
+     * Whether a submission will be kept, and nothing else about it.
+     *
+     * The retention period is an internal policy and stays internal; whether
+     * anything is stored at all is something a form is entitled to say out loud,
+     * and a consent notice that promises the opposite of what happens is worse
+     * than no notice.
+     */
+    leads: { store: s.leads?.store !== false },
   };
 }
 
@@ -142,6 +152,25 @@ siteRouter.get('/asset/:slug', asyncHandler(async (req, res) => {
   res.redirect(302, hit.url);
 }));
 
+/**
+ * Record that a redirect was followed.
+ *
+ * Called by the frontend middleware, server to server, immediately after it
+ * matches one — fire-and-forget, so a visitor's redirect never waits for this.
+ * Gated on the shared secret for the same reason the integration map is: a
+ * counter anybody can drive is a counter nobody can read.
+ *
+ * The write is a bare `$inc`, with no read first, so concurrent hits cannot lose
+ * each other.
+ */
+siteRouter.post('/redirect-hit', asyncHandler(async (req, res) => {
+  if (req.get('x-cms-secret') !== config.revalidateSecret) throw notFoundError('No such route');
+  const from = String(req.body?.from || '').slice(0, 500);
+  if (!from) return res.status(204).end();
+  await Redirect.updateOne({ from }, { $inc: { hits: 1 }, $set: { lastHitAt: new Date() } });
+  res.status(204).end();
+}));
+
 siteRouter.get('/routes', asyncHandler(async (req, res) => {
   const [index, locales] = await Promise.all([routeIndexCached(), activeLocaleCodes()]);
   res.set('cache-control', 'public, max-age=60');
@@ -155,29 +184,65 @@ const listQuery = z.object({
   category: z.string().max(80).optional(),
   tag: z.string().max(80).optional(),
   q: z.string().max(120).optional(),
+  /**
+   * Ask for the category and tag lists alongside the page of articles.
+   *
+   * The blog index needs both to draw its filter pills, and it needs them
+   * computed over *every* published article rather than the twelve on this page
+   * — a pill for a category is only worth showing if something is in it. Two
+   * round trips for one screen is worse than one flag.
+   */
+  facets: z.coerce.boolean().optional(),
+  // Leave one article out by slug. The blog index shows its lead article as a
+  // large featured card and the rest as a grid; without this the featured one
+  // appears twice on the first page.
+  exclude: z.string().max(200).optional(),
 });
 
 siteRouter.get('/blog', validate(listQuery, 'query'), asyncHandler(async (req, res) => {
-  const { locale, page, limit, category, tag, q: search } = q(req);
+  const { locale, page, limit, category, tag, q: search, facets, exclude } = q(req);
   const filter = { locale, status: 'published', publishedAt: { $lte: new Date() } };
   if (category) filter.category = category;
   if (tag) filter.tags = tag;
+  if (exclude) filter.slug = { $ne: exclude };
   if (search) filter.$or = [
     { title: { $regex: escapeRegex(search), $options: 'i' } },
     { excerpt: { $regex: escapeRegex(search), $options: 'i' } },
   ];
 
-  const [items, total] = await Promise.all([
+  const published = { locale, status: 'published', publishedAt: { $lte: new Date() } };
+  const [items, total, categories, tags] = await Promise.all([
     BlogPost.find(filter, { bodyHtml: 0, sections: 0 })
       .sort({ featured: -1, publishedAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
       .lean(),
     BlogPost.countDocuments(filter),
+    // Counted, not just listed: a pill saying how many articles are behind it is
+    // the difference between a filter and a guess.
+    facets
+      ? BlogPost.aggregate([
+        { $match: published },
+        { $group: { _id: '$category', count: { $sum: 1 } } },
+        { $sort: { count: -1, _id: 1 } },
+      ])
+      : Promise.resolve(null),
+    facets ? BlogPost.distinct('tags', published) : Promise.resolve(null),
   ]);
 
   res.set('cache-control', 'public, max-age=60');
-  res.json({ items, total, page, pages: Math.ceil(total / limit) || 1 });
+  res.json({
+    items,
+    total,
+    page,
+    pages: Math.ceil(total / limit) || 1,
+    ...(facets ? {
+      categories: (categories || [])
+        .filter(c => c._id)
+        .map(c => ({ name: c._id, count: c.count })),
+      tags: (tags || []).filter(Boolean).sort(),
+    } : {}),
+  });
 }));
 
 siteRouter.get('/blog/:slug', asyncHandler(async (req, res) => {
@@ -226,11 +291,29 @@ siteRouter.get('/blog/:slug', asyncHandler(async (req, res) => {
 /**
  * The partner locator fetches this at the same URL the static site used, so the
  * page's JavaScript is untouched while the data becomes CMS-managed.
+ *
+ * `?locale=` translates the country names. The directory is exported from
+ * elsewhere and its country field is English, inconsistently — `USA`, `MEXICO`,
+ * `Utd.Arab.Emir.` — and the locator groups its filter dropdown by that value
+ * and prints it on every card. So a French visitor was reading a list of English
+ * country names with two of them misspelled.
+ *
+ * Translated here rather than in the page, because the page's script is under
+ * the byte-fidelity guarantee, and because the same table then serves anything
+ * else that has to name a country.
  */
 siteRouter.get('/partners', asyncHandler(async (req, res) => {
-  const partners = await Partner.find({ active: true }, { raw: 1, _id: 0 }).lean();
+  const locale = /^[a-z]{2}$/.test(String(req.query.locale || '')) ? String(req.query.locale) : null;
+  const [partners, countries] = await Promise.all([
+    Partner.find({ active: true }, { raw: 1, _id: 0 }).lean(),
+    locale ? countryNames(locale) : Promise.resolve(null),
+  ]);
   res.set('cache-control', 'public, max-age=300');
-  res.json(partners.map(p => p.raw));
+  res.json(partners.map((p) => {
+    const raw = p.raw || {};
+    const translated = countries && raw.country ? countries[raw.country] : null;
+    return translated ? { ...raw, country: translated } : raw;
+  }));
 }));
 
 siteRouter.get('/forms/schema', asyncHandler(async (_req, res) => {

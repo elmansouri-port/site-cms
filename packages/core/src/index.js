@@ -1,6 +1,13 @@
 export * as html from './html.js';
 export { replaceElementInner } from './html.js';
 export { collectUnits, encodeRich, stripMarkers } from './units.js';
+export {
+  copyUnits, copyEdits, linkTargets as chromeLinkTargets, replaceLink, matchLineEndings,
+  skeleton, structurallyEqual,
+} from './copy.js';
+export {
+  isTranslated, translated, pickLocale, localesOf, localiseData,
+} from './i18nData.js';
 export { render, renderRich } from './render.js';
 export { sliceDocument, sliceBody, uniqueKeys, extractHeadMeta } from './slice.js';
 export {

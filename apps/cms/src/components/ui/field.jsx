@@ -35,7 +35,7 @@ export function Field({ label, hint, error, children, htmlFor, className, inline
   }
 
   return (
-    <div data-slot="field" className={cn('grid gap-1.5', className)}>
+    <div data-slot="field" className={cn('grid min-w-0 gap-1.5', className)}>
       {label && <Label htmlFor={id}>{label}</Label>}
       {control}
       {hint && !error && <p className="text-muted-foreground text-[12px] leading-snug">{hint}</p>}
@@ -48,7 +48,7 @@ export function Field({ label, hint, error, children, htmlFor, className, inline
 export function FieldRow({ className, cols = 2, ...props }) {
   return (
     <div
-      className={cn('grid gap-4', cols === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2', className)}
+      className={cn('grid min-w-0 gap-4', cols === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2', className)}
       {...props}
     />
   );
@@ -56,13 +56,13 @@ export function FieldRow({ className, cols = 2, ...props }) {
 
 /** Vertical rhythm inside a card body, so no screen invents its own spacing. */
 export function FieldSet({ className, ...props }) {
-  return <div className={cn('grid gap-4', className)} {...props} />;
+  return <div className={cn('grid min-w-0 gap-4', className)} {...props} />;
 }
 
 /** A heading inside a long form, where a second card would be too heavy. */
 export function FieldGroupLabel({ className, children, hint, ...props }) {
   return (
-    <div className={cn('border-b pb-2', className)} {...props}>
+    <div className={cn('min-w-0 border-b pb-2', className)} {...props}>
       <h3 className="text-[12px] font-semibold tracking-wide uppercase">{children}</h3>
       {hint && <p className="text-muted-foreground mt-1 text-[12px] normal-case">{hint}</p>}
     </div>

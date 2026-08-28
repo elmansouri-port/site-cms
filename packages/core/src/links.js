@@ -64,6 +64,30 @@ export function linkTargets({ pages = [], posts = [], locale, blogSegment = 'blo
 }
 
 /**
+ * Build the thumbnail map for one locale: what image a `page:` or `post:`
+ * reference's own cover image is, for anything that wants to show a link as a
+ * card rather than a row — the megamenu's showcase link, say — without every
+ * caller having to know where a cover image lives on a page versus a post.
+ */
+export function imageTargets({ pages = [], posts = [], locale }) {
+  const map = new Map();
+
+  for (const page of pages) {
+    if (!page?.key) continue;
+    const image = page.meta?.[locale]?.image;
+    if (image) map.set(pageRef(page.key), image);
+  }
+
+  for (const post of posts) {
+    if (!post?.slug) continue;
+    if (post.locale && post.locale !== locale) continue;
+    if (post.coverImage) map.set(postRef(post.slug), post.coverImage);
+  }
+
+  return map;
+}
+
+/**
  * Replace every reference in a piece of markup with the path it resolves to.
  *
  * Longest reference first, so `page:products` cannot eat the prefix of

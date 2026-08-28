@@ -217,9 +217,17 @@ export function extractHeadMeta(headRaw) {
     rest = rest.replace(re, '');
   }
 
-  // JSON-LD blocks: the page may carry several.
+  /*
+   * JSON-LD blocks: the page may carry several.
+   *
+   * The type attribute is matched anywhere in the tag, not immediately after
+   * `<script `. It used to be anchored there, so the article template's
+   * `<script id="json-ld-main" type="application/ld+json" …>` was never
+   * recognised: its structured data stayed in the raw head, untranslated, and
+   * shipped with its internal `data-i18n-raw` key visible in the markup.
+   */
   const jsonLd = [];
-  const ldRe = /[ \t]*<script\s+type="application\/ld\+json"([^>]*)>([\s\S]*?)<\/script>\s*\n?/gi;
+  const ldRe = /[ \t]*<script\b([^>]*\stype="application\/ld\+json"[^>]*)>([\s\S]*?)<\/script>\s*\n?/gi;
   let lm;
   while ((lm = ldRe.exec(rest)) !== null) {
     jsonLd.push({

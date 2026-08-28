@@ -123,7 +123,15 @@ export function render(template, catalogue, locale, opts = {}) {
       if (seen.has(unit.tagStart)) continue;
       seen.add(unit.tagStart);
       const raw = template.slice(unit.tagStart, unit.tagEnd);
-      const re = /\s+data-i18n(?:-rich|-attr)?\s*=\s*("[^"]*"|'[^']*')/g;
+      /*
+       * Every marker, not three of the five.
+       *
+       * `-raw` and `-js` were missing, so a page carrying either shipped the
+       * attribute — and with it an internal translation key — to the browser.
+       * The list matches `stripMarkers` in units.js, which is what the ingest
+       * uses; the two disagreeing is what let this through.
+       */
+      const re = /\s+data-i18n(?:-rich|-attr|-raw|-js)?\s*=\s*("[^"]*"|'[^']*')/g;
       let mm;
       while ((mm = re.exec(raw)) !== null) {
         edits.push({
@@ -147,6 +155,22 @@ export function render(template, catalogue, locale, opts = {}) {
     const openEnd = m.index + m[0].indexOf('>') + 1;
     const closeStart = m.index + m[0].lastIndexOf('</script>');
     edits.push({ start: openEnd, end: closeStart, text: body });
+
+    /*
+     * And the marker itself.
+     *
+     * This tag is not a translation unit — it is a whole element the branch is
+     * baked into — so the strip pass above, which walks the units, never saw it.
+     * Two pages therefore published `data-i18n-js="trouver-un-partenaire.js"` to
+     * the browser: harmless to a parser, and an internal key on a public page.
+     */
+    if (stripMarkers) {
+      const marker = /\s+data-i18n-js\s*=\s*("[^"]*"|'[^']*')/.exec(m[1]);
+      if (marker) {
+        const at = m.index + '<script'.length + marker.index;
+        edits.push({ start: at, end: at + marker[0].length, text: '' });
+      }
+    }
   }
 
   let out = L.applyEdits(template, dedupe(edits));

@@ -18,6 +18,7 @@ import { useToast } from '../lib/toast.jsx';
 import { useAuth } from '../lib/auth.jsx';
 import { cn } from '../lib/cn.js';
 import LinkPicker from '../components/LinkPicker.jsx';
+import MediaPicker from '../components/MediaPicker.jsx';
 import HistoryPanel from '../components/HistoryPanel.jsx';
 import {
   Badge, Button, Callout, Card, CardContent, CardHeader, CardTitle, CheckboxField, Code,
@@ -111,12 +112,12 @@ export default function NavigationEditor() {
             </Callout>
           )}
 
-          <div className="grid gap-2">
+          <div className="grid min-w-0 gap-2">
             {items.map(item => (
-              <div key={item.key}>
+              <div key={item.key} className="min-w-0">
                 <div
                   className={cn(
-                    'bg-card flex items-center gap-2 rounded-lg border p-2.5 transition-opacity',
+                    'bg-card flex min-w-0 items-center gap-2 rounded-lg border p-2.5 transition-opacity',
                     dragKey === item.key && 'opacity-40',
                   )}
                   draggable={can('editor')}
@@ -246,6 +247,7 @@ export default function NavigationEditor() {
 
 function Zone({ title, hint, zone = {}, locale, canEdit, withSeeAll, onChange }) {
   const links = zone.links || [];
+  const [picking, setPicking] = useState(null);
   const setLink = (i, updater) => onChange({
     ...zone,
     links: links.map((l, idx) => (idx === i ? updater(l) : l)),
@@ -296,8 +298,29 @@ function Zone({ title, hint, zone = {}, locale, canEdit, withSeeAll, onChange })
               />
             )}
           </Field>
+          {link.variant === 'showcase' && (
+            <Field
+              label="Thumbnail"
+              hint="Leave empty to use the cover image of the article or page it links to."
+            >
+              {id => (
+                <div className="flex items-center gap-2">
+                  <Input
+                    id={id}
+                    mono
+                    value={link.image || ''}
+                    disabled={!canEdit}
+                    onChange={e => setLink(i, l => ({ ...l, image: e.target.value }))}
+                  />
+                  <Button variant="outline" size="sm" onClick={() => setPicking(i)} disabled={!canEdit}>
+                    Browse…
+                  </Button>
+                </div>
+              )}
+            </Field>
+          )}
           <FieldRow cols={3}>
-            <Field label="Icon">
+            <Field label="Icon" hint={link.variant === 'showcase' ? 'Unused by the showcase card — it shows the thumbnail above instead.' : undefined}>
               {id => (
                 <Input
                   id={id}
@@ -353,11 +376,21 @@ function Zone({ title, hint, zone = {}, locale, canEdit, withSeeAll, onChange })
         disabled={!canEdit}
         onClick={() => onChange({
           ...zone,
-          links: [...links, { label: {}, description: {}, href: '', icon: 'chat', column: 1, variant: 'item' }],
+          links: [...links, { label: {}, description: {}, href: '', icon: 'chat', image: '', column: 1, variant: 'item' }],
         })}
       >
         <Plus /> Add link
       </Button>
+
+      {picking != null && (
+        <MediaPicker
+          onClose={() => setPicking(null)}
+          onSelect={(item) => {
+            setLink(picking, l => ({ ...l, image: item.url }));
+            setPicking(null);
+          }}
+        />
+      )}
 
       {withSeeAll && (
         <FieldRow>

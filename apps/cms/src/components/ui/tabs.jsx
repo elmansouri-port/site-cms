@@ -1,7 +1,19 @@
 import * as TabsPrimitive from '@radix-ui/react-tabs';
 import { cn } from '../../lib/cn.js';
 
-export const Tabs = TabsPrimitive.Root;
+/**
+ * The tab set.
+ *
+ * `min-w-0` on the root, always. A tab strip is `whitespace-nowrap` and scrolls
+ * horizontally when it has to, but a grid or flex *parent* still reads its
+ * min-content — five tabs of nowrap text — and grows its track to fit. That is
+ * how the header editor ended up with a 543px panel in a 460px column, with the
+ * right-hand side of every callout cut off. The scroll container is the intended
+ * answer to a narrow tab strip; this is what lets it be used.
+ */
+export function Tabs({ className, ...props }) {
+  return <TabsPrimitive.Root className={cn('min-w-0', className)} {...props} />;
+}
 
 export function TabsList({ className, ...props }) {
   return (

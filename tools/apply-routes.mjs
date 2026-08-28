@@ -26,6 +26,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { loadEnv, credentials } from './lib/env.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const TABLE = path.join(ROOT, 'content-source', 'routes.i18n.json');
@@ -39,17 +40,7 @@ const DRY = !args.includes('--confirm');
 
 /* The .env the docker stack already reads, so the tool needs no arguments in
  * the normal case. Values on the command line still win. */
-function dotenv() {
-  const out = {};
-  try {
-    for (const line of fs.readFileSync(path.join(ROOT, '.env'), 'utf8').split('\n')) {
-      const m = /^\s*([A-Z0-9_]+)\s*=\s*(.*)$/.exec(line);
-      if (m) out[m[1]] = m[2].trim().replace(/^["']|["']$/g, '');
-    }
-  } catch { /* no .env: fall back to the environment */ }
-  return out;
-}
-const env = { ...dotenv(), ...process.env };
+const env = loadEnv(ROOT);
 
 const API = flag('api', env.API_BASE || 'http://localhost:8080/api/v1');
 const EMAIL = flag('email', env.ADMIN_EMAIL);
@@ -99,7 +90,7 @@ async function main() {
   console.log(DRY ? c.yellow('DRY RUN — nothing will be written. Re-run with --confirm to apply.\n')
     : c.green('Applying.\n'));
 
-  ({ token } = await call('POST', '/auth/login', { email: EMAIL, password: PASSWORD }));
+  ({ token } = await call('POST', '/auth/login', credentials(env, { email: EMAIL, password: PASSWORD })));
 
   const { items: pages } = await call('GET', '/pages');
   const byKey = new Map(pages.map(p => [p.key, p]));

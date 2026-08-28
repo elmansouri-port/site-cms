@@ -91,6 +91,32 @@ const SettingsSchema = new Schema({
 
   robotsExtra: { type: String, default: '' },
   maintenanceMode: { type: Boolean, default: false },
+
+  /**
+   * Whether a form submission is kept.
+   *
+   * The site stores every submission before forwarding it, so a lead is not lost
+   * when the automation platform is down. That is the right default and it is not
+   * always the right answer: a deployment whose forms feed a CRM that is already
+   * the system of record does not want a second copy of every enquiry in a
+   * marketing database, and one that does not need the data should not be holding
+   * names, email addresses and IP addresses at all.
+   *
+   * Off means **not written**, not hidden. There is no copy to leak, to export,
+   * or to have to delete on request. Forwarding is unaffected, which is the
+   * point: the submission still reaches wherever it is meant to go.
+   */
+  leads: {
+    store: { type: Boolean, default: true },
+    /**
+     * Days to keep a stored lead; 0 keeps them indefinitely.
+     *
+     * The other half of the same question, and it belongs next to the switch:
+     * "we keep leads" and "we keep leads for 90 days" are different commitments,
+     * and only one of them can be made by doing nothing.
+     */
+    retentionDays: { type: Number, default: 0, min: 0, max: 3650 },
+  },
 }, { timestamps: true, minimize: false });
 
 export const Settings = mongoose.model('Settings', SettingsSchema);
@@ -104,6 +130,10 @@ const MegaLinkSchema = new Schema({
   mobileDescription: { type: Map, of: String, default: {} },
   href: { type: String, default: '' },
   icon: { type: String, default: '' },
+  // A custom thumbnail for the showcase card. Left empty, the showcase card
+  // uses the cover image of the article or page it links to — set this only
+  // to override that.
+  image: { type: String, default: '' },
   badge: { type: Map, of: String, default: {} },
   // Which column of the zone this link sits in (the resources menu uses two).
   column: { type: Number, default: 1 },
@@ -349,7 +379,21 @@ const RedirectSchema = new Schema({
   to: { type: String, required: true },
   status: { type: Number, enum: [301, 302, 307, 308], default: 301 },
   active: { type: Boolean, default: true },
+
+  /**
+   * How many times this has actually been followed, and when it last was.
+   *
+   * `hits` existed and was never incremented, so the field was a permanent zero
+   * — which is worse than absent, because the one question anybody asks about a
+   * redirect is whether anything still uses it. A rename writes these
+   * automatically, so a site accumulates them, and without a count there is no
+   * safe way to decide which are archaeology: deleting a live one throws away
+   * whatever links to it, and keeping a dead one forever means nobody trusts the
+   * list.
+   */
   hits: { type: Number, default: 0 },
+  lastHitAt: { type: Date, default: null },
+
   note: { type: String, default: '' },
 }, { timestamps: true });
 
@@ -575,6 +619,29 @@ const PartnerSchema = new Schema({
   specialties: { type: [String], default: [] },
   lat: { type: Number, default: null },
   lng: { type: Number, default: null },
+
+  /**
+   * Head office or subsidiary.
+   *
+   * The locator's three filter buttons are "all / head offices / subsidiaries"
+   * and its map draws the two with different markers, so this is not decoration —
+   * a partner with no `hq` value lands in the wrong filter and the wrong pin.
+   * It was missing from the model, which meant editing a partner through the CMS
+   * silently dropped it, because `buildRaw` rebuilt `raw` from the structured
+   * fields and `hq` was not one of them.
+   */
+  hq: { type: Boolean, default: false },
+
+  /**
+   * Extra search terms, as the source data supplies them.
+   *
+   * A free-text field the locator searches alongside the name and the country —
+   * "Brasil; UAE; Suisse" on a partner that trades under other names or covers
+   * other territories. Same story as `hq`: read by the page, absent from the
+   * model, and therefore lost on the first edit.
+   */
+  keywords: { type: String, default: '' },
+
   active: { type: Boolean, default: true },
   raw: { type: Schema.Types.Mixed, default: {} },
 }, { timestamps: true, minimize: false });

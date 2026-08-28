@@ -264,7 +264,7 @@ function CreatePage({ pages, onClose, onCreated }) {
             </Field>
 
             <Field label="Kind of page">
-              <div className="grid gap-2">
+              <div className="grid min-w-0 gap-2">
                 {PRESETS.map(p => (
                   <button
                     key={p.key}

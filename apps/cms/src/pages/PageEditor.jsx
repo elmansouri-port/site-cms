@@ -249,6 +249,7 @@ export default function PageEditor() {
                 pageKey={key}
                 sectionKey={editingSection}
                 locale={locales[0]}
+                locales={locales}
                 canEdit={can('editor')}
                 anchors={anchorsOf(page, blockLabel)}
                 onSaved={reload}

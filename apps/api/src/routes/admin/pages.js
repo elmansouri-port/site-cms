@@ -56,13 +56,33 @@ const listQuery = z.object({
   status: z.enum(['published', 'draft']).optional(),
   kind: z.string().max(40).optional(),
   q: z.string().max(120).optional(),
+  /**
+   * Include the pages that back a blog article.
+   *
+   * One migrated page *is* an article: `blog-the-power-of-rainbow` is the
+   * authored article the template was taken from, and it is also a BlogPost with
+   * `pageKey` set. It appeared in Pages, which meant the Blog screen and the
+   * Pages screen both claimed to own the same thing, and an editor who found it
+   * under Pages got the markup rather than the article. Articles are edited under
+   * Blog; this list is pages.
+   *
+   * The flag exists because two callers legitimately want everything: the
+   * migration tools, which walk every stored document, and anybody debugging
+   * where an article's markup actually lives.
+   */
+  includeArticles: z.coerce.boolean().optional(),
 });
 
 pagesRouter.get('/', validate(listQuery, 'query'), asyncHandler(async (req, res) => {
-  const { status, kind, q: search } = q(req);
+  const { status, kind, q: search, includeArticles } = q(req);
   const filter = {};
   if (status) filter.status = status;
-  if (kind) filter.pageKind = kind;
+  if (kind) {
+    // Asking for a kind by name is explicit, including `blogPost`.
+    filter.pageKind = kind;
+  } else if (!includeArticles) {
+    filter.pageKind = { $ne: 'blogPost' };
+  }
   if (search) filter.$or = [
     { title: { $regex: search, $options: 'i' } },
     { route: { $regex: search, $options: 'i' } },
@@ -645,10 +665,42 @@ pagesRouter.delete('/:key/sections/:sectionKey', requireRole('editor'), asyncHan
   if (!page) throw notFoundError('No such page');
   const at = page.sections.findIndex(s => s.key === req.params.sectionKey);
   if (at < 0) throw notFoundError('No such section');
-  if (page.sections[at].locked) throw badRequest('This block is structural and cannot be deleted');
+
+  const doomed = page.sections[at];
+  const html = String(doomed.html || '');
+  /*
+   * A locked block that is nothing but whitespace is not structural any more.
+   *
+   * `locked` is set on every script and style block, because the markup around
+   * them assumes where they sit. That is right while they hold something. It also
+   * left twelve pages carrying a block whose entire content is one newline: the
+   * residue of the live-reload tag `strip-dev-scripts` removed, which it had to
+   * *empty* rather than delete for exactly this reason. They appear in the page
+   * builder as a "Script" block an editor cannot open, cannot delete, and which
+   * does nothing at all.
+   *
+   * Deleting one is allowed, and the whitespace it carried moves onto the block
+   * before it. That newline is part of the authored body — the slicer attaches the
+   * trivia preceding an element to the block that follows it, so joining the
+   * blocks reproduces the body exactly — and dropping it would make the live page
+   * two bytes shorter than the file it came from, which `verify-live` reports as a
+   * difference for ever. Moving it keeps the output byte-identical, which is why
+   * this is safe and why deleting the block outright would not be.
+   */
+  const isEmptyResidue = doomed.locked
+    && (doomed.type === 'script' || doomed.type === 'style')
+    && !html.trim();
+  if (doomed.locked && !isEmptyResidue) {
+    throw badRequest('This block is structural and cannot be deleted');
+  }
 
   await snapshot('page', page.key, page.toObject(), req.user,
-    `before deleting "${page.sections[at].label}"`, { force: true });
+    `before deleting "${doomed.label}"`, { force: true });
+
+  if (isEmptyResidue && html && at > 0) {
+    const previous = page.sections[at - 1];
+    previous.html = String(previous.html || '') + html;
+  }
   page.sections.splice(at, 1);
   page.sections.forEach((s, i) => { s.order = i; });
   page.editedInCms = true;

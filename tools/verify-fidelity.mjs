@@ -55,6 +55,17 @@ for (const spec of registry.pages) {
     console.log(`SKIP  ${spec.key} (no ${spec.file})`);
     continue;
   }
+  /*
+   * A page marked dynamic in the registry no longer renders from its template.
+   *
+   * The slicing check below would still pass — the template can still be cut up
+   * and put back together — but the hash it pins would describe a page the site
+   * does not serve any more, which is a worse kind of green than a skip.
+   */
+  if (spec.dynamicSince) {
+    console.log(`SKIP  ${spec.key}: ${spec.dynamicSince}`);
+    continue;
+  }
   const html = fs.readFileSync(file, 'utf8');
 
   // 1. slicing is lossless: the blocks put the body back together exactly

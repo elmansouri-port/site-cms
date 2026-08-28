@@ -27,9 +27,9 @@
  * All removed at the end. Never point it at production.
  */
 import { chromium } from 'playwright';
-import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { loadEnv, credentials } from './lib/env.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
@@ -40,17 +40,7 @@ const flag = (name, fallback) => {
 const BASE = (args.find(a => !a.startsWith('--')) || 'http://localhost:8080').replace(/\/+$/, '');
 const SITE = flag('site', BASE).replace(/\/+$/, '');
 
-function dotenv() {
-  const out = {};
-  try {
-    for (const line of fs.readFileSync(path.join(ROOT, '.env'), 'utf8').split('\n')) {
-      const m = /^\s*([A-Z0-9_]+)\s*=\s*(.*)$/.exec(line);
-      if (m) out[m[1]] = m[2].trim().replace(/^["']|["']$/g, '');
-    }
-  } catch { /* environment only */ }
-  return out;
-}
-const env = { ...dotenv(), ...process.env };
+const env = loadEnv(ROOT);
 
 if (!args.includes('--confirm')) {
   console.error('\nThis writes a scratch page, an experiment and its counters to the database.\n'
@@ -115,7 +105,7 @@ async function main() {
 
   const login = await api('/auth/login', {
     method: 'POST',
-    body: JSON.stringify({ email: env.ADMIN_EMAIL, password: env.ADMIN_PASSWORD }),
+    body: JSON.stringify(credentials(env)),
   });
   if (login.status !== 200) throw new Error(`Sign-in failed: ${login.status} ${login.body?.error || ''}`);
   token = login.body.token;

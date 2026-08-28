@@ -26,6 +26,7 @@ import { Integration, Lead } from '../models/index.js';
 import { asyncHandler, badRequest, notFoundError } from '../middleware/error.js';
 import { logger } from '../lib/log.js';
 import { sendsBody, withQuery } from '../services/integrationProbe.js';
+import { leadStorage } from '../services/leads.js';
 
 export const hooksRouter = Router();
 
@@ -120,7 +121,11 @@ hooksRouter.post('/:slug', gateLimiter, asyncHandler(async (req, res) => {
   // Store first. An automation platform that is down, misconfigured or halfway
   // through a migration must not cost a lead.
   let leadId = null;
-  if (integration.captureLead) {
+  // Both halves have to be true: this integration asked for a copy, and the site
+  // is keeping copies at all. The site-wide switch wins, because it is the one
+  // somebody sets to mean "do not hold this data".
+  const { store: storeLeads } = await leadStorage();
+  if (integration.captureLead && storeLeads) {
     const name = forward.name || [forward.firstName, forward.lastName].filter(Boolean).join(' ');
     const lead = await Lead.create({
       type: integration.leadType || 'other',

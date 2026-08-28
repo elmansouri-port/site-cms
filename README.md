@@ -10,27 +10,37 @@ through a purpose-built admin. A verification tool proves the equivalence on
 every run:
 
 ```
+$ npm run test:core
+66 tests, 0 failures
+
 $ npm run verify
-133 checks, 0 failure(s)
+126 checks, 0 failure(s)
 
 $ node tools/verify-live.mjs http://localhost:8080
-54 page renders compared against the authored source, 0 difference(s)
+51 page renders compared against the authored source, 0 difference(s)
+  1 page(s) exempt by design: blog
 
 $ node tools/verify-chrome.mjs http://localhost:8080
 one header and one footer across 13 pages × 3 languages, 0 upstream URLs exposed
 
 $ node tools/verify-editor.mjs http://localhost:8080 --confirm
-158 passed, 0 failed
+160 passed, 0 failed
 
 $ node tools/verify-ui.mjs http://localhost:8080 --confirm
 43 checks, 0 failure(s)
+
+$ node tools/verify-forms.mjs http://localhost:8080 --confirm
+40 checks passed, 0 failed
+
+$ node tools/verify-experiments.mjs http://localhost:8080 --confirm
+30 checks, 0 failure(s)
 ```
 
-The last one is a real browser. It signs in, builds a landing page with no header
-or footer, drops a form on it, submits that form as a visitor, finds the
-submission under Leads, points a button at a page and checks the link resolves
-differently in French and German, then breaks the page, restores it from history,
-undoes the restore, deletes the page and recovers it from the trash.
+The browser suites sign in and do the work: build a landing page with no header
+or footer, drop a form on it, submit that form as a visitor, find the submission
+under Leads, point a button at a page and check the link resolves differently in
+French and German, then break the page, restore it from history, undo the restore,
+delete the page and recover it from the trash.
 
 `verify-live` distinguishes a page whose **markup** has drifted from one whose
 **copy** was edited in the CMS: on a difference it re-renders against the
@@ -38,10 +48,17 @@ catalogue the API is serving, and reports an edit rather than a failure when tha
 matches. Without that, the tool would go red the first time anyone changed a word
 and be switched off by the end of the week.
 
+One page is exempt, and the exemption is stated in `pages.registry.json` and
+printed on every run: the blog index reads the articles that exist, so its body
+cannot match a template with twelve hard-coded article cards in it — which was the
+point of making it dynamic. An exemption on the record beats a page that quietly
+falls out of the suite.
+
 Editing is visual — the canvas is the real page in an iframe, so what an editor
 sees is not a preview of what ships, it is what ships. Blocks are clicked and
 dragged; copy is rewritten in place; the advanced block takes your own HTML and
-Tailwind. None of which costs the guarantee above.
+Tailwind. Articles get the same canvas, rendering the draft you have not saved.
+None of which costs the guarantee above.
 
 ---
 
@@ -132,11 +149,15 @@ Three things make that round trip lossless:
 | The URL of every page, per language | How a URL is resolved to a page |
 | Navigation labels, links, megamenu zones | The megamenu's layout and behaviour |
 | Blog posts, media, partner directory | The article template's shape |
+| The blog index: its copy, its promo card, how many per page | Which articles match a filter |
 | Site-wide and per-page code (add-ins) | |
 | Which page a link points at | Where that page lives, per language |
 | Lead-capture forms and where they send | The proxy that makes the call |
+| Whether a submission is stored at all, and for how long | |
 | A/B experiments and their variants | |
 | Custom blocks: their HTML, Tailwind and scoped CSS | |
+| The header and footer: their words, their links, their markup | Where the megamenu's panels come from |
+| The partner map's tile provider | The map's behaviour and clustering |
 
 ---
 
@@ -353,6 +374,55 @@ In French that was invisible. In English and German it was not: `verify-chrome`
 found **thirteen different footers** in each of those languages, because only
 some of the duplicate keys had ever been translated. Consolidating fixed that.
 
+Four tabs, and the first one is the answer to why this screen did not work.
+
+| | |
+|---|---|
+| **Text** | Every string the part renders, one row each, in every language |
+| **Links** | Every `href`, with its own anchor text, and the usual page picker |
+| **Markup** | The structure: layout, classes, which elements exist |
+| **CSS & JS** | The part's own stylesheet and script, emitted with it |
+
+#### Why editing the markup used to do nothing
+
+The screen opened on the markup, with the French words plainly visible inside it.
+So people changed the words there, saved, looked at the site — and found it
+unchanged. Every string in the header carries a translation key, and the renderer
+**splices the catalogue's value over the marked range** on the way out. The copy
+in the markup is a default that is overridden on every single request.
+
+Two things follow, and both are now true:
+
+- **Editing the markup writes the catalogue.** The API works out which marked
+  strings an edit changed and saves them as the copy for the language the canvas
+  is showing, then reports how many moved. It needs to be *told* which language:
+  a caller that does not say gets its markup saved and its copy left alone, and
+  the response says so. Defaulting to French meant a migration script that merely
+  reformatted the markup had every string it touched recorded as a deliberate
+  edit.
+- **The words are not edited through the markup any more.** The Text tab lists
+  them. A sentence containing a link or a styled word is not offered as a text
+  box — its stored value is `Welcome to <0>Rainbow</0>`, and retyping that as
+  plain text would delete the link — so those open in Copy & languages, which
+  shows the placeholders.
+
+The "edited" badge follows the *structure*, not the words: a copy change emits
+identical bytes, so counting it as an edit lit the badge and offered **Restore
+original** for something that had not happened.
+
+And the markup editor is a textarea, which normalises CRLF to LF the moment it is
+focused. The authored pages are CRLF, so opening the header and changing one word
+used to rewrite all sixty of its lines — an unreadable history entry, a spurious
+"edited" badge, and `verify-live` reporting the whole site as drifted. Incoming
+markup is put back into the convention the stored copy uses.
+
+#### What is not on this screen
+
+The **dropdown panels and the mobile drawer** are built in the browser by
+`/js/mega-menu.js` from the CMS navigation, and the script *hides* the
+placeholder markup for them that this part carries. Editing that markup can never
+have an effect, so the screen says so and points at **Navigation** instead.
+
 Every breakpoint is one click away — Desktop, Laptop, Tablet, Mobile — and so is
 every language, because a header has a different design at each width and
 different copy in each language.
@@ -422,6 +492,48 @@ Those three fields are gone. Anything in them is migrated into named add-ins on
 first boot — switched **on**, because they were running, and a migration that
 silently disabled a consent banner would be a worse bug than the one it fixed.
 
+### The blog's front page
+
+`/{lang}/blog` reads the articles that exist. It used to be three authored
+sections: a hero with nine hard-coded category pills, a featured card about a
+webinar guide, and twelve article cards pointing at Unsplash photographs and,
+mostly, at nothing. Publishing an article changed none of it, two of the cards
+linked to articles that were never written, and the filter script filtered the
+placeholders.
+
+It is now one `blog_index` block, and three things about it were choices:
+
+- **The filters are in the URL.** `?category=…&q=…&page=2` is resolved on the
+  server, so a filtered blog is a real page: shareable, crawlable, and working
+  with JavaScript off. The old version filtered by hiding DOM nodes, which is why
+  page two did not exist and no filtered view had an address.
+- **The pills come from the articles**, with a count each. A fixed list of
+  categories is a list of promises — nine pills, of which two had anything behind
+  them.
+- **The lead article is the featured one, else the newest.** Never a hard-coded
+  slug, which is how the old page came to link an article nobody wrote.
+
+The promo card beside it is a slot an editor fills — a guide, an ebook — and
+leaving its title empty gives the lead article the full width rather than a gap.
+
+The page is exempt from `verify-live`, stated in `pages.registry.json` and printed
+by the tool on every run: a body that reads the database cannot match a template
+with twelve article cards in it, and that was the point. An exemption on the
+record beats a page that quietly falls out of the suite.
+
+### Component blocks speak more than one language
+
+A component block's data used to be one value for the whole site, so a block
+dropped onto a trilingual site said the same thing in all three. That is why the
+blog index stayed a static page: there was no way to give it a French heading and
+a German one.
+
+A field marked `i18n` in its schema stores a map instead of a string, resolved for
+the locale being rendered in the same pass that resolves image references and page
+links. The editor gets a language switch per field, with the source language shown
+underneath and the missing languages named — so an untranslated field is visible
+in the CMS rather than discovered on the site.
+
 ### Blog articles
 
 An article body is an ordered list of **sections**, not one HTML box. That
@@ -446,6 +558,24 @@ Drag to reorder, hide a section while you rewrite it, duplicate one. Anchors are
 generated from the heading and de-duplicated, so two chapters called
 *Conclusion* do not both answer to `#conclusion`.
 
+#### The canvas
+
+Beside the section list is the article, as the page. Add a *Key points* section
+and the blue box appears; type in it and the box fills in; the contents list picks
+the heading up. Before this the editor was a list of forms and writing an article
+meant saving, looking, and coming back — the page builder has had a live canvas
+from the beginning and the articles did not, which is why composing one felt like
+writing code.
+
+It is not a second renderer. The **unsaved** draft is posted to
+`/cms/article-preview`, which pours it into the authored article template and
+composes the document exactly as the published route does: real header, real
+footer, real stylesheet, real scripts. Nothing is written anywhere — the draft
+travels in the request and is gone with the response — so previewing cannot
+publish half a paragraph on an article that is already live. Selecting a section
+scrolls the page to it, and the scroll position survives a re-render, because
+being returned to the top on every keystroke is worse than no canvas.
+
 Articles imported as one block of HTML keep working — the contents list is then
 derived from their headings, and **Split into sections** converts one into the
 first section, losing nothing.
@@ -461,6 +591,27 @@ Three things the article template used to state and now reports honestly:
   recent. They used to be three hand-written cards, two of them pointing at
   articles that were never written — which `verify-assets` had been reporting as
   broken links since the migration.
+
+And one that was actively wrong. The template ended with an eighty-line
+"Dynamic SEO" script that built the canonical URL, the OG tags and the JSON-LD in
+the browser. Under the CMS it threw on its first statement — the element it
+reaches for was lifted into the CMS-owned head years ago — so *everything after
+that line never ran*, which is why the article template's own LinkedIn and X
+buttons pointed at `#`. Had it run, the `@graph` it builds is hard-coded to the
+article the template shipped with: every article published through the CMS would
+have told search engines it was *The Power of Rainbow* by Marie Hillion, published
+1 July 2026. It is gone, replaced by the four lines that set the share URLs, which
+is the one thing there that genuinely needs the address bar.
+
+### Articles are not pages
+
+The Pages list excludes them. One migrated page *is* an article —
+`blog-the-power-of-rainbow` is the authored article the template was taken from,
+and it is also a BlogPost — and it appeared under Pages, so both screens claimed
+to own the same thing and an editor who found it there got the markup instead of
+the article. Articles are edited under **Blog**; that list is pages.
+`?includeArticles=1` still returns everything, for the migration tools and for
+anybody working out where an article's markup actually lives.
 
 ### Publishing
 
@@ -515,6 +666,100 @@ The SEO tab reads the **rendered page** rather than scoring the form you just
 filled in — title and description length against what search results actually
 show, H1 count, heading order, missing alt text, canonical, hreflang coverage,
 JSON-LD validity, social image, thin copy. Every check is one you would act on.
+
+### Whether leads are kept at all
+
+Every form stores its submission before forwarding it, so an automation platform
+being down does not cost a lead. That is the right default and it is not always
+the right answer: a deployment whose forms feed a CRM that is already the system
+of record does not want a second copy of every enquiry here, and one that does
+not need the data should not be holding names, email addresses and IP addresses.
+
+**Settings → Leads** turns it off, and off means **not written**, not hidden.
+There is no copy to leak, to export, or to have to delete on request. Submissions
+are still accepted and still forwarded, so nothing about the visitor's experience
+or the integration changes. A retention period is the other half of the same
+question and sits next to it; saving one deletes what is already older, and the
+confirmation says how many — because "keep for 90 days" applied to two years of
+leads is a destructive act and "Saved" is not an adequate description of it.
+
+### The partner directory
+
+1,130 partners behind the locator's map, and for a long time none of them: the
+export lived at the repository root, the seed looked only in
+`content-source/data/`, found nothing, and returned **silently**. A directory of
+1,130 partners, a map with no pins, and nothing anywhere saying why. The seed now
+looks in both places and logs a miss.
+
+Two other things the map needed:
+
+- **`hq` and `keywords` were read by the page and absent from the model.** The
+  locator's three filter buttons are all/head-offices/subsidiaries and its map
+  draws the two kinds differently; `keywords` is searched alongside the name. So
+  editing any partner in the CMS *deleted both* — visible only as a pin in the
+  wrong style. `raw` is now merged rather than rebuilt, so a field the CMS does
+  not model survives an edit.
+- **The basemap needed an API key.** CARTO's `light_all` tiles still arrive with
+  HTTP 200 and every one of them is a grey square stamped "API KEY REQUIRED". No
+  console error, no broken image, no failed request — just a map that looks like a
+  placeholder, which is what it was. It is OpenStreetMap's own tiles now, and the
+  URL is read from the page's translation branch (`mapTileUrl`), so a paid
+  provider can be set from **Copy & languages** without a deploy.
+
+**Import** takes the export as a JSON file or pasted text and upserts on `id`, so
+loading the same file twice updates rather than duplicates. It describes the file
+before writing anything — how many rows, how many countries, how many have
+coordinates — because a directory that imports cleanly and has no coordinates is a
+map with no pins on it, and that is worth knowing beforehand. *Replace the whole
+directory* deletes what the file does not mention, and asks first.
+
+Country names come from the export in English, inconsistently: `USA`, `MEXICO`,
+`Utd.Arab.Emir.`. The locator prints them on every card and groups its filter by
+them, so a French reader got a list of English names with two of them mangled.
+`tools/build-countries.mjs` maps each spelling to an ISO 3166-1 code once and
+takes the names from `Intl.DisplayNames` — the names a browser would use — and the
+dataset endpoint translates them for the language the page was fetched from.
+
+### Accented characters
+
+The pages and the catalogues were authored with `&eacute;` rather than `é`: 1,673
+of them in French alone. Everything is UTF-8 and has been since the migration, so
+the escaping bought nothing and made the CMS hard to use — the copy editor showed
+`L'&eacute;diteur fran&ccedil;ais`, the page builder labelled a block
+"Footer: La prochaine conversation de votre &eacute;quipe m&eacute;rite", and
+searching the strings for "équipe" matched nothing.
+
+`npm run decode:entities` fixes both sides in one pass. Both, deliberately:
+`verify-live` renders the authored template against the authored catalogue and
+diffs, so decoding one side and not the other would make it fail on every page —
+and it would be right to. The fidelity hashes are re-pinned afterwards. The
+guarantee is not weakened; the baseline is corrected.
+
+Four escapes are left alone because they are doing a job — `&amp; &lt; &gt;
+&quot;` — and so is `&nbsp;`, because a non-breaking space is indistinguishable
+from an ordinary one in a text box and an editor will eventually delete the thing
+they cannot see. The catalogue *keys* are left too: they were minted from
+entity-encoded text and read like `l-diteur-fran-ais-des`, and renaming them would
+mean rewriting every `data-i18n` attribute in eighteen pages at the same instant.
+
+### Redirects, and why each one exists
+
+Changing a page's URL leaves a 301 behind automatically, because a rename without
+one throws away whatever ranking and inbound links the old address had. The cost
+is a list nobody understands: somebody opens the screen, finds
+`/en/pricing → /en/tarifs`, cannot remember an English pricing page, and has no
+way to tell whether deleting it breaks something.
+
+So every row says **where it came from** — "tarifs was renamed", read back from
+the note the automatic path writes — and **whether anything has followed it**.
+`hits` existed and was never incremented, so the field was a permanent zero, which
+is worse than absent: the one question anybody asks about a redirect is whether it
+is still load-bearing. The frontend middleware now counts them, fire-and-forget, so
+a visitor's redirect never waits on a counter.
+
+*Followed: never* is the one that is safe to delete — as long as it has been in
+place long enough to know. A redirect left over from a rename that was itself
+undone points at a URL that was never public.
 
 ---
 
@@ -615,6 +860,34 @@ Variants are assigned in Astro middleware, **before** the page renders, and
 stored in a cookie for the experiment's window. The HTML a visitor receives
 already is their variant: no flash, no layout shift, no hydration mismatch, and
 a crawler sees an ordinary page.
+
+### Creating one asks two questions
+
+Name, and what varies. That is all that is required.
+
+It used to ask for a **key** as well — a slug matching `^[a-z0-9-]+$`, labelled
+"it cannot change later". That is a database concern presented as a decision: the
+interface generated it from the name anyway, and all asking achieved was a form
+that could fail validation on a field nobody meant to touch. It is derived now,
+and two tests with the same name get `-2` rather than a conflict about a field the
+editor never filled in. It is still settable, behind a disclosure, for when a
+report elsewhere already names one.
+
+The **goal** is offered in the same dialogue rather than deferred, because a test
+with no goal measures nothing and cannot be started — it was the thing everybody
+had to come back for. The **hypothesis** is last and optional: it is the field
+nobody fills in afterwards and the one that makes a finished test worth reading a
+year later, so it is offered now and not demanded.
+
+And when something *is* refused, the message says what. A validation failure sends
+`[{path, message}, …]` and a duplicate key used to send the offending
+`{field: value}` object; the toast rendered both with `join(', ')`, so creating a
+test with an empty name produced **"Validation failed — [object Object],
+[object Object]"** — alarming, and silent about the name being empty. Every shape
+the API can send is now named, and an unrecognised one is dropped rather than
+stringified: no detail at all beats a detail that reads like a crash. See
+`apps/cms/src/lib/apiErrors.js`, and `tests/cms.test.mjs`, which exists so it
+cannot come back.
 
 Three scopes:
 
@@ -759,8 +1032,13 @@ apps/
 packages/
   core/         the shared scanner, renderer, slicer, SEO builders and the three
                 indirections: assets.js, links.js, endpoints.js
+                copy.js      what a fragment's marked strings are, and what
+                             changing its markup did to them
+                i18nData.js  a component block's own copy, per language
 content-source/ the authored templates, catalogues and seed data
+                data/        the partner directory and its country names
 tools/          verification and migration scripts
+  lib/env.mjs   how every tool reads .env
 infra/nginx/    gateway configuration
 docs/           architecture, operations and content-model notes
 ```
@@ -794,12 +1072,44 @@ Content:
 | Command | What it does |
 |---|---|
 | `npm run seed` | Loads the authored site into MongoDB (re-runnable) |
+| `npm run seed -- --only=forms,partners` | Runs just those steps |
 | `npm run seed:reset` | Drops the content collections first |
 | `node tools/build-nav-seed.mjs` | Regenerates the navigation seed from the shipped menu |
 | `node tools/build-media-index.mjs` | Regenerates the bundled-media manifest |
+| `npm run build:countries` | Regenerates the partner directory's country names, in every language |
 
 `npm run seed` is safe to re-run: it updates templates whose source file
 changed and leaves anything edited in the CMS alone. `--force` overrides that.
+
+`--only=` exists because every step being idempotent is not the same as every
+step being wanted. The four site forms went missing from a working database and
+the only offered way to restore them was a seed that also walks eighteen pages
+and 1,521 strings — so, reasonably, nobody ran it: the forms stayed missing, the
+form blocks rendered an HTML comment, and the dashboard reported four failing
+integrations for months. The step names are `settings pages strings navigation
+chrome snippets integrations forms blog media partners`, and an unknown one is
+refused with the list rather than silently doing nothing.
+
+One-off migrations. Each takes the source files and the database together, so the
+fidelity guarantee holds across the change rather than being spent on it, and each
+is re-runnable — a second pass finds nothing:
+
+| Command | What it does |
+|---|---|
+| `npm run decode:entities -- --confirm` | `&eacute;` becomes `é`, in the pages, the catalogues and the database |
+| `npm run strip:dev-scripts -- --confirm` | Removes the live-reload tag the site was built with, and the empty blocks it left behind |
+| `npm run strip:legacy-seo -- --confirm` | Removes the article template's in-page SEO script, keeping its share links |
+| `npm run blog:index -- --confirm` | Turns the static blog page into the dynamic index |
+| `npm run fix:map-tiles -- --confirm` | Points the partner map at a basemap that does not need an API key |
+| `npm run routes:apply -- --confirm` | Applies `routes.i18n.json`, writing a 301 for every path that changes |
+
+Each prints what it would do first; `--confirm` applies it. `--source-only`
+skips the database, for a checkout with no server running. After any of them:
+
+```bash
+npm run verify -- --write-hashes   # re-pin the fidelity baseline
+npm run verify:live                # against a running server
+```
 
 Against a local `npm run dev` the three services are on separate ports, so the
 tools take both:

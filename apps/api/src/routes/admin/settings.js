@@ -13,6 +13,7 @@ import { validate } from '../../middleware/validate.js';
 import { requireAuth, requireRole } from '../../middleware/auth.js';
 import { snapshot, audit, publishChanged } from '../../services/publish.js';
 import { getSettings } from '../../services/content.js';
+import { applyRetention } from '../../services/leads.js';
 
 export const settingsRouter = Router();
 
@@ -54,6 +55,16 @@ const settingsBody = z.object({
   }).optional(),
   robotsExtra: z.string().max(10000).optional(),
   maintenanceMode: z.boolean().optional(),
+  /**
+   * Whether form submissions are stored here at all.
+   *
+   * Off means not written, not hidden. See services/leads.js for why that
+   * distinction is the whole feature.
+   */
+  leads: z.object({
+    store: z.boolean().optional(),
+    retentionDays: z.number().int().min(0).max(3650).optional(),
+  }).optional(),
 }).strict();
 
 settingsRouter.get('/', asyncHandler(async (_req, res) => {
@@ -77,7 +88,25 @@ settingsRouter.put('/', requireRole('admin'), validate(settingsBody), asyncHandl
 
   await audit(req, 'settings.update', 'settings', 'global', { fields: Object.keys(req.body) });
   await publishChanged('settings updated');
+
+  /*
+   * A retention period takes effect now, not at the next restart — and says how
+   * many submissions that just deleted.
+   *
+   * Setting "keep leads for 90 days" on a database holding two years of them is
+   * a destructive act, and the number belongs in the response so the interface
+   * can report it. Silently deleting four hundred records and saying "Saved" is
+   * how somebody discovers the setting by missing the data.
+   */
+  let retention = null;
+  if (req.body.leads?.retentionDays !== undefined) {
+    retention = await applyRetention();
+  }
+
   // `blogSegment` is a Map, and JSON.stringify renders a Map as `{}` — without
   // flattening it the response would claim the value was not saved.
-  res.json({ settings: settings.toObject({ flattenMaps: true }) });
+  res.json({
+    settings: settings.toObject({ flattenMaps: true }),
+    ...(retention ? { retention } : {}),
+  });
 }));

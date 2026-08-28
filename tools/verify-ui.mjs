@@ -30,6 +30,8 @@
  */
 import { chromium } from 'playwright';
 import { mkdir } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import { loadEnv } from './lib/env.mjs';
 import path from 'node:path';
 
 const args = process.argv.slice(2);
@@ -39,7 +41,17 @@ const flag = (name, fallback) => {
 };
 
 const BASE = (args.find(a => !a.startsWith('--')) || 'http://localhost:5173').replace(/\/+$/, '');
-const SITE = flag('site', 'http://localhost:3000').replace(/\/+$/, '');
+/*
+ * Where the public pages are.
+ *
+ * Behind the gateway that is the same origin as the admin. In development the
+ * admin is a Vite dev server on 5173 and the site is on 3000, which is the only
+ * case needing a different default — and defaulting to 3000 unconditionally meant
+ * that pointing this tool at a gateway checked the admin against a dev server
+ * that was not running, and reported the failure as a broken page.
+ */
+const SITE = flag('site', BASE === 'http://localhost:5173' ? 'http://localhost:3000' : BASE)
+  .replace(//+$/, '');
 /*
  * Where this tool's own API calls go.
  *
@@ -50,8 +62,23 @@ const SITE = flag('site', 'http://localhost:3000').replace(/\/+$/, '');
  */
 const API = flag('api', BASE === 'http://localhost:5173' ? 'http://localhost:4000' : BASE).replace(/\/+$/, '');
 const SHOTS = path.resolve(flag('shots', 'artifacts/e2e'));
-const EMAIL = process.env.ADMIN_EMAIL || 'admin@rainbow.local';
-const PASSWORD = process.env.ADMIN_PASSWORD || 'Rainbow!Admin2026';
+const ENV_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+
+/*
+ * Credentials from .env, not only from the environment.
+ *
+ * Every tool here used to read `process.env` directly, so running one meant
+ * prefixing the command with ADMIN_PASSWORD= even though the password is sitting
+ * in .env at the repository root. Real environment variables still win, so CI and
+ * `docker compose` override the file rather than the other way round.
+ *
+ * And no hard-coded fallback. 'Rainbow!Admin2026' was never anybody's password,
+ * so the tool failed at the login screen with "Invalid email or password" rather
+ * than saying it had not been told one.
+ */
+const env = loadEnv(ENV_ROOT);
+const EMAIL = env.ADMIN_EMAIL || 'admin@rainbow.local';
+const PASSWORD = env.ADMIN_PASSWORD;
 
 const KEY = 'zz-ui-landing';
 const ROUTE = 'zz-ui-landing';
@@ -293,7 +320,17 @@ async function addArticleList(page) {
   await page.getByRole('button', { name: /^Article list/ }).first().click();
   await page.waitForSelector('[role="dialog"]', { state: 'detached' });
 
-  const published = await api('/blog?status=published&limit=1');
+  /*
+   * A French article, because the page is rendered in French.
+   *
+   * This asked for the newest published article in any language and then looked
+   * for its slug on `/fr/…`. It passed for as long as the newest article happened
+   * to be French, and failed the day an English one was published — reporting a
+   * bug in the block when the block was right: an article list shows the language
+   * it is being read in, and English articles on a French page would be the
+   * actual defect.
+   */
+  const published = await api('/blog?status=published&locale=fr&limit=1');
   const sample = published.body?.items?.[0];
 
   await api(`/pages/${KEY}/publish`, { method: 'POST' });
@@ -301,9 +338,10 @@ async function addArticleList(page) {
 
   ok('the article list block renders', html.includes('article') || html.includes('blog'));
   if (sample) {
-    ok('a published article appears on the page', html.includes(sample.slug), `looked for ${sample.slug}`);
+    ok('a published French article appears on the page',
+      html.includes(sample.slug), `looked for ${sample.slug}`);
   } else {
-    console.log('  note  no published article to look for — list rendering not asserted');
+    console.log('  note  no published French article to look for — list rendering not asserted');
   }
 }
 

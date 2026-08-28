@@ -9,7 +9,8 @@
  * pricing plans does not need a drag layer, and buttons work from the keyboard.
  */
 import { useMemo, useState } from 'react';
-import { ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Languages, Plus, Trash2 } from 'lucide-react';
+import { isTranslated, localesOf, translated } from '@rainbow/core/i18nData';
 import { BLOCK_SCHEMAS } from '../lib/blockSchemas.js';
 import { useResource } from '../lib/hooks.js';
 import { cn } from '../lib/cn.js';
@@ -17,10 +18,13 @@ import MediaPicker from './MediaPicker.jsx';
 import LinkPicker from './LinkPicker.jsx';
 import CodeEditor, { inspectCss, inspectHtml } from './CodeEditor.jsx';
 import {
-  Badge, Button, Callout, CheckboxField, Code, Field, Input, Label, Select, Textarea, Tooltip,
+  Badge, Button, Callout, CheckboxField, Code, Field, Input, Label, Segmented, Select, Textarea,
+  Tooltip,
 } from './ui/index.js';
 
-export default function BlockDataForm({ componentKey, value, onChange, anchors = [] }) {
+export default function BlockDataForm({
+  componentKey, value, onChange, anchors = [], locales = ['fr'], locale = 'fr',
+}) {
   const schema = BLOCK_SCHEMAS[componentKey];
 
   if (!schema) {
@@ -46,8 +50,6 @@ export default function BlockDataForm({ componentKey, value, onChange, anchors =
     );
   }
 
-  const set = (name, v) => onChange({ ...(value || {}), [name]: v });
-
   return (
     <div className="grid gap-4">
       {schema.fields.map(field => (
@@ -57,16 +59,132 @@ export default function BlockDataForm({ componentKey, value, onChange, anchors =
          * dead weight, and showing a form somebody can fill in that will then be
          * ignored is worse than showing nothing.
          */
-        field.hideWhen && value?.[field.hideWhen] ? null : (
+        field.hideWhen && readPath(value, field.hideWhen) ? null : field.i18n && locales.length > 1 ? (
+          /*
+           * A translated field is one value per language, not one value.
+           *
+           * Component blocks used to hold a single string, so a block dropped on
+           * a trilingual site said the same thing in all three — which is why
+           * the blog index stayed a static page. Marking a field `i18n` in the
+           * schema gives it a language switch and stores a map.
+           */
+          <TranslatedField
+            key={field.name}
+            field={field}
+            value={readPath(value, field.name)}
+            anchors={anchors}
+            locales={locales}
+            initialLocale={locale}
+            onChange={(v) => onChange(writePath(value, field.name, v))}
+          />
+        ) : (
           <FieldControl
             key={field.name}
             field={field}
-            value={value?.[field.name]}
+            value={plainValue(readPath(value, field.name), locale, locales[0])}
             anchors={anchors}
-            onChange={(v) => set(field.name, v)}
+            onChange={(v) => onChange(writePath(value, field.name, v))}
           />
         )
       ))}
+    </div>
+  );
+}
+
+/*
+ * Field names may be paths: `promo.title`.
+ *
+ * A block whose data has a natural grouping — the blog index's promo card, which
+ * is six fields describing one thing — should store it as one object rather than
+ * six flat keys named `promoTitle`, `promoText`, `promoImage`. The renderer then
+ * asks "is there a promo at all" in one check instead of six, which is what makes
+ * "leave it empty and the layout closes up" a one-line condition.
+ *
+ * One level or ten; the split is generic so a schema can group as deeply as it
+ * needs without touching this.
+ */
+function readPath(obj, path) {
+  if (!path.includes('.')) return obj?.[path];
+  return path.split('.').reduce((at, key) => (at == null ? undefined : at[key]), obj);
+}
+
+/** The same object with one path replaced. Never mutates: React compares by identity. */
+function writePath(obj, path, next) {
+  if (!path.includes('.')) return { ...(obj || {}), [path]: next };
+  const [head, ...rest] = path.split('.');
+  const current = obj?.[head];
+  return {
+    ...(obj || {}),
+    [head]: writePath(typeof current === 'object' && current !== null ? current : {}, rest.join('.'), next),
+  };
+}
+
+/**
+ * Read a value that may or may not be a translation map.
+ *
+ * A field can stop being marked `i18n` in the schema, or a site can drop back to
+ * one language, and the data written while it was translated is still there.
+ * Collapsing it for display beats showing `{__i18n: true, fr: …}` in a text box.
+ */
+function plainValue(value, locale, sourceLocale) {
+  if (!isTranslated(value)) return value;
+  return value[locale] ?? value[sourceLocale] ?? '';
+}
+
+/**
+ * One field, in every language.
+ *
+ * The switch is per field rather than per block on purpose: translating is done
+ * one string at a time with the source in view, and a block-level switch means
+ * flipping to German, translating six fields, flipping back to check one. The
+ * languages that are still missing are named under the box, so an untranslated
+ * field is visible here rather than discovered on the site.
+ */
+function TranslatedField({ field, value, onChange, anchors, locales, initialLocale }) {
+  const [active, setActive] = useState(locales.includes(initialLocale) ? initialLocale : locales[0]);
+  const source = locales[0];
+  const map = isTranslated(value) ? value : null;
+  // A field that was a plain string keeps that value as the source language, so
+  // marking an existing block's field translatable loses nothing.
+  const current = map ? (map[active] ?? '') : (active === source ? (value ?? '') : '');
+  const filled = map ? localesOf(map) : (value ? [source] : []);
+  const missing = locales.filter(l => !filled.includes(l));
+
+  return (
+    <div className="grid min-w-0 gap-1.5">
+      <div className="flex flex-wrap items-center gap-2">
+        <Segmented
+          value={active}
+          onChange={setActive}
+          options={locales.map(l => ({
+            value: l,
+            label: filled.includes(l) ? l.toUpperCase() : `${l.toUpperCase()} ·`,
+            title: filled.includes(l) ? undefined : `No ${l.toUpperCase()} version yet`,
+          }))}
+        />
+        {missing.length > 0 && (
+          <Tooltip content={`Falls back to ${source.toUpperCase()} in ${missing.map(l => l.toUpperCase()).join(', ')}.`}>
+            <Badge variant="warning">
+              <Languages className="size-3" /> {missing.map(l => l.toUpperCase()).join(' ')}
+            </Badge>
+          </Tooltip>
+        )}
+      </div>
+      <FieldControl
+        field={field}
+        value={current}
+        anchors={anchors}
+        onChange={(next) => {
+          const base = map ? { ...map } : (value ? { [source]: value } : {});
+          onChange(translated({ ...base, [active]: next }));
+        }}
+      />
+      {active !== source && (map?.[source] || (!map && value)) && (
+        <p className="text-muted-foreground text-[11.5px] leading-snug">
+          <span className="font-semibold">{source.toUpperCase()}:</span>{' '}
+          {String(map?.[source] ?? value)}
+        </p>
+      )}
     </div>
   );
 }
@@ -201,7 +319,7 @@ function CodeField({ field, value, onChange }) {
   const notes = problems.filter(p => p.level === 'info');
 
   return (
-    <div className="grid gap-1.5">
+    <div className="grid min-w-0 gap-1.5">
       <Label>{field.label}</Label>
       <CodeEditor
         value={value}
@@ -401,10 +519,10 @@ function ListField({ field, value, onChange, anchors }) {
   return (
     <div className="grid gap-1.5">
       <Label>{field.label}</Label>
-      <ul className="grid gap-1.5">
+      <ul className="grid min-w-0 gap-1.5">
         {value.map((item, i) => (
-          <li key={i} className="bg-card rounded-lg border">
-            <div className="flex items-center gap-1.5 p-2">
+          <li key={i} className="bg-card min-w-0 rounded-lg border">
+            <div className="flex min-w-0 items-center gap-1.5 p-2">
               <Button
                 variant="ghost"
                 size="icon-sm"
@@ -450,7 +568,7 @@ function ListField({ field, value, onChange, anchors }) {
               </Tooltip>
             </div>
             {open === i && (
-              <div className="grid gap-4 border-t p-3">
+              <div className="grid min-w-0 gap-4 border-t p-3">
                 {field.fields.map(sub => (
                   <FieldControl
                     key={sub.name}

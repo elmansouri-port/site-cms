@@ -13,6 +13,7 @@ import { z } from 'zod';
 import { Lead } from '../models/index.js';
 import { asyncHandler, badRequest } from '../middleware/error.js';
 import { logger } from '../lib/log.js';
+import { leadStorage } from '../services/leads.js';
 
 export const formsRouter = Router();
 
@@ -57,6 +58,21 @@ formsRouter.post('/:type', submitLimiter, asyncHandler(async (req, res) => {
   const { website, payload, ...rest } = body;
   const name = body.name || [body.firstName, body.lastName].filter(Boolean).join(' ');
 
+  /*
+   * Storage is a setting, and off means not written.
+   *
+   * A deployment whose forms feed a CRM that is already the system of record
+   * does not want a second copy of every enquiry here — and one that does not
+   * need the data should not be holding names, addresses and IPs at all. The
+   * submission is still accepted, so the visitor's experience is identical and
+   * whatever forwards it still forwards it.
+   */
+  const { store } = await leadStorage();
+  if (!store) {
+    logger.info({ type }, 'submission accepted, not stored (lead storage is off)');
+    return res.status(201).json({ ok: true, id: null, stored: false });
+  }
+
   const lead = await Lead.create({
     type,
     locale: body.locale || 'fr',
@@ -73,5 +89,5 @@ formsRouter.post('/:type', submitLimiter, asyncHandler(async (req, res) => {
   });
 
   logger.info({ type, id: String(lead._id) }, 'lead captured');
-  res.status(201).json({ ok: true, id: String(lead._id) });
+  res.status(201).json({ ok: true, id: String(lead._id), stored: true });
 }));

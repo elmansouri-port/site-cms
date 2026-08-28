@@ -618,9 +618,9 @@ function WordingTab({ draft, locale, canEdit, usedBy, onChange }) {
               <strong> Form</strong> section inside an article.
             </Empty>
           ) : (
-            <ul className="grid gap-1.5">
+            <ul className="grid min-w-0 gap-1.5">
               {usedBy.map(u => (
-                <li key={`${u.kind}-${u.id}`} className="text-[12.5px]">
+                <li key={`${u.kind}-${u.id}`} className="min-w-0 text-[12.5px]">
                   <Link
                     to={u.kind === 'page' ? `/pages/${u.id}` : `/blog/${u.id}`}
                     className="hover:underline"

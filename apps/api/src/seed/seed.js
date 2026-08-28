@@ -40,6 +40,17 @@ const PUBLIC_DIR = process.env.WEB_PUBLIC_DIR
 const FORCE = process.argv.includes('--force');
 const RESET = process.argv.includes('--reset');
 
+/**
+ * `--only=forms,partners` — run just those steps.
+ *
+ * Empty means all of them, which is what the first run of a new database wants.
+ */
+const ONLY = (process.argv.find(a => a.startsWith('--only=')) || '')
+  .slice('--only='.length)
+  .split(',')
+  .map(s => s.trim())
+  .filter(Boolean);
+
 const read = (p) => fs.readFileSync(p, 'utf8');
 const readJson = (p) => JSON.parse(read(p));
 const sha = (s) => crypto.createHash('sha256').update(s).digest('hex');
@@ -64,20 +75,64 @@ async function main() {
   }
 
   await ensureBootstrapUser();
-  await seedSettings(registry);
-  const { seoKeys } = await seedPages(registry, catalogues);
-  await seedStrings(catalogues, registry.locales, seoKeys);
-  await seedNavigation();
-  await seedChrome();
-  await migrateGlobalSnippets();
-  await seedIntegrations();
-  await seedForms();
-  await seedBlog(registry, catalogues);
-  await seedMedia();
-  await seedPartners();
+
+  /*
+   * One step, or all of them.
+   *
+   * `--only=forms,partners` runs just those. Every step is already idempotent —
+   * "already present, left as they are" — so running the lot is safe in
+   * principle, and in practice nobody wants to. The four site forms went missing
+   * from a working database, and the only offered way to restore them was a seed
+   * that also walks eighteen pages and 1,521 strings. Faced with that, the
+   * reasonable thing to do is nothing, which is what happened: the forms stayed
+   * missing, the form blocks rendered a comment, and the dashboard reported four
+   * failing integrations for months.
+   *
+   * The order below is the dependency order and is preserved whichever subset is
+   * asked for: chrome reads the pages, strings read the keys the pages produced.
+   */
+  const steps = [
+    ['settings', () => seedSettings(registry)],
+    ['pages', async () => { pageResult = await seedPages(registry, catalogues); }],
+    ['strings', () => seedStrings(catalogues, registry.locales, pageResult?.seoKeys)],
+    ['navigation', () => seedNavigation()],
+    ['chrome', () => seedChrome()],
+    ['snippets', () => migrateGlobalSnippets()],
+    ['integrations', () => seedIntegrations()],
+    ['forms', () => seedForms()],
+    ['blog', () => seedBlog(registry, catalogues)],
+    ['media', () => seedMedia()],
+    ['partners', () => seedPartners()],
+  ];
+
+  let pageResult = null;
+  const unknown = ONLY.filter(name => !steps.some(([step]) => step === name));
+  if (unknown.length) {
+    logger.error({ unknown, available: steps.map(([n]) => n) }, 'no such seed step');
+    process.exitCode = 1;
+    return;
+  }
+
+  /*
+   * `strings` needs the SEO keys `pages` produces.
+   *
+   * Asked for on its own it would have none, and would then treat every SEO
+   * string as ordinary content — which puts the page title into the copy editor
+   * as an editable body string. So the pages are read (not written) first, which
+   * is cheap and correct, rather than the step quietly doing the wrong thing.
+   */
+  const running = (name) => !ONLY.length || ONLY.includes(name);
+  if (running('strings') && !running('pages')) {
+    pageResult = { seoKeys: await seoKeysOf(registry, catalogues) };
+  }
+
+  for (const [name, run] of steps) {
+    if (!running(name)) continue;
+    await run();
+  }
 
   await bumpRevision('seed');
-  logger.info('seed complete');
+  logger.info({ steps: ONLY.length ? ONLY : 'all' }, 'seed complete');
 }
 
 async function seedSettings(registry) {
@@ -109,6 +164,24 @@ async function seedSettings(registry) {
   );
   logger.info('settings seeded');
   return doc;
+}
+
+/**
+ * The SEO keys the templates carry, without writing anything.
+ *
+ * `seedStrings` needs them to mark which strings the SEO panel owns rather than
+ * the copy editor. `seedPages` produces them as a side effect, so running
+ * `--only=strings` used to have none — and every page title would have been
+ * filed as ordinary body copy. Reading the templates is cheap; guessing is not.
+ */
+async function seoKeysOf(registry, catalogues) {
+  const keys = new Set();
+  for (const spec of registry.pages) {
+    const file = path.join(CONTENT_DIR, 'pages', spec.file);
+    if (!fs.existsSync(file)) continue;
+    for (const k of ingestPage(spec, read(file), catalogues, registry.locales).seoKeys) keys.add(k);
+  }
+  return keys;
 }
 
 async function seedPages(registry, catalogues) {
@@ -548,8 +621,28 @@ async function seedMedia() {
 }
 
 async function seedPartners() {
-  const file = path.join(CONTENT_DIR, 'data', 'partners.json');
-  if (!fs.existsSync(file)) return;
+  /*
+   * Where the directory lives, and where it is also looked for.
+   *
+   * `content-source/data/partners.json` is the home. The repository root is a
+   * fallback because that is where the export lands when somebody downloads it —
+   * and the whole partner locator was empty for exactly that reason: the file sat
+   * at the root, this function looked only in `data/`, found nothing, and
+   * returned silently. A directory of 1,130 partners and a map with no pins on
+   * it, and nothing anywhere said why.
+   *
+   * So a miss is now logged. A seed step that can do nothing and say nothing is
+   * a seed step that will eventually do nothing.
+   */
+  const candidates = [
+    path.join(CONTENT_DIR, 'data', 'partners.json'),
+    path.resolve(HERE, '../../../../partners.json'),
+  ];
+  const file = candidates.find(f => fs.existsSync(f));
+  if (!file) {
+    logger.warn({ looked: candidates }, 'no partner directory file — the locator will have no pins');
+    return;
+  }
   if (await Partner.countDocuments({}) && !FORCE) {
     logger.info('partners already present — left as they are');
     return;
@@ -574,7 +667,12 @@ async function seedPartners() {
             email: raw.email || '',
             level: raw.level || raw.tier || '',
             lat: numberOrNull(raw.lat ?? raw.latitude),
-            lng: numberOrNull(raw.lng ?? raw.lon ?? raw.longitude),
+            lng: numberOrNull(raw.lng ?? raw.longitude),
+            // Read by the locator's filter buttons and its map markers, and
+            // absent from this list until now — so a partner imported by the seed
+            // and then edited in the CMS lost its head-office status.
+            hq: raw.hq === true || /^(1|true|yes|y)$/i.test(String(raw.hq ?? '')),
+            keywords: typeof raw.keywords === 'string' ? raw.keywords : '',
             active: true,
             raw,
           },

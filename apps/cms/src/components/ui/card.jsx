@@ -4,7 +4,7 @@ export function Card({ className, ...props }) {
   return (
     <div
       data-slot="card"
-      className={cn('bg-card text-card-foreground flex flex-col rounded-xl border shadow-xs', className)}
+      className={cn('bg-card text-card-foreground flex min-w-0 flex-col rounded-xl border shadow-xs', className)}
       {...props}
     />
   );
@@ -40,7 +40,7 @@ export function CardActions({ className, ...props }) {
 }
 
 export function CardContent({ className, ...props }) {
-  return <div data-slot="card-content" className={cn('p-4', className)} {...props} />;
+  return <div data-slot="card-content" className={cn('min-w-0 p-4', className)} {...props} />;
 }
 
 export function CardFooter({ className, ...props }) {

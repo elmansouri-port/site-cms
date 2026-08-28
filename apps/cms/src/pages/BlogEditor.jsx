@@ -10,10 +10,24 @@
  * Everything lives on the same draft object and one Save. Nothing here writes
  * to the site until Publish, and the bar at the bottom always says which of
  * those two states you are in.
+ *
+ * ── The canvas ───────────────────────────────────────────────────────────────
+ *
+ * Writing used to mean filling in forms and imagining the result: add a "Key
+ * points" section and you got three input boxes, with no way to see the blue box
+ * they produce or whether the heading above it reached the contents list. The
+ * page builder has had a live canvas since the beginning; this did not, which is
+ * why composing an article felt like writing code.
+ *
+ * The **Preview** pane beside the section list is that canvas. It posts the
+ * unsaved draft to /cms/article-preview, which pours it into the authored
+ * article template and composes the document exactly as the published route
+ * does — so it is the page, not an impression of it, and adding a block shows
+ * the block. Selecting a section in the list scrolls the page to it.
  */
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { AlertCircle, Trash2, TriangleAlert } from 'lucide-react';
+import { AlertCircle, PanelRightClose, PanelRightOpen, Trash2, TriangleAlert } from 'lucide-react';
 import { useDirtyGuard, useResource } from '../lib/hooks.js';
 import { api } from '../lib/api.js';
 import { useToast } from '../lib/toast.jsx';
@@ -22,6 +36,7 @@ import { renderArticleBody } from '@rainbow/core/article';
 import { cn } from '../lib/cn.js';
 import MediaPicker from '../components/MediaPicker.jsx';
 import ArticleSections, { ContentsPreview } from '../components/ArticleSections.jsx';
+import ArticleCanvas from '../components/ArticleCanvas.jsx';
 import SharePreview from '../components/SharePreview.jsx';
 import HistoryPanel from '../components/HistoryPanel.jsx';
 import PublishBar, { Steps } from '../components/PublishBar.jsx';
@@ -51,6 +66,26 @@ export default function BlogEditor() {
   const [dirty, setDirty] = useState(false);
   const [busy, setBusy] = useState(false);
   const [picking, setPicking] = useState(null);
+  /*
+   * Which section the canvas should be looking at, and whether the canvas is
+   * open at all.
+   *
+   * Closing it is worth offering: the section list at full width is the better
+   * shape for restructuring a long article, and a narrow laptop cannot show both
+   * usefully. Remembered per browser, because it is a working preference rather
+   * than a property of the article.
+   */
+  const [selectedSection, setSelectedSection] = useState(null);
+  const [canvasOpen, setCanvasOpen] = useState(() => {
+    try { return localStorage.getItem('cms.article.canvas') !== 'off'; } catch { return true; }
+  });
+  function toggleCanvas() {
+    setCanvasOpen((open) => {
+      const next = !open;
+      try { localStorage.setItem('cms.article.canvas', next ? 'on' : 'off'); } catch { /* private mode */ }
+      return next;
+    });
+  }
 
   useEffect(() => { if (data?.post) { setDraft(data.post); setDirty(false); } }, [data]);
   useDirtyGuard(dirty);
@@ -228,9 +263,22 @@ export default function BlogEditor() {
       />
 
       {step === 'write' && (
-        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div
+          className={cn(
+            'grid gap-4',
+            canvasOpen ? 'xl:grid-cols-[minmax(0,460px)_minmax(0,1fr)]' : 'xl:grid-cols-[minmax(0,1fr)_320px]',
+          )}
+        >
           <Card>
-            <CardHeader><CardTitle>The article</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle>The article</CardTitle>
+              <div data-slot="card-actions">
+                <Button variant="outline" size="sm" onClick={toggleCanvas}>
+                  {canvasOpen ? <PanelRightClose /> : <PanelRightOpen />}
+                  {canvasOpen ? 'Hide preview' : 'Show preview'}
+                </Button>
+              </div>
+            </CardHeader>
             <CardContent className="grid gap-4">
               <Field label="Title" hint="Also the H1 and the default meta title.">
                 {id2 => <Input id={id2} value={draft.title} onChange={set('title')} disabled={!canEdit} />}
@@ -281,38 +329,60 @@ export default function BlogEditor() {
                 <ArticleSections
                   sections={draft.sections || []}
                   canEdit={canEdit}
+                  openKey={selectedSection}
+                  onOpenChange={setSelectedSection}
                   onChange={(sections) => { setDraft(d => ({ ...d, sections })); setDirty(true); }}
                 />
               )}
             </CardContent>
           </Card>
 
-          <div className="grid content-start gap-4">
-            {/* An authored page builds its own contents list; there is nothing
-                for this one to project. */}
-            {!draft.pageKey && (
-              <Card>
-                <CardHeader><CardTitle>Contents list</CardTitle></CardHeader>
-                <CardContent><ContentsPreview contents={body.contents} /></CardContent>
-              </Card>
-            )}
-            <Card>
-              <CardHeader><CardTitle>Reading</CardTitle></CardHeader>
-              <CardContent>
-                <DataList>
-                  {!draft.pageKey && <DataRow label="Words">{words.toLocaleString()}</DataRow>}
-                  <DataRow label="Reading time">
-                    {draft.readingMinutes || Math.max(1, Math.round(words / 200))} min
-                  </DataRow>
-                </DataList>
-                <p className="text-muted-foreground mt-3 text-[12px] leading-snug">
-                  {draft.pageKey
-                    ? 'Shown on the card and in the article header. Set it under Configure — it cannot be counted from an authored page here.'
-                    : 'Calculated at 200 words a minute unless you set a figure under Configure.'}
-                </p>
-              </CardContent>
+          {canvasOpen ? (
+            /*
+             * The canvas.
+             *
+             * Sticky, and as tall as the viewport allows: an editor working down
+             * a long article should not lose sight of the page while scrolling
+             * the section list. An article that renders from an authored page
+             * gets the same treatment — it is still a page worth looking at, it
+             * is simply not edited here.
+             */
+            <Card className="overflow-hidden xl:sticky xl:top-4 xl:self-start">
+              <ArticleCanvas
+                articleId={id}
+                draft={draft}
+                selectedKey={selectedSection}
+                height="calc(100vh - 15rem)"
+              />
             </Card>
-          </div>
+          ) : (
+            <div className="grid content-start gap-4">
+              {/* An authored page builds its own contents list; there is nothing
+                  for this one to project. */}
+              {!draft.pageKey && (
+                <Card>
+                  <CardHeader><CardTitle>Contents list</CardTitle></CardHeader>
+                  <CardContent><ContentsPreview contents={body.contents} /></CardContent>
+                </Card>
+              )}
+              <Card>
+                <CardHeader><CardTitle>Reading</CardTitle></CardHeader>
+                <CardContent>
+                  <DataList>
+                    {!draft.pageKey && <DataRow label="Words">{words.toLocaleString()}</DataRow>}
+                    <DataRow label="Reading time">
+                      {draft.readingMinutes || Math.max(1, Math.round(words / 200))} min
+                    </DataRow>
+                  </DataList>
+                  <p className="text-muted-foreground mt-3 text-[12px] leading-snug">
+                    {draft.pageKey
+                      ? 'Shown on the card and in the article header. Set it under Configure — it cannot be counted from an authored page here.'
+                      : 'Calculated at 200 words a minute unless you set a figure under Configure.'}
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
       )}
 

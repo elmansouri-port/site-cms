@@ -279,7 +279,7 @@ function NewFormDialog({ onClose }) {
             )}
           </Field>
 
-          <div className="grid gap-2">
+          <div className="grid min-w-0 gap-2">
             <span className="text-[13px] font-medium">Start from</span>
             {Object.entries(STARTERS).map(([key, option]) => (
               <button

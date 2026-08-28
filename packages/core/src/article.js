@@ -340,6 +340,11 @@ function renderSection(section, id, opts = {}) {
  * Returns `{ html, contents }`. A post with no sections falls back to its
  * `bodyHtml`, and the contents are then derived from that markup's headings —
  * imported articles keep working without being migrated.
+ *
+ * `opts.annotate` tags each section with `data-cms-article-section="<key>"`,
+ * which is what lets the editor's canvas scroll to the section being edited and
+ * outline it. Preview only: the attribute never reaches a published article, for
+ * the same reason the page builder's block annotations do not.
  */
 export function renderArticleBody(post, opts = {}) {
   const sections = (post?.sections || []).filter(s => s.visible !== false);
@@ -357,7 +362,7 @@ export function renderArticleBody(post, opts = {}) {
     const id = anchorFor(section, taken);
     const html = renderSection(section, id, opts);
     if (!html) continue;
-    parts.push(html);
+    parts.push(opts.annotate ? annotateSection(html, section) : html);
     if (inContents(section)) {
       contents.push({
         id,
@@ -368,6 +373,34 @@ export function renderArticleBody(post, opts = {}) {
   }
 
   return { html: parts.join('\n'), contents };
+}
+
+/**
+ * Mark a rendered section with the key it came from.
+ *
+ * On the first real tag rather than in a wrapper, because a wrapper around a
+ * <figure> or a heading changes the spacing the editor is looking at — and the
+ * whole point of the canvas is that it is the page. A section whose markup opens
+ * with a <style> block (the custom one does) is annotated on the element after
+ * it, which is the part that occupies space.
+ */
+function annotateSection(html, section) {
+  const source = String(html || '');
+  const attr = ` data-cms-article-section="${escapeAttr(section.key || '')}"`
+    + ` data-cms-article-type="${escapeAttr(section.type || '')}"`;
+
+  let from = 0;
+  if (source.startsWith('<style')) {
+    const close = source.indexOf('</style>');
+    if (close >= 0) from = close + '</style>'.length;
+  }
+  const at = source.slice(from).search(/<[a-zA-Z][a-zA-Z0-9-]*(?=[\s/>])/);
+  if (at < 0) return source;
+  const tagStart = from + at;
+  const tagEnd = source.indexOf('>', tagStart);
+  if (tagEnd < 0) return source;
+  const insertAt = source[tagEnd - 1] === '/' ? tagEnd - 1 : tagEnd;
+  return source.slice(0, insertAt) + attr + source.slice(insertAt);
 }
 
 /**

@@ -63,7 +63,18 @@ const slug = (s) => String(s || '').toLowerCase().normalize('NFD')
  * Pour one post into the authored article markup.
  * Returns { page, extra } ready for renderPage().
  */
-export async function renderArticle(article, locale, { blogSegment = 'blog', baseUrl = '' } = {}) {
+export async function renderArticle(article, locale, {
+  blogSegment = 'blog',
+  baseUrl = '',
+  /*
+   * Tag each body section with the key it came from.
+   *
+   * Only ever set by the editor's canvas, which uses it to scroll to the section
+   * being edited. A published article carries no such attribute, the same way a
+   * published page carries no block annotations.
+   */
+  annotate = false,
+} = {}) {
   const post = article.post;
   const template = await apiGet(
     `/api/v1/site/page?key=${ARTICLE_TEMPLATE_KEY}&locale=${locale}`,
@@ -82,7 +93,7 @@ export async function renderArticle(article, locale, { blogSegment = 'blog', bas
   // The forms this article references, resolved by the API. A form section
   // renders through the same `renderForm` a page block uses, so a form in an
   // article is the same form — see packages/core/src/article.js.
-  const body = renderArticleBody(post, { locale, forms: article.forms || {} });
+  const body = renderArticleBody(post, { locale, forms: article.forms || {}, annotate });
 
   // The breadcrumb, the contents list, the article and the related cards all
   // live in one authored block (`main-content`), so every substitution happens

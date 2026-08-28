@@ -50,8 +50,8 @@
     "clientPortal": "Portale clienti",
     "admin": "Amministrazione",
     "rainbow": "Rainbow",
-    "copyright": "&copy; 2026 Rainbow by Alcatel-Lucent. Tutti i diritti riservati.",
-    "copyrightShort": "&copy; 2026 Rainbow by ALE. Tutti i diritti riservati."
+    "copyright": "© 2026 Rainbow by Alcatel-Lucent. Tutti i diritti riservati.",
+    "copyrightShort": "© 2026 Rainbow by ALE. Tutti i diritti riservati."
   },
   "products": {
     "heroTag": "Le nostre soluzioni",
@@ -351,7 +351,7 @@
     "expiry": "Scadenza",
     "cvc": "CVC",
     "submitBtn": "Abbonati e paga",
-    "processing": "Elaborazione\u2026",
+    "processing": "Elaborazione…",
     "stripeNote": "Protetto da Stripe. I dati della carta non passano mai dai nostri server.",
     "successTitle": "Abbonamento attivo!",
     "successDescription": "Il tuo pagamento è stato elaborato con successo.",
@@ -362,7 +362,7 @@
     "paymentFailed": "Pagamento fallito. Riprova."
   },
   "offers": {
-    "collaborationDesc": "Piattaforma di comunicazione unificata \u2014 messaggistica, video, telefonia.",
+    "collaborationDesc": "Piattaforma di comunicazione unificata — messaggistica, video, telefonia.",
     "webinarDesc": "Organizza eventi online su larga scala con fino a 10.000 partecipanti.",
     "smartHotelDesc": "Esperienza ospite e gestione alberghiera basate sull'IA.",
     "plansComing": "Piani disponibili a breve.",
@@ -371,21 +371,47 @@
       "subtitle": "Per iniziare",
       "priceNote": "fino a 15 utenti",
       "ctaText": "Inizia gratis",
-      "features": ["Audio e video HD (1:1)", "Messaggistica istantanea", "Condivisione file (1 GB)", "Integrazione calendario", "App mobile iOS e Android", "Supporto community"]
+      "features": [
+        "Audio e video HD (1:1)",
+        "Messaggistica istantanea",
+        "Condivisione file (1 GB)",
+        "Integrazione calendario",
+        "App mobile iOS e Android",
+        "Supporto community"
+      ]
     },
     "business": {
       "name": "Business",
-      "subtitle": "Il pi\u00f9 popolare",
+      "subtitle": "Il più popolare",
       "priceNote": "/utente/mese",
       "ctaText": "Prova gratuita 30 giorni",
-      "features": ["Tutto di Essential +", "Conferenza fino a 100 partecipanti", "Registrazione riunioni", "Condivisione schermo avanzata", "10 GB spazio/utente", "Integrazione CRM e Office 365", "Supporto prioritario 24/7", "Amministrazione centralizzata"]
+      "features": [
+        "Tutto di Essential +",
+        "Conferenza fino a 100 partecipanti",
+        "Registrazione riunioni",
+        "Condivisione schermo avanzata",
+        "10 GB spazio/utente",
+        "Integrazione CRM e Office 365",
+        "Supporto prioritario 24/7",
+        "Amministrazione centralizzata"
+      ]
     },
     "enterprise": {
       "name": "Enterprise",
       "subtitle": "Su misura",
       "priceNote": "/utente/mese",
       "ctaText": "Prova gratuita 30 giorni",
-      "features": ["Tutto di Business +", "Conferenza fino a 1000 partecipanti", "Webinar ed eventi", "Telefonia cloud (SIP/PSTN)", "Spazio illimitato", "API e SDK sviluppatori", "SLA 99,99% garantito", "Customer Success Manager dedicato", "SSO e sicurezza avanzata"]
+      "features": [
+        "Tutto di Business +",
+        "Conferenza fino a 1000 partecipanti",
+        "Webinar ed eventi",
+        "Telefonia cloud (SIP/PSTN)",
+        "Spazio illimitato",
+        "API e SDK sviluppatori",
+        "SLA 99,99% garantito",
+        "Customer Success Manager dedicato",
+        "SSO e sicurezza avanzata"
+      ]
     }
   },
   "lang": {

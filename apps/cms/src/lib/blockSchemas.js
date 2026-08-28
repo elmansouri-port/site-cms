@@ -11,6 +11,11 @@
  * its shape. An editor choosing a block should be looking at pictures, not
  * reading a dropdown of identifiers.
  *
+ * `i18n: true` on a field makes it one value per language rather than one value
+ * for the site. Component blocks held a single string, so a block on a
+ * trilingual site said the same thing in all three; the blog index is the first
+ * block that could not live with that. See packages/core/src/i18nData.js.
+ *
  * type: text | textarea | html | code | number | boolean | select | media | list | lines
  *     | link       — a destination chosen from the pages, articles and anchors that
  *                    exist, stored as a reference so it survives a rename (LinkPicker)
@@ -247,6 +252,52 @@ export const BLOCK_SCHEMAS = {
       { name: 'limit', label: 'How many', type: 'number' },
       { name: 'category', label: 'Category filter', type: 'text' },
       { name: 'ctaLabel', label: 'Link to the blog', type: 'text' },
+    ],
+  },
+  /*
+   * The blog's own front page.
+   *
+   * Not the same thing as `article_list`, which is three cards dropped onto any
+   * page. This is the index: search, category pills, a lead article and real
+   * pagination, all of it reading the URL — so a filtered blog is a page rather
+   * than a DOM state. One per site, on the page whose route is the blog segment.
+   */
+  blog_index: {
+    label: 'Blog index',
+    category: 'content',
+    description: 'The blog front page: search, categories, a lead article and pagination. Reads the articles that exist.',
+    wireframe: ['title-lg', 'buttons', 'split', 'cards-3'],
+    fields: [
+      { name: 'title', label: 'Page title', type: 'text', i18n: true, hint: 'The H1 above the search box.' },
+      { name: 'searchPlaceholder', label: 'Search box placeholder', type: 'text', i18n: true },
+      { name: 'allLabel', label: '"All categories" pill', type: 'text', i18n: true },
+      { name: 'recentTitle', label: 'Heading above the grid', type: 'text', i18n: true },
+      { name: 'recentIntro', label: 'Intro under that heading', type: 'textarea', i18n: true },
+      { name: 'readMoreLabel', label: '"Read more" on the lead article', type: 'text', i18n: true },
+      { name: 'moreLabel', label: 'Next page button', type: 'text', i18n: true },
+      {
+        name: 'perPage',
+        label: 'Articles per page',
+        type: 'number',
+        hint: 'The lead article is shown above the grid and not repeated in it.',
+      },
+      { name: 'emptyTitle', label: 'When nothing matches — title', type: 'text', i18n: true },
+      { name: 'emptyHint', label: 'When nothing matches — explanation', type: 'text', i18n: true },
+      /*
+       * The promo card beside the lead article.
+       *
+       * A slot, not an article: a guide, an ebook, whatever is being pushed this
+       * month. Left empty, the lead article takes the full width rather than
+       * leaving a gap where a card used to be.
+       */
+      { name: 'promo.badge', label: 'Promo — badge', type: 'text', i18n: true, hint: 'Leave the promo title empty and the lead article takes the full width.' },
+      { name: 'promo.title', label: 'Promo — title', type: 'text', i18n: true },
+      { name: 'promo.text', label: 'Promo — text', type: 'textarea', i18n: true },
+      { name: 'promo.image', label: 'Promo — image', type: 'media' },
+      { name: 'promo.imageAlt', label: 'Promo — image alt text', type: 'text', i18n: true },
+      { name: 'promo.overlay', label: 'Promo — text over the image', type: 'text', i18n: true },
+      { name: 'promo.ctaLabel', label: 'Promo — button', type: 'text', i18n: true },
+      { name: 'promo.href', label: 'Promo — button goes to', type: 'link' },
     ],
   },
   form: {

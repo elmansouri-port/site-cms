@@ -1,0 +1,354 @@
+---
+/*
+ * BlogIndex — the blog's front page, from the database.
+ *
+ * It used to be a static section: a hero with nine hard-coded category pills, a
+ * featured card about a webinar guide, and twelve article cards pointing at
+ * Unsplash photographs and, mostly, at nothing. Publishing an article in the CMS
+ * changed none of it. The filter script filtered the placeholders.
+ *
+ * This renders the same design from the articles that exist. Three things about
+ * how, because each one was a choice:
+ *
+ *   - **The filters are in the URL.** `?category=…&q=…&page=2` is resolved on
+ *     the server, so a filtered blog is a real page: shareable, crawlable, and
+ *     working with JavaScript off. The old version filtered by hiding DOM nodes,
+ *     which meant page two did not exist and no filtered view had a URL.
+ *   - **The pills come from the articles.** A fixed list of categories is a list
+ *     of promises: nine pills, of which two had anything behind them. Each pill
+ *     here is a category something is published in, with the count.
+ *   - **The lead article is the featured one, else the newest.** Never a
+ *     hard-coded slug, which is how the old page ended up linking an article that
+ *     was never written.
+ *
+ * The class names are the authored page's own, so the stylesheet in its <head>
+ * still dresses this — the markup is new, the design is not.
+ */
+import { resolveAssetsDeep } from '@rainbow/core/assets';
+import { blogList, blogSegment } from '../../lib/site.js';
+
+const { data = {}, locale, editMode = false } = Astro.props;
+const fieldHook = (name) => (editMode ? { 'data-cms-field': name } : {});
+
+const segment = blogSegment(Astro.locals.settings, locale);
+const base = `/${locale}/${segment}`;
+
+const {
+  title = '',
+  searchPlaceholder = '',
+  allLabel = '',
+  recentTitle = '',
+  recentIntro = '',
+  moreLabel = '',
+  emptyTitle = '',
+  emptyHint = '',
+  readMoreLabel = '',
+  perPage = 12,
+  // The promo card beside the lead article. Not an article — a slot an editor
+  // fills with whatever is being pushed this month — so it is block data.
+  promo = {},
+} = data;
+
+/* ── What was asked for ───────────────────────────────────────────────────── */
+
+const params = Astro.url.searchParams;
+const category = (params.get('category') || '').slice(0, 80);
+const search = (params.get('q') || '').slice(0, 120);
+const page = Math.max(1, Number.parseInt(params.get('page') || '1', 10) || 1);
+const limit = Math.min(48, Math.max(1, Number(perPage) || 12));
+const filtered = !!(category || search);
+
+/*
+ * The lead card is only shown on an unfiltered first page.
+ *
+ * On a filtered view it would be a second, differently-shaped copy of the first
+ * result, and on page two it would be the same article again above a grid that
+ * has moved on.
+ */
+const wantsLead = !filtered && page === 1;
+
+let lead = null;
+let items = [];
+let total = 0;
+let pages = 1;
+let categories = [];
+let failed = false;
+
+try {
+  if (wantsLead) {
+    const first = await blogList(locale, { limit: '1', facets: '1' });
+    lead = (first?.items || [])[0] || null;
+    categories = first?.categories || [];
+  }
+  const list = await blogList(locale, {
+    limit: String(limit),
+    page: String(page),
+    facets: '1',
+    ...(category ? { category } : {}),
+    ...(search ? { q: search } : {}),
+    ...(lead ? { exclude: lead.slug } : {}),
+  });
+  items = list?.items || [];
+  total = list?.total || 0;
+  pages = list?.pages || 1;
+  if (!categories.length) categories = list?.categories || [];
+
+  /*
+   * A cover image may be a managed reference — `/media/a/hero-home` — and these
+   * rows come straight from the API, so nothing has resolved it.
+   *
+   * The renderer resolves references inside *markup*; a block that fetches its
+   * own data has to ask. Without this the cards emitted
+   * `src="/media/a/images-collaborate"`, which resolves only because the nginx
+   * gateway rewrites that prefix — so it worked in production by way of a
+   * redirect per image, and 404d in development. Resolved here, the card gets the
+   * content-hashed file directly, which is the whole point of the reference.
+   */
+  const assets = Astro.locals.assets || [];
+  if (assets.length) {
+    if (lead) lead = resolveAssetsDeep(lead, assets);
+    items = resolveAssetsDeep(items, assets);
+  }
+} catch (err) {
+  // A blog index that says "we could not load the articles" is recoverable. One
+  // that 500s takes the whole URL down and tells a crawler the page is broken.
+  console.warn('[blog_index] could not load articles:', err.message);
+  failed = true;
+}
+
+const dateFormat = new Intl.DateTimeFormat(locale, { year: 'numeric', month: 'short', day: 'numeric' });
+const showDate = (value) => (value ? dateFormat.format(new Date(value)) : '');
+const isoDate = (value) => (value ? new Date(value).toISOString() : undefined);
+const href = (post) => `${base}/${post.slug}`;
+
+/** A filter URL, keeping whatever else is set. Page always resets to one. */
+function filterUrl(next = {}) {
+  const q = new URLSearchParams();
+  const merged = { category, q: search, ...next };
+  if (merged.category) q.set('category', merged.category);
+  if (merged.q) q.set('q', merged.q);
+  if (merged.page && Number(merged.page) > 1) q.set('page', String(merged.page));
+  const s = q.toString();
+  return s ? `${base}?${s}` : base;
+}
+---
+
+<!-- ===== HERO BANNER ===== -->
+<div class="blog-hero">
+  <div class="blog-hero-content">
+    <h1 class="blog-hero-title text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6" {...fieldHook('title')}>
+      {title}
+    </h1>
+
+    {/*
+      A real form, submitting to this page.
+
+      GET to the blog's own URL, so searching produces a URL somebody can send
+      to a colleague and a crawler can follow — and it works before any script
+      has loaded, which the previous keyup handler did not.
+    */}
+    <form class="flex justify-center mb-6" method="get" action={base} role="search">
+      <div class="search-bar-wrap">
+        <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/></svg>
+        <input
+          type="search"
+          name="q"
+          value={search}
+          placeholder={searchPlaceholder}
+          class="w-56 md:w-72"
+          id="blog-search-input"
+          aria-label={searchPlaceholder || 'Search'}
+        />
+        {category && <input type="hidden" name="category" value={category} />}
+      </div>
+    </form>
+
+    {categories.length > 0 && (
+      <div class="flex flex-wrap justify-center gap-2 max-w-2xl mx-auto mb-2" id="cat-pills">
+        <a href={filterUrl({ category: '' })} class={`cat-pill ${category ? 'inactive' : 'active'}`} {...fieldHook('allLabel')}>
+          {allLabel}
+        </a>
+        {categories.map(c => (
+          <a
+            href={filterUrl({ category: c.name })}
+            class={`cat-pill ${category === c.name ? 'active' : 'inactive'}`}
+          >
+            {c.name}
+            <span class="opacity-60"> {c.count}</span>
+          </a>
+        ))}
+      </div>
+    )}
+  </div>
+</div>
+
+<!-- ===== FEATURED + PROMO ===== -->
+{(lead || promo?.title) && (
+  <section class="featured-section">
+    <div class="featured-section-inner">
+      <div class={`grid gap-6 items-stretch ${promo?.title ? 'lg:grid-cols-[1fr_380px]' : ''}`}>
+
+        {lead && (
+          <div class="featured-card">
+            {lead.coverImage && (
+              <img class="featured-card-img" src={lead.coverImage} alt={lead.coverAlt || lead.title} width="800" height="450" loading="eager" />
+            )}
+            <div class="featured-card-body">
+              {lead.category && (
+                <a href={filterUrl({ category: lead.category })} class="badge">{lead.category}</a>
+              )}
+              <h2 class="text-xl md:text-2xl font-bold text-navy-900 leading-snug mb-3">
+                <a href={href(lead)}>{lead.title}</a>
+              </h2>
+              {lead.excerpt && (
+                <p class="text-gray-500 text-sm leading-relaxed mb-4">{lead.excerpt}</p>
+              )}
+              <p class="text-xs text-gray-400 mb-6">
+                {lead.publishedAt && <time datetime={isoDate(lead.publishedAt)}>{showDate(lead.publishedAt)}</time>}
+                {lead.readingMinutes ? <span> · {lead.readingMinutes} min</span> : null}
+              </p>
+              <a href={href(lead)} class="read-more" {...fieldHook('readMoreLabel')}>
+                {readMoreLabel}
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+              </a>
+            </div>
+          </div>
+        )}
+
+        {promo?.title && (
+          <div class="resource-card">
+            {promo.image && (
+              <div class="resource-card-thumb">
+                <img src={promo.image} alt={promo.imageAlt || ''} class="w-full h-full object-cover" width="600" height="340" loading="lazy" />
+                {promo.overlay && (
+                  <div class="resource-card-overlay">
+                    <p class="text-white font-bold text-base leading-snug" {...fieldHook('promo.overlay')}>{promo.overlay}</p>
+                  </div>
+                )}
+              </div>
+            )}
+            <div class="resource-card-body">
+              {promo.badge && (
+                <span class="badge-ebook mb-3" {...fieldHook('promo.badge')}>
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                  {promo.badge}
+                </span>
+              )}
+              <h3 class="text-base font-bold text-navy-900 leading-snug mb-2" {...fieldHook('promo.title')}>{promo.title}</h3>
+              {promo.text && (
+                <p class="text-sm text-gray-500 leading-relaxed mb-4 flex-1" {...fieldHook('promo.text')}>{promo.text}</p>
+              )}
+              {promo.ctaLabel && promo.href && (
+                <a href={promo.href} class="download-link" {...fieldHook('promo.ctaLabel')}>
+                  {promo.ctaLabel}
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                </a>
+              )}
+            </div>
+          </div>
+        )}
+
+      </div>
+    </div>
+  </section>
+)}
+
+<!-- ===== ARTICLES ===== -->
+{/*
+  The grid is skipped entirely when the lead card is the only article there is.
+
+  A site with one published article showed it as the featured card and then said
+  "no articles found" underneath, which reads as a bug. There is nothing more to
+  list, so there is nothing to say about it.
+*/}
+{(items.length > 0 || !lead) && (
+<section class="articles-section py-16 px-6">
+  <div class="max-w-6xl mx-auto">
+    <h2 class="text-2xl md:text-3xl font-extrabold text-navy-900 mb-2" {...fieldHook('recentTitle')}>
+      {filtered && category ? category : recentTitle}
+    </h2>
+    {recentIntro && !filtered && (
+      <p class="text-gray-500 max-w-3xl mb-10 text-sm leading-relaxed" {...fieldHook('recentIntro')}>
+        {recentIntro}
+      </p>
+    )}
+    {filtered && (
+      <p class="text-gray-500 mb-10 text-sm">
+        {total} {total === 1 ? 'article' : 'articles'}
+        {search && <> · <span class="italic">“{search}”</span></>}
+        {' '}<a href={base} class="underline">clear</a>
+      </p>
+    )}
+
+    {failed ? (
+      <div class="bg-white border border-gray-100 rounded-[10px] p-8 text-center">
+        <p class="font-bold text-navy-900 mb-1">{emptyTitle}</p>
+        <p class="text-sm text-gray-500">{emptyHint}</p>
+      </div>
+    ) : items.length ? (
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6" id="articles-grid">
+        {items.map(post => (
+          <article class="article-card" data-cat={post.category || ''}>
+            <a href={href(post)} class="block">
+              {post.coverImage && (
+                <img src={post.coverImage} alt={post.coverAlt || post.title} width="600" height="400" loading="lazy" decoding="async" />
+              )}
+            </a>
+            <div class="article-card-body">
+              {post.category && <span class="badge">{post.category}</span>}
+              <h3 class="font-bold text-navy-900 leading-snug text-base">
+                <a href={href(post)}>{post.title}</a>
+              </h3>
+              <p class="text-xs text-gray-400 mt-3">
+                {post.publishedAt && <time datetime={isoDate(post.publishedAt)}>{showDate(post.publishedAt)}</time>}
+                {post.readingMinutes ? <span> · {post.readingMinutes} min</span> : null}
+              </p>
+            </div>
+          </article>
+        ))}
+      </div>
+    ) : (
+      <div class="bg-white border border-gray-100 rounded-[10px] p-10 text-center">
+        <div class="w-12 h-12 rounded-[10px] bg-brand-50 flex items-center justify-center mx-auto mb-4">
+          <svg class="w-6 h-6 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"/></svg>
+        </div>
+        <p class="font-bold text-navy-900 mb-1" {...fieldHook('emptyTitle')}>{emptyTitle}</p>
+        <p class="text-sm text-gray-500" {...fieldHook('emptyHint')}>{emptyHint}</p>
+      </div>
+    )}
+
+    {/*
+      Pagination, not "load more".
+
+      The button used to reveal cards that were already in the HTML — which is
+      why there were only ever twelve. A link to page two is a URL, so the
+      thirteenth article is reachable by a crawler, a bookmark and the back
+      button. `rel` tells a crawler how the sequence runs.
+    */}
+    {pages > 1 && (
+      <nav class="text-center mt-12 flex flex-wrap items-center justify-center gap-3" aria-label="Pages">
+        {page > 1 && (
+          <a
+            href={filterUrl({ page: page - 1 })}
+            rel="prev"
+            class="px-8 py-3.5 rounded-full border-2 border-navy-900 text-navy-900 font-semibold text-sm hover:bg-navy-900 hover:text-white transition-all"
+          >
+            ←
+          </a>
+        )}
+        <span class="text-sm text-gray-500">{page} / {pages}</span>
+        {page < pages && (
+          <a
+            href={filterUrl({ page: page + 1 })}
+            rel="next"
+            class="px-8 py-3.5 rounded-full border-2 border-navy-900 text-navy-900 font-semibold text-sm hover:bg-navy-900 hover:text-white transition-all"
+            {...fieldHook('moreLabel')}
+          >
+            {moreLabel}
+          </a>
+        )}
+      </nav>
+    )}
+  </div>
+</section>
+)}

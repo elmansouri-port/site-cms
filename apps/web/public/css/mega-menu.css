@@ -244,6 +244,11 @@
   width: 36px;
   height: 36px;
 }
+.mega-menu-showcase-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
 .mega-menu-showcase-body {
   padding: 16px;

@@ -35,6 +35,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { loadEnv, credentials } from './lib/env.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PAGES_DIR = path.join(ROOT, 'content-source', 'pages');
@@ -127,17 +128,7 @@ function stripSource() {
 
 /* ── The database ─────────────────────────────────────────────────────────── */
 
-function dotenv() {
-  const out = {};
-  try {
-    for (const line of fs.readFileSync(path.join(ROOT, '.env'), 'utf8').split('\n')) {
-      const m = /^\s*([A-Z0-9_]+)\s*=\s*(.*)$/.exec(line);
-      if (m) out[m[1]] = m[2].trim().replace(/^["']|["']$/g, '');
-    }
-  } catch { /* fall back to the environment */ }
-  return out;
-}
-const env = { ...dotenv(), ...process.env };
+const env = loadEnv(ROOT);
 const API = flag('api', env.API_BASE || 'http://localhost:8080/api/v1');
 
 let token = null;
@@ -155,39 +146,30 @@ async function call(method, endpoint, body) {
 }
 
 async function stripDatabase() {
-  ({ token } = await call('POST', '/auth/login', {
-    email: env.ADMIN_EMAIL, password: env.ADMIN_PASSWORD,
-  }));
+  ({ token } = await call('POST', '/auth/login', credentials(env)));
 
-  const { items } = await call('GET', '/pages');
-  let removed = 0;
+  const { items } = await call('GET', '/pages?includeArticles=1');
+  let emptied = 0;
+  let deleted = 0;
 
   for (const summary of items) {
     const { page } = await call('GET', `/pages/${summary.key}`);
-    const doomed = (page.sections || []).filter(s => LOOPBACK_SRC.test(s.html || ''));
-    if (!doomed.length) continue;
 
-    for (const section of doomed) {
-      /*
-       * Emptied down to its own leading whitespace, not hidden and not deleted.
-       *
-       * Deleting is refused — the slicer marks `<script>` blocks `locked`
-       * because the markup around them assumes where they sit. Hiding works,
-       * but a hidden block contributes *nothing*, including the newline it
-       * carries in front of it, and that newline is part of the authored body.
-       * Drop it and the live page is two bytes shorter than the file it came
-       * from, which `verify-live` reports as a difference on every affected
-       * page — for ever, on eleven pages.
-       *
-       * So the block keeps exactly the trivia the slicer attached to it and
-       * loses the tag. Byte-for-byte identical to the authored source once the
-       * same lines are gone from it, which is what the offline check asserts.
-       */
-      const trivia = /^\s*/.exec(section.html || '')[0];
+    /*
+     * Pass one: take the tag out, leaving the block's own whitespace.
+     *
+     * The block cannot simply be deleted here — the slicer attaches the trivia
+     * preceding an element to the block that follows it, so that newline is part
+     * of the authored body and dropping it makes the live page two bytes shorter
+     * than the file it came from. `verify-live` reports that as a difference for
+     * ever, on eleven pages.
+     */
+    for (const section of (page.sections || []).filter(s => LOOPBACK_SRC.test(s.html || ''))) {
+      const trivia = /^s*/.exec(section.html || '')[0];
       if (section.html === trivia) continue;   // already dealt with
       console.log(`  ${DRY ? c.yellow('would empty') : c.green('emptied')}  `
         + `${page.key} → block "${section.key}"`);
-      removed++;
+      emptied++;
       if (!DRY) {
         await call('PATCH', `/pages/${page.key}/sections/${section.key}`, {
           html: trivia,
@@ -197,8 +179,36 @@ async function stripDatabase() {
         });
       }
     }
+
+    /*
+     * Pass two: and now take the block itself.
+     *
+     * The blocks pass one leaves behind are the reason this tool used to finish
+     * with the job half done. Twelve pages carried a "Script" block whose whole
+     * content was a newline — visible in the page builder, impossible to open,
+     * impossible to delete, and doing nothing.
+     *
+     * The delete endpoint now accepts an emptied script block and moves its
+     * whitespace onto the block before it, so the page still emits the same
+     * bytes. Which is what made this possible; the constraint was never that the
+     * block had to exist, only that its newline did.
+     *
+     * Read fresh, because pass one has just changed what is there.
+     */
+    const { page: current } = DRY ? { page } : await call('GET', `/pages/${summary.key}`);
+    const residue = (current.sections || []).filter((s, at) => (
+      at > 0
+      && (s.type === 'script' || s.type === 'style')
+      && !String(s.html || '').trim()
+    ));
+    for (const section of residue) {
+      console.log(`  ${DRY ? c.yellow('would delete') : c.green('deleted')}  `
+        + `${current.key} → the empty block "${section.key}" it left behind`);
+      deleted++;
+      if (!DRY) await call('DELETE', `/pages/${current.key}/sections/${section.key}`);
+    }
   }
-  return removed;
+  return { emptied, deleted };
 }
 
 /* ── Run ──────────────────────────────────────────────────────────────────── */
@@ -219,8 +229,9 @@ async function main() {
 
   let dbRemoved = 0;
   try {
-    dbRemoved = await stripDatabase();
-    console.log(`  database: ${dbRemoved} block(s)`);
+    const db = await stripDatabase();
+    dbRemoved = db.emptied + db.deleted;
+    console.log(`  database: ${db.emptied} tag(s) removed, ${db.deleted} empty block(s) deleted`);
   } catch (err) {
     console.log(c.red(`  database: ${err.message}`));
     console.log(c.dim('  (the source files above were still handled)'));

@@ -8,7 +8,8 @@ import path from 'node:path';
 import { config } from './config.js';
 import { logger } from './lib/log.js';
 import { redisHealthy, revision } from './lib/redis.js';
-import { notFoundHandler, errorHandler } from './middleware/error.js';
+import { notFoundHandler, errorHandler, asyncHandler } from './middleware/error.js';
+import { assetsCached } from './services/content.js';
 import { siteRouter } from './routes/site.js';
 import { formsRouter } from './routes/forms.js';
 import { hooksRouter } from './routes/hooks.js';
@@ -44,6 +45,35 @@ export function createApp() {
   app.use(express.json({ limit: '5mb' }));
   app.use(express.urlencoded({ extended: true, limit: '2mb' }));
   app.use(cookieParser());
+
+  /*
+   * The managed-reference fallback: `/media/a/<slug>` becomes the file it holds.
+   *
+   * The renderer resolves these references before a page is sent, so this is
+   * never on the hot path. It exists for a reference that escaped the render
+   * pass — inside a JavaScript string, in copy somebody pasted, in a feed built
+   * against the site — and 302s to the current file rather than 404ing.
+   *
+   * It used to exist only as a rewrite in the nginx gateway, which made the
+   * behaviour the documentation describes a property of one deployment: the same
+   * reference 404d against `npm run dev`, so a block that emitted one looked
+   * broken locally and fine in production. Declared here, it is true wherever
+   * the API runs.
+   *
+   * Before the static mount, so a slug cannot be shadowed by a directory
+   * called `a`.
+   */
+  app.get(`${config.uploads.publicPath}/a/:slug`, asyncHandler(async (req, res) => {
+    const slug = String(req.params.slug || '').toLowerCase();
+    const assets = await assetsCached();
+    const hit = assets.find(a => a.slug === slug)
+      || assets.find(a => (a.aliases || []).includes(slug));
+    if (!hit) return res.status(404).json({ error: 'No such asset' });
+    // Short-lived: the target changes when somebody replaces the image, and the
+    // file it points at is itself immutable and cached for a month.
+    res.set('cache-control', 'public, max-age=60');
+    return res.redirect(302, hit.url);
+  }));
 
   // Uploaded media. Immutable: filenames carry a content hash suffix.
   app.use(config.uploads.publicPath, express.static(path.resolve(config.uploads.dir), {

@@ -5,7 +5,7 @@ import { composeParts } from '@rainbow/core/compose';
 import { getKey } from '@rainbow/core/html';
 import {
   catalogue as loadCatalogue, alternatesFor, baseUrlFrom, activeLocales, knownRoutes,
-  integrationMap, linkMap,
+  integrationMap, linkMap, imageMap,
 } from './site.js';
 import { navRuntime } from './nav.js';
 import { runtimeExperiments } from './experiments.js';
@@ -14,7 +14,15 @@ import { config } from './config.js';
 /**
  * Structured data authored inside the template stays translatable: the block
  * carries the i18n key it was marked with, so the locale's version is used.
+ *
+ * An entry that resolves to nothing — or to `{}` — is dropped rather than
+ * emitted. The article template's block was exactly that: the static site filled
+ * it in from JavaScript at runtime, so both the markup and the catalogue held
+ * `{}`, and every article shipped an empty `application/ld+json` script for a
+ * search engine to parse and find nothing in.
  */
+const EMPTY_LD = /^\{\s*\}$|^\[\s*\]$/;
+
 function resolveJsonLd(page, catalogue) {
   return (page.jsonLd || []).map((entry) => {
     if (entry.i18nKey) {
@@ -22,11 +30,11 @@ function resolveJsonLd(page, catalogue) {
       if (translated !== undefined) return String(translated);
     }
     return entry.value;
-  }).filter(Boolean);
+  }).filter(value => value && !EMPTY_LD.test(String(value).trim()));
 }
 
 /** The object the browser reads as window.__CMS__. */
-function runtimeFor({ locale, locales, page, settings, navigation, variants, experiments }) {
+function runtimeFor({ locale, locales, page, settings, navigation, navImages, variants, experiments }) {
   return {
     locale,
     locales,
@@ -48,7 +56,7 @@ function runtimeFor({ locale, locales, page, settings, navigation, variants, exp
     experiments,
     // Reshaped into what the shipped megamenu script expects, so the menu is
     // CMS-driven without its markup changing.
-    nav: navRuntime(navigation, locale),
+    nav: navRuntime(navigation, locale, navImages),
     analytics: {
       matomoUrl: settings.analytics?.matomoUrl || '',
       matomoSiteId: settings.analytics?.matomoSiteId || '',
@@ -74,10 +82,11 @@ export async function renderPage(astro, page, extra = {}) {
   const settings = locals.settings || {};
   const locales = activeLocales(settings);
   const baseUrl = baseUrlFrom(settings, url);
-  const [catalogue, integrations, links] = await Promise.all([
+  const [catalogue, integrations, links, navImages] = await Promise.all([
     loadCatalogue(locale),
     integrationMap(),
     linkMap(settings, locale),
+    imageMap(locale),
   ]);
 
   const ctx = {
@@ -112,6 +121,7 @@ export async function renderPage(astro, page, extra = {}) {
       page,
       settings,
       navigation: locals.navigation,
+      navImages,
       variants: locals.variants || {},
       experiments: runtimeExperiments(
         locals.experiments || [],

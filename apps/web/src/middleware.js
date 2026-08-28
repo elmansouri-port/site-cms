@@ -10,7 +10,7 @@
  * locale has to be known before anything reads content.
  */
 import { defineMiddleware } from 'astro:middleware';
-import { bootstrap, activeLocales } from './lib/site.js';
+import { bootstrap, activeLocales, countRedirect } from './lib/site.js';
 import { config } from './lib/config.js';
 import { resolveExperiments, writeVisitor, visitorId } from './lib/experiments.js';
 
@@ -61,7 +61,21 @@ export const onRequest = defineMiddleware(async (context, next) => {
   // 1. Redirects managed in the CMS.
   const path = url.pathname.replace(/\/+$/, '') || '/';
   const redirect = (boot?.redirects || []).find(r => r.from.replace(/\/+$/, '') === path);
-  if (redirect) return context.redirect(redirect.to, redirect.status || 301);
+  if (redirect) {
+    /*
+     * Counted, and not waited for.
+     *
+     * A renamed page writes a redirect automatically, so these accumulate — and
+     * without a count there is no safe way to tell which are still load-bearing.
+     * Deleting a live one throws away every inbound link to it; keeping the dead
+     * ones forever means nobody trusts the list enough to delete anything.
+     *
+     * Deliberately not awaited: a visitor's redirect must not wait on a counter,
+     * and a counter that fails is not worth a failed redirect.
+     */
+    countRedirect(redirect.from);
+    return context.redirect(redirect.to, redirect.status || 301);
+  }
 
   // 2. Locale prefix. Every public URL carries one (reco.md 4.1).
   const segments = url.pathname.split('/').filter(Boolean);

@@ -172,8 +172,11 @@ const goalBody = z.object({
 });
 
 const experimentBody = z.object({
-  key: z.string().min(1).max(60).regex(/^[a-z0-9-]+$/),
-  name: z.string().min(1).max(200),
+  key: z.string()
+    .min(1, 'The key cannot be empty')
+    .max(60, 'The key is too long — 60 characters at most')
+    .regex(/^[a-z0-9-]+$/, 'The key can only use lower-case letters, numbers and hyphens'),
+  name: z.string().min(1, 'Give the test a name').max(200, 'The name is too long'),
   description: z.string().max(2000).optional(),
   hypothesis: z.string().max(4000).optional(),
   status: z.enum(['draft', 'running', 'paused', 'finished']).default('draft'),
@@ -187,11 +190,12 @@ const experimentBody = z.object({
     allocation: z.number().int().min(1).max(100).optional(),
   }).optional(),
   variants: z.array(z.object({
-    key: z.string().min(1).max(20).regex(/^[A-Za-z0-9-]+$/),
+    key: z.string().min(1, 'An arm needs a key').max(20)
+      .regex(/^[A-Za-z0-9-]+$/, 'An arm key can only use letters, numbers and hyphens'),
     label: z.string().max(80).optional(),
     weight: z.number().int().min(0).max(100).default(50),
     isControl: z.boolean().optional(),
-  })).min(2).max(6),
+  })).min(2, 'A test needs at least two arms').max(6, 'Six arms is the most a test can measure'),
   goals: z.array(goalBody).max(10).optional(),
   guardrails: z.object({
     minExposuresPerArm: z.number().int().min(0).max(10_000_000).optional(),
@@ -250,9 +254,70 @@ function normalise(body) {
   return out;
 }
 
-experimentsRouter.post('/', requireRole('editor'), validate(experimentBody), asyncHandler(async (req, res) => {
-  if (await Experiment.exists({ key: req.body.key })) throw conflict('A test with that key already exists');
-  const body = normalise(req.body);
+/*
+ * The create schema, with the parts a person should not have to fill in.
+ *
+ * Creating a test asked for a key matching `^[a-z0-9-]+$` and an array of at
+ * least two arms — both of which the interface was generating anyway, and both
+ * of which produced a validation failure listing fields nobody had been shown.
+ * Deriving them here means the only required answer is the name, and the API is
+ * as forgiving as the screen implies it is.
+ */
+const createBody = experimentBody
+  .partial({ key: true, variants: true })
+  // `.min(1, …)` only speaks when the value *is* a string, so a request with no
+  // name at all fell through to zod's own "expected string, received undefined".
+  // The `error` option covers the missing case, which is the common one.
+  .extend({
+    name: z.string({ error: 'Give the test a name' })
+      .min(1, 'Give the test a name')
+      .max(200, 'The name is too long'),
+  });
+
+/** A key from the name: `Pricing page headline` → `pricing-page-headline`. */
+function keyFrom(name) {
+  return String(name).toLowerCase().normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60)
+    .replace(/-+$/, '');
+}
+
+/** A control and one variant, which is what every test starts as. */
+const TWO_ARMS = [
+  { key: 'A', label: 'Control', weight: 50, isControl: true },
+  { key: 'B', label: 'Variant B', weight: 50, isControl: false },
+];
+
+experimentsRouter.post('/', requireRole('editor'), validate(createBody), asyncHandler(async (req, res) => {
+  // A name with no letters or numbers in it ("!!!") produces no key, so the
+  // fallback is a word rather than a validation failure about a field the editor
+  // was never shown. The de-duplication below then makes it `test-2`.
+  const base = req.body.key || keyFrom(req.body.name) || 'test';
+
+  /*
+   * A free key rather than a conflict.
+   *
+   * The key is derived from the name, so two tests called "Homepage headline"
+   * collide — and the editor is told "a test with that key already exists" about
+   * a field they never filled in. Only an explicitly supplied key still
+   * conflicts, because then the caller chose it and silently changing it would be
+   * worse.
+   */
+  let key = base;
+  if (req.body.key) {
+    if (await Experiment.exists({ key })) throw conflict('A test with that key already exists');
+  } else {
+    let n = 1;
+    while (await Experiment.exists({ key })) key = `${base}-${++n}`;
+  }
+
+  const body = normalise({
+    ...req.body,
+    key,
+    variants: req.body.variants?.length ? req.body.variants : TWO_ARMS,
+  });
   const item = await Experiment.create({
     ...body,
     // Fixed once, at creation. Everything about who-sees-what hangs off this

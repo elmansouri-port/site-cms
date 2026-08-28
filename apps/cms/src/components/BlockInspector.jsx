@@ -41,7 +41,8 @@ const SPACING = [
 ];
 
 export default function BlockInspector({
-  pageKey, sectionKey, locale, canEdit, anchors = [], onSaved, onClose, onEditString,
+  pageKey, sectionKey, locale, locales = ['fr', 'en', 'de'], canEdit, anchors = [], onSaved,
+  onClose, onEditString,
 }) {
   const toast = useToast();
   const confirm = useConfirm();
@@ -146,6 +147,8 @@ export default function BlockInspector({
                 componentKey={draft.componentKey}
                 value={draft.data || {}}
                 anchors={anchors}
+                locales={locales}
+                locale={locale}
                 onChange={(v) => setDraft(d => ({ ...d, data: v }))}
               />
             ) : (
@@ -233,6 +236,8 @@ export default function BlockInspector({
               isComponent={isComponent}
               schema={schema}
               anchors={anchors}
+              locales={locales}
+              locale={locale}
               experiments={experiments.data?.items || []}
               canEdit={canEdit}
             />
@@ -353,7 +358,9 @@ function AuthoredContent({ pageKey, section, locale, canEdit, onEditString, onCo
  * markup. Both are assigned server-side before the page renders, so a visitor
  * never sees the control flash first.
  */
-function ExperimentPanel({ draft, setDraft, isComponent, schema, experiments, canEdit, anchors }) {
+function ExperimentPanel({
+  draft, setDraft, isComponent, schema, experiments, canEdit, anchors, locales, locale,
+}) {
   const assigned = draft.experiment?.key || '';
   const variants = draft.experiment?.variants || [];
   const experiment = experiments.find(x => x.key === assigned);
@@ -450,6 +457,8 @@ function ExperimentPanel({ draft, setDraft, isComponent, schema, experiments, ca
                     componentKey={draft.componentKey}
                     value={variant.data || {}}
                     anchors={anchors}
+                    locales={locales}
+                    locale={locale}
                     onChange={(v) => updateVariant(i, { data: v })}
                   />
                 ) : (

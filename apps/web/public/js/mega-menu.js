@@ -32,6 +32,14 @@
     return '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">' + p + '</svg>';
   }
 
+  // The showcase card is a thumbnail of the article or page it links to
+  // whenever the CMS resolved one; a bare icon is only the fallback for a
+  // showcase link that points nowhere resolvable (an external URL, say).
+  function showcaseImg(imageUrl, fallbackIcon) {
+    if (imageUrl) return '<img src="' + imageUrl + '" alt="" loading="lazy">';
+    return svgIcon(fallbackIcon);
+  }
+
   var COPY = {
     fr: {
       products: {
@@ -298,7 +306,7 @@
         '<div class="mega-menu-side">',
           '<p class="mega-menu-section-title">' + C.products.sideTitle + '</p>',
           '<a href="' + url(L.productsShowcase) + '" class="mega-menu-showcase">',
-            '<div class="mega-menu-showcase-img">' + svgIcon('chat') + '</div>',
+            '<div class="mega-menu-showcase-img">' + showcaseImg(CMS_PRODUCTS && CMS_PRODUCTS.images && CMS_PRODUCTS.images.showcase, 'chat') + '</div>',
             '<div class="mega-menu-showcase-body">',
               '<p class="mega-menu-showcase-title">' + C.products.showcaseTitle + '</p>',
               '<p class="mega-menu-showcase-desc">' + C.products.showcaseDesc + '</p>',
@@ -348,7 +356,7 @@
         '<div class="mega-menu-side">',
           '<p class="mega-menu-section-title">' + C.ressources.sideTitle + '</p>',
           '<a href="' + url(L.ressourcesShowcase) + '" class="mega-menu-showcase">',
-            '<div class="mega-menu-showcase-img">' + svgIcon('light-bulb') + '</div>',
+            '<div class="mega-menu-showcase-img">' + showcaseImg(CMS_RESSOURCES && CMS_RESSOURCES.images && CMS_RESSOURCES.images.showcase, 'light-bulb') + '</div>',
             '<div class="mega-menu-showcase-body">',
               '<p class="mega-menu-showcase-title">' + C.ressources.showcaseTitle + '</p>',
               '<p class="mega-menu-showcase-desc">' + C.ressources.showcaseDesc + '</p>',

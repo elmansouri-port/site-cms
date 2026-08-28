@@ -16,8 +16,16 @@ _source/
 # artefacts; the handful checked into docs/screenshots is copied there by hand.
 artifacts/
 
-# Runtime data
-data/
+# Runtime data.
+#
+# `data/` is the container volume, and the pattern is unanchored, so it also
+# matched `content-source/data/` — where the partner directory and the country
+# name table live. Both are content the seed reads and the site cannot work
+# without, and both would have been silently left out of the commit. Anchored to
+# the root, with the content directory named explicitly in case somebody
+# un-anchors it again.
+/data/
+!content-source/data/
 uploads/
 *.log
 npm-debug.log*

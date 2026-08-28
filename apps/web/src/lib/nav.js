@@ -25,7 +25,7 @@ function linksOf(zone, { column = null, variant = 'item' } = {}) {
   ));
 }
 
-function menuFor(item, locale) {
+function menuFor(item, locale, images) {
   const mm = item.megamenu || {};
   const main = mm.main || {};
   const features = mm.features || {};
@@ -33,6 +33,10 @@ function menuFor(item, locale) {
 
   const showcase = linksOf(features, { variant: 'showcase' })[0] || null;
   const cta = linksOf(features, { variant: 'cta' })[0] || null;
+  // The showcase card is a thumbnail, not an icon: a custom image wins, then
+  // the cover image of whatever article or page it links to, and only when
+  // neither exists does the caller fall back to its own default icon.
+  const imageFor = (link) => (link?.image || images?.get(link?.href) || '');
 
   const mainItems = linksOf(main, { column: 1 });
   const secondColumn = linksOf(main, { column: 2 });
@@ -78,6 +82,10 @@ function menuFor(item, locale) {
       showcase: showcase?.icon || '',
       cta: cta?.icon || '',
     },
+    images: {
+      showcase: imageFor(showcase),
+      cta: imageFor(cta),
+    },
     zones: {
       features: linksOf(features, { variant: 'showcase' }).length > 0 || linksOf(features, { variant: 'cta' }).length > 0,
       footer: !!(pick(footer.text, locale) || pick(footer.primaryLabel, locale)),
@@ -86,7 +94,7 @@ function menuFor(item, locale) {
 }
 
 /** The whole navigation, reshaped for the browser. */
-export function navRuntime(navigation, locale) {
+export function navRuntime(navigation, locale, images) {
   const items = (navigation?.items || [])
     .filter(i => i.visible !== false)
     .slice()
@@ -96,7 +104,7 @@ export function navRuntime(navigation, locale) {
   const navWords = {};
   for (const item of items) {
     navWords[item.key] = pick(item.label, locale);
-    if (item.megamenu?.enabled) menus[item.key] = menuFor(item, locale);
+    if (item.megamenu?.enabled) menus[item.key] = menuFor(item, locale, images);
   }
 
   return {

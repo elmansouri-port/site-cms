@@ -25,7 +25,7 @@
     "lint:fix": "eslint . --fix",
 
     "test": "npm run test:core && npm run verify && npm run verify:assets && npm run test:api",
-    "test:core": "node --test tests/core.test.mjs",
+    "test:core": "node --test tests/core.test.mjs tests/cms.test.mjs",
     "test:api": "npm run test --workspace @rainbow/api",
 
     "verify": "node tools/verify-fidelity.mjs",
@@ -39,6 +39,11 @@
     "verify:experiments": "node tools/verify-experiments.mjs",
     "routes:apply": "node tools/apply-routes.mjs",
     "strip:dev-scripts": "node tools/strip-dev-scripts.mjs",
+    "strip:legacy-seo": "node tools/strip-legacy-seo.mjs",
+    "decode:entities": "node tools/decode-entities.mjs",
+    "fix:map-tiles": "node tools/fix-map-tiles.mjs",
+    "blog:index": "node tools/blog-index.mjs",
+    "build:countries": "node tools/build-countries.mjs",
     "verify:forms": "node tools/verify-forms.mjs",
     "ui:shots": "node tools/ui-shots.mjs",
 

@@ -100,10 +100,28 @@ async function liveCatalogue(locale) {
 let failures = 0;
 let checked = 0;
 let edited = 0;
+const dynamic = [];
 
 for (const spec of registry.pages) {
   const file = path.join(SRC, 'pages', spec.file);
   if (!fs.existsSync(file) || spec.route === '404') continue;
+
+  /*
+   * A page that has deliberately left the guarantee is not a failure.
+   *
+   * The blog index reads the articles that exist, so its body cannot match a
+   * template with twelve hard-coded article cards in it — the whole point of
+   * making it dynamic was that it stopped agreeing with that template. Skipping
+   * it silently would be worse than checking it: the registry states the reason
+   * and the tool prints it, so the exemption is a decision on the record rather
+   * than a page that quietly fell out of the suite.
+   */
+  if (spec.dynamicSince) {
+    dynamic.push(spec);
+    console.log(`SKIP  ${spec.key}: ${spec.dynamicSince}`);
+    continue;
+  }
+
   const source = fs.readFileSync(file, 'utf8');
 
   for (const locale of registry.routedLocales) {
@@ -163,6 +181,9 @@ console.log(`  body: byte-for-byte against its own template`);
 console.log(`  header and footer: the homepage's pair, shared by every page`);
 if (edited) {
   console.log(`  ${edited} render(s) had copy edited in the CMS — markup verified against it instead`);
+}
+if (dynamic.length) {
+  console.log(`  ${dynamic.length} page(s) exempt by design: ${dynamic.map(d => d.key).join(', ')}`);
 }
 if (integrations.length) {
   console.log(`  ${integrations.length} third-party endpoints repointed at this origin`);

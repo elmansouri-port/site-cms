@@ -97,12 +97,12 @@ export default function SectionList({ pageKey, sections, canEdit, onOpen, onChan
   }
 
   return (
-    <ul className="grid gap-1.5" aria-busy={busy}>
+    <ul className="grid min-w-0 gap-1.5" aria-busy={busy}>
       {order.map(section => (
         <li
           key={section.key}
           className={cn(
-            'group bg-card flex items-center gap-2 rounded-lg border p-2 transition-all',
+            'group bg-card flex min-w-0 items-center gap-2 rounded-lg border p-2 transition-all',
             dragKey === section.key && 'opacity-40',
             overKey === section.key && 'border-primary ring-primary/20 ring-2',
             !section.visible && 'bg-muted/50',

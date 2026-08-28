@@ -26,6 +26,7 @@ const megaLink = z.object({
   mobileDescription: localised.default({}),
   href: z.string().max(500).default(''),
   icon: z.string().max(60).default(''),
+  image: z.string().max(500).default(''),
   badge: localised.default({}),
   column: z.number().int().min(1).max(2).default(1),
   variant: z.enum(['item', 'showcase', 'cta']).default('item'),

@@ -26,9 +26,22 @@ import {
 /** The order the palette offers them in: most-used first, escape hatch last. */
 const PALETTE = ['heading', 'rich', 'keyPoints', 'image', 'quote', 'callout', 'embed', 'custom'];
 
-export default function ArticleSections({ sections, onChange, canEdit }) {
+export default function ArticleSections({
+  sections,
+  onChange,
+  canEdit,
+  /*
+   * Which section is open, lifted so the canvas beside this list can scroll to
+   * it. Optional: the list still works uncontrolled, which is what the SEO and
+   * history screens want.
+   */
+  openKey,
+  onOpenChange,
+}) {
   const confirm = useConfirm();
-  const [open, setOpen] = useState(null);
+  const [ownOpen, setOwnOpen] = useState(null);
+  const open = onOpenChange ? openKey : ownOpen;
+  const setOpen = onOpenChange || setOwnOpen;
   const [adding, setAdding] = useState(null);
   const [dragKey, setDragKey] = useState(null);
   const [overKey, setOverKey] = useState(null);
@@ -69,7 +82,7 @@ export default function ArticleSections({ sections, onChange, canEdit }) {
   }
 
   return (
-    <div className="grid gap-1.5">
+    <div className="grid min-w-0 gap-1.5">
       {!list.length && (
         <Empty title="Nothing written yet">
           Add a heading and some text. Headings become the article&apos;s contents list automatically.
@@ -83,7 +96,7 @@ export default function ArticleSections({ sections, onChange, canEdit }) {
         const label = section.tocLabel || section.data?.text || section.data?.title || '';
 
         return (
-          <div key={section.key}>
+          <div key={section.key} className="min-w-0">
             <div
               className={cn(
                 'group bg-card flex items-center gap-2 rounded-lg border p-2 transition-all',

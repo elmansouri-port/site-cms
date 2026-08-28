@@ -4,7 +4,7 @@
 import { apiGet } from './api.js';
 import { config } from './config.js';
 import { pageUrlFor, routeFor, blogSegmentFor } from '@rainbow/core/seo';
-import { linkTargets } from '@rainbow/core/links';
+import { linkTargets, imageTargets } from '@rainbow/core/links';
 
 export const bootstrap = () => apiGet('/api/v1/site/bootstrap', { ttl: 30 });
 
@@ -27,6 +27,22 @@ export function integrationMap() {
     return [];
   });
 }
+/**
+ * Record that a CMS redirect was followed.
+ *
+ * Fire-and-forget by design: the caller does not await it, and a failure is
+ * swallowed rather than logged on every hit. A counter is worth having and is not
+ * worth one line of noise per redirect, let alone a slower redirect.
+ */
+export function countRedirect(from) {
+  fetch(config.apiUrl + '/api/v1/site/redirect-hit', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-cms-secret': config.revalidateSecret },
+    body: JSON.stringify({ from }),
+    signal: AbortSignal.timeout(2000),
+  }).catch(() => {});
+}
+
 export const routeIndex = () => apiGet('/api/v1/site/routes', { ttl: 60 });
 export const catalogue = (locale) => apiGet(`/api/v1/site/catalogue/${locale}`, { ttl: 120 })
   .then(r => r?.catalogue || {});
@@ -84,11 +100,30 @@ export async function linkMap(settings, locale) {
   });
 }
 
+/**
+ * The cover image behind every `page:<key>` and `post:<slug>` reference, in
+ * one locale — what the megamenu's showcase link uses as its thumbnail when
+ * the link itself has not been given a custom one.
+ */
+export async function imageMap(locale) {
+  const index = await routeIndex().catch(() => null);
+  if (!index) return new Map();
+  return imageTargets({ pages: index.pages || [], posts: index.posts || [], locale });
+}
+
 /** The blog's URL segment in this locale (`blog` unless Settings overrides it). */
 export function blogSegment(settings, locale) {
   return blogSegmentFor(settings, locale);
 }
 
+/**
+ * A page of articles, plus the category counts when `facets` is asked for.
+ *
+ * Every parameter goes straight into the query string, so the blog index's
+ * filters are the API's filters — the alternative was fetching everything and
+ * filtering in the browser, which is what the static page did and why page two
+ * did not exist.
+ */
 export function blogList(locale, params = {}) {
   const qs = new URLSearchParams({ locale, ...params });
   return apiGet(`/api/v1/site/blog?${qs}`, { ttl: 60 });

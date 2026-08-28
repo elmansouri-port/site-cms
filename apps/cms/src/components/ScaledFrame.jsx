@@ -21,12 +21,23 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 export default function ScaledFrame({
   src,
+  /*
+   * Markup instead of a URL.
+   *
+   * The article canvas renders an *unsaved* draft, so there is no URL to point
+   * at: the composed document is posted for and handed straight to the frame.
+   * Root-relative asset URLs still resolve, because a srcdoc document inherits
+   * the base URL of the page that holds it — which behind the gateway is the
+   * origin that serves the site.
+   */
+  srcDoc,
   logicalWidth,
   frameRef,
   frameKey,
   title,
   onScale,
   onOffset,
+  onLoad,
   children,
 }) {
   const wrap = useRef(null);
@@ -74,8 +85,9 @@ export default function ScaledFrame({
         <iframe
           key={frameKey}
           ref={frameRef}
-          src={src}
+          {...(srcDoc !== undefined ? { srcDoc } : { src })}
           title={title}
+          onLoad={onLoad}
           className="h-full w-full border-0 bg-white"
         />
       </div>
